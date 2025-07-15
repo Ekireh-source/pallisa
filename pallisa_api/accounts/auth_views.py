@@ -1,0 +1,358 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+from drf_spectacular.utils import extend_schema
+from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
+import logging
+
+from .models import CustomUser, UserProfile, EmailVerificationToken
+from .serializers import (
+    UserRegistrationSerializer,
+    LoginSerializer,
+    LoginResponseSerializer,
+    OTPVerificationSerializer,
+    ResendOTPSerializer,
+    LogoutSerializer,
+    UserProfileSerializer,
+    SchoolSerializer,
+    CampusSerializer,
+)
+from .services import AuthenticationService, SchoolService
+
+logger = logging.getLogger(__name__)
+
+
+class UserRegistrationView(APIView):
+    """
+    Register a new user with profile and optionally create school and campus
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    @extend_schema(
+        summary="Register a new user with profile and school",
+        description="Register a new user account with profile information. If user_type is 'school_owner', school and campus information is required. An OTP will be sent to the provided email for verification.",
+        request=UserRegistrationSerializer,
+        responses={
+            201: {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string"},
+                    "user": UserProfileSerializer,
+                    "school": SchoolSerializer,
+                    "campus": CampusSerializer,
+                    "requires_verification": {"type": "boolean"}
+                }
+            },
+            400: {"description": "Invalid request data"}
+        },
+    )
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Extract user and profile data
+            email = serializer.validated_data.pop('email')
+            password = serializer.validated_data.pop('password')
+            school_data = serializer.validated_data.pop('school_data', None)
+            profile_data = serializer.validated_data
+            
+            # Register user through service
+            profile, otp, school, campus = AuthenticationService.register_user(
+                email, password, profile_data, school_data
+            )
+            
+            logger.info(f"User registered successfully: {email}")
+            
+            # Prepare response
+            response_data = {
+                "message": "Registration successful. Please check your email for verification code.",
+                "user": UserProfileSerializer(profile, context={'request': request}).data,
+                "requires_verification": True
+            }
+            
+            # Add school and campus information if created
+            if school:
+                response_data["school"] = SchoolSerializer(school, context={'request': request}).data
+            if campus:
+                response_data["campus"] = CampusSerializer(campus, context={'request': request}).data
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"Registration failed for {email}: {str(e)}")
+            return Response(
+                {"error": "Registration failed. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class LoginView(APIView):
+    """
+    Authenticate a user and return JWT tokens
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def get_cache_key(self, identifier):
+        """Generate cache key for rate limiting"""
+        return f"login_attempts_{identifier}"
+    
+    def is_rate_limited(self, identifier):
+        """Check if user is rate limited"""
+        cache_key = self.get_cache_key(identifier)
+        attempts = cache.get(cache_key, 0)
+        return attempts >= 5  # Max 5 attempts per hour
+    
+    def increment_attempts(self, identifier):
+        """Increment login attempts counter"""
+        cache_key = self.get_cache_key(identifier)
+        attempts = cache.get(cache_key, 0)
+        cache.set(cache_key, attempts + 1, 3600)  # 1 hour timeout
+    
+    def clear_attempts(self, identifier):
+        """Clear login attempts counter"""
+        cache_key = self.get_cache_key(identifier)
+        cache.delete(cache_key)
+    
+    @extend_schema(
+        summary="Login and get JWT tokens",
+        description="Authenticate user with email/student_id and password. Returns JWT tokens on success.",
+        request=LoginSerializer,
+        responses={
+            200: LoginResponseSerializer,
+            401: {"description": "Invalid credentials or email not verified"},
+            429: {"description": "Too many login attempts"},
+            400: {"description": "Invalid request"}
+        },
+    )
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data.get('email')
+        student_id = serializer.validated_data.get('student_id')
+        password = serializer.validated_data['password']
+        
+        identifier = email or student_id
+        
+        # Check rate limiting
+        if self.is_rate_limited(identifier):
+            logger.warning(f"Rate limited login attempt for: {identifier}")
+            return Response(
+                {"error": "Too many login attempts. Please try again later."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+        
+        try:
+            # Authenticate user through service
+            user = AuthenticationService.authenticate_user(email=email, student_id=student_id, password=password)
+            
+            if not user:
+                self.increment_attempts(identifier)
+                logger.warning(f"Failed login attempt for: {identifier}")
+                return Response(
+                    {"error": "Invalid credentials"}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            
+            # Check if email is verified
+            if not user.email_verified:
+                logger.info(f"Login attempt with unverified email: {user.email}")
+                return Response({
+                    "error": "Please verify your email before logging in.",
+                    "email_verification_required": True,
+                    "email": user.email
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Clear rate limiting on successful auth
+            self.clear_attempts(identifier)
+            
+            # Generate tokens
+            tokens = AuthenticationService.generate_tokens(user)
+            
+            # Get user profile data
+            profile_data = AuthenticationService.get_user_profile_data(user)
+            
+            logger.info(f"Successful login for: {user.email}")
+            
+            return Response({
+                **tokens,
+                'user_profile': UserProfileSerializer(user.profile, context={'request': request}).data,
+                'user_info': profile_data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Login error for {identifier}: {str(e)}")
+            return Response(
+                {"error": "Login failed. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class LogoutView(APIView):
+    """
+    Blacklist the refresh token to logout
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Logout user",
+        description="Blacklist the refresh token to logout the user.",
+        request=LogoutSerializer,
+        responses={
+            205: {"description": "Successfully logged out"},
+            400: {"description": "Invalid or missing refresh token"}
+        }
+    )
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {"error": "Refresh token is required."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            logger.info(f"User logged out: {request.user.email}")
+            return Response(
+                {"message": "Successfully logged out."}, 
+                status=status.HTTP_205_RESET_CONTENT
+            )
+        except TokenError:
+            return Response(
+                {"warning": "Token was already invalid or blacklisted."}, 
+                status=status.HTTP_205_RESET_CONTENT
+            )
+
+
+class VerifyEmailView(APIView):
+    """
+    Verify a user's email address using an OTP code
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    @extend_schema(
+        summary="Verify user email with OTP",
+        description="Verify user's email address using the OTP code sent via email.",
+        request=OTPVerificationSerializer,
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string"},
+                    "access": {"type": "string"},
+                    "refresh": {"type": "string"},
+                    "user_profile": UserProfileSerializer
+                }
+            },
+            400: {"description": "Invalid OTP or OTP expired"},
+            404: {"description": "OTP not found"}
+        },
+    )
+    def post(self, request):
+        serializer = OTPVerificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+        
+        try:
+            # Verify OTP through service
+            user = AuthenticationService.verify_email_otp(email, otp)
+            
+            # Generate tokens for automatic login
+            tokens = AuthenticationService.generate_tokens(user)
+            
+            logger.info(f"Email verified successfully for: {email}")
+            
+            return Response({
+                "message": "Email verified successfully. You are now logged in.",
+                **tokens,
+                "user_profile": UserProfileSerializer(user.profile, context={'request': request}).data
+            }, status=status.HTTP_200_OK)
+            
+        except EmailVerificationToken.DoesNotExist:
+            logger.warning(f"Invalid OTP attempt for: {email}")
+            return Response(
+                {"error": "Invalid OTP code."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValueError as e:
+            logger.warning(f"Expired OTP attempt for: {email}")
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Email verification error for {email}: {str(e)}")
+            return Response(
+                {"error": "Verification failed. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ResendVerificationEmailView(APIView):
+    """
+    Resend verification OTP to the user
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    @extend_schema(
+        summary="Resend verification OTP",
+        description="Resend verification OTP to user's email address.",
+        request=ResendOTPSerializer,
+        responses={
+            200: {"description": "Verification OTP sent"},
+            400: {"description": "Invalid email or account already verified"},
+            404: {"description": "User not found"}
+        },
+    )
+    def post(self, request):
+        serializer = ResendOTPSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        
+        # Rate limiting for resend requests
+        cache_key = f"resend_otp_{email}"
+        if cache.get(cache_key):
+            return Response(
+                {"error": "Please wait before requesting another OTP."}, 
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+        
+        try:
+            # Resend OTP through service
+            otp = AuthenticationService.resend_verification_otp(email)
+            
+            # Set rate limiting (1 minute)
+            cache.set(cache_key, True, 60)
+            
+            logger.info(f"Verification OTP resent to: {email}")
+            
+            return Response(
+                {"message": "Verification OTP has been sent to your email."}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            logger.error(f"Resend OTP error for {email}: {str(e)}")
+            if hasattr(e, 'detail'):
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Failed to resend OTP. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            ) 
