@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import FeeCategory, FeeStructure, Scholarship, StudentFeeOverride, FeePayment
+from .models import FeeCategory, FeeStructure, Scholarship, StudentFeeOverride, FeePayment, TermFeeCollectionSummary
+
+class TermFeeCollectionSummaryAdmin(admin.ModelAdmin):
+    list_display = ('academic_year', 'term', 'total_expected_from_structures', 'total_expected_with_overrides', 'total_collected', 'total_discounts_given', 'total_pending_collection', 'total_students', 'students_with_fees', 'fully_paid_students', 'partially_paid_students', 'unpaid_students', 'overpaid_students', 'collection_rate', 'average_payment_per_student', 'last_calculated', 'created_at', 'updated_at')
+    search_fields = ('academic_year__name', 'term__name')
+    list_filter = ('academic_year', 'term', 'created_at', 'updated_at')
+    ordering = ('academic_year', 'term')
 
 class FeeCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'is_active', 'created_at', 'updated_at')
@@ -36,3 +42,4 @@ admin.site.register(FeeStructure, FeeStructureAdmin)
 admin.site.register(Scholarship, ScholarshipAdmin)
 admin.site.register(StudentFeeOverride, StudentFeeOverrideAdmin)
 admin.site.register(FeePayment, FeePaymentAdmin)
+admin.site.register(TermFeeCollectionSummary, TermFeeCollectionSummaryAdmin)

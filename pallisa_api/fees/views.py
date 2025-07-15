@@ -1206,7 +1206,29 @@ class TermFeeCollectionSummaryListView(generics.ListAPIView):
         tags=["Term Fee Collection Summaries"]
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        # Get the queryset with filters
+        queryset = self.get_queryset()
+        
+        # Get pagination parameters
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+        
+        # Paginate the queryset
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page)
+        
+        # Serialize the data
+        serializer = self.get_serializer(page_obj.object_list, many=True)
+        
+        # Return paginated response in the expected format
+        return Response({
+            'count': paginator.count,
+            'next': page_obj.has_next() and page_obj.next_page_number() or None,
+            'previous': page_obj.has_previous() and page_obj.previous_page_number() or None,
+            'results': serializer.data,
+            'current_page': page_obj.number,
+            'total_pages': paginator.num_pages,
+        })
 
     def get_queryset(self):
         qs = super().get_queryset()

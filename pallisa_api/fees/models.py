@@ -393,24 +393,28 @@ class TermFeeCollectionSummary(models.Model):
             student_paid = payments.aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
             student_discounts = payments.aggregate(total=Sum('discount_amount'))['total'] or Decimal('0.00')
             
+            # Cap the collected amount at the expected amount to prevent over 100% collection rates
+            # This handles cases where students make multiple payments for the same term
+            effective_collected = min(student_paid, student_expected_with_overrides)
+            
             # Add to totals
             total_expected_from_structures += student_expected_from_structures
             total_expected_with_overrides += student_expected_with_overrides
-            total_collected += student_paid
+            total_collected += effective_collected
             total_discounts += student_discounts
             
             # Count students with fees
             if student_expected_with_overrides > 0:
                 students_with_fees += 1
                 
-                # Determine payment status
-                student_pending = student_expected_with_overrides - student_paid
+                # Determine payment status based on effective collected amount
+                student_pending = student_expected_with_overrides - effective_collected
                 if student_pending <= 0:
                     if student_pending == 0:
                         fully_paid += 1
                     else:
                         overpaid += 1
-                elif student_paid > 0:
+                elif effective_collected > 0:
                     partially_paid += 1
                 else:
                     unpaid += 1
@@ -418,10 +422,10 @@ class TermFeeCollectionSummary(models.Model):
         # Calculate pending amount
         total_pending = total_expected_with_overrides - total_collected
         
-        # Calculate collection rate
+        # Calculate collection rate (should never exceed 100%)
         collection_rate = Decimal('0.00')
         if total_expected_with_overrides > 0:
-            collection_rate = (total_collected / total_expected_with_overrides) * 100
+            collection_rate = min((total_collected / total_expected_with_overrides) * 100, Decimal('100.00'))
         
         # Calculate average payment per student
         average_payment = Decimal('0.00')
