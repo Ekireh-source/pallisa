@@ -240,7 +240,10 @@ class Teacher(models.Model):
         ],
         default='full_time'
     )
-    salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    salary = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True,
+        help_text="Salary amount in Ugandan Shillings (UGX)"
+    )
     
     # Status
     is_active = models.BooleanField(default=True)
@@ -312,6 +315,75 @@ class Teacher(models.Model):
     @property
     def streams_taught(self):
         return Stream.objects.filter(class_teacher=self, is_active=True)
+
+
+class NonStaffMember(models.Model):
+    """Model to represent non-staff members with salary information"""
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='non_staff_profile')
+    employee_id = models.CharField(max_length=20, unique=True, db_index=True)
+    hire_date = models.DateField(default=get_current_date)
+    
+    # Professional information
+    qualification = models.CharField(max_length=200, blank=True, null=True)
+    specialization = models.CharField(max_length=200, blank=True, null=True)
+    years_of_experience = models.PositiveIntegerField(default=0)
+    previous_experience = models.TextField(blank=True, null=True)
+    
+    # Employment details
+    employment_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('full_time', 'Full Time'),
+            ('part_time', 'Part Time'),
+            ('contract', 'Contract'),
+            ('temporary', 'Temporary'),
+            ('volunteer', 'Volunteer'),
+        ],
+        default='full_time'
+    )
+    
+    # Salary information - simple amount field
+    salary = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True,
+        help_text="Salary amount in Ugandan Shillings (UGX)"
+    )
+    
+    # Status
+    is_active = models.BooleanField(default=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['employee_id']),
+            models.Index(fields=['employment_type', 'is_active']),
+            models.Index(fields=['hire_date']),
+        ]
+        verbose_name_plural = "Non-Staff Members"
+
+    def __str__(self):
+        return f"{self.employee_id} - {self.user_profile.get_full_name()}"
+
+    def _generate_employee_id(self):
+       
+        if school:
+            year = timezone.now().year
+            timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+            return f"NS{year}{timestamp}"
+        
+
+    def save(self, *args, **kwargs):
+        # Auto-generate employee_id if not provided
+        if not self.employee_id:
+            self.employee_id = self._generate_employee_id()
+
+        super().save(*args, **kwargs)
+
+    @property
+    def full_name(self):
+        return self.user_profile.get_full_name()
 
 
 class Parent(models.Model):

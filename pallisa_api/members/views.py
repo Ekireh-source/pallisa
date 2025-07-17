@@ -12,7 +12,7 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParamet
 
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
-    StudentStreamHistory, Subject, TeacherSubjectAssignment
+    StudentStreamHistory, Subject, TeacherSubjectAssignment, NonStaffMember
 )
 from .serializers import (
     ClassSerializer, StreamSerializer, StreamDetailSerializer,
@@ -22,7 +22,8 @@ from .serializers import (
     ParentStudentRelationshipSerializer,
     StudentStreamHistorySerializer,
     SubjectSerializer,
-    TeacherSubjectAssignmentSerializer
+    TeacherSubjectAssignmentSerializer,
+    NonStaffMemberSerializer, NonStaffMemberDetailSerializer
 )
 
 
@@ -986,8 +987,10 @@ class TeacherListCreateView(APIView):
         """Create a new teacher"""
         serializer = TeacherSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            teacher = serializer.save()
+            # Return detailed serializer for response
+            response_serializer = TeacherDetailSerializer(teacher)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1490,3 +1493,107 @@ class BulkAssignTeacherSubjectsView(APIView):
         
         response_serializer = TeacherSubjectAssignmentSerializer(created_assignments, many=True)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class NonStaffMemberListCreateView(APIView):
+    """List all non-staff members or create a new one"""
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="List all non-staff members",
+        parameters=[
+            OpenApiParameter(name='employment_type', type=str, description='Filter by employment type'),
+            OpenApiParameter(name='search', type=str, description='Search in employee ID, name, specialization'),
+            OpenApiParameter(name='page', type=int, description='Page number'),
+            OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
+        ],
+        responses={200: NonStaffMemberSerializer(many=True)},
+        tags=["NonStaffMembers"]
+    )
+    def get(self, request):
+        search = request.query_params.get('search')
+        employment_type = request.query_params.get('employment_type')
+        is_active = request.query_params.get('is_active')
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+
+        queryset = NonStaffMember.objects.select_related('user_profile__user', 'user_profile__role__school').order_by('employee_id')
+        if employment_type:
+            queryset = queryset.filter(employment_type=employment_type)
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        if search:
+            queryset = queryset.filter(
+                Q(employee_id__icontains=search) |
+                Q(user_profile__first_name__icontains=search) |
+                Q(user_profile__last_name__icontains=search) |
+                Q(specialization__icontains=search)
+            )
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page)
+        serializer = NonStaffMemberSerializer(page_obj.object_list, many=True)
+        return Response({
+            'count': paginator.count,
+            'next': page_obj.has_next(),
+            'previous': page_obj.has_previous(),
+            'results': serializer.data
+        })
+
+    @extend_schema(
+        summary="Create a new non-staff member",
+        request=NonStaffMemberSerializer,
+        responses={201: OpenApiResponse(description="Non-staff member created successfully", response=NonStaffMemberSerializer)},
+        tags=["NonStaffMembers"]
+    )
+    def post(self, request):
+        serializer = NonStaffMemberSerializer(data=request.data)
+        if serializer.is_valid():
+            member = serializer.save()
+            response_serializer = NonStaffMemberSerializer(member)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NonStaffMemberDetailView(APIView):
+    """Retrieve, update or delete a non-staff member"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_object(self, pk):
+        return get_object_or_404(NonStaffMember, pk=pk)
+    
+    @extend_schema(
+        summary="Retrieve a non-staff member",
+        responses={200: NonStaffMemberDetailSerializer},
+        tags=["NonStaffMembers"]
+    )
+    def get(self, request, pk):
+        """Get detailed information about a non-staff member"""
+        non_staff_member = self.get_object(pk)
+        serializer = NonStaffMemberDetailSerializer(non_staff_member)
+        return Response(serializer.data)
+    
+    @extend_schema(
+        summary="Update a non-staff member",
+        request=NonStaffMemberSerializer,
+        responses={200: NonStaffMemberDetailSerializer},
+        tags=["NonStaffMembers"]
+    )
+    def put(self, request, pk):
+        """Update a non-staff member"""
+        non_staff_member = self.get_object(pk)
+        serializer = NonStaffMemberSerializer(non_staff_member, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(NonStaffMemberDetailSerializer(non_staff_member).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @extend_schema(
+        summary="Delete a non-staff member",
+        responses={204: None},
+        tags=["NonStaffMembers"]
+    )
+    def delete(self, request, pk):
+        """Delete a non-staff member"""
+        non_staff_member = self.get_object(pk)
+        non_staff_member.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

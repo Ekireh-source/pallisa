@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.db.models import Count
 from .models import (
     Class, Stream, Student, Teacher, Parent, 
-    ParentStudentRelationship, Subject, StudentStreamHistory, TeacherSubjectAssignment
+    ParentStudentRelationship, Subject, StudentStreamHistory, TeacherSubjectAssignment, NonStaffMember
 )
 
 
@@ -287,6 +287,39 @@ class TeacherSubjectAssignmentAdmin(admin.ModelAdmin):
             'fields': ('is_active',)
         }),
     )
+
+
+@admin.register(NonStaffMember)
+class NonStaffMemberAdmin(admin.ModelAdmin):
+    list_display = ['employee_id', 'full_name', 'employment_type', 'salary', 'hire_date', 'is_active']
+    list_filter = ['employment_type', 'user_profile__role__school', 'hire_date', 'is_active']
+    search_fields = ['employee_id', 'user_profile__first_name', 'user_profile__last_name', 'specialization']
+    ordering = ['employee_id']
+    
+    def full_name(self, obj):
+        return obj.user_profile.get_full_name()
+    full_name.short_description = 'Full Name'
+    
+    fieldsets = (
+        ('User Information', {
+            'fields': ('user_profile',)
+        }),
+        ('Employment Information', {
+            'fields': ('employee_id', 'hire_date', 'employment_type', 'salary')
+        }),
+        ('Professional Information', {
+            'fields': ('qualification', 'specialization', 'years_of_experience'),
+        }),
+        ('Experience', {
+            'fields': ('previous_experience',),
+            'classes': ('collapse',)
+        }),
+        ('Status', {
+            'fields': ('is_active',)
+        }),
+    )
+    
+    readonly_fields = ['employee_id']
 
 
 # Customize the admin site headers

@@ -258,7 +258,7 @@ class StudentFeeSummarySerializer(serializers.Serializer):
     payment_count = serializers.IntegerField()
     overdue_count = serializers.IntegerField()
     last_payment_date = serializers.DateField(allow_null=True)
-    payment_status = serializers.CharField()  # 'paid', 'partial', 'unpaid'
+    payment_status = serializers.CharField()  # 'paid', 'partial', 'unpaid' 
 
 
 class TermFeeCollectionSummarySerializer(serializers.ModelSerializer):

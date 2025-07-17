@@ -39,7 +39,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.http import FileResponse
 from rest_framework.permissions import IsAuthenticated
-from .permission import HasPermission
+from .permission import HasPermission, HasAnyPermission, require_permission
 
 
 class UserRegistrationView(APIView):
@@ -287,7 +287,8 @@ class UserProfileListView(APIView):
     """
     List all user profiles
     """
-    # permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_users'
     
     @extend_schema(
         summary="List all user profiles",
@@ -342,6 +343,13 @@ class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
     """
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.view_users',
+        'PUT': 'admin.edit_users',
+        'PATCH': 'admin.edit_users',
+        'DELETE': 'admin.delete_users',
+    }
     
     def get_permissions(self):
         """
@@ -363,7 +371,11 @@ class DocumentListCreateAPIView(APIView):
     """
     API view to list and create documents.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.view_documents',
+        'POST': 'admin.create_documents',
+    }
     parser_classes = [MultiPartParser, FormParser]
     
     @extend_schema(
@@ -445,7 +457,12 @@ class DocumentDetailAPIView(APIView):
     """
     API view for retrieving, updating and deleting individual documents.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.view_documents',
+        'PATCH': 'admin.edit_documents',
+        'DELETE': 'admin.delete_documents',
+    }
     parser_classes = [MultiPartParser, FormParser]
     
     def get_object(self, pk, user):
@@ -499,7 +516,8 @@ class DocumentDownloadAPIView(APIView):
     """
     API view for downloading document files.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.view_documents'
     
     @extend_schema(
         summary="Download a document",
@@ -518,6 +536,9 @@ class DocumentDownloadAPIView(APIView):
         return FileResponse(document.doc.open(), as_attachment=True, filename=document.doc.name.split('/')[-1])
 
 class ProfileDocumentListAPIView(APIView):
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.view_documents'
+    
     @extend_schema(
         summary="List documents for a specific profile",
         description="Returns a list of all documents associated with a specific profile",
@@ -570,8 +591,12 @@ class ProfileDocumentListAPIView(APIView):
 
 
 class RoleListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-    # required_permission = 'manage_roles'
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_roles',
+        'POST': 'admin.manage_roles',
+    }
+    
     @extend_schema(
         tags=["Roles"],
         summary="List all roles",
@@ -579,23 +604,34 @@ class RoleListCreateView(APIView):
     )
     def get(self, request):
         user_profile = request.user.profile
-        campus_ids = request.query_params.get("campus_ids")
         
+        # Start with all roles
         roles = Role.objects.all()
-        if not campus_ids:
+        
+        # If user is a school owner, filter by their schools
+        if user_profile.user_type == 'school_owner':
             owned_schools = School.objects.filter(owner=user_profile)
-
-            if not owned_schools.exists():
-                return Response(
-                    {"detail": "You do not own any schools."},
-                    status=status.HTTP_403_FORBIDDEN
+            if owned_schools.exists():
+                # Include roles that belong to owned schools OR have no school assigned (system roles)
+                roles = roles.filter(
+                    Q(school__in=owned_schools) | Q(school__isnull=True)
                 )
-            roles = roles.filter(school__in=owned_schools) 
+            else:
+                # If no owned schools, only show system roles (no school assigned)
+                roles = roles.filter(school__isnull=True)
+        elif user_profile.user_type == 'admin':
+            # Admins can see all roles
+            pass
+        else:
+            # Other user types can only see roles from their school
+            if hasattr(user_profile, 'school') and user_profile.school:
+                roles = roles.filter(
+                    Q(school=user_profile.school) | Q(school__isnull=True)
+                )
+            else:
+                # If no school assigned, only show system roles
+                roles = roles.filter(school__isnull=True)
             
-        if campus_ids:
-            campus_id_list = [int(c) for c in campus_ids.split(",") if c.strip().isdigit()]  
-            school_ids = Campus.objects.filter(id__in=campus_id_list).values_list('school_id', flat=True)
-            roles = roles.filter(school_id__in=school_ids)     
         serializer = RoleSerializer(roles, many=True)
         return Response(serializer.data)
 
@@ -621,6 +657,13 @@ class RoleListCreateView(APIView):
 
 
 class RoleDetailView(APIView):
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_roles',
+        'PATCH': 'admin.manage_roles',
+        'DELETE': 'admin.manage_roles',
+    }
+    
     @extend_schema(tags=["Roles"], summary="Retrieve a role by ID")
     def get(self, request, pk):
         try:
@@ -657,6 +700,9 @@ class RoleDetailView(APIView):
     responses={200: PermissionSerializer(many=True)}
 )
 class PermissionListView(APIView):
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_permissions'
+    
     def get(self, request):
         permissions = Permission.objects.select_related('category').all()
         serializer = PermissionSerializer(permissions, many=True)
@@ -677,7 +723,8 @@ class PermissionListView(APIView):
     responses={200: UserPermissionSerializer(many=True)}
 )
 class UserPermissionListAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_permissions'
     
     def get(self, request):
         user_id = request.query_params.get("user_id")
@@ -693,6 +740,9 @@ class UserPermissionListAPIView(APIView):
     
 @extend_schema(tags=["User Permissions"])
 class AssignUserPermissionAPIView(APIView):
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_permissions'
+    
     @extend_schema(
         summary="Assign a direct permission to a user",
         request={
@@ -736,6 +786,9 @@ class AssignUserPermissionAPIView(APIView):
     
 @extend_schema(tags=["User Permissions"])
 class RemoveDirectUserPermissionAPIView(APIView):
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_permissions'
+    
     @extend_schema(
         summary="Remove a direct permission from a user",
         request={
@@ -768,7 +821,7 @@ class RemoveDirectUserPermissionAPIView(APIView):
         ).delete()
 
         return Response({"detail": "Permission removed successfully" if deleted else "No direct permission found to remove"})
-    
+
 
 class ForgotPasswordView(APIView):
     """

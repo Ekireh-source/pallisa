@@ -6,7 +6,7 @@ from expenses.models import AcademicYear
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
     StudentStreamHistory, Subject, TeacherSubjectAssignment,
-    generate_password, send_login_credentials
+    generate_password, send_login_credentials, NonStaffMember
 )
 
 User = get_user_model()
@@ -675,6 +675,166 @@ class TeacherSubjectAssignmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
+class NonStaffMemberSerializer(serializers.ModelSerializer):
+    """Serializer for NonStaffMember with complete user creation flow"""
+    user_profile_data = UserProfileSerializer(source='user_profile', read_only=True)
+    full_name = serializers.CharField(source='user_profile.get_full_name', read_only=True)
+    email = serializers.CharField(source='user_profile.user.email', read_only=True)
+    school_name = serializers.CharField(source='user_profile.role.school.name', read_only=True)
+    
+    # User creation fields (required when user_profile not provided)
+    user_email = serializers.EmailField(write_only=True, required=False)
+    
+    # UserProfile creation fields
+    user_first_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_last_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_gender = serializers.ChoiceField(
+        choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')], 
+        write_only=True, required=False
+    )
+    user_dob = serializers.DateField(write_only=True, required=False)
+    user_phone = serializers.CharField(max_length=20, write_only=True, required=False)
+    user_emergency_contact = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_emergency_phone = serializers.CharField(max_length=20, write_only=True, required=False)
+    user_emergency_contact_address = serializers.CharField(max_length=255, write_only=True, required=False)
+    user_emergency_contact_email = serializers.EmailField(write_only=True, required=False)
+    user_role_id = serializers.IntegerField(write_only=True, required=False)
+    salary = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, allow_null=True, label="Salary (UGX)"
+    )
+
+    class Meta:
+        model = NonStaffMember
+        fields = [
+            'id', 'user_profile', 'user_profile_data', 'employee_id', 'hire_date', 'qualification',
+            'specialization', 'years_of_experience', 'previous_experience',
+            'employment_type', 'salary', 'is_active', 'full_name', 'email',
+            'school_name', 'created_at', 'updated_at',
+            # User creation fields
+            'user_email',
+            # UserProfile creation fields
+            'user_first_name', 'user_last_name', 'user_other_name', 'user_gender', 'user_dob',
+            'user_phone', 'user_emergency_contact', 'user_emergency_phone', 
+            'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id'
+        ]
+        read_only_fields = ['id', 'employee_id', 'created_at', 'updated_at', 'full_name', 'email']
+        extra_kwargs = {
+            'user_profile': {'required': False, 'allow_null': True}
+        }
+
+    def validate(self, data):
+        """Validate that either user_profile is provided or user creation fields are provided"""
+        # Only validate user creation fields if this is a new record (no instance)
+        if not self.instance and not data.get('user_profile'):
+            if not data.get('user_email'):
+                raise serializers.ValidationError({
+                    'user_email': 'Email is required when creating a new user account.'
+                })
+            if not data.get('user_first_name'):
+                raise serializers.ValidationError({
+                    'user_first_name': 'First name is required when creating a new user account.'
+                })
+            if not data.get('user_last_name'):
+                raise serializers.ValidationError({
+                    'user_last_name': 'Last name is required when creating a new user account.'
+                })
+        return data
+
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create User → UserProfile → NonStaffMember in proper hierarchy with atomicity"""
+        # Extract all user and profile creation fields
+        user_fields = {
+            'user_email': validated_data.pop('user_email', None),
+        }
+        
+        profile_fields = {
+            'user_first_name': validated_data.pop('user_first_name', None),
+            'user_last_name': validated_data.pop('user_last_name', None),
+            'user_other_name': validated_data.pop('user_other_name', None),
+            'user_gender': validated_data.pop('user_gender', None),
+            'user_dob': validated_data.pop('user_dob', None),
+            'user_phone': validated_data.pop('user_phone', None),
+            'user_emergency_contact': validated_data.pop('user_emergency_contact', None),
+            'user_emergency_phone': validated_data.pop('user_emergency_phone', None),
+            'user_emergency_contact_address': validated_data.pop('user_emergency_contact_address', None),
+            'user_emergency_contact_email': validated_data.pop('user_emergency_contact_email', None),
+            'user_role_id': validated_data.pop('user_role_id', None),
+        }
+        
+        # If user_profile is not provided, create the entire hierarchy atomically
+        if not validated_data.get('user_profile') and user_fields['user_email']:
+            # Step 1: Create User
+            generated_password = generate_password()
+            user = User.objects.create_user(
+                email=user_fields['user_email'],
+                password=generated_password
+            )
+            print(f"✓ Created User: {user.email} (ID: {user.id})")
+            
+            # Step 2: Create UserProfile
+            # Get or create role
+            role = None
+            if profile_fields['user_role_id']:
+                try:
+                    role = Role.objects.get(id=profile_fields['user_role_id'])
+                except Role.DoesNotExist:
+                    pass
+            
+            if not role:
+                role = Role.objects.filter(name__icontains='non-staff').first() or Role.objects.filter(name__icontains='staff').first()
+            
+            # Prepare profile data
+            profile_data = {
+                'user': user,
+                'user_type': 'staff',
+                'first_name': profile_fields['user_first_name'] or '',
+                'last_name': profile_fields['user_last_name'] or '',
+                'role': role,
+            }
+            
+            # Add optional profile fields
+            optional_field_mappings = {
+                'user_other_name': 'other_name',
+                'user_gender': 'gender',
+                'user_dob': 'dob',
+                'user_phone': 'phone',
+                'user_emergency_contact': 'emergency_contact',
+                'user_emergency_phone': 'emergency_phone',
+                'user_emergency_contact_address': 'emergency_contact_address',
+                'user_emergency_contact_email': 'emergency_contact_email'
+            }
+            
+            for field_key, model_field in optional_field_mappings.items():
+                value = profile_fields.get(field_key)
+                if value:
+                    profile_data[model_field] = value
+            
+            # Create user profile
+            user_profile = UserProfile.objects.create(**profile_data)
+            print(f"✓ Created UserProfile: {user_profile.get_full_name()} (ID: {user_profile.id})")
+            
+            # Set the user_profile for non-staff member creation
+            validated_data['user_profile'] = user_profile
+            
+            # Step 3: Create NonStaffMember
+            non_staff_member = super().create(validated_data)
+            print(f"✓ Created NonStaffMember: {non_staff_member.employee_id} (ID: {non_staff_member.id})")
+            
+            # Step 4: Send login credentials (outside the critical transaction path)
+            try:
+                send_login_credentials(user, generated_password, 'non-staff')
+                print(f"✓ Sent login credentials to {user.email}")
+            except Exception as e:
+                print(f"⚠ Failed to send email to {user.email}: {str(e)}")
+            
+            return non_staff_member
+        
+        # If user_profile is provided, create non-staff member directly
+        return super().create(validated_data)
+
+
 # Detailed serializers with nested relationships
 class StudentDetailSerializer(StudentSerializer):
     """Detailed student serializer with parent relationships"""
@@ -721,6 +881,13 @@ class ParentDetailSerializer(ParentSerializer):
             'is_primary': rel.is_primary,
             'current_stream': rel.student.current_stream.name if rel.student.current_stream else None,
         } for rel in relationships]
+
+
+class NonStaffMemberDetailSerializer(NonStaffMemberSerializer):
+    """Detailed non-staff member serializer with additional context"""
+    
+    class Meta(NonStaffMemberSerializer.Meta):
+        fields = NonStaffMemberSerializer.Meta.fields
 
 
 class StreamDetailSerializer(StreamSerializer):

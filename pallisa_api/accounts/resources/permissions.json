@@ -27,11 +27,6 @@
           "description": "Create, update, and delete roles and assign permissions"
         },
         {
-          "code": "admin.system_settings",
-          "name": "System Settings",
-          "description": "Modify system-wide settings and configurations"
-        },
-        {
           "code": "admin.view_campuses",
           "name": "View Campuses",
           "description": "View campuses"
@@ -40,576 +35,280 @@
           "code": "admin.manage_campuses",
           "name": "Manage Campuses",
           "description": "Create, update and delete campuses"
-        },
-        {
-          "code": "admin.audit_logs",
-          "name": "View Audit Logs",
-          "description": "Access system audit logs and user activity history"
-        },
-        {
-          "code": "admin.manage_contracts",
-          "name": "Manage Contract Types",
-          "description": "Access and manage contract types"
         }
       ]
     },
     {
-      "name": "Health Management",
-      "code": "health",
-      "description": "Manage student health records, medical visits, and incidents",
+      "name": "Members Management",
+      "code": "members",
+      "description": "Manage students, teachers, parents, and non-staff members",
       "is_admin": false,
       "permissions": [
         {
-          "code": "health.view_records",
-          "name": "View Health Records",
-          "description": "View student health records"
-        },
-        {
-          "code": "health.manage_records",
-          "name": "Manage Health Records",
-          "description": "Create, update, or delete student health records"
-        },
-        {
-          "code": "health.view_visits",
-          "name": "View Medical Visits",
-          "description": "View records of student medical visits"
-        },
-        {
-          "code": "health.manage_visits",
-          "name": "Manage Medical Visits",
-          "description": "Record and update student medical visits"
-        },
-        {
-          "code": "health.view_incidents",
-          "name": "View Medical Incidents",
-          "description": "View reported student medical incidents"
-        },
-        {
-          "code": "health.manage_incidents",
-          "name": "Manage Medical Incidents",
-          "description": "Report and manage medical incidents involving students"
-        },
-        {
-          "code": "health.notify_parents",
-          "name": "Notify Parents",
-          "description": "Send notifications to parents about medical visits or incidents"
-        }
-      ]
-    },
-    {
-      "name": "Academic Management",
-      "code": "academic",
-      "description": "Curriculum and academic program management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "academic.manage_subjects",
-          "name": "Manage Subjects",
-          "description": "Create, update, and delete subjects"
-        },
-        {
-          "code": "academic.manage_classes",
-          "name": "Manage Classes",
-          "description": "Create, update, and delete classes"
-        },
-        {
-          "code": "academic.manage_academic_years",
-          "name": "Manage Academic Years",
-          "description": "Configure academic years, terms"
-        },
-        {
-          "code": "academic.manage_streams",
-          "name": "Manage Streams",
-          "description": "Create, update ans delete streams"
-        },
-        {
-          "code": "academic.manage_promotions",
-          "name": "Manage Student Promotions",
-          "description": "Create, update ans delete promotions"
-        },
-        {
-          "code": "academic.manage_materials",
-          "name": "Manage E-Learning materials",
-          "description": "Create, update ans delete materials"
-        }
-      ]
-    },
-    {
-      "name": "Student Management",
-      "code": "student",
-      "description": "Student record and information management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "student.view_students",
+          "code": "members.view_students",
           "name": "View Students",
           "description": "View student profiles and basic information"
         },
         {
-          "code": "student.manage_students",
+          "code": "members.manage_students",
           "name": "Manage Students",
           "description": "Create, update, and delete student records"
         },
         {
-          "code": "student.view_attendance",
-          "name": "View Attendance",
-          "description": "View student attendance records"
+          "code": "members.view_teachers",
+          "name": "View Teachers",
+          "description": "View teacher profiles and information"
         },
         {
-          "code": "student.manage_attendance",
-          "name": "Manage Attendance",
-          "description": "Record and modify student attendance"
-        }
-      ]
-    },
-    {
-      "name": "Staff Management",
-      "code": "staff",
-      "description": "Staff and faculty management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "staff.view_staff",
-          "name": "View Staff",
-          "description": "View staff profiles and information"
-        },
-        {
-          "code": "staff.manage_staff",
-          "name": "Manage Staff",
-          "description": "Create, update, and delete staff records"
-        },
-        {
-          "code": "staff.manage_teachers",
+          "code": "members.manage_teachers",
           "name": "Manage Teachers",
-          "description": "Assign teachers to classes and subjects"
+          "description": "Create, update, and delete teacher records"
         },
         {
-          "code": "staff.view_staff_attendance",
-          "name": "View Staff Attendance",
-          "description": "View staff attendance records"
+          "code": "members.view_parents",
+          "name": "View Parents",
+          "description": "View parent profiles and information"
         },
         {
-          "code": "staff.manage_staff_attendance",
-          "name": "Manage Staff Attendance",
-          "description": "Record and update staff attendance"
+          "code": "members.manage_parents",
+          "name": "Manage Parents",
+          "description": "Create, update, and delete parent records"
         },
         {
-          "code": "staff.manage_departments",
+          "code": "members.view_non_staff",
+          "name": "View Non-Staff Members",
+          "description": "View non-staff member profiles and information"
+        },
+        {
+          "code": "members.manage_non_staff",
+          "name": "Manage Non-Staff Members",
+          "description": "Create, update, and delete non-staff member records"
+        },
+        {
+          "code": "members.view_classes",
+          "name": "View Classes",
+          "description": "View class information and details"
+        },
+        {
+          "code": "members.manage_classes",
+          "name": "Manage Classes",
+          "description": "Create, update, and delete classes"
+        },
+        {
+          "code": "members.view_streams",
+          "name": "View Streams",
+          "description": "View stream information and details"
+        },
+        {
+          "code": "members.manage_streams",
+          "name": "Manage Streams",
+          "description": "Create, update, and delete streams"
+        },
+        {
+          "code": "members.view_subjects",
+          "name": "View Subjects",
+          "description": "View subject information and details"
+        },
+        {
+          "code": "members.manage_subjects",
+          "name": "Manage Subjects",
+          "description": "Create, update, and delete subjects"
+        },
+        {
+          "code": "members.assign_teachers",
+          "name": "Assign Teachers",
+          "description": "Assign teachers to subjects and streams"
+        },
+        {
+          "code": "members.assign_students",
+          "name": "Assign Students",
+          "description": "Assign students to streams and classes"
+        },
+        {
+          "code": "members.view_statistics",
+          "name": "View Member Statistics",
+          "description": "View member statistics and reports"
+        }
+      ]
+    },
+    {
+      "name": "Expense Management",
+      "code": "expenses",
+      "description": "Manage school expenses and financial records",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "expenses.view_expenses",
+          "name": "View Expenses",
+          "description": "View expense records and details"
+        },
+        {
+          "code": "expenses.manage_expenses",
+          "name": "Manage Expenses",
+          "description": "Create, update, and delete expense records"
+        },
+        {
+          "code": "expenses.approve_expenses",
+          "name": "Approve Expenses",
+          "description": "Approve or reject expense submissions"
+        },
+        {
+          "code": "expenses.view_categories",
+          "name": "View Expense Categories",
+          "description": "View expense categories"
+        },
+        {
+          "code": "expenses.manage_categories",
+          "name": "Manage Expense Categories",
+          "description": "Create, update, and delete expense categories"
+        },
+        {
+          "code": "expenses.view_departments",
+          "name": "View Departments",
+          "description": "View department information"
+        },
+        {
+          "code": "expenses.manage_departments",
           "name": "Manage Departments",
-          "description": "Create and manage academic departments"
+          "description": "Create, update, and delete departments"
+        },
+        {
+          "code": "expenses.view_vendors",
+          "name": "View Vendors",
+          "description": "View vendor information"
+        },
+        {
+          "code": "expenses.manage_vendors",
+          "name": "Manage Vendors",
+          "description": "Create, update, and delete vendors"
+        },
+        {
+          "code": "expenses.view_academic_years",
+          "name": "View Academic Years",
+          "description": "View academic year information"
+        },
+        {
+          "code": "expenses.manage_academic_years",
+          "name": "Manage Academic Years",
+          "description": "Create, update, and delete academic years"
+        },
+        {
+          "code": "expenses.view_terms",
+          "name": "View Terms",
+          "description": "View term information"
+        },
+        {
+          "code": "expenses.manage_terms",
+          "name": "Manage Terms",
+          "description": "Create, update, and delete terms"
+        },
+        {
+          "code": "expenses.view_expense_summary",
+          "name": "View Expense Summary",
+          "description": "View expense summaries and reports"
         }
       ]
     },
     {
-      "name": "Assessment Management",
-      "code": "assessment",
-      "description": "Examination and assessment management",
+      "name": "Fees Management",
+      "code": "fees",
+      "description": "Manage student fees, payments, and financial records",
       "is_admin": false,
       "permissions": [
         {
-          "code": "assessment.view_exams",
-          "name": "View Exams",
-          "description": "View examination details and schedules"
+          "code": "fees.view_fee_categories",
+          "name": "View Fee Categories",
+          "description": "View fee categories"
         },
         {
-          "code": "assessment.manage_assessments",
-          "name": "Manage Assessments",
-          "description": "Create, update, and delete assessments"
+          "code": "fees.manage_fee_categories",
+          "name": "Manage Fee Categories",
+          "description": "Create, update, and delete fee categories"
         },
         {
-          "code": "assessment.view_grades",
-          "name": "View Grades",
-          "description": "View student grades and assessment results"
-        },
-        {
-          "code": "assessment.manage_grades",
-          "name": "Manage Grades",
-          "description": "Enter and update student grades"
-        },
-        {
-          "code": "assessment.manage_grading_system",
-          "name": "Manage Grading System",
-          "description": "Configure grading scales and assessment criteria"
-        },
-        {
-          "code": "assessment.generate_report_cards",
-          "name": "Generate Report Cards",
-          "description": "Create and manage student report cards"
-        }
-      ]
-    },
-    {
-      "name": "Timetable Management",
-      "code": "timetable",
-      "description": "School timetable and scheduling management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "timetable.view_timetable",
-          "name": "View Timetable",
-          "description": "View class schedules and timetables"
-        },
-        {
-          "code": "timetable.manage_timetable",
-          "name": "Manage Timetable",
-          "description": "Create and update class schedules"
-        },
-        {
-          "code": "timetable.manage_classrooms",
-          "name": "Manage Classrooms",
-          "description": "Assign and manage classroom allocations"
-        },
-        {
-          "code": "timetable.manage_events",
-          "name": "Manage Events",
-          "description": "Create and manage school events and activities"
-        }
-      ]
-    },
-    {
-      "name": "Library Management",
-      "code": "library",
-      "description": "Comprehensive library operations including book management, issuing, returns, and fines",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "library.view_dashboard",
-          "name": "View Library Dashboard",
-          "description": "Access library overview dashboard with key metrics and statistics"
-        },
-        {
-          "code": "library.view_books",
-          "name": "View Books",
-          "description": "View library book catalog and inventory"
-        },
-        {
-          "code": "library.manage_books",
-          "name": "Manage Books",
-          "description": "Add, update, and delete books in the library catalog"
-        },
-        {
-          "code": "library.view_book_details",
-          "name": "View Book Details",
-          "description": "Access detailed information about books including availability and copies"
-        },
-        {
-          "code": "library.manage_book_inventory",
-          "name": "Manage Book Inventory",
-          "description": "Update book copies, availability, and inventory adjustments"
-        },
-        {
-          "code": "library.return_books",
-          "name": "Process Book Returns",
-          "description": "Process and record book returns from users"
-        },
-        {
-          "code": "library.view_issued_books",
-          "name": "View Issued Books",
-          "description": "View list of currently issued books and their status"
-        },
-        {
-          "code": "library.manage_book_issues",
-          "name": "Manage Book Issues",
-          "description": "Modify book issue records and status updates"
-        },
-        {
-          "code": "library.view_fines",
-          "name": "View Library Fines",
-          "description": "View library fines and penalties for users"
-        },
-        {
-          "code": "library.manage_fines",
-          "name": "Manage Library Fines",
-          "description": "Create, update, and delete library fines"
-        },
-        {
-          "code": "library.waive_fines",
-          "name": "Waive Library Fines",
-          "description": "Waive or reduce library fines for users"
-        }
-      ]
-    },
-    {
-      "name": "Parent Portal Management",
-      "code": "parent_portal",
-      "description": "Parent access and portal management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "parent.manage_accounts",
-          "name": "Manage Parent Accounts",
-          "description": "Create and manage parent portal accounts"
-        },
-        {
-          "code": "parent.manage_content",
-          "name": "Manage Portal Content",
-          "description": "Update content visible to parents"
-        }
-      ]
-    },
-    {
-      "name": "Calendar Management",
-      "code": "calendar",
-      "description": "School calendar and event management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "calendar.view_calendar",
-          "name": "View Calendar",
-          "description": "View school calendar and events"
-        },
-        {
-          "code": "calendar.manage_calendar",
-          "name": "Manage Calendar",
-          "description": "Create and update calendar events"
-        },
-        {
-          "code": "calendar.manage_holidays",
-          "name": "Manage Holidays",
-          "description": "Define school holidays and vacations"
-        }
-      ]
-    },
-    {
-      "name": "Financial Management",
-      "code": "finance",
-      "description": "Comprehensive school financial operations and transactions management",
-      "is_admin": false,
-      "permissions": [
-        {
-          "code": "finance.view_dashboard",
-          "name": "View Financial Dashboard",
-          "description": "Access financial overview dashboard and key metrics"
-        },
-        {
-          "code": "finance.view_student_fees",
-          "name": "View Student Fees",
-          "description": "View student fee balances, payment history, and account details"
-        },
-        {
-          "code": "finance.manage_student_fees",
-          "name": "Manage Student Fees",
-          "description": "Record, update, and modify student fee payments and accounts"
-        },
-        {
-          "code": "finance.view_fee_structures",
+          "code": "fees.view_fee_structures",
           "name": "View Fee Structures",
-          "description": "View fee structures, amounts, and configurations"
+          "description": "View fee structures and amounts"
         },
         {
-          "code": "finance.manage_fee_structures",
+          "code": "fees.manage_fee_structures",
           "name": "Manage Fee Structures",
-          "description": "Create, update, and delete fee structures for classes and terms"
+          "description": "Create, update, and delete fee structures"
         },
         {
-          "code": "finance.generate_invoices",
-          "name": "Generate Invoices",
-          "description": "Create and issue student fee invoices and billing statements"
-        },
-        {
-          "code": "finance.process_payments",
-          "name": "Process Payments",
-          "description": "Record and process fee payments from various payment methods"
-        },
-        {
-          "code": "finance.view_payments",
-          "name": "View Payment Records",
-          "description": "Access payment transaction history and details"
-        },
-        {
-          "code": "finance.manage_payments",
-          "name": "Manage Payments",
-          "description": "Edit, cancel, refund, and manage payment records"
-        },
-        {
-          "code": "finance.view_receipts",
-          "name": "View Receipts",
-          "description": "View payment receipts and receipt history"
-        },
-        {
-          "code": "finance.generate_receipts",
-          "name": "Generate Receipts",
-          "description": "Create and regenerate payment receipts"
-        },
-        {
-          "code": "finance.email_receipts",
-          "name": "Email Receipts",
-          "description": "Send payment receipts via email to students and parents"
-        },
-        {
-          "code": "finance.view_scholarships",
+          "code": "fees.view_scholarships",
           "name": "View Scholarships",
-          "description": "View student scholarships and discount information"
+          "description": "View scholarship information"
         },
         {
-          "code": "finance.manage_scholarships",
+          "code": "fees.manage_scholarships",
           "name": "Manage Scholarships",
-          "description": "Create, update, and manage student scholarships and discounts"
+          "description": "Create, update, and delete scholarships"
         },
         {
-          "code": "finance.approve_scholarships",
-          "name": "Approve Scholarships",
-          "description": "Approve and activate student scholarship applications"
+          "code": "fees.view_fee_overrides",
+          "name": "View Fee Overrides",
+          "description": "View student-specific fee overrides"
         },
         {
-          "code": "finance.revoke_scholarships",
-          "name": "Revoke Scholarships",
-          "description": "Deactivate and revoke student scholarships"
+          "code": "fees.manage_fee_overrides",
+          "name": "Manage Fee Overrides",
+          "description": "Create, update, and delete fee overrides"
         },
         {
-          "code": "finance.view_student_accounts",
-          "name": "View Student Fee Accounts",
-          "description": "Access detailed student fee account information and balances"
+          "code": "fees.view_payments",
+          "name": "View Payments",
+          "description": "View payment records and history"
         },
         {
-          "code": "finance.manage_student_accounts",
-          "name": "Manage Student Fee Accounts",
-          "description": "Create, update, and manage student fee accounts"
+          "code": "fees.manage_payments",
+          "name": "Manage Payments",
+          "description": "Create, update, and delete payment records"
         },
         {
-          "code": "finance.add_optional_fees",
-          "name": "Add Optional Fees",
-          "description": "Add optional fee items to student accounts"
+          "code": "fees.view_fee_balances",
+          "name": "View Fee Balances",
+          "description": "View student fee balances"
         },
         {
-          "code": "finance.remove_fee_items",
-          "name": "Remove Fee Items",
-          "description": "Remove fee items from student accounts"
+          "code": "fees.view_collection_summaries",
+          "name": "View Collection Summaries",
+          "description": "View fee collection summaries and reports"
         },
         {
-          "code": "finance.view_transactions",
-          "name": "View Financial Transactions",
-          "description": "Access all financial transaction records and audit trails"
+          "code": "fees.manage_collection_summaries",
+          "name": "Manage Collection Summaries",
+          "description": "Create and update collection summaries"
         },
         {
-          "code": "finance.manage_refunds",
-          "name": "Manage Refunds",
-          "description": "Process and track student fee refunds"
-        },
-        {
-          "code": "finance.view_payment_audit",
-          "name": "View Payment Audit Logs",
-          "description": "Access payment audit logs and change history"
-        },
-        {
-          "code": "finance.manage_expenses",
-          "name": "Manage School Expenses",
-          "description": "Record and manage school operational expenditures"
-        },
-        {
-          "code": "finance.generate_reports",
-          "name": "Generate Financial Reports",
-          "description": "Create comprehensive financial statements and analytics reports"
-        },
-        {
-          "code": "finance.view_reports",
-          "name": "View Financial Reports",
-          "description": "Access financial reports and analytics"
-        },
-        {
-          "code": "finance.export_data",
-          "name": "Export Financial Data",
-          "description": "Export financial data to various formats (Excel, PDF, CSV)"
-        },
-        {
-          "code": "finance.manage_budgets",
-          "name": "Manage Budgets",
-          "description": "Create, update, and oversee school budget plans and allocations"
-        },
-        {
-          "code": "finance.view_outstanding_balances",
-          "name": "View Outstanding Balances",
-          "description": "Access reports of students with outstanding fee balances"
-        },
-        {
-          "code": "finance.send_payment_reminders",
-          "name": "Send Payment Reminders",
-          "description": "Send automated or manual payment reminder notifications"
-        },
-        {
-          "code": "finance.manage_payment_plans",
-          "name": "Manage Payment Plans",
-          "description": "Create and manage installment payment plans for students"
-        },
-        {
-          "code": "finance.reconcile_accounts",
-          "name": "Reconcile Financial Accounts",
-          "description": "Perform account reconciliation and balance verification"
-        },
-        {
-          "code": "finance.override_calculations",
-          "name": "Override Financial Calculations",
-          "description": "Override automatic fee calculations and scholarship applications"
-        },
-        {
-          "code": "finance.bulk_operations",
-          "name": "Perform Bulk Financial Operations",
-          "description": "Execute bulk operations like mass fee updates or payment processing"
+          "code": "fees.view_fee_statistics",
+          "name": "View Fee Statistics",
+          "description": "View fee statistics and reports"
         }
       ]
     },
     {
-      "name": "Communication Management",
-      "code": "communication",
-      "description": "Manage school-wide communication including messages, groups, and notifications",
+      "name": "Reports and Analytics",
+      "code": "reports",
+      "description": "Access to reports and analytics features",
       "is_admin": false,
       "permissions": [
         {
-          "code": "communication.create_group",
-          "name": "Create Chat Groups",
-          "description": "Create new chat groups for communication among users"
+          "code": "reports.view_reports",
+          "name": "View Reports",
+          "description": "Access to view various system reports"
         },
         {
-          "code": "communication.manage_group_members",
-          "name": "Manage Group Members",
-          "description": "Add or remove members from chat groups"
+          "code": "reports.generate_reports",
+          "name": "Generate Reports",
+          "description": "Generate and export reports"
         },
         {
-          "code": "communication.send_group_message",
-          "name": "Send Group Messages",
-          "description": "Send messages to chat groups"
-        },
-        {
-          "code": "communication.send_private_message",
-          "name": "Send Private Messages",
-          "description": "Send direct messages to individual users"
-        },
-        {
-          "code": "communication.view_messages",
-          "name": "View Messages",
-          "description": "View private and group messages"
-        },
-        {
-          "code": "communication.send_announcement",
-          "name": "Send Announcements",
-          "description": "Broadcast school-wide announcements"
-        },
-        {
-          "code": "communication.send_notification",
-          "name": "Send Notifications",
-          "description": "Send notifications such as exams, events, or assignments"
-        },
-        {
-          "code": "communication.manage_notifications",
-          "name": "Manage Notifications",
-          "description": "Edit or delete existing notifications"
-        },
-        {
-          "code": "communication.view_notification_logs",
-          "name": "View Notification History",
-          "description": "Track and view logs of notifications and messages sent"
-        },
-        {
-          "code": "communication.send_bulk_sms",
-          "name": "Send Bulk SMS",
-          "description": "Send mass SMS to users based on roles or groups"
-        },
-        {
-          "code": "communication.send_bulk_email",
-          "name": "Send Bulk Email",
-          "description": "Send mass email messages to students, parents, or staff"
+          "code": "reports.view_analytics",
+          "name": "View Analytics",
+          "description": "Access to analytics and dashboards"
         }
       ]
     }
   ]
-}
+} 
