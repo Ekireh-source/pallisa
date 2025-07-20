@@ -121,7 +121,7 @@ class LoginView(APIView):
                     user_type = None
                     name = None
                 
-                serializer = UserProfileSerializer(user.profile)
+                serializer = UserProfileSerializer(user.profile, context={'request': request})
                 
                 return Response({
                     'refresh': str(refresh),
@@ -1218,7 +1218,7 @@ class CurrentUserProfileView(APIView):
     def get(self, request):
         try:
             user_profile = UserProfile.objects.get(user=request.user)
-            serializer = UserProfileSerializer(user_profile)
+            serializer = UserProfileSerializer(user_profile, context={'request': request})
             return Response({"user_profile": serializer.data})
         except UserProfile.DoesNotExist:
             return Response(

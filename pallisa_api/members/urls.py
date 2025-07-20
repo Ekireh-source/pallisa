@@ -49,4 +49,29 @@ urlpatterns = [
     # Non-Staff Members URLs
     path('non-staff-members/', views.NonStaffMemberListCreateView.as_view(), name='non-staff-member-list'),
     path('non-staff-members/<int:pk>/', views.NonStaffMemberDetailView.as_view(), name='non-staff-member-detail'),
+    
+    # ==================== SALARY MANAGEMENT URLS ====================
+    
+    # Salary Periods URLs
+    path('salary-periods/', views.SalaryPeriodListCreateView.as_view(), name='salary-period-list'),
+    path('salary-periods/<int:pk>/', views.SalaryPeriodDetailView.as_view(), name='salary-period-detail'),
+    
+    # Salary Allowances URLs
+    path('salary-allowances/', views.SalaryAllowanceListCreateView.as_view(), name='salary-allowance-list'),
+    path('salary-allowances/<int:pk>/', views.SalaryAllowanceDetailView.as_view(), name='salary-allowance-detail'),
+    
+    # Salary Deductions URLs
+    path('salary-deductions/', views.SalaryDeductionListCreateView.as_view(), name='salary-deduction-list'),
+    path('salary-deductions/<int:pk>/', views.SalaryDeductionDetailView.as_view(), name='salary-deduction-detail'),
+    
+    # Salary Payments URLs
+    path('salary-payments/', views.SalaryPaymentListCreateView.as_view(), name='salary-payment-list'),
+    path('salary-payments/<int:pk>/', views.SalaryPaymentDetailView.as_view(), name='salary-payment-detail'),
+    
+    # Salary Summaries URLs
+    path('salary-summaries/', views.SalarySummaryListView.as_view(), name='salary-summary-list'),
+    path('salary-summary/', views.SalarySummaryView.as_view(), name='salary-summary'),
+    
+    # Staff Salary List URL
+    path('staff-salaries/', views.StaffSalaryListView.as_view(), name='staff-salary-list'),
 ] 

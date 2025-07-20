@@ -288,6 +288,74 @@
       ]
     },
     {
+      "name": "Salary Management",
+      "code": "salary",
+      "description": "Manage staff salaries, payments, and salary-related financial records",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "admin.manage_salaries",
+          "name": "Manage Salaries",
+          "description": "Full access to salary management including periods, payments, and summaries"
+        },
+        {
+          "code": "salary.view_salary_periods",
+          "name": "View Salary Periods",
+          "description": "View salary periods and their details"
+        },
+        {
+          "code": "salary.manage_salary_periods",
+          "name": "Manage Salary Periods",
+          "description": "Create, update, and delete salary periods"
+        },
+        {
+          "code": "salary.view_allowances",
+          "name": "View Salary Allowances",
+          "description": "View salary allowance types and amounts"
+        },
+        {
+          "code": "salary.manage_allowances",
+          "name": "Manage Salary Allowances",
+          "description": "Create, update, and delete salary allowances"
+        },
+        {
+          "code": "salary.view_deductions",
+          "name": "View Salary Deductions",
+          "description": "View salary deduction types and amounts"
+        },
+        {
+          "code": "salary.manage_deductions",
+          "name": "Manage Salary Deductions",
+          "description": "Create, update, and delete salary deductions"
+        },
+        {
+          "code": "salary.view_payments",
+          "name": "View Salary Payments",
+          "description": "View salary payment records and details"
+        },
+        {
+          "code": "salary.manage_payments",
+          "name": "Manage Salary Payments",
+          "description": "Create, update, and delete salary payments"
+        },
+        {
+          "code": "salary.view_summaries",
+          "name": "View Salary Summaries",
+          "description": "View salary summaries and reports"
+        },
+        {
+          "code": "salary.view_staff_salaries",
+          "name": "View Staff Salaries",
+          "description": "View staff salary information and budgets"
+        },
+        {
+          "code": "salary.process_payments",
+          "name": "Process Salary Payments",
+          "description": "Process and approve salary payments"
+        }
+      ]
+    },
+    {
       "name": "Reports and Analytics",
       "code": "reports",
       "description": "Access to reports and analytics features",
@@ -311,4 +379,4 @@
       ]
     }
   ]
-} 
+}

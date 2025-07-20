@@ -12,7 +12,24 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config, Csv
+
+# Helper function to get environment variables with defaults
+def get_env(key, default=None, cast=None):
+    value = os.environ.get(key, default)
+    if value is None:
+        return default
+    
+    if cast is bool:
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in ('true', '1', 'yes', 'on')
+    elif cast is int:
+        return int(value) if value else default
+    elif cast is list:
+        if isinstance(value, list):
+            return value
+        return [x.strip() for x in value.split(',')] if value else default
+    return value
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,12 +40,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default="django-insecure-8!f*%q81ie^s%tgog1*drwowm&c1o7&7qw%$j6^!2^ajsn_n*b")
+SECRET_KEY = get_env('SECRET_KEY', default="django-insecure-8!f*%q81ie^s%tgog1*drwowm&c1o7&7qw%$j6^!2^ajsn_n*b")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = get_env('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=list)
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
@@ -146,14 +163,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Email configuration from environment variables
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@pallisa.com')
+EMAIL_BACKEND = get_env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = get_env('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = get_env('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_USE_SSL = get_env('EMAIL_USE_SSL', default=False, cast=bool)
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', default='noreply@pallisa.com')
 
 # SSL Configuration for email (fix certificate verification issues)
 import ssl
@@ -165,12 +182,12 @@ if EMAIL_USE_TLS:
     # For production, you should use proper SSL verification
 
 # Site configuration
-SITE_NAME = config('SITE_NAME', default='Pallisa')
-SUPPORT_EMAIL = config('SUPPORT_EMAIL', default='support@pallisa.com')
-FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
+SITE_NAME = get_env('SITE_NAME', default='Pallisa')
+SUPPORT_EMAIL = get_env('SUPPORT_EMAIL', default='support@pallisa.com')
+FRONTEND_URL = get_env('FRONTEND_URL', default='http://localhost:3000')
 
 # Cache configuration (use local memory for development, Redis for production)
-REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/1')
+REDIS_URL = get_env('REDIS_URL', default='redis://localhost:6379/1')
 if REDIS_URL:
     CACHES = {
         'default': {

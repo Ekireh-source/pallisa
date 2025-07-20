@@ -6,7 +6,8 @@ from expenses.models import AcademicYear
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
     StudentStreamHistory, Subject, TeacherSubjectAssignment,
-    generate_password, send_login_credentials, NonStaffMember
+    generate_password, send_login_credentials, NonStaffMember,
+    SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPaymentDetail, SalaryPayment, SalarySummary
 )
 
 User = get_user_model()
@@ -21,7 +22,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = [
             'id', 'first_name', 'last_name', 'other_name', 'full_name',
-            'gender', 'dob', 'phone', 'profile_picture', 'user_type', 'user',
+            'gender', 'dob', 'phone', 'profile_picture', 'user_type', 'user', 'role',
             'emergency_contact', 'emergency_phone', 'emergency_contact_address', 'emergency_contact_email'
         ]
         read_only_fields = ['id', 'full_name', 'user_type']
@@ -37,6 +38,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 'date_joined': obj.user.date_joined.isoformat() if obj.user.date_joined else None,
             }
         return None
+
+    def to_representation(self, instance):
+        """Customize the output representation"""
+        representation = super().to_representation(instance)
+        
+        # Show role details instead of just ID in responses
+        if instance.role:
+            from accounts.serializers import RoleSerializer
+            representation["role"] = RoleSerializer(instance.role).data
+            
+        return representation
 
 
 class SchoolSerializer(serializers.ModelSerializer):
@@ -897,3 +909,253 @@ class StreamDetailSerializer(StreamSerializer):
     
     class Meta(StreamSerializer.Meta):
         fields = StreamSerializer.Meta.fields + ['students', 'subject_assignments'] 
+
+
+# ==================== SALARY MANAGEMENT SERIALIZERS ====================
+
+class SalaryPeriodSerializer(serializers.ModelSerializer):
+    """Serializer for SalaryPeriod model"""
+    academic_year_name = serializers.CharField(source='academic_year.name', read_only=True)
+    term_name = serializers.CharField(source='term.name', read_only=True)
+    duration_days = serializers.IntegerField(read_only=True)
+    can_be_modified = serializers.BooleanField(read_only=True)
+    
+    class Meta:
+        model = SalaryPeriod
+        fields = [
+            'id', 'name', 'academic_year', 'academic_year_name',
+            'term', 'term_name', 'start_date', 'end_date', 'is_active', 'is_closed',
+            'duration_days', 'can_be_modified', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['duration_days', 'can_be_modified', 'created_at', 'updated_at']
+
+    def validate(self, data):
+        """Validate that only one period can be active at a time"""
+        is_active = data.get('is_active', False)
+        
+        if is_active:
+            # Check if there are other active periods (excluding this instance if it's an update)
+            other_active_periods = SalaryPeriod.objects.filter(is_active=True)
+            if self.instance:  # If this is an update, exclude this instance
+                other_active_periods = other_active_periods.exclude(pk=self.instance.pk)
+            
+            if other_active_periods.exists():
+                raise serializers.ValidationError({
+                    'is_active': "Only one salary period can be active at a time. Please deactivate other active periods first."
+                })
+        
+        return data
+
+    def create(self, validated_data):
+        """Create salary period with proper active period handling"""
+        is_active = validated_data.get('is_active', False)
+        
+        # If this period is being set as active, deactivate all other periods first
+        if is_active:
+            SalaryPeriod.objects.all().update(is_active=False)
+        
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update salary period with proper active period handling"""
+        is_active = validated_data.get('is_active', False)
+        
+        # If this period is being set as active, deactivate all other periods first
+        if is_active:
+            SalaryPeriod.objects.exclude(pk=instance.pk).update(is_active=False)
+        
+        return super().update(instance, validated_data)
+
+
+class SalaryAllowanceSerializer(serializers.ModelSerializer):
+    """Serializer for SalaryAllowance model"""
+    class Meta:
+        model = SalaryAllowance
+        fields = [
+            'id', 'name', 'allowance_type', 'description', 'amount',
+            'is_percentage', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class SalaryDeductionSerializer(serializers.ModelSerializer):
+    """Serializer for SalaryDeduction model"""
+    class Meta:
+        model = SalaryDeduction
+        fields = [
+            'id', 'name', 'deduction_type', 'description', 'amount',
+            'is_percentage', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class SalaryPaymentDetailSerializer(serializers.ModelSerializer):
+    """Serializer for SalaryPaymentDetail model"""
+    allowance_name = serializers.CharField(source='allowance.name', read_only=True)
+    deduction_name = serializers.CharField(source='deduction.name', read_only=True)
+    
+    class Meta:
+        model = SalaryPaymentDetail
+        fields = [
+            'id', 'salary_payment', 'allowance', 'allowance_name',
+            'deduction', 'deduction_name', 'amount', 'notes', 'created_at'
+        ]
+        read_only_fields = ['created_at']
+
+
+class SalaryPaymentSerializer(serializers.ModelSerializer):
+    """Serializer for SalaryPayment model"""
+    staff_name = serializers.CharField(source='get_staff_name', read_only=True)
+    staff_type = serializers.CharField(source='get_staff_type', read_only=True)
+    salary_period_name = serializers.CharField(source='salary_period.name', read_only=True)
+    processed_by_name = serializers.CharField(source='processed_by.get_full_name', read_only=True)
+    details = SalaryPaymentDetailSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = SalaryPayment
+        fields = [
+            'id', 'teacher', 'non_staff_member', 'staff_name', 'staff_type',
+            'salary_period', 'salary_period_name', 'base_salary', 'allowances',
+            'deductions', 'net_salary', 'payment_date', 'payment_method',
+            'payment_status', 'transaction_reference', 'notes', 'receipt_image',
+            'processed_by', 'processed_by_name', 'details', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['staff_name', 'staff_type', 'salary_period_name', 'processed_by_name', 'created_at', 'updated_at']
+
+    def validate(self, data):
+        """Validate salary payment data"""
+        # Ensure either teacher or non_staff_member is provided
+        if not data.get('teacher') and not data.get('non_staff_member'):
+            raise serializers.ValidationError("Either teacher or non-staff member must be specified")
+        
+        if data.get('teacher') and data.get('non_staff_member'):
+            raise serializers.ValidationError("Cannot specify both teacher and non-staff member")
+        
+        # Calculate net salary if not provided
+        if 'net_salary' not in data or not data['net_salary']:
+            base_salary = data.get('base_salary', 0)
+            allowances = data.get('allowances', 0)
+            deductions = data.get('deductions', 0)
+            data['net_salary'] = base_salary + allowances - deductions
+        
+        return data
+
+
+class SalarySummarySerializer(serializers.ModelSerializer):
+    """Serializer for SalarySummary model"""
+    salary_period_name = serializers.CharField(source='salary_period.name', read_only=True)
+    
+    class Meta:
+        model = SalarySummary
+        fields = [
+            'id', 'salary_period', 'salary_period_name',
+            'total_base_salary', 'total_allowances', 'total_deductions', 'total_net_salary',
+            'total_staff', 'paid_staff', 'pending_staff', 'average_salary',
+            'payment_completion_rate', 'total_fee_collection', 'net_income',
+            'last_calculated', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'total_base_salary', 'total_allowances', 'total_deductions', 'total_net_salary',
+            'total_staff', 'paid_staff', 'pending_staff', 'average_salary',
+            'payment_completion_rate', 'total_fee_collection', 'net_income',
+            'last_calculated', 'created_at', 'updated_at'
+        ]
+
+
+class SalaryPaymentCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for creating/updating salary payments with details"""
+    allowance_details = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        help_text="List of allowance details with 'allowance_id' and 'amount'"
+    )
+    deduction_details = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        help_text="List of deduction details with 'deduction_id' and 'amount'"
+    )
+    
+    class Meta:
+        model = SalaryPayment
+        fields = [
+            'teacher', 'non_staff_member', 'salary_period', 'base_salary',
+            'payment_date', 'payment_method', 'payment_status', 'transaction_reference',
+            'notes', 'receipt_image', 'allowance_details', 'deduction_details'
+        ]
+
+    def create(self, validated_data):
+        """Create salary payment with details"""
+        allowance_details = validated_data.pop('allowance_details', [])
+        deduction_details = validated_data.pop('deduction_details', [])
+        
+        # Calculate totals
+        total_allowances = sum(detail.get('amount', 0) for detail in allowance_details)
+        total_deductions = sum(detail.get('amount', 0) for detail in deduction_details)
+        
+        validated_data['allowances'] = total_allowances
+        validated_data['deductions'] = total_deductions
+        validated_data['net_salary'] = validated_data['base_salary'] + total_allowances - total_deductions
+        
+        # Create the salary payment
+        salary_payment = SalaryPayment.objects.create(**validated_data)
+        
+        # Create allowance details
+        for detail in allowance_details:
+            SalaryPaymentDetail.objects.create(
+                salary_payment=salary_payment,
+                allowance_id=detail['allowance_id'],
+                amount=detail['amount'],
+                notes=detail.get('notes', '')
+            )
+        
+        # Create deduction details
+        for detail in deduction_details:
+            SalaryPaymentDetail.objects.create(
+                salary_payment=salary_payment,
+                deduction_id=detail['deduction_id'],
+                amount=detail['amount'],
+                notes=detail.get('notes', '')
+            )
+        
+        return salary_payment
+
+    def update(self, instance, validated_data):
+        """Update salary payment with details"""
+        allowance_details = validated_data.pop('allowance_details', [])
+        deduction_details = validated_data.pop('deduction_details', [])
+        
+        # Calculate totals
+        total_allowances = sum(detail.get('amount', 0) for detail in allowance_details)
+        total_deductions = sum(detail.get('amount', 0) for detail in deduction_details)
+        
+        validated_data['allowances'] = total_allowances
+        validated_data['deductions'] = total_deductions
+        validated_data['net_salary'] = validated_data['base_salary'] + total_allowances - total_deductions
+        
+        # Update the salary payment
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Clear existing details and create new ones
+        instance.details.all().delete()
+        
+        # Create allowance details
+        for detail in allowance_details:
+            SalaryPaymentDetail.objects.create(
+                salary_payment=instance,
+                allowance_id=detail['allowance_id'],
+                amount=detail['amount'],
+                notes=detail.get('notes', '')
+            )
+        
+        # Create deduction details
+        for detail in deduction_details:
+            SalaryPaymentDetail.objects.create(
+                salary_payment=instance,
+                deduction_id=detail['deduction_id'],
+                amount=detail['amount'],
+                notes=detail.get('notes', '')
+            )
+        
+        return instance 

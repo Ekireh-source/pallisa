@@ -63,6 +63,15 @@ class Command(BaseCommand):
             }
         )
         
+        salary_category, _ = PermissionCategory.objects.get_or_create(
+            code='salary',
+            defaults={
+                'name': 'Salary Management',
+                'description': 'Salary management permissions',
+                'is_admin': False
+            }
+        )
+        
         # Create comprehensive permissions
         permissions_data = [
             # Admin permissions
@@ -82,6 +91,12 @@ class Command(BaseCommand):
                 'code': 'admin.manage_users',
                 'name': 'Manage Users',
                 'description': 'Can create, edit, and delete user profiles',
+                'category': admin_category
+            },
+            {
+                'code': 'admin.manage_salaries',
+                'name': 'Manage Salaries',
+                'description': 'Full access to salary management including periods, payments, and summaries',
                 'category': admin_category
             },
             {
@@ -243,6 +258,74 @@ class Command(BaseCommand):
                 'category': fees_category
             },
             
+            # Salary permissions
+            {
+                'code': 'salary.view_salary_periods',
+                'name': 'View Salary Periods',
+                'description': 'View salary periods and their details',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.manage_salary_periods',
+                'name': 'Manage Salary Periods',
+                'description': 'Create, edit, and delete salary periods',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.view_allowances',
+                'name': 'View Allowances',
+                'description': 'View salary allowances and their details',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.manage_allowances',
+                'name': 'Manage Allowances',
+                'description': 'Create, edit, and delete salary allowances',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.view_deductions',
+                'name': 'View Deductions',
+                'description': 'View salary deductions and their details',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.manage_deductions',
+                'name': 'Manage Deductions',
+                'description': 'Create, edit, and delete salary deductions',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.view_payments',
+                'name': 'View Payments',
+                'description': 'View salary payments and their details',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.manage_payments',
+                'name': 'Manage Payments',
+                'description': 'Create, edit, and delete salary payments',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.view_summaries',
+                'name': 'View Summaries',
+                'description': 'View salary summaries and reports',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.view_staff_salaries',
+                'name': 'View Staff Salaries',
+                'description': 'View staff salary information',
+                'category': salary_category
+            },
+            {
+                'code': 'salary.process_payments',
+                'name': 'Process Payments',
+                'description': 'Process salary payments and generate reports',
+                'category': salary_category
+            },
+            
             # Report permissions
             {
                 'code': 'reports.view_reports',
@@ -260,23 +343,36 @@ class Command(BaseCommand):
         
         created_permissions = []
         for perm_data in permissions_data:
-            # First try to get by code
+            # First check if a permission with this code already exists
             try:
                 permission = Permission.objects.get(code=perm_data['code'])
-                # Update existing permission
-                for key, value in perm_data.items():
-                    if key != 'code':  # Don't update the code field
-                        setattr(permission, key, value)
-                permission.save()
-                self.stdout.write(f'Updated permission: {permission.name}')
-            except Permission.DoesNotExist:
-                # Try to get by name
-                try:
-                    permission = Permission.objects.get(name=perm_data['name'])
-                    # Update the code and other fields
-                    for key, value in perm_data.items():
-                        setattr(permission, key, value)
+                # Update existing permission if needed
+                updated = False
+                if permission.name != perm_data['name']:
+                    permission.name = perm_data['name']
+                    updated = True
+                if permission.description != perm_data['description']:
+                    permission.description = perm_data['description']
+                    updated = True
+                if permission.category != perm_data['category']:
+                    permission.category = perm_data['category']
+                    updated = True
+                
+                if updated:
                     permission.save()
+                    self.stdout.write(f'Updated permission: {permission.name}')
+                else:
+                    self.stdout.write(f'Permission already exists: {permission.name}')
+            except Permission.DoesNotExist:
+                # Check if a permission with this name already exists
+                try:
+                    existing_permission = Permission.objects.get(name=perm_data['name'])
+                    # Update the existing permission with the new code and other fields
+                    existing_permission.code = perm_data['code']
+                    existing_permission.description = perm_data['description']
+                    existing_permission.category = perm_data['category']
+                    existing_permission.save()
+                    permission = existing_permission
                     self.stdout.write(f'Updated permission: {permission.name} (updated code to {perm_data["code"]})')
                 except Permission.DoesNotExist:
                     # Create new permission
@@ -318,6 +414,7 @@ class Command(BaseCommand):
                     'teachers.view_teachers', 'teachers.create_teacher', 'teachers.edit_teacher',
                     'expenses.view_expenses', 'expenses.create_expense', 'expenses.edit_expense', 'expenses.approve_expense',
                     'fees.view_fees', 'fees.create_fee', 'fees.edit_fee',
+                    'salary.view_salary_periods', 'salary.view_payments', 'salary.view_summaries',
                     'reports.view_reports'
                 ]
             },
@@ -328,6 +425,7 @@ class Command(BaseCommand):
                 'permissions': [
                     'students.view_students',
                     'expenses.view_expenses', 'expenses.create_expense',
+                    'salary.view_staff_salaries',
                     'reports.view_reports'
                 ]
             },

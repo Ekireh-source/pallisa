@@ -9,10 +9,12 @@ from django.core.paginator import Paginator
 from django.http import Http404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiExample
+from django.core.exceptions import ValidationError
 
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
-    StudentStreamHistory, Subject, TeacherSubjectAssignment, NonStaffMember
+    StudentStreamHistory, Subject, TeacherSubjectAssignment, NonStaffMember,
+    SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPayment, SalarySummary
 )
 from .serializers import (
     ClassSerializer, StreamSerializer, StreamDetailSerializer,
@@ -23,8 +25,11 @@ from .serializers import (
     StudentStreamHistorySerializer,
     SubjectSerializer,
     TeacherSubjectAssignmentSerializer,
-    NonStaffMemberSerializer, NonStaffMemberDetailSerializer
+    NonStaffMemberSerializer, NonStaffMemberDetailSerializer,
+    SalaryPeriodSerializer, SalaryAllowanceSerializer, SalaryDeductionSerializer,
+    SalaryPaymentSerializer, SalaryPaymentCreateUpdateSerializer, SalarySummarySerializer
 )
+from accounts.permission import HasPermission
 
 
 # Base classes for common functionality
@@ -1597,3 +1602,579 @@ class NonStaffMemberDetailView(APIView):
         non_staff_member = self.get_object(pk)
         non_staff_member.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ==================== SALARY MANAGEMENT VIEWS ====================
+
+@extend_schema(tags=["Salary Management"])
+class SalaryPeriodListCreateView(APIView):
+    """List and create salary periods"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'POST': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(
+        summary="List salary periods",
+        parameters=[
+            OpenApiParameter(name='academic_year', type=int, description='Filter by academic year'),
+            OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
+        ],
+        responses={200: SalaryPeriodSerializer(many=True)}
+    )
+    def get(self, request):
+        """Get list of salary periods with filtering"""
+        queryset = SalaryPeriod.objects.select_related('academic_year', 'term').all()
+        
+        # Apply filters
+        academic_year = request.query_params.get('academic_year')
+        if academic_year:
+            queryset = queryset.filter(academic_year_id=academic_year)
+        
+        is_active = request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        
+        serializer = SalaryPeriodSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Create salary period",
+        request=SalaryPeriodSerializer,
+        responses={201: SalaryPeriodSerializer}
+    )
+    def post(self, request):
+        """Create a new salary period"""
+        serializer = SalaryPeriodSerializer(data=request.data)
+        if serializer.is_valid():
+            salary_period = serializer.save()
+            return Response(SalaryPeriodSerializer(salary_period).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryPeriodDetailView(APIView):
+    """Retrieve, update, and delete salary periods"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'PATCH': 'admin.manage_salaries',
+        'DELETE': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(summary="Get salary period details")
+    def get(self, request, pk):
+        """Get salary period details"""
+        try:
+            salary_period = SalaryPeriod.objects.get(pk=pk)
+        except SalaryPeriod.DoesNotExist:
+            return Response({'error': 'Salary period not found'}, status=404)
+        
+        serializer = SalaryPeriodSerializer(salary_period)
+        return Response(serializer.data)
+
+    @extend_schema(summary="Update salary period")
+    def patch(self, request, pk):
+        """Update salary period"""
+        try:
+            salary_period = SalaryPeriod.objects.get(pk=pk)
+        except SalaryPeriod.DoesNotExist:
+            return Response({'error': 'Salary period not found'}, status=404)
+        
+        if not salary_period.can_be_modified():
+            return Response({'error': 'Cannot modify closed salary period'}, status=400)
+        
+        serializer = SalaryPeriodSerializer(salary_period, data=request.data, partial=True)
+        if serializer.is_valid():
+            salary_period = serializer.save()
+            return Response(SalaryPeriodSerializer(salary_period).data)
+        return Response(serializer.errors, status=400)
+
+    @extend_schema(summary="Activate salary period")
+    def post(self, request, pk):
+        """Activate a specific salary period and deactivate all others"""
+        try:
+            salary_period = SalaryPeriod.objects.get(pk=pk)
+        except SalaryPeriod.DoesNotExist:
+            return Response({'error': 'Salary period not found'}, status=404)
+        
+        if not salary_period.can_be_modified():
+            return Response({'error': 'Cannot modify closed salary period'}, status=400)
+        
+        try:
+            # Use the class method to activate this period and deactivate others
+            SalaryPeriod.activate_period(pk)
+            return Response({'message': f'Salary period "{salary_period.name}" has been activated'})
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=400)
+
+    @extend_schema(summary="Delete salary period")
+    def delete(self, request, pk):
+        """Delete salary period"""
+        try:
+            salary_period = SalaryPeriod.objects.get(pk=pk)
+        except SalaryPeriod.DoesNotExist:
+            return Response({'error': 'Salary period not found'}, status=404)
+        
+        if not salary_period.can_be_modified():
+            return Response({'error': 'Cannot delete closed salary period'}, status=400)
+        
+        salary_period.delete()
+        return Response(status=204)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryAllowanceListCreateView(APIView):
+    """List and create salary allowances"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'POST': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(
+        summary="List salary allowances",
+        parameters=[
+            OpenApiParameter(name='allowance_type', type=str, description='Filter by allowance type'),
+            OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
+        ],
+        responses={200: SalaryAllowanceSerializer(many=True)}
+    )
+    def get(self, request):
+        """Get list of salary allowances with filtering"""
+        queryset = SalaryAllowance.objects.all()
+        
+        # Apply filters
+        allowance_type = request.query_params.get('allowance_type')
+        if allowance_type:
+            queryset = queryset.filter(allowance_type=allowance_type)
+        
+        is_active = request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        
+        serializer = SalaryAllowanceSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Create salary allowance",
+        request=SalaryAllowanceSerializer,
+        responses={201: SalaryAllowanceSerializer}
+    )
+    def post(self, request):
+        """Create a new salary allowance"""
+        serializer = SalaryAllowanceSerializer(data=request.data)
+        if serializer.is_valid():
+            allowance = serializer.save()
+            return Response(SalaryAllowanceSerializer(allowance).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryAllowanceDetailView(APIView):
+    """Retrieve, update, and delete salary allowances"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'PATCH': 'admin.manage_salaries',
+        'DELETE': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(summary="Get salary allowance details")
+    def get(self, request, pk):
+        """Get salary allowance details"""
+        try:
+            allowance = SalaryAllowance.objects.get(pk=pk)
+        except SalaryAllowance.DoesNotExist:
+            return Response({'error': 'Salary allowance not found'}, status=404)
+        
+        serializer = SalaryAllowanceSerializer(allowance)
+        return Response(serializer.data)
+
+    @extend_schema(summary="Update salary allowance")
+    def patch(self, request, pk):
+        """Update salary allowance"""
+        try:
+            allowance = SalaryAllowance.objects.get(pk=pk)
+        except SalaryAllowance.DoesNotExist:
+            return Response({'error': 'Salary allowance not found'}, status=404)
+        
+        serializer = SalaryAllowanceSerializer(allowance, data=request.data, partial=True)
+        if serializer.is_valid():
+            allowance = serializer.save()
+            return Response(SalaryAllowanceSerializer(allowance).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(summary="Delete salary allowance")
+    def delete(self, request, pk):
+        """Delete salary allowance"""
+        try:
+            allowance = SalaryAllowance.objects.get(pk=pk)
+        except SalaryAllowance.DoesNotExist:
+            return Response({'error': 'Salary allowance not found'}, status=404)
+        
+        allowance.delete()
+        return Response(status=204)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryDeductionListCreateView(APIView):
+    """List and create salary deductions"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'POST': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(
+        summary="List salary deductions",
+        parameters=[
+            OpenApiParameter(name='deduction_type', type=str, description='Filter by deduction type'),
+            OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
+        ],
+        responses={200: SalaryDeductionSerializer(many=True)}
+    )
+    def get(self, request):
+        """Get list of salary deductions with filtering"""
+        queryset = SalaryDeduction.objects.all()
+        
+        # Apply filters
+        deduction_type = request.query_params.get('deduction_type')
+        if deduction_type:
+            queryset = queryset.filter(deduction_type=deduction_type)
+        
+        is_active = request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        
+        serializer = SalaryDeductionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Create salary deduction",
+        request=SalaryDeductionSerializer,
+        responses={201: SalaryDeductionSerializer}
+    )
+    def post(self, request):
+        """Create a new salary deduction"""
+        serializer = SalaryDeductionSerializer(data=request.data)
+        if serializer.is_valid():
+            deduction = serializer.save()
+            return Response(SalaryDeductionSerializer(deduction).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryDeductionDetailView(APIView):
+    """Retrieve, update, and delete salary deductions"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'PATCH': 'admin.manage_salaries',
+        'DELETE': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(summary="Get salary deduction details")
+    def get(self, request, pk):
+        """Get salary deduction details"""
+        try:
+            deduction = SalaryDeduction.objects.get(pk=pk)
+        except SalaryDeduction.DoesNotExist:
+            return Response({'error': 'Salary deduction not found'}, status=404)
+        
+        serializer = SalaryDeductionSerializer(deduction)
+        return Response(serializer.data)
+
+    @extend_schema(summary="Update salary deduction")
+    def patch(self, request, pk):
+        """Update salary deduction"""
+        try:
+            deduction = SalaryDeduction.objects.get(pk=pk)
+        except SalaryDeduction.DoesNotExist:
+            return Response({'error': 'Salary deduction not found'}, status=404)
+        
+        serializer = SalaryDeductionSerializer(deduction, data=request.data, partial=True)
+        if serializer.is_valid():
+            deduction = serializer.save()
+            return Response(SalaryDeductionSerializer(deduction).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(summary="Delete salary deduction")
+    def delete(self, request, pk):
+        """Delete salary deduction"""
+        try:
+            deduction = SalaryDeduction.objects.get(pk=pk)
+        except SalaryDeduction.DoesNotExist:
+            return Response({'error': 'Salary deduction not found'}, status=404)
+        
+        deduction.delete()
+        return Response(status=204)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryPaymentListCreateView(APIView):
+    """List and create salary payments"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'POST': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(
+        summary="List salary payments",
+        parameters=[
+            OpenApiParameter(name='salary_period', type=int, description='Filter by salary period'),
+            OpenApiParameter(name='payment_status', type=str, description='Filter by payment status'),
+            OpenApiParameter(name='staff_type', type=str, description='Filter by staff type (teacher/non_staff)'),
+            OpenApiParameter(name='payment_date_from', type=str, description='Filter by payment date from (YYYY-MM-DD)'),
+            OpenApiParameter(name='payment_date_to', type=str, description='Filter by payment date to (YYYY-MM-DD)'),
+        ],
+        responses={200: SalaryPaymentSerializer(many=True)}
+    )
+    def get(self, request):
+        """Get list of salary payments with filtering"""
+        queryset = SalaryPayment.objects.select_related(
+            'teacher__user_profile', 'non_staff_member__user_profile',
+            'salary_period', 'processed_by'
+        ).prefetch_related('details__allowance', 'details__deduction').all()
+        
+        # Apply filters
+        salary_period = request.query_params.get('salary_period')
+        if salary_period:
+            queryset = queryset.filter(salary_period_id=salary_period)
+        
+        payment_status = request.query_params.get('payment_status')
+        if payment_status:
+            queryset = queryset.filter(payment_status=payment_status)
+        
+        staff_type = request.query_params.get('staff_type')
+        if staff_type == 'teacher':
+            queryset = queryset.filter(teacher__isnull=False)
+        elif staff_type == 'non_staff':
+            queryset = queryset.filter(non_staff_member__isnull=False)
+        
+        payment_date_from = request.query_params.get('payment_date_from')
+        if payment_date_from:
+            queryset = queryset.filter(payment_date__gte=payment_date_from)
+        
+        payment_date_to = request.query_params.get('payment_date_to')
+        if payment_date_to:
+            queryset = queryset.filter(payment_date__lte=payment_date_to)
+        
+        serializer = SalaryPaymentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Create salary payment",
+        request=SalaryPaymentCreateUpdateSerializer,
+        responses={201: SalaryPaymentSerializer}
+    )
+    def post(self, request):
+        """Create a new salary payment"""
+        serializer = SalaryPaymentCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            # Set the processed_by field
+            validated_data = serializer.validated_data
+            validated_data['processed_by'] = request.user.profile
+            
+            salary_payment = serializer.save(**validated_data)
+            return Response(SalaryPaymentSerializer(salary_payment).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalaryPaymentDetailView(APIView):
+    """Retrieve, update, and delete salary payments"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'GET': 'admin.manage_salaries',
+        'PATCH': 'admin.manage_salaries',
+        'DELETE': 'admin.manage_salaries',
+    }
+    
+    @extend_schema(summary="Get salary payment details")
+    def get(self, request, pk):
+        """Get salary payment details"""
+        try:
+            salary_payment = SalaryPayment.objects.select_related(
+                'teacher__user_profile', 'non_staff_member__user_profile',
+                'salary_period', 'processed_by'
+            ).prefetch_related('details__allowance', 'details__deduction').get(pk=pk)
+        except SalaryPayment.DoesNotExist:
+            return Response({'error': 'Salary payment not found'}, status=404)
+        
+        serializer = SalaryPaymentSerializer(salary_payment)
+        return Response(serializer.data)
+
+    @extend_schema(summary="Update salary payment")
+    def patch(self, request, pk):
+        """Update salary payment"""
+        try:
+            salary_payment = SalaryPayment.objects.get(pk=pk)
+        except SalaryPayment.DoesNotExist:
+            return Response({'error': 'Salary payment not found'}, status=404)
+        
+        serializer = SalaryPaymentCreateUpdateSerializer(salary_payment, data=request.data, partial=True)
+        if serializer.is_valid():
+            salary_payment = serializer.save()
+            return Response(SalaryPaymentSerializer(salary_payment).data)
+        return Response(serializer.errors, status=400)
+
+    @extend_schema(summary="Delete salary payment")
+    def delete(self, request, pk):
+        """Delete salary payment"""
+        try:
+            salary_payment = SalaryPayment.objects.get(pk=pk)
+        except SalaryPayment.DoesNotExist:
+            return Response({'error': 'Salary payment not found'}, status=404)
+        
+        salary_payment.delete()
+        return Response(status=204)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalarySummaryView(APIView):
+    """Get salary summary for a period"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_salaries'
+    
+    @extend_schema(
+        summary="Get salary summary",
+        parameters=[
+            OpenApiParameter(name='salary_period', type=int, description='Salary period ID', required=True),
+        ],
+        responses={200: SalarySummarySerializer}
+    )
+    def get(self, request):
+        """Get salary summary for a period"""
+        salary_period_id = request.query_params.get('salary_period')
+        if not salary_period_id:
+            return Response({'error': 'Salary period ID is required'}, status=400)
+        
+        try:
+            salary_period = SalaryPeriod.objects.get(pk=salary_period_id)
+        except SalaryPeriod.DoesNotExist:
+            return Response({'error': 'Salary period not found'}, status=404)
+        
+        # Get or create summary
+        summary, created = SalarySummary.objects.get_or_create(salary_period=salary_period)
+        
+        # Calculate summary
+        summary.calculate_summary()
+        
+        serializer = SalarySummarySerializer(summary)
+        return Response(serializer.data)
+
+
+@extend_schema(tags=["Salary Management"])
+class SalarySummaryListView(APIView):
+    """List salary summaries"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_salaries'
+    
+    @extend_schema(
+        summary="List salary summaries",
+        parameters=[
+            OpenApiParameter(name='academic_year', type=int, description='Filter by academic year'),
+        ],
+        responses={200: SalarySummarySerializer(many=True)}
+    )
+    def get(self, request):
+        """Get list of salary summaries with filtering"""
+        queryset = SalarySummary.objects.select_related('salary_period__academic_year', 'salary_period__term').all()
+        
+        # Apply filters
+        academic_year = request.query_params.get('academic_year')
+        if academic_year:
+            queryset = queryset.filter(salary_period__academic_year_id=academic_year)
+        
+        serializer = SalarySummarySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+@extend_schema(tags=["Salary Management"])
+class StaffSalaryListView(APIView):
+    """List staff members with their salary information"""
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required = 'admin.manage_salaries'
+    
+    @extend_schema(
+        summary="List staff with salary information",
+        parameters=[
+            OpenApiParameter(name='staff_type', type=str, description='Filter by staff type (teacher/non_staff)'),
+            OpenApiParameter(name='employment_type', type=str, description='Filter by employment type'),
+            OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
+        ],
+        responses={200: {"type": "object", "properties": {
+            "teachers": {"type": "array"},
+            "non_staff": {"type": "array"},
+            "total_staff": {"type": "integer"},
+            "total_salary_budget": {"type": "number"}
+        }}}
+    )
+    def get(self, request):
+        """Get list of staff members with salary information"""
+        staff_type = request.query_params.get('staff_type')
+        employment_type = request.query_params.get('employment_type')
+        is_active = request.query_params.get('is_active')
+        
+        # Get teachers
+        teachers_queryset = Teacher.objects.select_related('user_profile').all()
+        if employment_type:
+            teachers_queryset = teachers_queryset.filter(employment_type=employment_type)
+        if is_active is not None:
+            teachers_queryset = teachers_queryset.filter(is_active=is_active.lower() == 'true')
+        
+        # Get non-staff members
+        non_staff_queryset = NonStaffMember.objects.select_related('user_profile').all()
+        if employment_type:
+            non_staff_queryset = non_staff_queryset.filter(employment_type=employment_type)
+        if is_active is not None:
+            non_staff_queryset = non_staff_queryset.filter(is_active=is_active.lower() == 'true')
+        
+        # Filter by staff type
+        if staff_type == 'teacher':
+            non_staff_queryset = NonStaffMember.objects.none()
+        elif staff_type == 'non_staff':
+            teachers_queryset = Teacher.objects.none()
+        
+        # Serialize data
+        teachers_data = []
+        for teacher in teachers_queryset:
+            teachers_data.append({
+                'id': teacher.id,
+                'employee_id': teacher.employee_id,
+                'name': teacher.full_name,
+                'email': teacher.user_profile.user.email if teacher.user_profile.user else None,
+                'employment_type': teacher.employment_type,
+                'base_salary': teacher.salary,
+                'is_active': teacher.is_active,
+                'hire_date': teacher.hire_date,
+            })
+        
+        non_staff_data = []
+        for non_staff in non_staff_queryset:
+            non_staff_data.append({
+                'id': non_staff.id,
+                'employee_id': non_staff.employee_id,
+                'name': non_staff.full_name,
+                'email': non_staff.user_profile.user.email if non_staff.user_profile.user else None,
+                'employment_type': non_staff.employment_type,
+                'base_salary': non_staff.salary,
+                'is_active': non_staff.is_active,
+                'hire_date': non_staff.hire_date,
+            })
+        
+        # Calculate totals
+        total_staff = len(teachers_data) + len(non_staff_data)
+        total_salary_budget = sum(
+            (t['base_salary'] or 0 for t in teachers_data + non_staff_data)
+        )
+        
+        return Response({
+            'teachers': teachers_data,
+            'non_staff': non_staff_data,
+            'total_staff': total_staff,
+            'total_salary_budget': total_salary_budget,
+        })

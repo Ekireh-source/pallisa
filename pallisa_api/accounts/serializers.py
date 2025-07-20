@@ -65,6 +65,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+    user_permissions = serializers.SerializerMethodField()
     
 
     class Meta:
@@ -72,7 +73,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'user', 'user_type', 'gender', 'first_name', 'last_name', 
             'other_name', 'dob', 'phone', 'profile_picture', 'profile_picture_url', 'role',
-            'emergency_contact', 'emergency_phone', 'emergency_contact_address', 'emergency_contact_email'
+            'emergency_contact', 'emergency_phone', 'emergency_contact_address', 'emergency_contact_email',
+            'user_permissions'
         )
         
     def get_profile_picture_url(self, obj):
@@ -84,11 +86,40 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return obj.profile_picture.url
         return None
 
+    def get_user_permissions(self, obj):
+        """Get user's permissions from both role and direct assignments"""
+        permissions = []
+        
+        # Get permissions from role
+        if obj.role:
+            role_permissions = obj.role.permissions.all()
+            for perm in role_permissions:
+                permissions.append({
+                    'code': perm.code,
+                    'name': perm.name,
+                    'is_role_based': True,
+                    'assigned_by': None,
+                    'created_at': obj.role.created_at.isoformat()
+                })
+        
+        # Get direct user permissions
+        user_permissions = UserPermission.objects.filter(user=obj)
+        for up in user_permissions:
+            permissions.append({
+                'code': up.permission.code,
+                'name': up.permission.name,
+                'is_role_based': False,
+                'assigned_by': up.assigned_by.id if up.assigned_by else None,
+                'created_at': up.created_at.isoformat()
+            })
+        
+        return permissions
+
     def to_representation(self, instance):
         """Customize the output representation"""
         representation = super().to_representation(instance)
         
-        # Show role name instead of ID in responses
+        # Show role details instead of just ID in responses
         if instance.role:
             representation["role"] = RoleSerializer(instance.role).data
             

@@ -1,0 +1,16 @@
+{
+  "email": "test@example.com",
+  "password": "testpass123",
+  "first_name": "Test",
+  "last_name": "User",
+  "user_type": "school_owner",
+  "phone": "+1234567890",
+  "school_data": {
+    "school_name": "Test School",
+    "school_address": "123 Test St",
+    "school_phone": "+1234567890",
+    "school_email": "school@test.com",
+    "campus_name": "Main Campus",
+    "campus_address": "123 Test St"
+  }
+}
