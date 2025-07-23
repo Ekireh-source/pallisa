@@ -4,17 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
-import { 
-  FileText, 
-  Download, 
-  TrendingUp, 
-  TrendingDown,
-  DollarSign,
-  Users,
-  Calendar,
-  BarChart3
-} from 'lucide-react';
-import Link from 'next/link';
+import { BarChart3, TrendingUp, Download, FileText } from 'lucide-react';
 
 interface SalaryReport {
   id: number;

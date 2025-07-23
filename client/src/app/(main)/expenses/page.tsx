@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { 
   fetchExpenses, 
-  fetchExpenseSummary, 
+  fetchExpenseSummary,
   approveExpense,
   deleteExpense,
   setFilters,
@@ -54,18 +54,13 @@ export default function ExpensesPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<number | undefined>(undefined);
 
-  // Helper function to get current term
-  const getCurrentTerm = () => {
-    const today = new Date();
-    return terms.find(term => {
-      const startDate = new Date(term.start_date);
-      const endDate = new Date(term.end_date);
-      return today >= startDate && today <= endDate;
-    });
-  };
+  // Helper function to get the current term
+  const getCurrentTerm = useCallback(() => {
+    return terms.find(term => term.is_current) || null;
+  }, [terms]);
 
   // Helper function to get the most recent term if no current term
-  const getMostRecentTerm = () => {
+  const getMostRecentTerm = useCallback(() => {
     if (terms.length === 0) return null;
     
     // Sort terms by start date (most recent first)
@@ -74,7 +69,7 @@ export default function ExpensesPage() {
     );
     
     return sortedTerms[0];
-  };
+  }, [terms]);
 
   // Load data on component mount
   useEffect(() => {
@@ -100,7 +95,7 @@ export default function ExpensesPage() {
         }
       }
     }
-  }, [terms, selectedTerm]);
+  }, [terms, selectedTerm, getCurrentTerm, getMostRecentTerm]);
 
   // Load expenses and summary when filters change
   useEffect(() => {

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { createStudent, clearFieldErrors } from '@/store/slices/memberStudentSlice';
 import { fetchStreams } from '@/store/slices/memberStreamSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, Textarea, LoadingSpinner } from '@/components/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Save, X, User, GraduationCap, Heart, FileText } from 'lucide-react';
 import type { StudentCreateUpdate } from '@/types';
 
@@ -90,13 +90,19 @@ export default function CreateStudentPage() {
     // Clean up empty string values
     const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (value !== '' && value !== undefined) {
-        acc[key] = value;
+        acc[key as keyof StudentCreateUpdate] = value;
       }
       return acc;
-    }, {} as any);
+    }, {} as Partial<StudentCreateUpdate>);
+
+    // Ensure required fields are present
+    const finalData: StudentCreateUpdate = {
+      enrollment_status: 'enrolled', // Default enrollment status
+      ...cleanedData
+    };
     
     try {
-      const result = await dispatch(createStudent(cleanedData));
+      const result = await dispatch(createStudent(finalData));
       if (createStudent.fulfilled.match(result)) {
         router.push('/members/students');
       }
@@ -175,10 +181,12 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.user_first_name || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_first_name}
                   placeholder="Enter first name"
                   required
                 />
+                {fieldErrors.user_first_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_first_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -191,10 +199,12 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.user_last_name || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_last_name}
                   placeholder="Enter last name"
                   required
                 />
+                {fieldErrors.user_last_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_last_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -205,9 +215,11 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.user_other_name || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_other_name}
                   placeholder="Enter other name"
                 />
+                {fieldErrors.user_other_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_other_name}</p>
+                )}
               </div>
             </div>
 
@@ -241,8 +253,10 @@ export default function CreateStudentPage() {
                   type="date"
                   value={formData.user_dob || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_dob}
                 />
+                {fieldErrors.user_dob && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_dob}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -253,9 +267,10 @@ export default function CreateStudentPage() {
                   type="tel"
                   value={formData.user_phone || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_phone}
-                  placeholder="Enter phone number"
                 />
+                {fieldErrors.user_phone && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_phone}</p>
+                )}
               </div>
             </div>
 
@@ -270,10 +285,10 @@ export default function CreateStudentPage() {
                   type="email"
                   value={formData.user_email || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_email}
-                  placeholder="Enter email address"
-                  required
                 />
+                {fieldErrors.user_email && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -284,13 +299,15 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.user_student_id || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_student_id}
                   placeholder="Leave blank for auto-generation"
                 />
                 <p className="text-xs text-gray-500">
                   Enter a unique student ID or leave blank to auto-generate one. 
                   If provided, this ID must be unique across all students.
                 </p>
+                {fieldErrors.user_student_id && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_student_id}</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -317,9 +334,11 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.user_emergency_contact || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_contact}
                   placeholder="Enter emergency contact name"
                 />
+                {fieldErrors.user_emergency_contact && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_contact}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -330,9 +349,11 @@ export default function CreateStudentPage() {
                   type="tel"
                   value={formData.user_emergency_phone || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_phone}
                   placeholder="Enter emergency contact phone"
                 />
+                {fieldErrors.user_emergency_phone && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_phone}</p>
+                )}
               </div>
             </div>
 
@@ -345,9 +366,11 @@ export default function CreateStudentPage() {
                   type="email"
                   value={formData.user_emergency_contact_email || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_contact_email}
                   placeholder="Enter emergency contact email"
                 />
+                {fieldErrors.user_emergency_contact_email && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_contact_email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -358,9 +381,11 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.user_emergency_contact_address || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_contact_address}
                   placeholder="Enter emergency contact address"
                 />
+                {fieldErrors.user_emergency_contact_address && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_contact_address}</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -435,9 +460,10 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.admission_number || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.admission_number}
-                  placeholder="Enter admission number"
                 />
+                {fieldErrors.admission_number && (
+                  <p className="text-sm text-red-600">{fieldErrors.admission_number}</p>
+                )}
               </div>
             </div>
 
@@ -450,8 +476,10 @@ export default function CreateStudentPage() {
                   type="date"
                   value={formData.admission_date || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.admission_date}
                 />
+                {fieldErrors.admission_date && (
+                  <p className="text-sm text-red-600">{fieldErrors.admission_date}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -462,9 +490,11 @@ export default function CreateStudentPage() {
                   type="text"
                   value={formData.previous_school || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.previous_school}
                   placeholder="Enter previous school name"
                 />
+                {fieldErrors.previous_school && (
+                  <p className="text-sm text-red-600">{fieldErrors.previous_school}</p>
+                )}
               </div>
             </div>
 
@@ -478,8 +508,10 @@ export default function CreateStudentPage() {
                     type="date"
                     value={formData.graduation_date || ''}
                     onChange={handleInputChange}
-                    error={fieldErrors.graduation_date}
                   />
+                  {fieldErrors.graduation_date && (
+                    <p className="text-sm text-red-600">{fieldErrors.graduation_date}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -501,7 +533,7 @@ export default function CreateStudentPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="medical_conditions">Medical Conditions</Label>
-                <Textarea
+                <textarea
                   id="medical_conditions"
                   name="medical_conditions"
                   value={formData.medical_conditions || ''}
@@ -516,7 +548,7 @@ export default function CreateStudentPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="allergies">Allergies</Label>
-                <Textarea
+                <textarea
                   id="allergies"
                   name="allergies"
                   value={formData.allergies || ''}
@@ -532,7 +564,7 @@ export default function CreateStudentPage() {
 
             <div className="space-y-2">
               <Label htmlFor="special_needs">Special Needs</Label>
-              <Textarea
+              <textarea
                 id="special_needs"
                 name="special_needs"
                 value={formData.special_needs || ''}

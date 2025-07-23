@@ -7,8 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { 
   fetchExpenseCategoryById, 
   updateExpenseCategory, 
-  clearError,
-  clearCurrentCategory
+  clearError
 } from '@/store/slices/expenseCategorySlice';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 

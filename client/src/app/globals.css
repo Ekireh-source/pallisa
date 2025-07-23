@@ -167,3 +167,5 @@ select {
   -moz-osx-font-smoothing: grayscale;
   opacity: 0.6;
 }
+
+.bg-popover { background-color: hsl(var(--popover)); }

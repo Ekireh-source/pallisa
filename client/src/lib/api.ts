@@ -308,7 +308,6 @@ import type {
   Role,
   RoleCreateUpdate,
   Permission,
-  PermissionCategory,
   UserPermission,
   RoleFilters,
 } from '@/types';
@@ -319,7 +318,7 @@ export const expenseCategoryApi = {
     const response = await apiGet<ExpenseCategory[]>(API_ENDPOINTS.EXPENSE_CATEGORIES);
     // Handle paginated response structure
     if (response && typeof response === 'object' && 'results' in response) {
-      return (response as any).results || [];
+      return (response as unknown as { results: ExpenseCategory[] }).results || [];
     }
     // Fallback for direct array response
     return Array.isArray(response) ? response : [];
@@ -338,7 +337,7 @@ export const departmentApi = {
     const response = await apiGet<Department[]>(API_ENDPOINTS.DEPARTMENTS);
     // Handle paginated response structure
     if (response && typeof response === 'object' && 'results' in response) {
-      return (response as any).results || [];
+      return (response as unknown as { results: Department[] }).results || [];
     }
     // Fallback for direct array response
     return Array.isArray(response) ? response : [];
@@ -357,7 +356,7 @@ export const vendorApi = {
     const response = await apiGet<Vendor[]>(API_ENDPOINTS.VENDORS);
     // Handle paginated response structure
     if (response && typeof response === 'object' && 'results' in response) {
-      return (response as any).results || [];
+      return (response as unknown as { results: Vendor[] }).results || [];
     }
     // Fallback for direct array response
     return Array.isArray(response) ? response : [];
@@ -376,7 +375,7 @@ export const academicYearApi = {
     const response = await apiGet<AcademicYear[]>(API_ENDPOINTS.ACADEMIC_YEARS);
     // Handle paginated response structure
     if (response && typeof response === 'object' && 'results' in response) {
-      return (response as any).results || [];
+      return (response as unknown as { results: AcademicYear[] }).results || [];
     }
     // Fallback for direct array response
     return Array.isArray(response) ? response : [];
@@ -395,7 +394,7 @@ export const termApi = {
     const response = await apiGet<Term[]>(API_ENDPOINTS.TERMS);
     // Handle paginated response structure
     if (response && typeof response === 'object' && 'results' in response) {
-      return (response as any).results || [];
+      return (response as unknown as { results: Term[] }).results || [];
     }
     // Fallback for direct array response
     return Array.isArray(response) ? response : [];
@@ -568,7 +567,7 @@ export const parentApi = {
     const response = await apiGet<MemberParent[]>(url);
     // Handle paginated response structure
     if (response && typeof response === 'object' && 'results' in response) {
-      return (response as any).results || [];
+      return (response as unknown as { results: MemberParent[] }).results || [];
     }
     // Fallback for direct array response
     return Array.isArray(response) ? response : [];
@@ -699,10 +698,8 @@ export const roleApi = {
 
 export const permissionApi = {
   getAll: () => apiGet<Permission[]>(API_ENDPOINTS.PERMISSIONS),
-  getById: (id: number) => apiGet<Permission>(API_ENDPOINTS.PERMISSIONS), // Assuming permission detail endpoint is the same as list
   create: (data: Permission) => apiPost<Permission>(API_ENDPOINTS.PERMISSIONS, data),
-  update: (id: number, data: Partial<Permission>) => apiPut<Permission>(API_ENDPOINTS.PERMISSIONS, data), // Assuming permission detail endpoint is the same as list
-  delete: (id: number) => apiDelete(API_ENDPOINTS.PERMISSIONS), // Assuming permission detail endpoint is the same as list
+
 };
 
 export const userPermissionApi = {
@@ -727,7 +724,7 @@ import type {
 } from '@/types';
 
 // Salary Periods
-export const getSalaryPeriods = async (params?: any): Promise<SalaryPeriod[]> => {
+export const getSalaryPeriods = async (params?: Record<string, string | number | boolean>): Promise<SalaryPeriod[]> => {
   const response = await axiosInstance.get('/members/salary-periods/', { params });
   return response.data;
 };
@@ -752,7 +749,7 @@ export const getSalaryPeriod = async (id: number): Promise<SalaryPeriod> => {
 };
 
 // Salary Allowances
-export const getSalaryAllowances = async (params?: any): Promise<SalaryAllowance[]> => {
+export const getSalaryAllowances = async (params?: Record<string, string | number | boolean>): Promise<SalaryAllowance[]> => {
   const response = await axiosInstance.get('/members/salary-allowances/', { params });
   return response.data;
 };
@@ -777,7 +774,7 @@ export const deleteSalaryAllowance = async (id: number): Promise<void> => {
 };
 
 // Salary Deductions
-export const getSalaryDeductions = async (params?: any): Promise<SalaryDeduction[]> => {
+export const getSalaryDeductions = async (params?: Record<string, string | number | boolean>): Promise<SalaryDeduction[]> => {
   const response = await axiosInstance.get('/members/salary-deductions/', { params });
   return response.data;
 };
@@ -802,14 +799,14 @@ export const deleteSalaryDeduction = async (id: number): Promise<void> => {
 };
 
 // Salary Payments
-export const getSalaryPayments = async (params?: any): Promise<SalaryPayment[]> => {
+export const getSalaryPayments = async (params?: Record<string, string | number | boolean>): Promise<SalaryPayment[]> => {
   const response = await axiosInstance.get('/members/salary-payments/', { params });
   return response.data;
 };
 
 export const createSalaryPayment = async (data: SalaryPaymentCreateUpdate): Promise<SalaryPayment> => {
   // Prepare the data, excluding undefined values for teacher and non_staff_member
-  const requestData: any = {
+  const requestData: Partial<SalaryPaymentCreateUpdate> = {
     salary_period: data.salary_period,
     base_salary: data.base_salary,
     payment_date: data.payment_date,
@@ -840,11 +837,12 @@ export const createSalaryPayment = async (data: SalaryPaymentCreateUpdate): Prom
   try {
     const response = await axiosInstance.post('/members/salary-payments/', requestData);
   return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating salary payment:', error);
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      console.error('Error status:', error.response.status);
+    if (error instanceof Error && 'response' in error) {
+      const axiosError = error as { response?: { data: unknown; status: number } };
+      console.error('Error response:', axiosError.response?.data);
+      console.error('Error status:', axiosError.response?.status);
     }
     throw error;
   }
@@ -852,7 +850,7 @@ export const createSalaryPayment = async (data: SalaryPaymentCreateUpdate): Prom
 
 export const updateSalaryPayment = async (id: number, data: Partial<SalaryPaymentCreateUpdate>): Promise<SalaryPayment> => {
   // Prepare the data, excluding undefined values for teacher and non_staff_member
-  const requestData: any = {};
+  const requestData: Partial<SalaryPaymentCreateUpdate> = {};
   
   // Add fields that are provided
   if (data.salary_period !== undefined) requestData.salary_period = data.salary_period;
@@ -887,7 +885,7 @@ export const getSalaryPayment = async (id: number): Promise<SalaryPayment> => {
 };
 
 // Salary Summaries
-export const getSalarySummaries = async (params?: any): Promise<SalarySummary[]> => {
+export const getSalarySummaries = async (params?: Record<string, string | number | boolean>): Promise<SalarySummary[]> => {
   const response = await axiosInstance.get('/members/salary-summaries/', { params });
   return response.data;
 };
@@ -900,7 +898,14 @@ export const getSalarySummary = async (salaryPeriodId: number): Promise<SalarySu
 };
 
 // Dashboard Summary Data
-export const getSalaryDashboardSummary = async (): Promise<any> => {
+export const getSalaryDashboardSummary = async (): Promise<{
+  total_staff: number;
+  total_salary_budget: number;
+  total_paid_this_month: number;
+  total_pending_payments: number;
+  average_salary: number;
+  payment_completion_rate: number;
+}> => {
   try {
     // Get all staff (teachers and non-staff members)
     const [teachers, nonStaffMembers] = await Promise.all([
@@ -910,22 +915,25 @@ export const getSalaryDashboardSummary = async (): Promise<any> => {
 
     // Calculate total budget from all staff salaries
     const totalBudget = [...teachers, ...nonStaffMembers].reduce((total, staff) => {
-      const salary = staff.salary ? parseFloat(staff.salary.replace(/[^\d.]/g, '')) : 0;
+      let salary = 0;
+      if ('salary' in staff && staff.salary) {
+        salary = parseFloat(staff.salary.replace(/[^\d.]/g, '')) || 0;
+      }
       return total + salary;
     }, 0);
 
     // Get active salary period
     const salaryPeriods = await getSalaryPeriods();
-    const activePeriod = salaryPeriods.find((period: any) => period.is_active);
+    const activePeriod = salaryPeriods.find((period: SalaryPeriod) => period.is_active);
 
     // Get all payments and filter by active period
     let totalPaidThisMonth = 0;
     if (activePeriod) {
       const allPayments = await getSalaryPayments();
-      const activePeriodPayments = allPayments.filter((payment: any) => 
+      const activePeriodPayments = allPayments.filter((payment: SalaryPayment) => 
         payment.salary_period === activePeriod.id && payment.payment_status === 'completed'
       );
-      totalPaidThisMonth = activePeriodPayments.reduce((total: number, payment: any) => total + payment.net_salary, 0);
+      totalPaidThisMonth = activePeriodPayments.reduce((total: number, payment: SalaryPayment) => total + payment.net_salary, 0);
     }
 
     // Calculate completion rate
@@ -935,10 +943,10 @@ export const getSalaryDashboardSummary = async (): Promise<any> => {
     let totalPendingPayments = 0;
     if (activePeriod) {
       const allPayments = await getSalaryPayments();
-      const pendingPayments = allPayments.filter((payment: any) => 
+      const pendingPayments = allPayments.filter((payment: SalaryPayment) => 
         payment.salary_period === activePeriod.id && payment.payment_status === 'pending'
       );
-      totalPendingPayments = pendingPayments.reduce((total: number, payment: any) => total + payment.net_salary, 0);
+      totalPendingPayments = pendingPayments.reduce((total: number, payment: SalaryPayment) => total + payment.net_salary, 0);
     }
 
     return {
@@ -981,43 +989,19 @@ export const getRecentSalaryPayments = async (limit: number = 5): Promise<Salary
 };
 
 // Staff Salary List
-export const getStaffSalaryList = async (params?: any): Promise<StaffSalaryList> => {
+export const getStaffSalaryList = async (params?: Record<string, string | number | boolean>): Promise<StaffSalaryList> => {
   const response = await axiosInstance.get('/members/staff-salaries/', { params });
   return response.data;
 };
 
 // Teachers
-export const getTeachers = async (params?: any): Promise<any[]> => {
-  try {
-    const response = await axiosInstance.get('/members/teachers/', { params });
-    const data = response.data;
-    console.log('Teachers API response:', data);
-    // Handle paginated response structure
-    if (data && typeof data === 'object' && 'results' in data) {
-      return data.results || [];
-    }
-    // Fallback for direct array response
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Error fetching teachers:', error);
-    return [];
-  }
+export const getTeachers = async (params?: Record<string, string | number | boolean>): Promise<MemberTeacher[]> => {
+  const response = await axiosInstance.get('/members/teachers/', { params });
+  return response.data;
 };
 
 // Non-Staff Members
-export const getNonStaffMembers = async (params?: any): Promise<any[]> => {
-  try {
-    const response = await axiosInstance.get('/members/non-staff-members/', { params });
-    const data = response.data;
-    console.log('Non-staff members API response:', data);
-    // Handle paginated response structure
-    if (data && typeof data === 'object' && 'results' in data) {
-      return data.results || [];
-    }
-    // Fallback for direct array response
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Error fetching non-staff members:', error);
-    return [];
-  }
+export const getNonStaffMembers = async (params?: Record<string, string | number | boolean>): Promise<NonStaffMember[]> => {
+  const response = await axiosInstance.get('/members/non-staff-members/', { params });
+  return response.data;
 }; 

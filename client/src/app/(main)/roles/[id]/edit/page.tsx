@@ -7,7 +7,7 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchRoleById, updateRole, clearFieldErrors, fetchPermissions } from '@/store/slices/roleSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Save, X, Shield, CheckSquare, Square } from 'lucide-react';
-import type { RoleCreateUpdate, Permission, PermissionCategory } from '@/types';
+import type { RoleCreateUpdate } from '@/types';
 
 export default function EditRolePage() {
   const params = useParams();
@@ -215,7 +215,7 @@ export default function EditRolePage() {
         <div className="text-center">
           <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Role Not Found</h2>
-          <p className="text-gray-600 mb-4">The role you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The role you&apos;re looking for doesn&apos;t exist.</p>
           <Link href="/roles">
             <Button>Back to Roles</Button>
           </Link>
@@ -264,7 +264,7 @@ export default function EditRolePage() {
               <span>Basic Information</span>
             </CardTitle>
             <CardDescription>
-              Update the role's basic details
+              Update the role&apos;s basic details
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -311,7 +311,7 @@ export default function EditRolePage() {
               <span>Permissions</span>
             </CardTitle>
             <CardDescription>
-              Select the permissions to assign to this role
+              Manage role permissions and access rights. Users with this role will have access to the selected permissions.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

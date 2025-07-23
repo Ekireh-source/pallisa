@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { loginUser, clearError, clearFieldError } from '@/store/slices/authSlice';
 import { LoginCredentials } from '@/types';
-import { Input, Button, ErrorMessage, Card } from '@/components/ui';
+import { Input, Button, ErrorMessage, Card, Label } from '@/components/ui';
 
 const LoginForm: React.FC = () => {
   const router = useRouter();
@@ -163,39 +163,51 @@ const LoginForm: React.FC = () => {
 
             {/* Dynamic input based on login method */}
             {loginMethod === 'email' ? (
-              <Input
-                label="Email Address"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                error={getFieldError('email')}
-                placeholder="Enter your email"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                />
+                {getFieldError('email') && (
+                  <p className="text-sm text-red-600">{getFieldError('email')}</p>
+                )}
+              </div>
             ) : (
-              <Input
-                label="Student ID"
-                name="student_id"
-                type="text"
-                required
-                value={formData.student_id}
-                onChange={handleInputChange}
-                error={getFieldError('student_id')}
-                placeholder="Enter your student ID"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="student_id">Student ID</Label>
+                <Input
+                  name="student_id"
+                  type="text"
+                  required
+                  value={formData.student_id}
+                  onChange={handleInputChange}
+                  placeholder="Enter your student ID"
+                />
+                {getFieldError('student_id') && (
+                  <p className="text-sm text-red-600">{getFieldError('student_id')}</p>
+                )}
+              </div>
             )}
 
-            <Input
-              label="Password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleInputChange}
-              error={getFieldError('password')}
-              placeholder="Enter your password"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Enter your password"
+              />
+              {getFieldError('password') && (
+                <p className="text-sm text-red-600">{getFieldError('password')}</p>
+              )}
+            </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">

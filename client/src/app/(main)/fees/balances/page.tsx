@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { 
   Search, 
-  Filter, 
   Download, 
   RefreshCw, 
   ArrowUpDown, 
@@ -51,8 +50,6 @@ export default function StudentFeeBalancesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('student_name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
 
   useEffect(() => {
     fetchBalances();
@@ -118,15 +115,6 @@ export default function StudentFeeBalancesPage() {
   const formatPercentage = (percentage: string) => {
     if (!percentage) return '0%';
     return `${parseFloat(percentage).toFixed(1)}%`;
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
   };
 
   const handleRefresh = () => {

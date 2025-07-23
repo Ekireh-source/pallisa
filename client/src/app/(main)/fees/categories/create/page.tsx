@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiGet, apiPost, API_ENDPOINTS } from "@/lib/api";
+import { apiPost, API_ENDPOINTS } from "@/lib/api";
 
 export default function CreateFeeCategoryPage() {
   const router = useRouter();
@@ -26,6 +26,7 @@ export default function CreateFeeCategoryPage() {
       await apiPost(API_ENDPOINTS.FEES + 'categories/', { name, description, is_active: isActive });
       router.push("/fees/categories");
     } catch (err) {
+      console.error('Error creating category:', err);
       setError("Failed to create category");
     } finally {
       setLoading(false);

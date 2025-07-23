@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { RootState } from "@/store";
+import { RootState, AppDispatch } from "@/store";
 import { logoutUser } from "@/store/slices/authSlice";
 
 interface SharedNavbarProps {
@@ -21,11 +21,11 @@ interface SharedNavbarProps {
 }
 
 export function SharedNavbar({ userName = "Admin User", userEmail = "admin@school.edu" }: SharedNavbarProps) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const handleLogout = () => {
-    dispatch(logoutUser() as any); // Type assertion to fix dispatch type error
+    dispatch(logoutUser());
     router.push('/login');
   };
 

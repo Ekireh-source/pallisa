@@ -34,9 +34,7 @@ export default function HomePage() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Access School Portal
                 </h2>
-                <p className="text-gray-600 mb-6">
-                  Welcome to Pallisa High School's digital management platform
-                </p>
+                <p className="text-gray-600">Welcome to Pallisa High School&apos;s comprehensive management system</p>
               </div>
 
               <div className="space-y-4">

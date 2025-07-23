@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { streamApi } from '@/lib/api';
-import type { MemberStreamState, MemberStream, StreamDetail, StreamCreateUpdate, MemberFilters } from '@/types';
+import type { MemberStreamState, MemberStream, StreamCreateUpdate, MemberFilters } from '@/types';
 import { parseApiError } from '@/lib/api';
 
 // Initial state

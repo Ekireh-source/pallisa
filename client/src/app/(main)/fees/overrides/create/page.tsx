@@ -425,7 +425,7 @@ export default function CreateFeeOverridePage() {
               <div className="mt-2 text-sm text-blue-700">
                 <ul className="list-disc list-inside space-y-1">
                   <li>Search for students by name or student ID</li>
-                  <li>Overrides are for special cases where a student's fee differs from the standard structure</li>
+                  <li>Overrides are for special cases where a student&apos;s fee differs from the standard structure</li>
                   <li>Provide a clear reason for the override if possible</li>
                   <li>Only active overrides will be available for new fee assignments</li>
                   <li>Custom amount should reflect the total fee for the student</li>

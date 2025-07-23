@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox } from '@/components/ui';
@@ -14,7 +14,7 @@ export default function EditSalaryAllowancePage() {
   const router = useRouter();
   const params = useParams();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [allowance, setAllowance] = useState<SalaryAllowance | null>(null);
   const [formData, setFormData] = useState<SalaryAllowanceCreateUpdate>({
@@ -28,22 +28,7 @@ export default function EditSalaryAllowancePage() {
 
   const allowanceId = params.id ? parseInt(params.id as string) : null;
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
-    if (!allowanceId) {
-      toast.error('Invalid allowance ID');
-      router.push('/salary-management/allowances');
-      return;
-    }
-
-    fetchAllowance();
-  }, [isAuthenticated, router, allowanceId]);
-
-  const fetchAllowance = async () => {
+  const fetchAllowance = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getSalaryAllowance(allowanceId!);
@@ -63,7 +48,22 @@ export default function EditSalaryAllowancePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [allowanceId, router]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    if (!allowanceId) {
+      toast.error('Invalid allowance ID');
+      router.push('/salary-management/allowances');
+      return;
+    }
+
+    fetchAllowance();
+  }, [isAuthenticated, router, allowanceId, fetchAllowance]);
 
   const handleInputChange = (field: keyof SalaryAllowanceCreateUpdate, value: string | number | boolean) => {
     setFormData(prev => ({

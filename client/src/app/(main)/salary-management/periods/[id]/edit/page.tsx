@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox } from '@/components/ui';
@@ -30,22 +30,7 @@ export default function EditSalaryPeriodPage() {
 
   const periodId = params.id ? parseInt(params.id as string) : null;
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
-    if (!periodId) {
-      toast.error('Invalid period ID');
-      router.push('/salary-management/periods');
-      return;
-    }
-
-    fetchData();
-  }, [isAuthenticated, router, periodId]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setFetching(true);
       const [periodData, yearsData, termsData] = await Promise.all([
@@ -74,9 +59,24 @@ export default function EditSalaryPeriodPage() {
     } finally {
       setFetching(false);
     }
-  };
+  }, [periodId, router]);
 
-  const handleInputChange = (field: keyof SalaryPeriodCreateUpdate, value: any) => {
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    if (!periodId) {
+      toast.error('Invalid period ID');
+      router.push('/salary-management/periods');
+      return;
+    }
+
+    fetchData();
+  }, [isAuthenticated, router, periodId, fetchData]);
+
+  const handleInputChange = (field: keyof SalaryPeriodCreateUpdate, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -101,9 +101,9 @@ export default function EditSalaryPeriodPage() {
       await updateSalaryPeriod(periodId!, formData);
       toast.success('Salary period updated successfully');
       router.push('/salary-management/periods');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating salary period:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update salary period';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update salary period';
       toast.error(errorMessage);
     } finally {
       setLoading(false);

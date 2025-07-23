@@ -6,26 +6,20 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchStudentStatistics } from '@/store/slices/memberStudentSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { 
   Users, 
   GraduationCap, 
   UserCheck, 
-  BookOpen,
-  Building2,
-  UserPlus,
-  BarChart3,
-  Settings,
-  Users2,
-  Baby
+  UserPlus, 
+  Calendar,
+  ArrowRight
 } from 'lucide-react';
 
 export default function MembersPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const { statistics, loading } = useAppSelector((state) => state.memberStudents);
+  const { statistics } = useAppSelector((state) => state.memberStudents);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -74,7 +68,7 @@ export default function MembersPage() {
       value: "267",
       change: "+12 new",
       changeType: "positive" as const,
-      icon: Baby,
+      icon: UserPlus,
       description: "Parent accounts",
       href: "/members/parents"
     },
@@ -83,7 +77,7 @@ export default function MembersPage() {
       value: "18",
       change: "6 streams",
       changeType: "neutral" as const,
-      icon: BookOpen,
+      icon: Calendar,
       description: "Academic classes",
       href: "/members/classes"
     }
@@ -108,14 +102,14 @@ export default function MembersPage() {
       title: "Add Parent",
       description: "Register parent account",
       href: "/members/parents/create",
-      icon: Users2,
+      icon: UserPlus,
       color: "bg-purple-500"
     },
     {
       title: "Member Reports",
       description: "View member analytics",
       href: "/members/reports",
-      icon: BarChart3,
+      icon: ArrowRight,
       color: "bg-orange-500"
     }
   ];
@@ -140,7 +134,7 @@ export default function MembersPage() {
     {
       title: "Parents",
       description: "Manage parent accounts and student relationships",
-      icon: Baby,
+      icon: UserPlus,
       count: 267,
       href: "/members/parents",
       color: "border-purple-200 hover:border-purple-300 bg-purple-50"
@@ -148,7 +142,7 @@ export default function MembersPage() {
     {
       title: "Classes & Streams",
       description: "Organize academic classes and student streams",
-      icon: BookOpen,
+      icon: Calendar,
       count: 18,
       href: "/members/classes",
       color: "border-indigo-200 hover:border-indigo-300 bg-indigo-50"
@@ -220,9 +214,9 @@ export default function MembersPage() {
                         <p className="text-sm text-gray-600 mt-1">{category.description}</p>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="text-sm font-medium">
+                    <div className="text-sm font-medium text-gray-700">
                       {category.count}
-                    </Badge>
+                    </div>
                   </div>
                 </div>
               </Link>

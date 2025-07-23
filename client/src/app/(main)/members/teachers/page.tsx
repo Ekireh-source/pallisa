@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
-import { fetchTeachers, deleteTeacher, clearFieldErrors } from '@/store/slices/memberTeacherSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, User, Mail, Phone, GraduationCap, UserCheck, Calendar } from 'lucide-react';
+import { fetchTeachers, deleteTeacher } from '@/store/slices/memberTeacherSlice';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { Plus, Search, Edit, Trash2, Eye, Mail, UserCheck, Calendar } from 'lucide-react';
 import type { MemberTeacher } from '@/types';
 
 const TEACHER_TYPE_COLORS = {
@@ -245,9 +245,9 @@ export default function TeachersPage() {
                             <Badge className={`${TEACHER_TYPE_COLORS[teacher.employment_type]} border-0 text-sm font-medium`}>
                               {TEACHER_TYPE_LABELS[teacher.employment_type]}
                             </Badge>
-                            {(teacher as any)?.user_profile_data?.role && (
+                            {(teacher as MemberTeacher & { user_profile_data?: { role?: { name: string } } })?.user_profile_data?.role && (
                               <Badge className="bg-purple-100 text-purple-800 border-0 text-sm font-medium">
-                                {(teacher as any).user_profile_data.role.name}
+                                {(teacher as MemberTeacher & { user_profile_data?: { role?: { name: string } } })?.user_profile_data?.role?.name}
                               </Badge>
                             )}
                             {teacher.hire_date && (

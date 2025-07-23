@@ -6,23 +6,25 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { 
   Search, 
-  Filter, 
   Download, 
   RefreshCw, 
   ArrowUpDown, 
   ArrowUp, 
   ArrowDown,
-  DollarSign,
-  AlertCircle,
-  CheckCircle,
-  Clock,
   TrendingUp,
+  AlertCircle,
   Users,
-  Target,
-  BarChart3,
-  PieChart
+  CheckCircle
 } from 'lucide-react';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
+
+interface Term {
+  id: number;
+  name: string;
+  is_current: boolean;
+  academic_year: number;
+  academic_year_name: string;
+}
 
 interface TermFeeCollectionSummary {
   id: number;
@@ -62,9 +64,7 @@ export default function FeeCollectionSummariesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('academic_year_name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
-  const [currentTerm, setCurrentTerm] = useState<any>(null);
+  const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
 
   useEffect(() => {
     fetchSummaries();
@@ -87,8 +87,8 @@ export default function FeeCollectionSummariesPage() {
 
   const fetchCurrentTerm = async () => {
     try {
-      const data = await apiGet<{ results: any[] }>(API_ENDPOINTS.EXPENSES + 'terms/');
-      const current = data.results ? data.results.find(term => term.is_current) : null;
+      const data = await apiGet<{ results: Term[] }>(API_ENDPOINTS.EXPENSES + 'terms/');
+      const current = data.results ? data.results.find(term => term.is_current) || null : null;
       setCurrentTerm(current);
     } catch (err) {
       console.error('Error fetching current term:', err);
@@ -316,7 +316,7 @@ export default function FeeCollectionSummariesPage() {
                     <p className="text-xs text-gray-500">{currentTermStats.academicYearName}</p>
                   )}
                 </div>
-                <BarChart3 className="h-8 w-8 text-blue-600" />
+                {/* BarChart3 className="h-8 w-8 text-blue-600" /> */}
               </div>
             </CardContent>
           </Card>
@@ -332,7 +332,7 @@ export default function FeeCollectionSummariesPage() {
                     {formatCurrency(currentTermStats ? currentTermStats.totalExpected.toString() : stats.totalExpected.toString())}
                   </p>
                 </div>
-                <Target className="h-8 w-8 text-gray-600" />
+                {/* Target className="h-8 w-8 text-gray-600" /> */}
               </div>
             </CardContent>
           </Card>
@@ -348,7 +348,7 @@ export default function FeeCollectionSummariesPage() {
                     {formatCurrency(currentTermStats ? currentTermStats.totalCollected.toString() : stats.totalCollected.toString())}
                   </p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
+                {/* CheckCircle className="h-8 w-8 text-green-600" /> */}
               </div>
             </CardContent>
           </Card>

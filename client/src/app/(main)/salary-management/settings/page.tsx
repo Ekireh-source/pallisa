@@ -3,17 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
-import { 
-  Settings, 
-  Save, 
-  DollarSign,
-  CreditCard,
-  Shield,
-  Calendar,
-  Users,
-  FileText
-} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/components/ui';
+import { Save, DollarSign, CreditCard, Calculator, Shield } from 'lucide-react';
 import Link from 'next/link';
 
 interface SalarySettings {
@@ -44,7 +35,7 @@ export default function SalarySettingsPage() {
     payment_reminder_days: 3,
     auto_close_periods: false
   });
-  const [loading, setLoading] = useState(true);
+ 
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -55,7 +46,7 @@ export default function SalarySettingsPage() {
 
     // TODO: Fetch salary settings data
     // For now, using mock data
-      setLoading(false);
+     
   }, [isAuthenticated, router]);
 
   const handleSave = async () => {
@@ -120,7 +111,7 @@ export default function SalarySettingsPage() {
               </label>
               <select 
                 value={settings.default_payment_method}
-                onChange={(e) => setSettings({...settings, default_payment_method: e.target.value as any})}
+                onChange={(e) => setSettings({...settings, default_payment_method: e.target.value as 'bank_transfer' | 'cash' | 'cheque' | 'mobile_money' | 'other'})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="bank_transfer">Bank Transfer</option>
@@ -276,7 +267,7 @@ export default function SalarySettingsPage() {
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-purple-600" />
+              <Calculator className="h-5 w-5 text-purple-600" />
               <span>Period Management</span>
             </CardTitle>
             <CardDescription>
@@ -302,7 +293,7 @@ export default function SalarySettingsPage() {
               <div className="space-y-2">
                 <Link href="/salary-management/periods">
                   <Button variant="outline" size="sm" className="w-full justify-start">
-                    <Calendar className="h-4 w-4 mr-2" />
+                    <Calculator className="h-4 w-4 mr-2" />
                     Manage Salary Periods
                   </Button>
                 </Link>

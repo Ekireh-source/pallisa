@@ -40,8 +40,6 @@ export default function RolesPage() {
 
   // Check permissions
   const canViewRoles = useHasPermission(PERMISSIONS.ADMIN.MANAGE_ROLES);
-  const canCreateRoles = useHasPermission(PERMISSIONS.ADMIN.MANAGE_ROLES);
-  const canEditRoles = useHasPermission(PERMISSIONS.ADMIN.MANAGE_ROLES);
   const canDeleteRoles = useHasPermission(PERMISSIONS.ADMIN.MANAGE_ROLES);
 
   useEffect(() => {
@@ -70,7 +68,7 @@ export default function RolesPage() {
   }, [roles, loading, error]);
 
   const handleSearch = () => {
-    const filters: any = {};
+    const filters: { search?: string; is_superadmin?: boolean } = {};
     if (searchTerm) filters.search = searchTerm;
     if (superAdminFilter && superAdminFilter !== 'all') filters.is_superadmin = superAdminFilter === 'true';
     dispatch(fetchRoles(filters));
@@ -117,7 +115,7 @@ export default function RolesPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
                 <p className="text-gray-600 mb-6">
-                  You don't have permission to access the Roles Management page.
+                  You don&apos;t have permission to access the Roles Management page.
                 </p>
                 <Button 
                   onClick={() => router.push('/dashboard')}

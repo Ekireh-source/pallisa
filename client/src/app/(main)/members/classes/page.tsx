@@ -6,7 +6,15 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchClasses, deleteClass } from '@/store/slices/memberClassSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
-import { Plus, Edit, Trash2, Eye, Search, Building, Users, GraduationCap } from 'lucide-react';
+import { 
+  Search, 
+  Building,
+  GraduationCap,
+  Plus,
+  Trash2,
+  Eye,
+  Edit
+} from 'lucide-react';
 import type { MemberClass } from '@/types';
 
 export default function ClassesPage() {

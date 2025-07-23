@@ -3,17 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAppSelector, useAppDispatch } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
-import { Plus, Edit, Trash2, Eye, Search, BookOpen, Users, GraduationCap } from 'lucide-react';
+import { useAppSelector } from '@/store';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, LoadingSpinner } from '@/components/ui';
+import { Plus, Search, BookOpen } from 'lucide-react';
 
 export default function SubjectsPage() {
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
 
   // Mock data - replace with actual data from Redux store
   const subjects = [];
@@ -30,21 +29,10 @@ export default function SubjectsPage() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1);
+   
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
-      try {
-        // Add delete logic here
-        console.log('Delete subject:', id);
-      } catch (error) {
-        console.error('Error deleting subject:', error);
-      }
-    }
-  };
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   if (!isAuthenticated) {
     return (

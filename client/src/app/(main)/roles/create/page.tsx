@@ -7,7 +7,7 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { createRole, clearFieldErrors, fetchPermissions } from '@/store/slices/roleSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Save, X, Shield, CheckSquare, Square } from 'lucide-react';
-import type { RoleCreateUpdate, Permission, PermissionCategory } from '@/types';
+import type { RoleCreateUpdate } from '@/types';
 
 export default function CreateRolePage() {
   const router = useRouter();
@@ -205,7 +205,7 @@ export default function CreateRolePage() {
               <span>Basic Information</span>
             </CardTitle>
             <CardDescription>
-              Define the role's basic details
+              Create a new role and assign permissions to it
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

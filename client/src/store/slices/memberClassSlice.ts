@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { classApi } from '@/lib/api';
-import type { MemberClassState, MemberClass, ClassDetail, ClassCreateUpdate, MemberFilters } from '@/types';
+import type { MemberClassState, MemberClass, ClassCreateUpdate, MemberFilters } from '@/types';
 import { parseApiError } from '@/lib/api';
 
 // Initial state

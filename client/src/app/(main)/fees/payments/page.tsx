@@ -1,7 +1,17 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { CheckCircle, XCircle, Eye, Search, Plus, ArrowUpDown, ArrowUp, ArrowDown, Download, RefreshCw } from 'lucide-react';
+import { 
+  Search, 
+  Download, 
+  RefreshCw, 
+  ArrowUpDown, 
+  ArrowUp, 
+  ArrowDown,
+  Plus,
+  XCircle,
+  Eye
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
 
@@ -59,7 +69,7 @@ export default function FeePaymentsPage() {
   });
 
   // Load payments with pagination
-  const loadPayments = async (page: number = 1, search: string = '') => {
+  const loadPayments = useCallback(async (page: number = 1, search: string = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -86,7 +96,7 @@ export default function FeePaymentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [itemsPerPage, setLoading, setPayments, setTotalCount, setTotalPages, setCurrentPage, setError]);
 
   // Load stats
   const loadStats = async () => {
@@ -102,7 +112,7 @@ export default function FeePaymentsPage() {
   useEffect(() => {
     loadPayments(1, searchTerm);
     loadStats();
-  }, []);
+  }, [loadPayments, searchTerm]);
 
   // Handle search with debouncing
   useEffect(() => {
@@ -112,7 +122,7 @@ export default function FeePaymentsPage() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm]);
+  }, [searchTerm, loadPayments]);
 
   // Handle page change
   const handlePageChange = (page: number) => {

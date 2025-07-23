@@ -20,7 +20,6 @@ export default function EditClassPage() {
 
   const [formData, setFormData] = useState<ClassCreateUpdate>({
     name: '',
-    level: 1,
     description: '',
   });
 
@@ -52,7 +51,6 @@ export default function EditClassPage() {
     if (currentClass && !isFormLoaded) {
       setFormData({
         name: currentClass.name,
-        level: currentClass.level,
         description: currentClass.description || '',
       });
       setIsFormLoaded(true);
@@ -63,7 +61,7 @@ export default function EditClassPage() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'level' ? parseInt(value, 10) : value
+      [name]: value
     }));
 
     // Clear field error when user starts typing
@@ -178,7 +176,7 @@ export default function EditClassPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Edit Class</h1>
-            <p className="text-gray-600 mt-1">{currentClass.name} - Level {currentClass.level}</p>
+            <p className="text-gray-600 mt-1">{currentClass.name}</p>
           </div>
         </div>
       </div>
@@ -200,46 +198,27 @@ export default function EditClassPage() {
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">Class Information</CardTitle>
           <CardDescription>
-            Update the class details and academic level information
+            Update the class details and information
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  Class Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  error={fieldErrors.name}
-                  placeholder="Enter class name (e.g., Form 1, Grade 8)"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="level">
-                  Class Level <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="level"
-                  name="level"
-                  type="number"
-                  min="1"
-                  max="12"
-                  value={formData.level}
-                  onChange={handleInputChange}
-                  error={fieldErrors.level}
-                  placeholder="Enter class level (1-12)"
-                  required
-                />
-                <p className="text-xs text-gray-500">Academic level (1 for lowest grade, 12 for highest)</p>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">
+                Class Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter class name (e.g., Form 1, Grade 8)"
+                required
+              />
+              {fieldErrors.name && (
+                <p className="text-sm text-red-600">{fieldErrors.name}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -249,10 +228,12 @@ export default function EditClassPage() {
                 name="description"
                 value={formData.description || ''}
                 onChange={handleInputChange}
-                error={fieldErrors.description}
                 placeholder="Enter class description and any additional information..."
                 rows={3}
               />
+              {fieldErrors.description && (
+                <p className="text-sm text-red-600">{fieldErrors.description}</p>
+              )}
             </div>
 
             {/* Action Buttons */}

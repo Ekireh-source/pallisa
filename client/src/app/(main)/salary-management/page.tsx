@@ -4,21 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
-import { 
-  DollarSign, 
-  Calendar, 
-  Users, 
-  TrendingUp, 
-  TrendingDown, 
-  Plus,
-  Settings,
-  FileText,
-  CreditCard,
-  Calculator,
-  Eye,
-  Clock,
-  BarChart3
-} from 'lucide-react';
+import { Plus, DollarSign, Users, TrendingUp, Calendar, FileText, BarChart3, CreditCard, Calculator, TrendingDown, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryDashboardSummary, getRecentSalaryPayments, getSalaryPayments } from '@/lib/api';
 import { SalaryPayment } from '@/types';

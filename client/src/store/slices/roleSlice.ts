@@ -123,7 +123,7 @@ const roleSlice = createSlice({
         state.loading = false;
         // Handle paginated response structure
         if (action.payload && typeof action.payload === 'object' && 'results' in action.payload) {
-          const paginatedResponse = action.payload as any;
+          const paginatedResponse = action.payload as unknown as { results: Role[]; count: number };
           state.roles = paginatedResponse.results || [];
           state.totalCount = paginatedResponse.count || 0;
         } else {

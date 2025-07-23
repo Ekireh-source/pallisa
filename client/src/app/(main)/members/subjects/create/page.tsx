@@ -1,13 +1,11 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/components/ui';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CreateSubjectPage() {
-  const router = useRouter();
 
   return (
     <div className="space-y-6">

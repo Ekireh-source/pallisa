@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchTeacherById, deleteTeacher, clearCurrentTeacher } from '@/store/slices/memberTeacherSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
 import { ArrowLeft, Edit, Trash2, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, UserCheck, BookOpen, DollarSign, Shield } from 'lucide-react';
+import type { Permission } from '@/types';
 
 const TEACHER_TYPE_COLORS = {
   full_time: 'bg-green-100 text-green-800',
@@ -286,7 +287,7 @@ export default function TeacherDetailPage() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Permissions</label>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {currentTeacher.user_profile_data.role.permissions.map((permission: any, index: number) => (
+                        {currentTeacher.user_profile_data.role.permissions.map((permission: Permission, index: number) => (
                           <Badge key={index} variant="secondary" className="text-xs">
                             {permission.name}
                           </Badge>
@@ -299,7 +300,7 @@ export default function TeacherDetailPage() {
                 <div className="text-center py-4">
                   <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-500 text-sm">No role assigned</p>
-                  <p className="text-gray-400 text-xs mt-1">This teacher doesn't have any specific role assigned</p>
+                  <p className="text-gray-600 text-sm">This teacher doesn&apos;t have any specific role assigned</p>
                 </div>
               )}
             </CardContent>

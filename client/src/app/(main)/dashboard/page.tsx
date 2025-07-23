@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAppSelector, useAppDispatch } from '@/store';
-import { logoutUser } from '@/store/slices/authSlice';
+import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,8 +18,6 @@ import {
   Building2,
   Users,
   Tags,
-  GraduationCap,
-  UserCheck,
   RefreshCw,
   BarChart3
 } from 'lucide-react';
@@ -50,6 +47,37 @@ interface DashboardStats {
   currentAcademicYear: string;
 }
 
+interface Expense {
+  id: number;
+  title: string;
+  amount: number;
+  category_name?: string;
+  created_at: string;
+  status: string;
+}
+
+interface FeePayment {
+  id: number;
+  amount_paid: string;
+  created_at: string;
+}
+
+interface Term {
+  id: number;
+  name: string;
+  is_current: boolean;
+  academic_year: number;
+  academic_year_name: string;
+}
+
+interface FeeCollectionSummary {
+  id: number;
+  term: number;
+  academic_year: number;
+  total_expected_with_overrides: string;
+  total_collected: string;
+}
+
 interface RecentExpense {
   id: number;
   title: string;
@@ -61,7 +89,6 @@ interface RecentExpense {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -101,10 +128,10 @@ export default function DashboardPage() {
         vendorApi.getAll(),
         studentApi.getAll(),
         teacherApi.getAll(),
-        apiGet<{ results: any[] }>(API_ENDPOINTS.FEES + 'payments/'),
+        apiGet<{ results: FeePayment[] }>(API_ENDPOINTS.FEES + 'payments/'),
         expenseApi.getSummary(),
-        apiGet<{ results: any[] }>(API_ENDPOINTS.TERMS),
-        apiGet<{ results: any[] }>(API_ENDPOINTS.FEES + 'collection-summaries/')
+        apiGet<{ results: Term[] }>(API_ENDPOINTS.TERMS),
+        apiGet<{ results: FeeCollectionSummary[] }>(API_ENDPOINTS.FEES + 'collection-summaries/')
       ]);
 
       // Extract terms from paginated response
@@ -122,9 +149,9 @@ export default function DashboardPage() {
       ) : null;
 
       // Handle paginated response for expenses
-      let expenses: any[] = [];
+      let expenses: Expense[] = [];
       if (expensesResponse && typeof expensesResponse === 'object' && 'results' in expensesResponse) {
-        expenses = (expensesResponse as any).results || [];
+        expenses = (expensesResponse as { results: Expense[] }).results || [];
       } else if (Array.isArray(expensesResponse)) {
         expenses = expensesResponse;
       } else {
@@ -138,16 +165,15 @@ export default function DashboardPage() {
       const teachers = Array.isArray(teachersResponse) ? teachersResponse : [];
 
       // Calculate statistics
-      const totalExpenses = expenses.length;
-      const pendingExpenses = expenses.filter((e: any) => e.status === 'Pending Approval').length;
+      const totalExpenseAmount = expenses.reduce((sum: number, e: Expense) => sum + (e.amount || 0), 0);
+      const pendingExpenses = expenses.filter((e: Expense) => e.status === 'Pending Approval').length;
       const totalVendors = vendors.length;
       const totalStudents = students.length;
       const totalTeachers = teachers.length;
       const totalFeePayments = feePayments.results?.length || 0;
       
       // Calculate total amounts
-      const totalExpenseAmount = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
-      const totalFeeAmount = (feePayments.results || []).reduce((sum: number, p: any) => sum + parseFloat(p.amount_paid || '0'), 0);
+      const totalFeeAmount = (feePayments.results || []).reduce((sum: number, p: FeePayment) => sum + parseFloat(p.amount_paid || '0'), 0);
       
       // Get monthly expenses from summary
       const monthlyExpenses = expenseSummary?.total_expenses || totalExpenseAmount;
@@ -174,7 +200,7 @@ export default function DashboardPage() {
       });
 
       // Set recent expenses
-      const recent = expenses.slice(0, 5).map((expense: any) => ({
+      const recent = expenses.slice(0, 5).map((expense: Expense) => ({
         id: expense.id,
         title: expense.title,
         amount: expense.amount,
@@ -191,11 +217,6 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = async () => {
-    await dispatch(logoutUser());
-    router.push('/login');
   };
 
   const formatCurrency = (amount: number) => {
@@ -263,7 +284,7 @@ export default function DashboardPage() {
             Welcome back to Pallisa High School, {user.first_name}!
           </h1>
           <p className="text-gray-600 mt-1">
-            Here's an overview of school operations and financial activities today.
+            Here&apos;s an overview of school operations and financial activities today.
           </p>
         </div>
         <Card className="bg-red-50 border border-red-200">
@@ -361,7 +382,7 @@ export default function DashboardPage() {
           Welcome back to Pallisa High School, {user.first_name}!
         </h1>
         <p className="text-gray-600 mt-1">
-          Here's an overview of school operations and financial activities today.
+          Here&apos;s an overview of school operations and financial activities today.
         </p>
       </div>
 

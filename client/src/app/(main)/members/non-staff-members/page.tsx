@@ -40,7 +40,7 @@ export default function NonStaffMembersPage() {
   }, [dispatch]);
 
   const handleSearch = () => {
-    const filters: any = {};
+    const filters: Record<string, string> = {};
     if (searchTerm) filters.search = searchTerm;
     if (employmentTypeFilter && employmentTypeFilter !== 'all') filters.employment_type = employmentTypeFilter;
     dispatch(fetchNonStaffMembers(filters));

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
-import { ArrowLeft, Edit, Calendar, Clock, CheckCircle, AlertCircle, Users, DollarSign } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, DollarSign, Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPeriod } from '@/lib/api';
 import { SalaryPeriod } from '@/types';
@@ -14,10 +14,24 @@ export default function SalaryPeriodDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState<SalaryPeriod | null>(null);
 
   const periodId = params.id ? parseInt(params.id as string) : null;
+
+  const fetchPeriod = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getSalaryPeriod(periodId!);
+      setPeriod(data);
+    } catch (error) {
+      console.error('Error fetching salary period:', error);
+      toast.error('Failed to fetch salary period');
+      router.push('/salary-management/periods');
+    } finally {
+      setLoading(false);
+    }
+  }, [periodId, router]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -32,21 +46,7 @@ export default function SalaryPeriodDetailPage() {
     }
 
     fetchPeriod();
-  }, [isAuthenticated, router, periodId]);
-
-  const fetchPeriod = async () => {
-    try {
-      setLoading(true);
-      const data = await getSalaryPeriod(periodId!);
-      setPeriod(data);
-    } catch (error) {
-      console.error('Error fetching salary period:', error);
-      toast.error('Failed to fetch salary period');
-      router.push('/salary-management/periods');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, router, periodId, fetchPeriod]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

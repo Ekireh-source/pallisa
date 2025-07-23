@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { expenseApi } from '@/lib/api';
 import { parseApiError } from '@/lib/api';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { ExpenseState, Expense, ExpenseDetail, ExpenseCreateUpdate, ExpenseFilters, ExpenseSummary } from '@/types';
+import type { ExpenseState, Expense, ExpenseCreateUpdate, ExpenseFilters } from '@/types';
 
 // Initial state
 const initialState: ExpenseState = {
@@ -134,7 +133,7 @@ const expenseSlice = createSlice({
         state.loading = false;
         // Handle paginated response structure
         if (action.payload && typeof action.payload === 'object' && 'results' in action.payload) {
-          const paginatedResponse = action.payload as any;
+          const paginatedResponse = action.payload as unknown as { results: Expense[]; count: number; current_page?: number };
           state.expenses = paginatedResponse.results || [];
           state.totalCount = paginatedResponse.count || 0;
           state.currentPage = paginatedResponse.current_page || 1;

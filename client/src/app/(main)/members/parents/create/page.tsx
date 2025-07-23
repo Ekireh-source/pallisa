@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { createParent, clearFieldErrors } from '@/store/slices/memberParentSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, Textarea, LoadingSpinner, Checkbox } from '@/components/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Save, X, User, Heart, Home, Shield } from 'lucide-react';
 import type { ParentCreateUpdate } from '@/types';
 
@@ -67,7 +67,7 @@ export default function CreateParentPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
-    let processedValue: any = value;
+    let processedValue: string | boolean | undefined = value;
     if (type === 'checkbox') {
       processedValue = (e.target as HTMLInputElement).checked;
     } else if (value === '') {
@@ -106,10 +106,10 @@ export default function CreateParentPage() {
         acc[key] = value;
       }
       return acc;
-    }, {} as any);
+    }, {} as Record<string, unknown>);
     
     try {
-      const result = await dispatch(createParent(cleanedData));
+      const result = await dispatch(createParent(cleanedData as unknown as ParentCreateUpdate));
       if (createParent.fulfilled.match(result)) {
         router.push('/members/parents');
       }
@@ -188,7 +188,6 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.user_first_name || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_first_name}
                   placeholder="Enter first name"
                   required
                 />
@@ -204,10 +203,12 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.user_last_name || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_last_name}
                   placeholder="Enter last name"
                   required
                 />
+                {fieldErrors.user_last_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_last_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -218,9 +219,11 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.user_other_name || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_other_name}
                   placeholder="Enter other name"
                 />
+                {fieldErrors.user_other_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_other_name}</p>
+                )}
               </div>
             </div>
 
@@ -254,8 +257,10 @@ export default function CreateParentPage() {
                   type="date"
                   value={formData.user_dob || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_dob}
                 />
+                {fieldErrors.user_dob && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_dob}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -266,9 +271,11 @@ export default function CreateParentPage() {
                   type="tel"
                   value={formData.user_phone || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_phone}
                   placeholder="Enter phone number"
                 />
+                {fieldErrors.user_phone && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_phone}</p>
+                )}
               </div>
             </div>
 
@@ -283,10 +290,12 @@ export default function CreateParentPage() {
                   type="email"
                   value={formData.user_email || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_email}
                   placeholder="Enter email address"
                   required
                 />
+                {fieldErrors.user_email && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -336,9 +345,11 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.user_emergency_contact || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_contact}
                   placeholder="Enter emergency contact name"
                 />
+                {fieldErrors.user_emergency_contact && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_contact}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -349,9 +360,11 @@ export default function CreateParentPage() {
                   type="tel"
                   value={formData.user_emergency_phone || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_phone}
                   placeholder="Enter emergency contact phone"
                 />
+                {fieldErrors.user_emergency_phone && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_phone}</p>
+                )}
               </div>
             </div>
 
@@ -364,9 +377,11 @@ export default function CreateParentPage() {
                   type="email"
                   value={formData.user_emergency_contact_email || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_contact_email}
                   placeholder="Enter emergency contact email"
                 />
+                {fieldErrors.user_emergency_contact_email && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_contact_email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -377,9 +392,11 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.user_emergency_contact_address || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_emergency_contact_address}
                   placeholder="Enter emergency contact address"
                 />
+                {fieldErrors.user_emergency_contact_address && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_emergency_contact_address}</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -406,9 +423,11 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.occupation || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.occupation}
                   placeholder="Enter occupation"
                 />
+                {fieldErrors.occupation && (
+                  <p className="text-sm text-red-600">{fieldErrors.occupation}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -419,9 +438,11 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.workplace || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.workplace}
                   placeholder="Enter workplace/company name"
                 />
+                {fieldErrors.workplace && (
+                  <p className="text-sm text-red-600">{fieldErrors.workplace}</p>
+                )}
               </div>
             </div>
 
@@ -434,9 +455,11 @@ export default function CreateParentPage() {
                   type="tel"
                   value={formData.work_phone || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.work_phone}
                   placeholder="Enter work phone number"
                 />
+                {fieldErrors.work_phone && (
+                  <p className="text-sm text-red-600">{fieldErrors.work_phone}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -447,9 +470,11 @@ export default function CreateParentPage() {
                   type="text"
                   value={formData.home_address || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.home_address}
                   placeholder="Enter home address"
                 />
+                {fieldErrors.home_address && (
+                  <p className="text-sm text-red-600">{fieldErrors.home_address}</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -469,24 +494,28 @@ export default function CreateParentPage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center space-x-3">
-                <Checkbox
+                <input
+                  type="checkbox"
                   id="is_primary_contact"
                   checked={formData.is_primary_contact || false}
-                  onCheckedChange={(checked) => handleCheckboxChange('is_primary_contact', checked as boolean)}
+                  onChange={(e) => handleCheckboxChange('is_primary_contact', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <div>
                   <Label htmlFor="is_primary_contact" className="text-sm font-medium">
                     Primary Contact
                   </Label>
-                  <p className="text-xs text-gray-500">School's first point of contact</p>
+                  <p className="text-xs text-gray-500">School&apos;s first point of contact</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
-                <Checkbox
+                <input
+                  type="checkbox"
                   id="is_emergency_contact"
                   checked={formData.is_emergency_contact || false}
-                  onCheckedChange={(checked) => handleCheckboxChange('is_emergency_contact', checked as boolean)}
+                  onChange={(e) => handleCheckboxChange('is_emergency_contact', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <div>
                   <Label htmlFor="is_emergency_contact" className="text-sm font-medium">
@@ -497,10 +526,12 @@ export default function CreateParentPage() {
               </div>
 
               <div className="flex items-center space-x-3">
-                <Checkbox
+                <input
+                  type="checkbox"
                   id="is_authorized_pickup"
                   checked={formData.is_authorized_pickup || false}
-                  onCheckedChange={(checked) => handleCheckboxChange('is_authorized_pickup', checked as boolean)}
+                  onChange={(e) => handleCheckboxChange('is_authorized_pickup', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <div>
                   <Label htmlFor="is_authorized_pickup" className="text-sm font-medium">

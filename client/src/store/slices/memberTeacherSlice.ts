@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { teacherApi } from '@/lib/api';
-import type { MemberTeacherState, MemberTeacher, TeacherDetail, TeacherCreateUpdate, TeacherAssignment, BulkTeacherAssignment, MemberFilters } from '@/types';
+import type { MemberTeacherState, MemberTeacher, TeacherCreateUpdate, BulkTeacherAssignment, MemberFilters } from '@/types';
 import { parseApiError } from '@/lib/api';
 
 // Initial state
@@ -129,7 +129,7 @@ const memberTeacherSlice = createSlice({
         state.loading = false;
         // Handle paginated response structure
         if (action.payload && typeof action.payload === 'object' && 'results' in action.payload) {
-          const paginatedResponse = action.payload as any;
+          const paginatedResponse = action.payload as unknown as { results: MemberTeacher[]; count: number };
           state.teachers = paginatedResponse.results || [];
           state.totalCount = paginatedResponse.count || 0;
         } else {
@@ -253,7 +253,7 @@ const memberTeacherSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTeacherAssignments.fulfilled, (state, action) => {
+      .addCase(fetchTeacherAssignments.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
       })
@@ -267,7 +267,7 @@ const memberTeacherSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(bulkAssignTeacherSubjects.fulfilled, (state, action) => {
+      .addCase(bulkAssignTeacherSubjects.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
       })

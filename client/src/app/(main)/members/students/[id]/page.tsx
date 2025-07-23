@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchStudentById, deleteStudent, clearCurrentStudent, restoreStudent } from '@/store/slices/memberStudentSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
 import { ArrowLeft, Edit, Trash2, User, Mail, Phone, Calendar, GraduationCap, AlertCircle } from 'lucide-react';
 
 const ENROLLMENT_STATUS_COLORS = {

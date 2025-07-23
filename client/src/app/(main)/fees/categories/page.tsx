@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Edit2, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { cn } from '@/lib/utils';
@@ -17,7 +16,6 @@ interface FeeCategory {
 }
 
 export default function FeeCategoriesPage() {
-  const router = useRouter();
   const [categories, setCategories] = useState<FeeCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

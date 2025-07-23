@@ -105,7 +105,7 @@ const memberNonStaffSlice = createSlice({
         state.loading = false;
         // Handle paginated response structure
         if (action.payload && typeof action.payload === 'object' && 'results' in action.payload) {
-          const paginatedResponse = action.payload as any;
+          const paginatedResponse = action.payload as unknown as { results: NonStaffMember[]; count: number };
           state.nonStaffMembers = paginatedResponse.results || [];
           state.totalCount = paginatedResponse.count || 0;
         } else {
@@ -144,10 +144,10 @@ const memberNonStaffSlice = createSlice({
       })
       .addCase(createNonStaffMember.fulfilled, (state, action) => {
         state.loading = false;
-        const payload = action.payload as any;
+        const payload = action.payload as NonStaffMember;
         state.nonStaffMembers.push({
           id: payload.id,
-          user_profile: typeof payload.user_profile === 'object' ? payload.user_profile.id : payload.user_profile,
+          user_profile: payload.user_profile,
           employee_id: payload.employee_id,
           hire_date: payload.hire_date,
           qualification: payload.qualification,
@@ -179,12 +179,12 @@ const memberNonStaffSlice = createSlice({
       })
       .addCase(updateNonStaffMember.fulfilled, (state, action) => {
         state.loading = false;
-        const payload = action.payload as any;
+        const payload = action.payload as NonStaffMember;
         const index = state.nonStaffMembers.findIndex(m => m.id === payload.id);
         if (index !== -1) {
           state.nonStaffMembers[index] = {
             id: payload.id,
-            user_profile: typeof payload.user_profile === 'object' ? payload.user_profile.id : payload.user_profile,
+            user_profile: payload.user_profile,
             employee_id: payload.employee_id,
             hire_date: payload.hire_date,
             qualification: payload.qualification,

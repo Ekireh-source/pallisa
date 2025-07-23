@@ -234,7 +234,7 @@ export default function EditStudentPage() {
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900">Basic Information</CardTitle>
             <CardDescription>
-              Update student's basic information and contact details
+              Update student&apos;s basic information and contact details
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -247,8 +247,10 @@ export default function EditStudentPage() {
                   type="text"
                   value={formData.user_first_name}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_first_name}
                 />
+                {fieldErrors.user_first_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_first_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -259,8 +261,10 @@ export default function EditStudentPage() {
                   type="text"
                   value={formData.user_last_name}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_last_name}
                 />
+                {fieldErrors.user_last_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_last_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -271,9 +275,11 @@ export default function EditStudentPage() {
                   type="text"
                   value={formData.user_other_name}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_other_name}
                   placeholder="Middle name, nickname, etc."
                 />
+                {fieldErrors.user_other_name && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_other_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -284,8 +290,10 @@ export default function EditStudentPage() {
                   type="email"
                   value={formData.user_email}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_email}
                 />
+                {fieldErrors.user_email && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -296,8 +304,10 @@ export default function EditStudentPage() {
                   type="tel"
                   value={formData.user_phone}
                   onChange={handleInputChange}
-                  error={fieldErrors.user_phone}
                 />
+                {fieldErrors.user_phone && (
+                  <p className="text-sm text-red-600">{fieldErrors.user_phone}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -353,8 +363,10 @@ export default function EditStudentPage() {
                   type="text"
                   value={formData.admission_number}
                   onChange={handleInputChange}
-                  error={fieldErrors.admission_number}
                 />
+                {fieldErrors.admission_number && (
+                  <p className="text-sm text-red-600">{fieldErrors.admission_number}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -365,8 +377,10 @@ export default function EditStudentPage() {
                   type="date"
                   value={formData.admission_date}
                   onChange={handleInputChange}
-                  error={fieldErrors.admission_date}
                 />
+                {fieldErrors.admission_date && (
+                  <p className="text-sm text-red-600">{fieldErrors.admission_date}</p>
+                )}
               </div>
 
               {formData.enrollment_status === 'graduated' && (
@@ -378,8 +392,10 @@ export default function EditStudentPage() {
                     type="date"
                     value={formData.graduation_date}
                     onChange={handleInputChange}
-                    error={fieldErrors.graduation_date}
                   />
+                  {fieldErrors.graduation_date && (
+                    <p className="text-sm text-red-600">{fieldErrors.graduation_date}</p>
+                  )}
                 </div>
               )}
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { ExpenseCreateUpdate, ExpenseCategory, Department, Vendor, Term } from '@/types';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';

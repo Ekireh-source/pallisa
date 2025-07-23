@@ -102,20 +102,7 @@ export default function SalaryPaymentsPage() {
     }
   };
 
-  const getPaymentMethodColor = (method: string) => {
-    switch (method) {
-      case 'bank_transfer':
-        return 'bg-blue-100 text-blue-800';
-      case 'cash':
-        return 'bg-green-100 text-green-800';
-      case 'mobile_money':
-        return 'bg-purple-100 text-purple-800';
-      case 'check':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+ 
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

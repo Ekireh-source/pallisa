@@ -766,7 +766,7 @@ export interface ClassCreateUpdate {
 }
 
 export interface StreamCreateUpdate {
-  class_obj: number;
+  class_obj: number | undefined;
   name: string;
   class_teacher?: number;
   capacity?: number;

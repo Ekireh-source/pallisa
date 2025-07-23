@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { studentApi } from '@/lib/api';
-import type { MemberStudentState, MemberStudent, StudentDetail, StudentCreateUpdate, StudentStatistics, MemberFilters } from '@/types';
+import type { MemberStudentState, MemberStudent, StudentCreateUpdate, MemberFilters } from '@/types';
 import { parseApiError } from '@/lib/api';
 
 // Initial state
@@ -297,16 +297,11 @@ const memberStudentSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Fetch student statistics
-      .addCase(fetchStudentStatistics.pending, (state) => {
-        // Don't set loading for statistics to avoid interfering with main loading
-      })
+    
       .addCase(fetchStudentStatistics.fulfilled, (state, action) => {
         state.statistics = action.payload;
       })
-      .addCase(fetchStudentStatistics.rejected, (state, action) => {
-        // Don't set error for statistics to avoid interfering with main error
-      });
+  
   },
 });
 

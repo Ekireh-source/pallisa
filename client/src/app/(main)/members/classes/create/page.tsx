@@ -123,10 +123,12 @@ export default function CreateClassPage() {
                   type="text"
                   value={formData.name}
                   onChange={handleInputChange}
-                  error={fieldErrors.name}
                   placeholder="Enter class name (e.g., Form 1, Grade 8, Senior 1)"
                   required
                 />
+                {fieldErrors.name && (
+                  <p className="text-sm text-red-600">{fieldErrors.name}</p>
+                )}
                 <p className="text-xs text-gray-500">Name of the class or grade level</p>
               </div>
             </div>
@@ -138,10 +140,12 @@ export default function CreateClassPage() {
                 name="description"
                 value={formData.description || ''}
                 onChange={handleInputChange}
-                error={fieldErrors.description}
                 placeholder="Enter class description and any additional information..."
                 rows={3}
               />
+              {fieldErrors.description && (
+                <p className="text-sm text-red-600">{fieldErrors.description}</p>
+              )}
             </div>
 
             {/* Action Buttons */}

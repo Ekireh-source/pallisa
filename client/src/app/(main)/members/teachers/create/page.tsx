@@ -15,7 +15,7 @@ import {
   SelectValue 
 } from '@/components/ui/Select';
 import { ArrowLeft, Save, X, User, Briefcase, Heart, Award, Shield } from 'lucide-react';
-import type { TeacherCreateUpdate, Role } from '@/types';
+import type { TeacherCreateUpdate } from '@/types';
 
 const EMPLOYMENT_TYPE_OPTIONS = [
   { value: 'full_time', label: 'Full Time' },
@@ -80,7 +80,7 @@ export default function CreateTeacherPage() {
     const { name, value } = e.target;
     
     // Handle numeric fields
-    let processedValue: any = value;
+    let processedValue: string | number | undefined = value;
     if (name === 'years_of_experience') {
       processedValue = value === '' ? 0 : parseInt(value) || 0;
     } else if (name === 'salary') {
@@ -118,17 +118,23 @@ export default function CreateTeacherPage() {
     // Clean up empty string values
     const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (value !== '' && value !== undefined && value !== null) {
-        acc[key] = value;
+        acc[key as keyof TeacherCreateUpdate] = value;
       }
       return acc;
-    }, {} as any);
+    }, {} as Partial<TeacherCreateUpdate>);
+
+    // Ensure required fields are present
+    const finalData: TeacherCreateUpdate = {
+      employment_type: 'full_time', // Default employment type
+      ...cleanedData
+    };
     
     try {
-      const result = await dispatch(createTeacher(cleanedData));
+      const result = await dispatch(createTeacher(finalData));
       
       if (createTeacher.fulfilled.match(result)) {
         // Refresh the teachers list to show the new teacher
-        dispatch(fetchTeachers());
+        dispatch(fetchTeachers({}));
         router.push('/members/teachers');
       }
     } catch (error) {
@@ -555,7 +561,7 @@ export default function CreateTeacherPage() {
               />
               {fieldErrors.previous_experience && (
                 <p className="text-sm text-red-600">{fieldErrors.previous_experience}</p>
-              )}
+                )}
             </div>
           </CardContent>
         </Card>

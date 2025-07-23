@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Inpu
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { createSalaryPayment, getSalaryPeriods, getTeachers, getNonStaffMembers } from '@/lib/api';
-import { SalaryPaymentCreateUpdate, SalaryPeriod } from '@/types';
+import { SalaryPaymentCreateUpdate, SalaryPeriod, StaffSalaryInfo } from '@/types';
 import { toast } from 'sonner';
 
 export default function CreateSalaryPaymentPage() {
@@ -16,8 +16,8 @@ export default function CreateSalaryPaymentPage() {
   const [loading, setLoading] = useState(false);
   const [loadingFormData, setLoadingFormData] = useState(true);
   const [periods, setPeriods] = useState<SalaryPeriod[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [nonStaffMembers, setNonStaffMembers] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<StaffSalaryInfo[]>([]);
+  const [nonStaffMembers, setNonStaffMembers] = useState<StaffSalaryInfo[]>([]);
   const [formData, setFormData] = useState<SalaryPaymentCreateUpdate>({
     teacher: undefined,
     non_staff_member: undefined,
@@ -49,8 +49,33 @@ export default function CreateSalaryPaymentPage() {
         getNonStaffMembers()
       ]);
       setPeriods(periodsData || []);
-      setTeachers(Array.isArray(teachersData) ? teachersData : []);
-      setNonStaffMembers(Array.isArray(nonStaffData) ? nonStaffData : []);
+      
+      // Transform teachers data to match StaffSalaryInfo type
+      const transformedTeachers = Array.isArray(teachersData) ? teachersData.map(teacher => ({
+        id: teacher.id,
+        employee_id: teacher.employee_id,
+        name: teacher.teacher_name || 'Unknown Teacher',
+        email: teacher.user_email,
+        employment_type: teacher.employment_type,
+        base_salary: undefined,
+        is_active: true,
+        hire_date: teacher.hire_date || new Date().toISOString().split('T')[0]
+      })) : [];
+      
+      // Transform non-staff data to match StaffSalaryInfo type
+      const transformedNonStaff = Array.isArray(nonStaffData) ? nonStaffData.map(member => ({
+        id: member.id,
+        employee_id: member.employee_id,
+        name: member.full_name || 'Unknown Member',
+        email: undefined,
+        employment_type: member.employment_type,
+        base_salary: undefined,
+        is_active: member.is_active,
+        hire_date: member.hire_date
+      })) : [];
+      
+      setTeachers(transformedTeachers);
+      setNonStaffMembers(transformedNonStaff);
     } catch (error) {
       console.error('Error loading form data:', error);
       toast.error('Failed to load form data');
@@ -63,7 +88,7 @@ export default function CreateSalaryPaymentPage() {
     }
   };
 
-  const handleInputChange = (field: keyof SalaryPaymentCreateUpdate, value: any) => {
+  const handleInputChange = (field: keyof SalaryPaymentCreateUpdate, value: string | number | File | Array<{ allowance_id: number; amount: number; notes?: string }> | Array<{ deduction_id: number; amount: number; notes?: string }> | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -170,12 +195,12 @@ export default function CreateSalaryPaymentPage() {
                   <SelectContent>
                     {teachers.map((teacher) => (
                       <SelectItem key={`teacher-${teacher.id}`} value={teacher.id.toString()}>
-                        {teacher.full_name} (Teacher)
+                        {teacher.name} (Teacher)
                       </SelectItem>
                     ))}
                     {nonStaffMembers.map((member) => (
                       <SelectItem key={`nonstaff-${member.id}`} value={member.id.toString()}>
-                        {member.full_name} (Non-Staff)
+                        {member.name} (Non-Staff)
                       </SelectItem>
                     ))}
                   </SelectContent>

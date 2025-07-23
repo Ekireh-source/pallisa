@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Eye, Calendar, DollarSign, User, GraduationCap, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
+import { ArrowLeft, Calendar, DollarSign, User, GraduationCap } from 'lucide-react';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
 
 interface FeePayment {
@@ -39,7 +39,6 @@ interface FeePayment {
 
 export default function FeePaymentDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params?.id;
   const [payment, setPayment] = useState<FeePayment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +63,6 @@ export default function FeePaymentDetailPage() {
   }, [id]);
 
   const getStatusBadge = (status: string) => {
-    const baseClasses = "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium";
     if (status === 'completed') {
       return <Badge className="bg-green-100 text-green-800 border-0">Completed</Badge>;
     }
@@ -135,7 +133,7 @@ export default function FeePaymentDetailPage() {
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-gray-400 text-6xl mb-4">📄</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Not Found</h1>
-          <p className="text-gray-600 mb-6">The payment you're looking for doesn't exist or has been removed.</p>
+          <p className="text-gray-600 mb-6">The payment you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Link href="/fees/payments">
             <Button className="bg-blue-600 hover:bg-blue-700">
               Back to Payments

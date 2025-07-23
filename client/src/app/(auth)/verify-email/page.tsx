@@ -8,7 +8,7 @@ import { verifyEmail, resendVerification, clearError, clearFieldError } from '@/
 import { Input, Button, ErrorMessage, SuccessMessage, Label } from '@/components/ui';
 import { 
   Mail, ArrowRight, RefreshCw, CheckCircle, Shield, Lock, 
-  X, Zap, Clock, Check 
+  X, Zap, Clock
 } from 'lucide-react';
 
 const VerifyEmailContent: React.FC = () => {

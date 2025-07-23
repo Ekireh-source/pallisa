@@ -1,36 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { registerUser, clearError, clearFieldError } from '@/store/slices/authSlice';
-import { RegisterData, SchoolRegistrationData } from '@/types';
-import { Input, Button, Select, ErrorMessage, Card } from '@/components/ui';
-
-const userTypeOptions = [
-  { value: 'school_owner', label: 'School Owner' },
-  { value: 'staff', label: 'Staff' },
-  { value: 'student', label: 'Student' },
-  { value: 'parent', label: 'Parent' },
-];
+import { registerUser, clearFieldError } from '@/store/slices/authSlice';
+import { RegisterData } from '@/types';
+import { Input, Button, ErrorMessage, Card, Label } from '@/components/ui';
 
 const RegisterForm: React.FC = () => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const { loading, error, fieldErrors } = useAppSelector((state) => state.auth);
 
-  // Form state
   const [formData, setFormData] = useState<RegisterData>({
     email: '',
     password: '',
     first_name: '',
     last_name: '',
-    user_type: 'school_owner',
     phone: '',
+    user_type: 'school_owner'
   });
 
-  // School data state (only for school owners)
-  const [schoolData, setSchoolData] = useState<SchoolRegistrationData>({
+  const [schoolData, setSchoolData] = useState({
     school_name: '',
     school_address: '',
     school_phone: '',
@@ -38,279 +27,302 @@ const RegisterForm: React.FC = () => {
     school_website: '',
     campus_name: '',
     campus_address: '',
-    campus_phone: '',
+    campus_phone: ''
   });
 
-  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
-  const [showSchoolFields, setShowSchoolFields] = useState(true);
+  const showSchoolFields = formData.user_type === 'school_owner';
 
-  // Clear error when component mounts
-  useEffect(() => {
-    dispatch(clearError());
-  }, [dispatch]);
-
-  // Show/hide school fields based on user type
-  useEffect(() => {
-    setShowSchoolFields(formData.user_type === 'school_owner');
-  }, [formData.user_type]);
+  const userTypeOptions = [
+    { value: 'school_owner', label: 'School Owner' },
+    { value: 'staff', label: 'Staff Member' },
+    { value: 'student', label: 'Student' },
+    { value: 'parent', label: 'Parent' }
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear field errors when user starts typing
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Clear field error when user starts typing
     if (fieldErrors[name]) {
       dispatch(clearFieldError(name));
-    }
-    if (localErrors[name]) {
-      setLocalErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
     }
   };
 
   const handleSchoolDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSchoolData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear field errors when user starts typing
+    setSchoolData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Clear field error when user starts typing
     if (fieldErrors[name]) {
       dispatch(clearFieldError(name));
-    }
-    if (localErrors[name]) {
-      setLocalErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
     }
   };
 
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    // Basic validation
-    if (!formData.email) errors.email = 'Email is required';
-    else if (!formData.email.includes('@')) errors.email = 'Please enter a valid email';
-    
-    if (!formData.password) errors.password = 'Password is required';
-    else if (formData.password.length < 8) errors.password = 'Password must be at least 8 characters';
-    
-    if (!formData.first_name) errors.first_name = 'First name is required';
-    if (!formData.last_name) errors.last_name = 'Last name is required';
-
-    // School owner specific validation
-    if (formData.user_type === 'school_owner') {
-      if (!schoolData.school_name) errors.school_name = 'School name is required';
-      if (!schoolData.campus_name) errors.campus_name = 'Campus name is required';
+    if (!formData.email || !formData.password || !formData.first_name || !formData.last_name) {
+      return false;
     }
 
-    setLocalErrors(errors);
-    return Object.keys(errors).length === 0;
+    if (formData.password.length < 8) {
+      return false;
+    }
+
+    if (showSchoolFields && !schoolData.school_name) {
+      return false;
+    }
+
+    return true;
   };
 
   const getFieldError = (fieldName: string): string | undefined => {
-    return fieldErrors[fieldName] || localErrors[fieldName];
+    return fieldErrors[fieldName];
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!validateForm()) {
       return;
     }
 
-    const registrationData: RegisterData = {
+    const registerData: RegisterData = {
       ...formData,
-      school_data: showSchoolFields ? schoolData : undefined,
+      ...(showSchoolFields && { school_data: schoolData })
     };
 
     try {
-      const result = await dispatch(registerUser(registrationData));
-      
-      if (registerUser.fulfilled.match(result)) {
-        // Registration successful - redirect to verification page
-        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
-      }
+      await dispatch(registerUser(registerData));
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Registration error:', error);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <button
-            onClick={() => router.push('/login')}
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
-            sign in to your existing account
-          </button>
+          Join Pallisa High School Management System
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card>
+        <Card className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Display general error and field errors */}
-            {(error || Object.keys(fieldErrors).length > 0) && (
-              <ErrorMessage 
-                message={error || undefined} 
-                errors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
-              />
-            )}
+            {error && <ErrorMessage message={error} />}
 
             {/* Personal Information */}
             <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="First Name"
-                name="first_name"
-                type="text"
-                required
-                value={formData.first_name}
-                onChange={handleInputChange}
-                error={getFieldError('first_name')}
-              />
-              <Input
-                label="Last Name"
-                name="last_name"
-                type="text"
-                required
-                value={formData.last_name}
-                onChange={handleInputChange}
-                error={getFieldError('last_name')}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First Name</Label>
+                <Input
+                  name="first_name"
+                  type="text"
+                  required
+                  value={formData.first_name}
+                  onChange={handleInputChange}
+                />
+                {getFieldError('first_name') && (
+                  <p className="text-sm text-red-600">{getFieldError('first_name')}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last Name</Label>
+                <Input
+                  name="last_name"
+                  type="text"
+                  required
+                  value={formData.last_name}
+                  onChange={handleInputChange}
+                />
+                {getFieldError('last_name') && (
+                  <p className="text-sm text-red-600">{getFieldError('last_name')}</p>
+                )}
+              </div>
             </div>
 
-            <Input
-              label="Email Address"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-              error={getFieldError('email')}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+              {getFieldError('email') && (
+                <p className="text-sm text-red-600">{getFieldError('email')}</p>
+              )}
+            </div>
 
-            <Input
-              label="Password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleInputChange}
-              error={getFieldError('password')}
-              helperText="Must be at least 8 characters"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+              />
+              {getFieldError('password') && (
+                <p className="text-sm text-red-600">{getFieldError('password')}</p>
+              )}
+              <p className="text-xs text-gray-500">Must be at least 8 characters</p>
+            </div>
 
-            <Input
-              label="Phone Number"
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleInputChange}
-              error={getFieldError('phone')}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleInputChange}
+              />
+              {getFieldError('phone') && (
+                <p className="text-sm text-red-600">{getFieldError('phone')}</p>
+              )}
+            </div>
 
-            <Select
-              label="User Type"
-              name="user_type"
-              required
-              value={formData.user_type}
-              onChange={handleInputChange}
-              options={userTypeOptions}
-              error={getFieldError('user_type')}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="user_type">User Type</Label>
+              <select
+                name="user_type"
+                required
+                value={formData.user_type}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {userTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {getFieldError('user_type') && (
+                <p className="text-sm text-red-600">{getFieldError('user_type')}</p>
+              )}
+            </div>
 
             {/* School Information (only for school owners) */}
             {showSchoolFields && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">School Information</h3>
                 
-                <Input
-                  label="School Name"
-                  name="school_name"
-                  type="text"
-                  required
-                  value={schoolData.school_name}
-                  onChange={handleSchoolDataChange}
-                  error={getFieldError('school_name')}
-                />
-
-                <Input
-                  label="School Address"
-                  name="school_address"
-                  type="text"
-                  value={schoolData.school_address}
-                  onChange={handleSchoolDataChange}
-                  error={getFieldError('school_address')}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="school_name">School Name</Label>
                   <Input
-                    label="School Phone"
-                    name="school_phone"
-                    type="tel"
-                    value={schoolData.school_phone}
+                    name="school_name"
+                    type="text"
+                    required
+                    value={schoolData.school_name}
                     onChange={handleSchoolDataChange}
-                    error={getFieldError('school_phone')}
                   />
-                  <Input
-                    label="School Email"
-                    name="school_email"
-                    type="email"
-                    value={schoolData.school_email}
-                    onChange={handleSchoolDataChange}
-                    error={getFieldError('school_email')}
-                  />
+                  {getFieldError('school_name') && (
+                    <p className="text-sm text-red-600">{getFieldError('school_name')}</p>
+                  )}
                 </div>
 
-                <Input
-                  label="School Website"
-                  name="school_website"
-                  type="url"
-                  value={schoolData.school_website}
-                  onChange={handleSchoolDataChange}
-                  error={getFieldError('school_website')}
-                  placeholder="https://example.com"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="school_address">School Address</Label>
+                  <Input
+                    name="school_address"
+                    type="text"
+                    value={schoolData.school_address}
+                    onChange={handleSchoolDataChange}
+                  />
+                  {getFieldError('school_address') && (
+                    <p className="text-sm text-red-600">{getFieldError('school_address')}</p>
+                  )}
+                </div>
 
-                <h4 className="text-md font-medium text-gray-800 mt-6">Campus Information</h4>
-                
-                <Input
-                  label="Campus Name"
-                  name="campus_name"
-                  type="text"
-                  required
-                  value={schoolData.campus_name}
-                  onChange={handleSchoolDataChange}
-                  error={getFieldError('campus_name')}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="school_phone">School Phone</Label>
+                    <Input
+                      name="school_phone"
+                      type="tel"
+                      value={schoolData.school_phone}
+                      onChange={handleSchoolDataChange}
+                    />
+                    {getFieldError('school_phone') && (
+                      <p className="text-sm text-red-600">{getFieldError('school_phone')}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="school_email">School Email</Label>
+                    <Input
+                      name="school_email"
+                      type="email"
+                      value={schoolData.school_email}
+                      onChange={handleSchoolDataChange}
+                    />
+                    {getFieldError('school_email') && (
+                      <p className="text-sm text-red-600">{getFieldError('school_email')}</p>
+                    )}
+                  </div>
+                </div>
 
-                <Input
-                  label="Campus Address"
-                  name="campus_address"
-                  type="text"
-                  value={schoolData.campus_address}
-                  onChange={handleSchoolDataChange}
-                  error={getFieldError('campus_address')}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="school_website">School Website</Label>
+                  <Input
+                    name="school_website"
+                    type="url"
+                    value={schoolData.school_website}
+                    onChange={handleSchoolDataChange}
+                  />
+                  {getFieldError('school_website') && (
+                    <p className="text-sm text-red-600">{getFieldError('school_website')}</p>
+                  )}
+                </div>
 
-                <Input
-                  label="Campus Phone"
-                  name="campus_phone"
-                  type="tel"
-                  value={schoolData.campus_phone}
-                  onChange={handleSchoolDataChange}
-                  error={getFieldError('campus_phone')}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="campus_name">Campus Name</Label>
+                  <Input
+                    name="campus_name"
+                    type="text"
+                    required
+                    value={schoolData.campus_name}
+                    onChange={handleSchoolDataChange}
+                  />
+                  {getFieldError('campus_name') && (
+                    <p className="text-sm text-red-600">{getFieldError('campus_name')}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="campus_address">Campus Address</Label>
+                  <Input
+                    name="campus_address"
+                    type="text"
+                    value={schoolData.campus_address}
+                    onChange={handleSchoolDataChange}
+                  />
+                  {getFieldError('campus_address') && (
+                    <p className="text-sm text-red-600">{getFieldError('campus_address')}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="campus_phone">Campus Phone</Label>
+                  <Input
+                    name="campus_phone"
+                    type="tel"
+                    value={schoolData.campus_phone}
+                    onChange={handleSchoolDataChange}
+                  />
+                  {getFieldError('campus_phone') && (
+                    <p className="text-sm text-red-600">{getFieldError('campus_phone')}</p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -321,7 +333,7 @@ const RegisterForm: React.FC = () => {
               loading={loading}
               disabled={loading}
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
         </Card>

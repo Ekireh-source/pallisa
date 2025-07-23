@@ -15,8 +15,9 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select';
-import { ArrowLeft, Save, X, User, Briefcase, Heart, Award, Shield } from 'lucide-react';
-import type { NonStaffMemberCreateUpdate, Role } from '@/types';
+import { ArrowLeft, Save, X, User, Shield } from 'lucide-react';
+import type { NonStaffMemberCreateUpdate } from '@/types';
+import { NonStaffMember } from '@/types';
 
 const EMPLOYMENT_TYPE_OPTIONS = [
   { value: 'full_time', label: 'Full Time' },
@@ -26,11 +27,9 @@ const EMPLOYMENT_TYPE_OPTIONS = [
   { value: 'volunteer', label: 'Volunteer' },
 ];
 
-const GENDER_OPTIONS = [
-  { value: 'M', label: 'Male' },
-  { value: 'F', label: 'Female' },
-  { value: 'O', label: 'Other' },
-];
+function isUserProfile(obj: unknown): obj is { role?: { id: number } } {
+  return typeof obj === 'object' && obj !== null && 'role' in obj;
+}
 
 export default function EditNonStaffMemberPage() {
   const router = useRouter();
@@ -74,7 +73,7 @@ export default function EditNonStaffMemberPage() {
 
   useEffect(() => {
     if (currentNonStaffMember) {
-      const member = currentNonStaffMember as any;
+      const member = currentNonStaffMember as NonStaffMember;
       setFormData({
         employment_type: member.employment_type || 'full_time',
         specialization: member.specialization || '',
@@ -83,7 +82,7 @@ export default function EditNonStaffMemberPage() {
         years_of_experience: member.years_of_experience || 0,
         previous_experience: member.previous_experience || '',
         salary: member.salary || undefined,
-        user_role_id: member.user_profile_data?.role?.id || undefined,
+        user_role_id: (isUserProfile(member.user_profile) && member.user_profile.role) ? member.user_profile.role.id : undefined,
       });
     }
   }, [currentNonStaffMember]);
@@ -92,7 +91,7 @@ export default function EditNonStaffMemberPage() {
     const { name, value } = e.target;
     
     // Handle numeric fields
-    let processedValue: any = value;
+    let processedValue: string | number | undefined = value;
     if (name === 'years_of_experience') {
       processedValue = value === '' ? 0 : parseInt(value) || 0;
     } else if (name === 'salary') {
@@ -132,13 +131,13 @@ export default function EditNonStaffMemberPage() {
     // Clean up empty string values
     const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (value !== '' && value !== undefined && value !== null) {
-        acc[key] = value;
+        (acc as Record<string, unknown>)[key] = value;
       }
       return acc;
-    }, {} as any);
+    }, {} as Record<string, unknown>);
     
     try {
-      const result = await dispatch(updateNonStaffMember({ id: nonStaffMemberId, data: cleanedData }));
+      const result = await dispatch(updateNonStaffMember({ id: nonStaffMemberId, data: cleanedData as unknown as NonStaffMemberCreateUpdate }));
       
       if (updateNonStaffMember.fulfilled.match(result)) {
         router.push(`/members/non-staff-members/${nonStaffMemberId}`);
@@ -216,7 +215,7 @@ export default function EditNonStaffMemberPage() {
     );
   }
 
-  const member = currentNonStaffMember as any;
+  const member = currentNonStaffMember as NonStaffMember;
 
   return (
     <div className="space-y-6">
@@ -231,7 +230,7 @@ export default function EditNonStaffMemberPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Edit Non-Staff Member</h1>
-            <p className="text-gray-600 mt-1">Update information for {member.user_profile_data?.get_full_name || member.full_name}</p>
+            <p className="text-gray-600 mt-1">Update information for {member.full_name || 'Unknown Member'}</p>
           </div>
         </div>
       </div>
@@ -256,7 +255,7 @@ export default function EditNonStaffMemberPage() {
             <span>Non-Staff Member Information</span>
           </CardTitle>
           <CardDescription>
-            Update the non-staff member's professional details and role assignment
+            Update the non-staff member&apos;s professional details and role assignment
           </CardDescription>
         </CardHeader>
         <CardContent>

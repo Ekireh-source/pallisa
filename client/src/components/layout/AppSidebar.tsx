@@ -74,11 +74,11 @@ const feesManagementItems = [
     url: "/fees/collection-summaries",
     icon: BarChart3,
   },
-  {
-    title: "Student Fee Overrides",
-    url: "/fees/overrides",
-    icon: UserCheck,
-  },
+  // {
+  //   title: "Student Fee Overrides",
+  //   url: "/fees/overrides",
+  //   icon: UserCheck,
+  // },
   {
     title: "Scholarships",
     url: "/fees/scholarships",

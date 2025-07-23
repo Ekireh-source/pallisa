@@ -1,7 +1,7 @@
 import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from './button';
-import { X, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export interface ConfirmationModalProps {
   isOpen: boolean;
@@ -74,9 +74,10 @@ export function ConfirmationModal({
                 {cancelText}
               </Button>
               <Button
-                variant={variant === 'danger' ? 'destructive' : 'default'}
+                variant={variant === 'danger' ? 'default' : 'default'}
                 onClick={handleConfirm}
                 disabled={isLoading}
+                className={variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : ''}
               >
                 {isLoading ? 'Processing...' : confirmText}
               </Button>

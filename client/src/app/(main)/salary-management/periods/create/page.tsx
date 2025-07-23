@@ -61,7 +61,7 @@ export default function CreateSalaryPeriodPage() {
     }
   };
 
-  const handleInputChange = (field: keyof SalaryPeriodCreateUpdate, value: any) => {
+  const handleInputChange = (field: keyof SalaryPeriodCreateUpdate, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -86,9 +86,9 @@ export default function CreateSalaryPeriodPage() {
       await createSalaryPeriod(formData);
       toast.success('Salary period created successfully');
       router.push('/salary-management/periods');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating salary period:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to create salary period';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create salary period';
       toast.error(errorMessage);
     } finally {
       setLoading(false);

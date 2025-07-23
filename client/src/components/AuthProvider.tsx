@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppDispatch } from '@/store';
 import { restoreAuthFromTokens, logoutUser } from '@/store/slices/authSlice';
 import { setLogoutHandler } from '@/lib/api';
 
@@ -13,7 +13,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {

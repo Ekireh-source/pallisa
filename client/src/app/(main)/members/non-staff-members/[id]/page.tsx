@@ -8,6 +8,11 @@ import { fetchNonStaffMemberById, deleteNonStaffMember } from '@/store/slices/me
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Edit, Trash2, User, Briefcase, Heart, Calendar, DollarSign, Award, Phone, Mail, MapPin, Shield } from 'lucide-react';
 import type { NonStaffMember } from '@/types';
+import type { UserProfile, Role, Permission } from '@/types';
+
+interface NonStaffMemberWithProfile extends NonStaffMember {
+  user_profile_data?: UserProfile & { role?: Role };
+}
 
 export default function NonStaffMemberDetailPage() {
   const router = useRouter();
@@ -75,6 +80,11 @@ export default function NonStaffMemberDetailPage() {
     return genders[gender] || gender;
   };
 
+  function getFullName(profile?: UserProfile): string {
+    if (!profile) return 'N/A';
+    return [profile.first_name, profile.other_name, profile.last_name].filter(Boolean).join(' ') || 'N/A';
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -116,6 +126,7 @@ export default function NonStaffMemberDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-gray-600 text-lg font-semibold mb-4">Non-Staff Member Not Found</div>
+          <p className="text-gray-600 mb-6">The non-staff member you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Link href="/members/non-staff-members">
             <Button variant="outline">Back to Non-Staff Members</Button>
           </Link>
@@ -124,7 +135,7 @@ export default function NonStaffMemberDetailPage() {
     );
   }
 
-  const member = currentNonStaffMember as any; // Using any to access nested user_profile_data
+  const member = currentNonStaffMember as NonStaffMemberWithProfile;
 
   return (
     <div className="space-y-6">
@@ -196,7 +207,7 @@ export default function NonStaffMemberDetailPage() {
                 <div>
                   <label className="text-sm font-medium text-gray-500">Full Name</label>
                   <p className="text-gray-900 font-medium">
-                    {member.user_profile_data?.get_full_name || member.full_name || 'N/A'}
+                    {getFullName(member.user_profile_data)}
                   </p>
                 </div>
                 <div>
@@ -210,7 +221,7 @@ export default function NonStaffMemberDetailPage() {
                   <label className="text-sm font-medium text-gray-500">Email</label>
                   <p className="text-gray-900 flex items-center">
                     <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                    {member.user_profile_data?.user?.email || 'N/A'}
+                    {typeof member.user_profile_data?.user === 'object' && member.user_profile_data.user?.email ? member.user_profile_data.user.email : 'N/A'}
                   </p>
                 </div>
                 <div>
@@ -225,7 +236,7 @@ export default function NonStaffMemberDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Gender</label>
-                  <p className="text-gray-900">{getGenderLabel(member.user_profile_data?.gender) || 'N/A'}</p>
+                  <p className="text-gray-900">{getGenderLabel(member.user_profile_data?.gender || '') || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Date of Birth</label>
@@ -263,7 +274,7 @@ export default function NonStaffMemberDetailPage() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Permissions</label>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {member.user_profile_data.role.permissions.map((permission: any, index: number) => (
+                        {member.user_profile_data.role.permissions.map((permission: Permission, index: number) => (
                           <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                             {permission.name}
                           </span>
@@ -276,7 +287,7 @@ export default function NonStaffMemberDetailPage() {
                 <div className="text-center py-4">
                   <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-500 text-sm">No role assigned</p>
-                  <p className="text-gray-400 text-xs mt-1">This staff member doesn't have any specific role assigned</p>
+                  <p className="text-gray-400 text-xs mt-1">This staff member doesn&apos;t have any specific role assigned</p>
                 </div>
               )}
             </CardContent>
@@ -300,7 +311,7 @@ export default function NonStaffMemberDetailPage() {
                   <label className="text-sm font-medium text-gray-500">Hire Date</label>
                   <p className="text-gray-900 flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                    {member.hire_date ? formatDate(member.hire_date) : 'N/A'}
+                    {formatDate(String(member.hire_date ?? ''))}
                   </p>
                 </div>
               </div>

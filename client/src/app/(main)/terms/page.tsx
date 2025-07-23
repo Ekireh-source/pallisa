@@ -9,7 +9,7 @@ import {
   clearError 
 } from '@/store/slices/termSlice';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
@@ -17,14 +17,11 @@ import {
   Filter, 
   Grid3X3, 
   List, 
-  Calendar,
   ChevronDown,
   ChevronUp,
   Edit,
   Trash2,
   Plus,
-  Eye,
-  Clock,
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
@@ -93,7 +90,7 @@ export default function TermsPage() {
 
   // Sort terms
   const sortedTerms = [...filteredTerms].sort((a, b) => {
-    let aValue: any, bValue: any;
+    let aValue: string | number | Date, bValue: string | number | Date;
     
     switch (sortBy) {
       case 'name':
@@ -101,8 +98,8 @@ export default function TermsPage() {
         bValue = b.name;
         break;
       case 'academic_year':
-        aValue = a.academic_year_name;
-        bValue = b.academic_year_name;
+        aValue = a.academic_year_name || '';
+        bValue = b.academic_year_name || '';
         break;
       case 'start_date':
         aValue = new Date(a.start_date);

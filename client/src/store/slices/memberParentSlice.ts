@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { parentApi } from '@/lib/api';
-import type { MemberParentState, MemberParent, ParentDetail, ParentCreateUpdate, MemberStudent, MemberFilters } from '@/types';
+import type { MemberParentState, ParentCreateUpdate, MemberFilters } from '@/types';
 import { parseApiError } from '@/lib/api';
 
 // Initial state
@@ -225,7 +225,7 @@ const memberParentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchParentChildren.fulfilled, (state, action) => {
+      .addCase(fetchParentChildren.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
       })

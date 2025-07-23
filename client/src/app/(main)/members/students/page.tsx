@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
-import { fetchStudents, deleteStudent, clearFieldErrors, fetchStudentStatistics } from '@/store/slices/memberStudentSlice';
+import { fetchStudents, deleteStudent, fetchStudentStatistics } from '@/store/slices/memberStudentSlice';
 import { fetchStreams } from '@/store/slices/memberStreamSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Button, Input, LoadingSpinner, ConfirmationModal } from '@/components/ui';
 import { 
@@ -13,7 +13,6 @@ import {
   Edit, 
   Trash2, 
   Eye, 
-  Filter,
   Download,
   RefreshCw,
   GraduationCap,
@@ -22,7 +21,7 @@ import {
   AlertCircle,
   ArrowUpDown
 } from 'lucide-react';
-import type { MemberStudent, MemberFilters } from '@/types';
+import type { MemberFilters } from '@/types';
 
 const ENROLLMENT_STATUS_COLORS = {
   enrolled: 'bg-green-100 text-green-800',
@@ -56,7 +55,7 @@ export default function StudentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [streamFilter, setStreamFilter] = useState<string>('');
   const [showInactive, setShowInactive] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<'name' | 'student_id' | 'created_at'>('name');
+  const [sortBy] = useState<'name' | 'student_id' | 'created_at'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {

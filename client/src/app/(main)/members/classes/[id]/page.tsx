@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchClassById, deleteClass, clearCurrentClass } from '@/store/slices/memberClassSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Edit, Trash2, Building, GraduationCap, Users, AlertCircle, Plus } from 'lucide-react';
 
 export default function ClassDetailPage() {
@@ -139,7 +139,7 @@ export default function ClassDetailPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{currentClass.name}</h1>
-            <p className="text-gray-600 mt-1">Class Level {currentClass.level}</p>
+            <p className="text-gray-600 mt-1">Class Information</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
@@ -184,7 +184,7 @@ export default function ClassDetailPage() {
                 <div>
                   <label className="text-sm font-medium text-gray-500">Academic Level</label>
                   <Badge variant="secondary" className="mt-1">
-                    Level {currentClass.level}
+                    {currentClass.name}
                   </Badge>
                 </div>
                 <div className="md:col-span-2">
@@ -221,7 +221,7 @@ export default function ClassDetailPage() {
                     <span className="text-sm font-medium text-gray-600">Students</span>
                   </div>
                   <span className="text-lg font-semibold text-gray-900">
-                    {currentClass.student_count || 0}
+                    {currentClass.streams?.reduce((total, stream) => total + (stream.current_enrollment || 0), 0) || 0}
                   </span>
                 </div>
               </div>
@@ -253,13 +253,10 @@ export default function ClassDetailPage() {
                 <div key={index} className="p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium text-gray-900">{stream.name}</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    {stream.student_count || 0} student{(stream.student_count || 0) !== 1 ? 's' : ''}
+                    {stream.current_enrollment || 0} student{(stream.current_enrollment || 0) !== 1 ? 's' : ''}
                   </p>
-                  {stream.description && (
-                    <p className="text-xs text-gray-500 mt-2 line-clamp-2">{stream.description}</p>
-                  )}
                   <div className="mt-3 flex items-center space-x-2">
-                    <Link href={`/members/streams/${stream.stream_id}`}>
+                    <Link href={`/members/streams/${stream.id}`}>
                       <Button variant="outline" size="sm">
                         View Details
                       </Button>
@@ -286,7 +283,7 @@ export default function ClassDetailPage() {
               <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No streams found</h3>
               <p className="text-gray-600 mb-4">
-                This class doesn't have any streams yet. Add streams to organize students better.
+                This class doesn&apos;t have any streams yet. Add streams to organize students better.
               </p>
               <Link href="/members/streams/create">
                 <Button>

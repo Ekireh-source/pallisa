@@ -7,7 +7,7 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { createStream, clearFieldErrors } from '@/store/slices/memberStreamSlice';
 import { fetchClasses } from '@/store/slices/memberClassSlice';
 import { fetchTeachers } from '@/store/slices/memberTeacherSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, LoadingSpinner } from '@/components/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Save, X, GitBranch } from 'lucide-react';
 import type { StreamCreateUpdate } from '@/types';
 
@@ -20,7 +20,7 @@ export default function CreateStreamPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState<StreamCreateUpdate>({
-    class_obj: undefined as any, // Changed from 0 to undefined to fix button disabled issue
+    class_obj: undefined,
     name: '',
     class_teacher: undefined,
     capacity: 30,
@@ -42,17 +42,27 @@ export default function CreateStreamPage() {
     dispatch(clearFieldErrors());
   }, [dispatch]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'class_obj' || name === 'class_teacher' || name === 'capacity'
-        ? (value ? parseInt(value, 10) : undefined)
-        : value
+      [name]: name === 'capacity' ? (value ? parseInt(value, 10) : undefined) : value
     }));
 
     // Clear field error when user starts typing
     if (fieldErrors[name]) {
+      dispatch(clearFieldErrors());
+    }
+  };
+
+  const handleSelectChange = (field: keyof StreamCreateUpdate, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value ? parseInt(value, 10) : undefined
+    }));
+
+    // Clear field error when user makes a selection
+    if (fieldErrors[field]) {
       dispatch(clearFieldErrors());
     }
   };
@@ -64,7 +74,7 @@ export default function CreateStreamPage() {
     if (!formData.class_obj || !formData.name) {
       return;
     }
-
+    
     try {
       const result = await dispatch(createStream(formData));
       if (createStream.fulfilled.match(result)) {
@@ -135,21 +145,28 @@ export default function CreateStreamPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
+                <Label htmlFor="class_obj">
+                  Class <span className="text-red-500">*</span>
+                </Label>
                 <Select
-                  id="class_obj"
-                  name="class_obj"
-                  label="Class"
                   value={formData.class_obj?.toString() || ''}
-                  onChange={handleInputChange}
-                  error={fieldErrors.class_obj}
-                  required
+                  onValueChange={(value) => handleSelectChange('class_obj', value)}
                   disabled={classesLoading}
-                  placeholder={classesLoading ? 'Loading classes...' : 'Select a class'}
-                  options={classes.map(cls => ({
-                    value: cls.id.toString(),
-                    label: cls.name
-                  }))}
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={classesLoading ? 'Loading classes...' : 'Select a class'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map(cls => (
+                      <SelectItem key={cls.id} value={cls.id.toString()}>
+                        {cls.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldErrors.class_obj && (
+                  <p className="text-sm text-red-600">{fieldErrors.class_obj}</p>
+                )}
                 <p className="text-xs text-gray-500">Select the class this stream belongs to</p>
               </div>
 
@@ -163,10 +180,12 @@ export default function CreateStreamPage() {
                   type="text"
                   value={formData.name}
                   onChange={handleInputChange}
-                  error={fieldErrors.name}
                   placeholder="Enter stream name (e.g., Form 1A, Grade 8 East)"
                   required
                 />
+                {fieldErrors.name && (
+                  <p className="text-sm text-red-600">{fieldErrors.name}</p>
+                )}
                 <p className="text-xs text-gray-500">Unique name for this stream</p>
               </div>
             </div>
@@ -184,28 +203,38 @@ export default function CreateStreamPage() {
                   max="100"
                   value={formData.capacity || ''}
                   onChange={handleInputChange}
-                  error={fieldErrors.capacity}
                   placeholder="Enter student capacity"
                   required
                 />
+                {fieldErrors.capacity && (
+                  <p className="text-sm text-red-600">{fieldErrors.capacity}</p>
+                )}
                 <p className="text-xs text-gray-500">Maximum number of students for this stream</p>
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="class_teacher">
+                  Class Teacher (Optional)
+                </Label>
                 <Select
-                  id="class_teacher"
-                  name="class_teacher"
-                  label="Class Teacher (Optional)"
                   value={formData.class_teacher?.toString() || ''}
-                  onChange={handleInputChange}
-                  error={fieldErrors.class_teacher}
+                  onValueChange={(value) => handleSelectChange('class_teacher', value)}
                   disabled={teachersLoading}
-                  placeholder={teachersLoading ? 'Loading teachers...' : 'Select class teacher (optional)'}
-                  options={teachers.map(teacher => ({
-                    value: teacher.id.toString(),
-                    label: teacher.teacher_name || 'Unknown Teacher'
-                  }))}
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={teachersLoading ? 'Loading teachers...' : 'Select class teacher (optional)'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teachers.map(teacher => (
+                      <SelectItem key={teacher.id} value={teacher.id.toString()}>
+                        {teacher.teacher_name || 'Unknown Teacher'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldErrors.class_teacher && (
+                  <p className="text-sm text-red-600">{fieldErrors.class_teacher}</p>
+                )}
                 <p className="text-xs text-gray-500">Assign a primary class teacher</p>
               </div>
             </div>

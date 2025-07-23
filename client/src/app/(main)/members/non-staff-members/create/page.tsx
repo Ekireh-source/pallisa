@@ -14,8 +14,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select';
-import { ArrowLeft, Save, X, User, Briefcase, Heart, Award, Shield } from 'lucide-react';
-import type { NonStaffMemberCreateUpdate, Role } from '@/types';
+import { ArrowLeft, Save, X, User, Briefcase, Heart, Shield } from 'lucide-react';
+import type { NonStaffMemberCreateUpdate } from '@/types';
 
 const EMPLOYMENT_TYPE_OPTIONS = [
   { value: 'full_time', label: 'Full Time' },
@@ -80,7 +80,7 @@ export default function CreateNonStaffMemberPage() {
     const { name, value } = e.target;
     
     // Handle numeric fields
-    let processedValue: any = value;
+    let processedValue: string | number | undefined = value;
     if (name === 'years_of_experience') {
       processedValue = value === '' ? 0 : parseInt(value) || 0;
     } else if (name === 'salary') {
@@ -121,10 +121,10 @@ export default function CreateNonStaffMemberPage() {
         acc[key] = value;
       }
       return acc;
-    }, {} as any);
+    }, {} as Record<string, unknown>);
     
     try {
-      const result = await dispatch(createNonStaffMember(cleanedData));
+      const result = await dispatch(createNonStaffMember(cleanedData as unknown as NonStaffMemberCreateUpdate));
       
       if (createNonStaffMember.fulfilled.match(result)) {
         // Refresh the non-staff members list to show the new member

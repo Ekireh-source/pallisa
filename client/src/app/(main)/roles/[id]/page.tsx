@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchRoleById, deleteRole } from '@/store/slices/roleSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
-import { ArrowLeft, Edit, Trash2, Shield, Users, Calendar, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Shield, Calendar, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
+import type { Permission } from '@/types';
 
 export default function RoleDetailPage() {
   const params = useParams();
@@ -56,7 +57,7 @@ export default function RoleDetailPage() {
   const groupPermissionsByCategory = () => {
     if (!currentRole?.permissions) return {};
     
-    const grouped: Record<string, any[]> = {};
+    const grouped: Record<string, Permission[]> = {};
     currentRole.permissions.forEach(permission => {
       const categoryName = permission.category?.name || 'Uncategorized';
       if (!grouped[categoryName]) {
@@ -111,7 +112,7 @@ export default function RoleDetailPage() {
         <div className="text-center">
           <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Role Not Found</h2>
-          <p className="text-gray-600 mb-4">The role you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The role you&apos;re looking for doesn&apos;t exist.</p>
           <Link href="/roles">
             <Button>Back to Roles</Button>
           </Link>
@@ -248,7 +249,7 @@ export default function RoleDetailPage() {
             <Badge className="ml-2">{getPermissionCount()}</Badge>
           </CardTitle>
           <CardDescription>
-            Permissions assigned to this role
+            Manage role permissions and access rights. Users with this role will have access to the selected permissions.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -264,9 +265,7 @@ export default function RoleDetailPage() {
             <div className="text-center py-8">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Permissions Assigned</h3>
-              <p className="text-gray-600 mb-4">
-                This role doesn't have any permissions assigned yet.
-              </p>
+              <p className="text-gray-600 text-sm">This role doesn&apos;t have any specific permissions assigned</p>
               <Link href={`/roles/${roleId}/edit`}>
                 <Button>Assign Permissions</Button>
               </Link>
