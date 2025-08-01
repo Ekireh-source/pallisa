@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
+import { ArrowLeft, Save, Loader2, Edit, CreditCard, User, Calendar, DollarSign, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPayment, updateSalaryPayment, getSalaryPeriods, getTeachers, getNonStaffMembers } from '@/lib/api';
 import { SalaryPayment, SalaryPaymentCreateUpdate, SalaryPeriod, StaffSalaryInfo } from '@/types';
@@ -177,10 +177,7 @@ export default function EditSalaryPaymentPage() {
   if (!isAuthenticated || loading || loadingFormData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -199,34 +196,61 @@ export default function EditSalaryPaymentPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href={`/salary-management/payments/${payment.id}`}>
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Salary Payment</h1>
-            <p className="text-gray-600 mt-2">
-              Update payment details and settings
+    <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+            <Edit className="w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Edit Salary Payment</h1>
+            <p className="text-purple-100 text-base sm:text-lg">
+              Update payment details for {payment.staff_name}
             </p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-4 text-purple-100 text-sm">
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span>Staff: {payment.staff_name}</span>
+            </div>
+            <div className="w-1 h-1 bg-purple-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-4 h-4" />
+              <span>Amount: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'UGX' }).format(payment.net_salary)}</span>
+            </div>
+            <div className="w-1 h-1 bg-purple-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>Status: {payment.payment_status}</span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex space-x-3">
+            <Link
+              href={`/salary-management/payments/${payment.id}`}
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 cursor-pointer relative z-10"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Back to Payment
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardHeader>
-          <CardTitle>Payment Details</CardTitle>
-          <CardDescription>
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+            <span>Payment Details</span>
+          </CardTitle>
+          <CardDescription className="text-gray-600">
             Update the details for this salary payment
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Staff Member */}
@@ -253,18 +277,34 @@ export default function EditSalaryPaymentPage() {
                     <SelectValue placeholder="Select staff member" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teachers.map((teacher) => (
-                      <SelectItem key={`teacher-${teacher.id}`} value={teacher.id.toString()}>
-                        {teacher.name} (Teacher)
-                      </SelectItem>
-                    ))}
-                    {nonStaffMembers.map((member) => (
-                      <SelectItem key={`nonstaff-${member.id}`} value={member.id.toString()}>
-                        {member.name} (Non-Staff)
-                      </SelectItem>
-                    ))}
+                    {teachers.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-sm font-semibold text-gray-500">Teachers</div>
+                        {teachers.map((teacher) => (
+                          <SelectItem key={`teacher-${teacher.id}`} value={teacher.id.toString()}>
+                            {teacher.name} (Teacher)
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {nonStaffMembers.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-sm font-semibold text-gray-500">Non-Staff Members</div>
+                        {nonStaffMembers.map((member) => (
+                          <SelectItem key={`nonstaff-${member.id}`} value={member.id.toString()}>
+                            {member.name} (Non-Staff)
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {teachers.length === 0 && nonStaffMembers.length === 0 && (
+                      <div className="px-2 py-1.5 text-sm text-gray-500">No staff members available</div>
+                    )}
                   </SelectContent>
                 </Select>
+                {loadingFormData && (
+                  <p className="text-sm text-gray-500">Loading staff members...</p>
+                )}
               </div>
 
               {/* Salary Period */}

@@ -14,7 +14,14 @@ import {
   TrendingUp,
   AlertCircle,
   Users,
-  CheckCircle
+  CheckCircle,
+  Activity,
+  FileText,
+  BarChart3,
+  DollarSign,
+  Calendar,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
 
@@ -114,492 +121,375 @@ export default function FeeCollectionSummariesPage() {
   };
 
   const getEfficiencyBadge = (efficiency: string) => {
-    switch (efficiency.toLowerCase()) {
-      case 'excellent':
-        return <Badge className="bg-green-100 text-green-800 border-0">Excellent</Badge>;
-      case 'good':
-        return <Badge className="bg-blue-100 text-blue-800 border-0">Good</Badge>;
-      case 'fair':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-0">Fair</Badge>;
-      case 'poor':
-        return <Badge className="bg-red-100 text-red-800 border-0">Poor</Badge>;
-      default:
-        return <Badge className="bg-gray-100 text-gray-800 border-0">{efficiency}</Badge>;
+    const efficiencyNum = parseFloat(efficiency || '0');
+    if (efficiencyNum >= 90) {
+      return <Badge className="bg-green-100 text-green-800 border-0">Excellent</Badge>;
+    } else if (efficiencyNum >= 75) {
+      return <Badge className="bg-blue-100 text-blue-800 border-0">Good</Badge>;
+    } else if (efficiencyNum >= 60) {
+      return <Badge className="bg-yellow-100 text-yellow-800 border-0">Fair</Badge>;
+    } else {
+      return <Badge className="bg-red-100 text-red-800 border-0">Poor</Badge>;
     }
   };
 
   const formatCurrency = (amount: string) => {
-    if (!amount) return 'UGX 0';
+    const num = parseFloat(amount || '0');
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'UGX',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(parseFloat(amount));
+      maximumFractionDigits: 0,
+    }).format(num);
   };
 
   const formatPercentage = (percentage: string) => {
-    if (!percentage) return '0%';
-    return `${parseFloat(percentage).toFixed(1)}%`;
+    const num = parseFloat(percentage || '0');
+    return `${num.toFixed(1)}%`;
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return new Date(dateString).toLocaleDateString();
   };
 
   const handleRefresh = () => {
     fetchSummaries();
   };
 
-  // Filter summaries based on search term
   const filteredSummaries = summaries.filter(summary =>
     summary.academic_year_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    summary.term_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    summary.collection_efficiency.toLowerCase().includes(searchTerm.toLowerCase())
+    summary.term_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Sort summaries
   const sortedSummaries = [...filteredSummaries].sort((a, b) => {
-    let aValue: string | number = '';
-    let bValue: string | number = '';
+    let aValue: any = a[sortField];
+    let bValue: any = b[sortField];
 
-    switch (sortField) {
-      case 'academic_year_name':
-        aValue = a.academic_year_name || '';
-        bValue = b.academic_year_name || '';
-        break;
-      case 'term_name':
-        aValue = a.term_name || '';
-        bValue = b.term_name || '';
-        break;
-      case 'total_expected_with_overrides':
-        aValue = parseFloat(a.total_expected_with_overrides) || 0;
-        bValue = parseFloat(b.total_expected_with_overrides) || 0;
-        break;
-      case 'total_collected':
-        aValue = parseFloat(a.total_collected) || 0;
-        bValue = parseFloat(b.total_collected) || 0;
-        break;
-      case 'total_pending_collection':
-        aValue = parseFloat(a.total_pending_collection) || 0;
-        bValue = parseFloat(b.total_pending_collection) || 0;
-        break;
-      case 'collection_rate':
-        aValue = parseFloat(a.collection_rate) || 0;
-        bValue = parseFloat(b.collection_rate) || 0;
-        break;
-      case 'students_with_fees':
-        aValue = a.students_with_fees || 0;
-        bValue = b.students_with_fees || 0;
-        break;
+    if (sortField === 'total_expected_with_overrides' || sortField === 'total_collected' || sortField === 'total_pending_collection') {
+      aValue = parseFloat(aValue || '0');
+      bValue = parseFloat(bValue || '0');
+    } else if (sortField === 'collection_rate') {
+      aValue = parseFloat(aValue || '0');
+      bValue = parseFloat(bValue || '0');
+    } else if (sortField === 'students_with_fees') {
+      aValue = parseInt(aValue || '0');
+      bValue = parseInt(bValue || '0');
     }
 
     if (sortOrder === 'asc') {
-      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      return aValue > bValue ? 1 : -1;
     } else {
-      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      return aValue < bValue ? 1 : -1;
     }
   });
 
-  // Calculate overall statistics
-  const stats = {
-    totalTerms: summaries.length,
-    totalExpected: summaries.reduce((sum, s) => sum + parseFloat(s.total_expected_with_overrides || '0'), 0),
-    totalCollected: summaries.reduce((sum, s) => sum + parseFloat(s.total_collected || '0'), 0),
-    totalPending: summaries.reduce((sum, s) => sum + parseFloat(s.total_pending_collection || '0'), 0),
-    totalStudents: summaries.reduce((sum, s) => sum + s.total_students, 0),
-    averageCollectionRate: summaries.length > 0 ? 
-      summaries.reduce((sum, s) => sum + parseFloat(s.collection_rate || '0'), 0) / summaries.length : 0,
-    completedCollections: summaries.filter(s => s.is_collection_complete).length,
-  };
+  const totalExpected = summaries.reduce((sum, summary) => sum + parseFloat(summary.total_expected_with_overrides || '0'), 0);
+  const totalCollected = summaries.reduce((sum, summary) => sum + parseFloat(summary.total_collected || '0'), 0);
+  const totalPending = summaries.reduce((sum, summary) => sum + parseFloat(summary.total_pending_collection || '0'), 0);
+  const totalStudents = summaries.reduce((sum, summary) => sum + summary.students_with_fees, 0);
+  const fullyPaidStudents = summaries.reduce((sum, summary) => sum + summary.fully_paid_students, 0);
 
-  // Get current term summary
-  const currentTermSummary = currentTerm ? summaries.find(summary => 
-    Number(summary.term) === Number(currentTerm.id) && Number(summary.academic_year) === Number(currentTerm.academic_year)
-  ) : null;
-
-  // Calculate current term statistics
-  const currentTermStats = currentTermSummary ? {
-    totalExpected: parseFloat(currentTermSummary.total_expected_with_overrides || '0'),
-    totalCollected: parseFloat(currentTermSummary.total_collected || '0'),
-    totalPending: parseFloat(currentTermSummary.total_pending_collection || '0'),
-    totalStudents: currentTermSummary.total_students,
-    collectionRate: parseFloat(currentTermSummary.collection_rate || '0'),
-    collectionEfficiency: currentTermSummary.collection_efficiency,
-    termName: currentTermSummary.term_name,
-    academicYearName: currentTermSummary.academic_year_name,
-  } : null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Fee Collection Summaries</h1>
-              <p className="text-gray-600 mt-1">Track overall fee collection performance across all terms</p>
-              {currentTermStats && (
-                <div className="mt-2 flex items-center space-x-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Current Term Focus
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    Statistics above show data for {currentTermStats.termName} ({currentTermStats.academicYearName})
-                  </span>
-                </div>
-              )}
-              {!currentTermStats && currentTerm === null && (
-                <div className="mt-2 flex items-center space-x-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    No Current Term Set
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    Statistics above show overall data across all terms
-                  </span>
-                </div>
-              )}
-              {!currentTermStats && currentTerm !== null && (
-                <div className="mt-2 flex items-center space-x-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    No Data for Current Term
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    No collection summary found for current term. Statistics show overall data.
-                  </span>
-                </div>
-              )}
+    <div className="space-y-6">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <TrendingUp className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Fee Collection Summaries</h1>
+            <p className="text-blue-100 text-lg">
+              Comprehensive overview of fee collection performance across all terms
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span className="text-sm">Total Terms: {summaries.length}</span>
             </div>
-            <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={loading}
-                className="flex items-center space-x-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Export</span>
-              </Button>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm">Total Expected: {formatCurrency(totalExpected.toString())}</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-sm">Total Collected: {formatCurrency(totalCollected.toString())}</span>
+            </div>
+          </div>
+          <div className="flex space-x-3">
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-300"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-300"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Current Term Highlight */}
+      {currentTerm && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-green-200">
+            <h3 className="text-lg font-semibold text-green-800 flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+              Current Active Term
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-green-900">{currentTerm.name}</h4>
+                  <p className="text-green-700">{currentTerm.academic_year_name}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1 px-3 py-1 bg-green-100 rounded-full">
+                  <CheckCircle className="w-3 h-3 text-green-600" />
+                  <span className="text-sm font-medium text-green-800">Active</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Overall Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Current Term' : 'Total Terms'}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {currentTermStats ? currentTermStats.termName : stats.totalTerms}
-                  </p>
-                  {currentTermStats && (
-                    <p className="text-xs text-gray-500">{currentTermStats.academicYearName}</p>
-                  )}
-                </div>
-                {/* BarChart3 className="h-8 w-8 text-blue-600" /> */}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Expected (Current)' : 'Total Expected'}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(currentTermStats ? currentTermStats.totalExpected.toString() : stats.totalExpected.toString())}
-                  </p>
-                </div>
-                {/* Target className="h-8 w-8 text-gray-600" /> */}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Collected (Current)' : 'Total Collected'}
-                  </p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {formatCurrency(currentTermStats ? currentTermStats.totalCollected.toString() : stats.totalCollected.toString())}
-                  </p>
-                </div>
-                {/* CheckCircle className="h-8 w-8 text-green-600" /> */}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Pending (Current)' : 'Total Pending'}
-                  </p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {formatCurrency(currentTermStats ? currentTermStats.totalPending.toString() : stats.totalPending.toString())}
-                  </p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
+      {/* Search and Filters */}
+      <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <Search className="w-5 h-5 mr-2 text-blue-600" />
+            Search Collection Summaries
+          </h3>
         </div>
-
-        {/* Performance Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Students (Current)' : 'Total Students'}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {currentTermStats ? currentTermStats.totalStudents : stats.totalStudents}
-                  </p>
-                </div>
-                <Users className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Collection Rate (Current)' : 'Avg Collection Rate'}
-                  </p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {currentTermStats ? `${currentTermStats.collectionRate.toFixed(1)}%` : `${stats.averageCollectionRate.toFixed(1)}%`}
-                  </p>
-                  {currentTermStats && (
-                    <p className="text-xs text-gray-500">{currentTermStats.collectionEfficiency}</p>
-                  )}
-                </div>
-                <TrendingUp className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-sm border border-gray-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {currentTermStats ? 'Status (Current)' : 'Completed Collections'}
-                  </p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {currentTermStats ? 
-                      (currentTermStats.collectionRate >= 100 ? 'Complete' : 'In Progress') : 
-                      stats.completedCollections
-                    }
-                  </p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
+        <div className="p-6">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by academic year or term name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300"
+            />
+          </div>
         </div>
+      </div>
 
-        {/* Search and Filters */}
-        <Card className="bg-white shadow-sm border border-gray-100 mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by academic year, term, or efficiency..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+      {/* Error Display */}
+      {error && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Loading Collection Summaries
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Summaries Grid */}
+      {sortedSummaries.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+              <TrendingUp className="w-5 h-5 mr-2 text-gray-600" />
+              No Collection Summaries Found
+            </h3>
+          </div>
+          <div className="p-12 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <TrendingUp className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No collection summaries found</h3>
+            <p className="text-gray-600 mb-6">
+              {searchTerm ? 'Try adjusting your search terms.' : 'Fee collection summaries will appear here once they are calculated.'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedSummaries.map((summary) => (
+            <div key={summary.id} className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <TrendingUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        {summary.term_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{summary.academic_year_name}</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    {getEfficiencyBadge(summary.collection_efficiency)}
+                  </div>
+                </div>
+                
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Expected:</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(summary.total_expected_with_overrides)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Collected:</span>
+                    <span className="font-semibold text-green-600">{formatCurrency(summary.total_collected)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Pending:</span>
+                    <span className="font-semibold text-red-600">{formatCurrency(summary.total_pending_collection)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Collection Rate:</span>
+                    <span className="font-semibold text-blue-600">{formatPercentage(summary.collection_percentage)}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Students with Fees:</span>
+                    <span className="font-medium">{summary.students_with_fees}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Fully Paid:</span>
+                    <span className="font-medium text-green-600">{summary.fully_paid_students}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Partially Paid:</span>
+                    <span className="font-medium text-yellow-600">{summary.partially_paid_students}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Unpaid:</span>
+                    <span className="font-medium text-red-600">{summary.unpaid_students}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 rounded-full">
+                    <Clock className="w-3 h-3 text-blue-600" />
+                    <span className="text-xs font-medium text-blue-800">
+                      {formatDate(summary.last_calculated)}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1 text-xs text-gray-500">
+                    <DollarSign className="w-3 h-3" />
+                    <span>Collection</span>
+                  </div>
+                </div>
+
+                {summary.is_collection_complete && (
+                  <div className="mt-3 flex items-center space-x-2 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-xs text-green-700 font-medium">Collection Complete</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Summary Stats */}
+      {summaries.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
+              Collection Summary Statistics
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Total Terms</p>
+                    <p className="text-2xl font-bold text-blue-900">{summaries.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-green-600">Total Collected</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {formatCurrency(totalCollected.toString())}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">Total Students</p>
+                    <p className="text-2xl font-bold text-purple-900">{totalStudents}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-600">Fully Paid Students</p>
+                    <p className="text-2xl font-bold text-yellow-900">{fullyPaidStudents}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Error Display */}
-        {error && (
-          <Card className="bg-red-50 border border-red-200 mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 text-red-700">
-                <AlertCircle className="h-5 w-5" />
-                <span className="text-sm font-medium">{error}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Summaries Table */}
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Fee Collection Summaries ({filteredSummaries.length})
-            </CardTitle>
-            <CardDescription>
-              {searchTerm ? 'Filtered collection summaries' : 'All term fee collection summaries'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <LoadingSpinner />
-                <span className="ml-2 text-gray-600">Loading summaries...</span>
-              </div>
-            ) : filteredSummaries.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-gray-400 text-6xl mb-4">📊</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No summaries found</h3>
-                <p className="text-gray-600 mb-4">
-                  {searchTerm ? 'Try adjusting your search terms.' : 'No fee collection summaries available.'}
-                </p>
-              </div>
-            ) : (
-              <div className="w-full">
-                <div className="min-w-full divide-y divide-gray-200">
-                  <div className="bg-gray-50">
-                    <div className="grid grid-cols-12 gap-4 px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="col-span-2">
-                        <button
-                          onClick={() => handleSort('academic_year_name')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Academic Year</span>
-                          {getSortIcon('academic_year_name')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          onClick={() => handleSort('term_name')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Term</span>
-                          {getSortIcon('term_name')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          onClick={() => handleSort('students_with_fees')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Students</span>
-                          {getSortIcon('students_with_fees')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          onClick={() => handleSort('total_expected_with_overrides')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Expected</span>
-                          {getSortIcon('total_expected_with_overrides')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          onClick={() => handleSort('total_collected')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Collected</span>
-                          {getSortIcon('total_collected')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          onClick={() => handleSort('total_pending_collection')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Pending</span>
-                          {getSortIcon('total_pending_collection')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          onClick={() => handleSort('collection_rate')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Rate</span>
-                          {getSortIcon('collection_rate')}
-                        </button>
-                      </div>
-                      <div className="col-span-1">Efficiency</div>
-                      <div className="col-span-1">Status</div>
-                      <div className="col-span-2">Last Updated</div>
-                    </div>
-                  </div>
-                  <div className="bg-white divide-y divide-gray-200">
-                    {sortedSummaries.map((summary) => (
-                      <div key={summary.id} className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-gray-50">
-                        <div className="col-span-2 text-sm font-medium text-gray-900">
-                          {summary.academic_year_name}
-                        </div>
-                        <div className="col-span-1 text-sm text-gray-900">
-                          <div className="flex items-center space-x-1">
-                            <span>{summary.term_name}</span>
-                            {/* Add current term indicator here if we have that data */}
-                          </div>
-                        </div>
-                        <div className="col-span-1 text-sm text-gray-900">{summary.students_with_fees}</div>
-                        <div className="col-span-1 text-sm text-gray-900">{formatCurrency(summary.total_expected_with_overrides)}</div>
-                        <div className="col-span-1 text-sm text-gray-900">{formatCurrency(summary.total_collected)}</div>
-                        <div className="col-span-1 text-sm text-gray-900">{formatCurrency(summary.total_pending_collection)}</div>
-                        <div className="col-span-1">
-                          <div className="flex items-center space-x-1">
-                            <div className="w-12 bg-gray-200 rounded-full h-1.5">
-                              <div 
-                                className="bg-blue-600 h-1.5 rounded-full" 
-                                style={{ width: `${Math.min(100, parseFloat(summary.collection_rate || '0'))}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs text-gray-600">{formatPercentage(summary.collection_rate)}</span>
-                          </div>
-                        </div>
-                        <div className="col-span-1">{getEfficiencyBadge(summary.collection_efficiency)}</div>
-                        <div className="col-span-1">
-                          {summary.is_collection_complete ? 
-                            <Badge className="bg-green-100 text-green-800 border-0">Complete</Badge> :
-                            <Badge className="bg-yellow-100 text-yellow-800 border-0">In Progress</Badge>
-                          }
-                        </div>
-                        <div className="col-span-2 text-xs text-gray-500">{formatDate(summary.last_calculated)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

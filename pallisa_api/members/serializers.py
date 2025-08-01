@@ -115,11 +115,12 @@ class StudentSerializer(serializers.ModelSerializer):
     # User creation fields (required when user_profile not provided)
     user_email = serializers.EmailField(write_only=True, required=False)
     user_student_id = serializers.CharField(max_length=100, write_only=True, required=False)
+    student_id = serializers.CharField(max_length=20, required=False, allow_blank=True)
     
     # UserProfile creation fields
     user_first_name = serializers.CharField(max_length=100, write_only=True, required=False)
     user_last_name = serializers.CharField(max_length=100, write_only=True, required=False)
-    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False, allow_blank=True)
     user_gender = serializers.ChoiceField(
         choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')], 
         write_only=True, required=False
@@ -146,13 +147,13 @@ class StudentSerializer(serializers.ModelSerializer):
             'special_needs', 'medical_conditions', 'allergies', 'enrollment_status',
             'is_active', 'full_name', 'email', 'age', 'created_at', 'updated_at',
             # User creation fields
-            'user_email', 'user_student_id',
+            'user_email', 'user_student_id', 'student_id',
             # UserProfile creation fields
             'user_first_name', 'user_last_name', 'user_other_name', 'user_gender', 'user_dob',
             'user_phone', 'user_emergency_contact', 'user_emergency_phone', 
             'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id'
         ]
-        read_only_fields = ['id', 'student_id', 'created_at', 'updated_at', 'full_name', 'email', 'age']
+        read_only_fields = ['id', 'admission_number', 'created_at', 'updated_at', 'full_name', 'email', 'age']
         extra_kwargs = {
             'user_profile': {'required': False, 'allow_null': True}
         }
@@ -202,6 +203,9 @@ class StudentSerializer(serializers.ModelSerializer):
             'user_email': validated_data.pop('user_email', None),
             'user_student_id': validated_data.pop('user_student_id', None),
         }
+        
+        # Extract student_id if provided
+        student_id = validated_data.pop('student_id', None)
         
         profile_fields = {
             'user_first_name': validated_data.pop('user_first_name', None),
@@ -277,6 +281,10 @@ class StudentSerializer(serializers.ModelSerializer):
             # Set the user_profile for student creation
             validated_data['user_profile'] = user_profile
             
+            # Set student_id if provided
+            if student_id:
+                validated_data['student_id'] = student_id
+            
             # Step 3: Create Student
             student = super().create(validated_data)
             print(f"✓ Created Student: {student.student_id} (ID: {student.id})")
@@ -292,6 +300,8 @@ class StudentSerializer(serializers.ModelSerializer):
             return student
         
         # If user_profile is provided, create student directly
+        if student_id:
+            validated_data['student_id'] = student_id
         return super().create(validated_data)
 
 
@@ -308,7 +318,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     # UserProfile creation fields
     user_first_name = serializers.CharField(max_length=100, write_only=True, required=False)
     user_last_name = serializers.CharField(max_length=100, write_only=True, required=False)
-    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False, allow_blank=True)
     user_gender = serializers.ChoiceField(
         choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')], 
         write_only=True, required=False
@@ -464,7 +474,7 @@ class ParentSerializer(serializers.ModelSerializer):
     # UserProfile creation fields
     user_first_name = serializers.CharField(max_length=100, write_only=True, required=False)
     user_last_name = serializers.CharField(max_length=100, write_only=True, required=False)
-    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False, allow_blank=True)
     user_gender = serializers.ChoiceField(
         choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')], 
         write_only=True, required=False
@@ -700,7 +710,7 @@ class NonStaffMemberSerializer(serializers.ModelSerializer):
     # UserProfile creation fields
     user_first_name = serializers.CharField(max_length=100, write_only=True, required=False)
     user_last_name = serializers.CharField(max_length=100, write_only=True, required=False)
-    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False)
+    user_other_name = serializers.CharField(max_length=100, write_only=True, required=False, allow_blank=True)
     user_gender = serializers.ChoiceField(
         choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')], 
         write_only=True, required=False

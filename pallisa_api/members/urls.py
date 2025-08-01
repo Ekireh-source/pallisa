@@ -21,6 +21,7 @@ urlpatterns = [
     
     # Students URLs
     path('students/', views.StudentListCreateView.as_view(), name='student-list'),
+    path('students/bulk-upload/', views.BulkStudentUploadView.as_view(), name='student-bulk-upload'),
     path('students/<int:pk>/', views.StudentDetailView.as_view(), name='student-detail'),
     path('students/<int:pk>/parents/', views.StudentParentsView.as_view(), name='student-parents'),
     path('students/<int:pk>/history/', views.StudentHistoryView.as_view(), name='student-history'),
@@ -29,6 +30,7 @@ urlpatterns = [
     
     # Teachers URLs
     path('teachers/', views.TeacherListCreateView.as_view(), name='teacher-list'),
+    path('teachers/bulk-upload/', views.BulkTeacherUploadView.as_view(), name='teacher-bulk-upload'),
     path('teachers/<int:pk>/', views.TeacherDetailView.as_view(), name='teacher-detail'),
     path('teachers/<int:pk>/assignments/', views.TeacherAssignmentsView.as_view(), name='teacher-assignments'),
     path('teachers/<int:pk>/streams/', views.TeacherStreamsView.as_view(), name='teacher-streams'),
@@ -48,6 +50,7 @@ urlpatterns = [
     
     # Non-Staff Members URLs
     path('non-staff-members/', views.NonStaffMemberListCreateView.as_view(), name='non-staff-member-list'),
+    path('non-staff-members/bulk-upload/', views.BulkNonStaffMemberUploadView.as_view(), name='non-staff-member-bulk-upload'),
     path('non-staff-members/<int:pk>/', views.NonStaffMemberDetailView.as_view(), name='non-staff-member-detail'),
     
     # ==================== SALARY MANAGEMENT URLS ====================

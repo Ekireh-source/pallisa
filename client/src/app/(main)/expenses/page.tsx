@@ -20,6 +20,20 @@ import { ExpenseTable } from '@/components/expenses/ExpenseTable';
 import { Pagination } from '@/components/ui/Pagination';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ExpenseFilters } from '@/types';
+import { 
+  CreditCard, 
+  Activity, 
+  Calendar, 
+  Plus, 
+  DollarSign, 
+  CheckCircle, 
+  Clock, 
+  X, 
+  Search, 
+  Filter, 
+  FileText, 
+  AlertCircle 
+} from 'lucide-react';
 
 export default function ExpensesPage() {
   const router = useRouter();
@@ -310,55 +324,61 @@ export default function ExpensesPage() {
     }).format(amount);
   };
 
-  if (loading && expenses.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
-              <p className="mt-2 text-gray-600">Manage and track school expenses</p>
-              {/* Debug info - remove in production */}
-              <p className="mt-1 text-xs text-gray-400">
-                Auth: {authState?.isAuthenticated ? '✅ Authenticated' : '❌ Not authenticated'} | 
-                User: {authState?.user?.email || 'None'}
-                <button 
-                  onClick={handleRefreshAuth}
-                  className="ml-2 text-blue-500 hover:text-blue-700 underline"
-                >
-                  Refresh Auth
-                </button>
-              </p>
-            </div>
-            <Link
-              href="/expenses/create"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Add New Expense
-            </Link>
+    <div className="space-y-6">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <CreditCard className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Expense Management</h1>
+            <p className="text-blue-100 text-lg">
+              Track, manage, and analyze school expenses with comprehensive oversight
+            </p>
           </div>
         </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span className="text-sm">Total Records: {totalCount}</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4" />
+              <span className="text-sm">Current Term: {getCurrentTerm()?.name || 'Not Set'}</span>
+            </div>
+          </div>
+          <Link
+            href="/expenses/create"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add New Expense
+          </Link>
+        </div>
+      </div>
 
-        {/* Term Selection */}
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="p-6">
-            <div className="flex items-center space-x-4">
-              <label className="text-sm font-medium text-gray-700">Academic Term:</label>
+      {/* Term Selection */}
+      <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+            Academic Term Filter
+          </h3>
+        </div>
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="flex items-center space-x-3">
+              <label className="text-sm font-semibold text-gray-700">Academic Term:</label>
               <select
                 value={selectedTerm || ''}
                 onChange={(e) => handleTermChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto bg-white hover:border-gray-300 transition-colors"
                 disabled={termsLoading}
               >
                 <option value="">All Terms</option>
@@ -372,284 +392,322 @@ export default function ExpensesPage() {
                   );
                 })}
               </select>
-              {selectedTerm && (
-                <span className="text-sm text-gray-500">
+            </div>
+            {selectedTerm && (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm text-blue-700 font-medium">
                   {getCurrentTerm()?.id === selectedTerm 
                     ? "Showing expenses for current term" 
                     : "Showing expenses for selected term only"
                   }
                 </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        {summary && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">UGX</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {selectedTerm ? 'Term Expenses' : 'Total Expenses'}
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {formatCurrency(summary.total_expenses)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">✓</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Approved</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {formatCurrency(summary.approved_expenses)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">⏳</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {formatCurrency(summary.pending_expenses)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-gray-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">#</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {selectedTerm ? 'Term Count' : 'Total Count'}
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {summary.expense_count.toLocaleString()}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Search and Filters */}
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="p-6">
-            {/* Search Bar */}
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search expenses..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Search
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Filters
-              </button>
-            </div>
-
-            {/* Filters Panel */}
-            {showFilters && (
-              <div className="border-t pt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                  {/* Category Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select
-                      value={localFilters.category || ''}
-                      onChange={(e) => handleFilterChange('category', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">All Categories</option>
-                      {categories.map(category => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Department Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                    <select
-                      value={localFilters.department || ''}
-                      onChange={(e) => handleFilterChange('department', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">All Departments</option>
-                      {departments.map(department => (
-                        <option key={department.id} value={department.id}>
-                          {department.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Approval Status Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select
-                      value={localFilters.approved === undefined ? '' : localFilters.approved.toString()}
-                      onChange={(e) => handleFilterChange('approved', e.target.value === '' ? undefined : e.target.value === 'true')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">All Status</option>
-                      <option value="true">Approved</option>
-                      <option value="false">Pending</option>
-                    </select>
-                  </div>
-
-                  {/* Date Range */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-                    <div className="space-y-2">
-                      <input
-                        type="date"
-                        value={localFilters.start_date || ''}
-                        onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="From"
-                      />
-                      <input
-                        type="date"
-                        value={localFilters.end_date || ''}
-                        onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="To"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Filter Actions */}
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={applyFilters}
-                    className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Apply Filters
-                  </button>
-                  <button
-                    onClick={clearAllFilters}
-                    className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Clear All
-                  </button>
-                </div>
               </div>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-            <p className="text-sm text-red-600">{error}</p>
+      {/* Summary Cards */}
+      {summary && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    {selectedTerm ? 'Term Expenses' : 'Total Expenses'}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(summary.total_expenses || 0)}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Expenses Table */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Approved Expenses</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(summary.approved_expenses || 0)}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Pending Expenses</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(summary.pending_expenses || 0)}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Rejected Expenses</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency((summary.total_expenses || 0) - (summary.approved_expenses || 0) - (summary.pending_expenses || 0))}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <X className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Search and Filters */}
+      <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Search className="w-5 h-5 mr-2 text-blue-600" />
+              Search & Filters
+            </h3>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Filter className="w-4 h-4" />
+              <span>{showFilters ? 'Hide' : 'Show'} Filters</span>
+            </button>
+          </div>
+        </div>
+        
+        <div className="p-6">
+          {/* Search Bar */}
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search expenses by title, description, or vendor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              Search
+            </button>
+          </div>
+
+          {/* Filters */}
+          {showFilters && (
+            <div className="bg-gray-50 rounded-xl p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                  <select
+                    value={localFilters.category || ''}
+                    onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
+                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Department</label>
+                  <select
+                    value={localFilters.department || ''}
+                    onChange={(e) => handleFilterChange('department', e.target.value || undefined)}
+                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">All Departments</option>
+                    {departments.map(department => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                  <select
+                    value={localFilters.approved === undefined ? '' : localFilters.approved.toString()}
+                    onChange={(e) => handleFilterChange('approved', e.target.value === '' ? undefined : e.target.value === 'true')}
+                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="true">Approved</option>
+                    <option value="false">Pending</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Amount Range</label>
+                  <div className="flex space-x-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={localFilters.start_date || ''}
+                      onChange={(e) => handleFilterChange('start_date', e.target.value)}
+                      className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={localFilters.end_date || ''}
+                      onChange={(e) => handleFilterChange('end_date', e.target.value)}
+                      className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <button
+                  onClick={clearAllFilters}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                >
+                  Clear All Filters
+                </button>
+                <button
+                  onClick={applyFilters}
+                  className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Results Summary */}
+      <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg border-0 p-6">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <FileText className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} expenses
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <label className="text-sm font-medium text-gray-700">Page Size:</label>
+          <select
+            value={pageSize}
+            onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
+            className="px-3 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 p-12">
+          <div className="flex items-center justify-center">
+            <LoadingSpinner size="lg" />
+            <span className="ml-4 text-gray-600">Loading expenses...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-red-800">Error Loading Expenses</h3>
+              <p className="text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expenses Table */}
+      {!loading && !error && expenses.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
           <ExpenseTable
             expenses={expenses}
             onApprove={handleApprove}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            currentUserId={user?.id}
-            userType={user?.user_type}
             loading={loading}
           />
-          
-          {/* Pagination */}
-          {totalCount > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          )}
         </div>
+      )}
 
-        {/* Empty State */}
-        {!loading && expenses.length === 0 && (
-          <div className="text-center py-12">
-            <div className="mx-auto max-w-md">
-              <div className="text-gray-400 text-6xl mb-4">📊</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
-              <p className="text-gray-500 mb-6">
-                {Object.keys(filters).length > 0 || selectedTerm
-                  ? "No expenses match your current filters. Try adjusting your search criteria or selecting a different term."
-                  : "Get started by creating your first expense."
-                }
-              </p>
-              <Link
-                href="/expenses/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Add First Expense
-              </Link>
-            </div>
+      {/* Empty State */}
+      {!loading && !error && expenses.length === 0 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 p-12 text-center">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FileText className="w-10 h-10 text-gray-400" />
           </div>
-        )}
-      </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No expenses found</h3>
+          <p className="text-gray-600 mb-6">No expenses match your current filters.</p>
+          <div className="flex items-center justify-center space-x-4">
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            >
+              Clear Filters
+            </button>
+            <Link
+              href="/expenses/create"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+            >
+              <Plus className="w-5 h-5 mr-2 inline" />
+              Add First Expense
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 p-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </div>
+      )}
     </div>
   );
 } 

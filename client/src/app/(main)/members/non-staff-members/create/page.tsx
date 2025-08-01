@@ -14,7 +14,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select';
-import { ArrowLeft, Save, X, User, Briefcase, Heart, Shield } from 'lucide-react';
+import { ArrowLeft, Save, X, User, Briefcase, Heart, Shield, Plus, Users, FileText, AlertCircle } from 'lucide-react';
 import type { NonStaffMemberCreateUpdate } from '@/types';
 
 const EMPLOYMENT_TYPE_OPTIONS = [
@@ -164,29 +164,56 @@ export default function CreateNonStaffMemberPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/non-staff-members">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Non-Staff Members</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Add New Non-Staff Member</h1>
-            <p className="text-gray-600 mt-1">Create a comprehensive non-staff member record with all required information</p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Plus className="w-8 h-8" />
           </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Add New Non-Staff Member</h1>
+            <p className="text-purple-100 text-lg">
+              Create a comprehensive non-staff member record with all required information
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-purple-100">
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span className="text-sm">Member Management</span>
+            </div>
+            <div className="w-1 h-1 bg-purple-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm">Employment Records</span>
+            </div>
+          </div>
+          <Link
+            href="/members/non-staff-members"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Members
+          </Link>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Creating Member
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -198,7 +225,7 @@ export default function CreateNonStaffMemberPage() {
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <User className="h-5 w-5 text-blue-600" />
+              <User className="h-5 w-5 text-purple-600" />
               <span>Personal Information</span>
             </CardTitle>
             <CardDescription>
@@ -401,7 +428,7 @@ export default function CreateNonStaffMemberPage() {
               <span>Employment Information</span>
             </CardTitle>
             <CardDescription>
-              Professional details and employment specifics
+              Employment details, specialization, and work history
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -534,7 +561,7 @@ export default function CreateNonStaffMemberPage() {
               <span>Emergency Contact Information</span>
             </CardTitle>
             <CardDescription>
-              Emergency contact details for safety and communication
+              Emergency contact details for member safety
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -604,25 +631,38 @@ export default function CreateNonStaffMemberPage() {
           </CardContent>
         </Card>
 
-        {/* Form Actions */}
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={loading} className="flex items-center space-x-2">
-            {loading ? (
-              <>
-                <LoadingSpinner className="h-4 w-4" />
-                <span>Creating Non-Staff Member...</span>
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                <span>Create Non-Staff Member</span>
-              </>
-            )}
-          </Button>
-        </div>
+        {/* Action Buttons */}
+        <Card className="bg-white shadow-sm border border-gray-100">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex items-center space-x-2"
+              >
+                {loading ? (
+                  <>
+                    <LoadingSpinner />
+                    <span>Creating Member...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    <span>Create Member</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </div>
   );

@@ -17,6 +17,15 @@ import { fetchTerms } from '@/store/slices/termSlice';
 import ExpenseForm from '@/components/expenses/ExpenseForm';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ExpenseCreateUpdate } from '@/types';
+import { 
+  ArrowLeft, 
+  Edit, 
+  AlertTriangle, 
+  FileText, 
+  X, 
+  Info,
+  FolderOpen
+} from 'lucide-react';
 
 export default function EditExpensePage() {
   const params = useParams();
@@ -94,29 +103,41 @@ export default function EditExpensePage() {
   // Handle permission errors
   if (expense && !canEdit) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">🚫</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-          <p className="text-gray-600 mb-6">
-            {expense.approved 
-              ? "You cannot edit approved expenses."
-              : "You can only edit expenses that you created."
-            }
-          </p>
-          <div className="space-x-4">
-            <Link
-              href={`/expenses/${id}`}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              View Expense
-            </Link>
-            <Link
-              href="/expenses"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Back to Expenses
-            </Link>
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-red-600" />
+              Access Denied
+            </h3>
+          </div>
+          <div className="p-12 text-center">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <X className="w-10 h-10 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+            <p className="text-gray-600 mb-6">
+              {expense.approved 
+                ? "You cannot edit approved expenses."
+                : "You can only edit expenses that you created."
+              }
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <Link
+                href={`/expenses/${id}`}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                View Expense
+              </Link>
+              <Link
+                href="/expenses"
+                className="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 bg-white rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Expenses
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -125,17 +146,28 @@ export default function EditExpensePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Expense</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Link
-            href="/expenses"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Expenses
-          </Link>
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-red-600" />
+              Error Loading Expense
+            </h3>
+          </div>
+          <div className="p-12 text-center">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <X className="w-10 h-10 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Expense</h1>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Link
+              href="/expenses"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Expenses
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -143,17 +175,28 @@ export default function EditExpensePage() {
 
   if (!expense) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-gray-400 text-6xl mb-4">📊</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Expense Not Found</h1>
-          <p className="text-gray-600 mb-6">The expense you&apos;re trying to edit doesn&apos;t exist.</p>
-          <Link
-            href="/expenses"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Expenses
-          </Link>
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-gray-600" />
+              Expense Not Found
+            </h3>
+          </div>
+          <div className="p-12 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FileText className="w-10 h-10 text-gray-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Expense Not Found</h1>
+            <p className="text-gray-600 mb-6">The expense you&apos;re trying to edit doesn&apos;t exist.</p>
+            <Link
+              href="/expenses"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Expenses
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -175,107 +218,140 @@ export default function EditExpensePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-4">
-            <Link
-              href={`/expenses/${id}`}
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
-            >
-              <svg className="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Expense
-            </Link>
+    <div className="space-y-6">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Edit className="w-8 h-8" />
           </div>
-          <div className="mt-4">
-            <h1 className="text-3xl font-bold text-gray-900">Edit Expense</h1>
-            <p className="mt-2 text-gray-600">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold mb-2">Edit Expense</h1>
+            <p className="text-blue-100 text-lg">
               Make changes to &quot;{expense.title}&quot;
             </p>
           </div>
+          <Link
+            href={`/expenses/${id}`}
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Expense
+          </Link>
         </div>
+      </div>
 
-        {/* Warning about approved expenses */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
-          <div className="flex">
+      {/* Warning about approved expenses */}
+      <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-blue-200">
+          <h3 className="text-lg font-semibold text-blue-800 flex items-center">
+            <Info className="w-5 h-5 mr-2 text-blue-600" />
+            Important Note
+          </h3>
+        </div>
+        <div className="p-6">
+          <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <Info className="w-5 h-5 text-blue-600" />
+              </div>
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Important Note
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-blue-800 mb-2">
+                Approval Status
               </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
-                  Once an expense is approved, it cannot be edited. Make sure all information is correct before submitting.
+              <p className="text-sm text-blue-700">
+                Once an expense is approved, it cannot be edited. Make sure all information is correct before submitting.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Current receipt info */}
+      {expense.receipt_url && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-gray-600" />
+              Current Receipt
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-600">
+                  This expense currently has a receipt attached. Upload a new image to replace it, or leave empty to keep the current one.
                 </p>
               </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Current receipt info */}
-        {expense.receipt_url && (
-          <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mb-6">
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="text-sm text-gray-600">
-                This expense currently has a receipt attached. Upload a new image to replace it, or leave empty to keep the current one.
-              </span>
-            </div>
+      {/* Check if required data is available */}
+      {categories.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-b border-yellow-200">
+            <h3 className="text-lg font-semibold text-yellow-800 flex items-center">
+              <FolderOpen className="w-5 h-5 mr-2 text-yellow-600" />
+              No Expense Categories Found
+            </h3>
           </div>
-        )}
-
-        {/* Check if required data is available */}
-        {categories.length === 0 ? (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-            <div className="flex">
+          <div className="p-6">
+            <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">
-                  No expense categories found
-                </h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <p>
-                    You need to have expense categories available to edit expenses.{' '}
-                    <Link 
-                      href="/expenses/categories" 
-                      className="font-medium underline text-yellow-700 hover:text-yellow-600"
-                    >
-                      Manage categories here
-                    </Link>
-                  </p>
+                <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <FolderOpen className="w-5 h-5 text-yellow-600" />
                 </div>
               </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-yellow-800 mb-2">
+                  Categories Required
+                </h3>
+                <p className="text-sm text-yellow-700 mb-4">
+                  You need to have expense categories available to edit expenses.
+                </p>
+                <Link 
+                  href="/categories" 
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 transition-all duration-300"
+                >
+                  Manage Categories
+                </Link>
+              </div>
             </div>
           </div>
-        ) : (
-          /* Expense Form */
-          <ExpenseForm
-            initialData={initialData}
-            categories={categories}
-            departments={departments}
-            vendors={vendors}
-            terms={terms}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            loading={loading}
-            error={error || undefined}
-            fieldErrors={fieldErrors}
-          />
-        )}
-      </div>
+        </div>
+      ) : (
+        /* Expense Form */
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Edit className="w-5 h-5 mr-2 text-blue-600" />
+              Edit Expense Details
+            </h3>
+          </div>
+          <div className="p-6">
+            <ExpenseForm
+              initialData={initialData}
+              categories={categories}
+              departments={departments}
+              vendors={vendors}
+              terms={terms}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              loading={loading}
+              error={error || undefined}
+              fieldErrors={fieldErrors}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

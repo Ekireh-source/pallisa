@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox } from '@/components/ui';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox, LoadingSpinner } from '@/components/ui';
+import { ArrowLeft, Save, Plus, Home, Car, Heart, Award, Clock, Gift, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { createSalaryAllowance } from '@/lib/api';
 import { SalaryAllowanceCreateUpdate } from '@/types';
@@ -56,11 +56,30 @@ export default function CreateSalaryAllowancePage() {
     }
   };
 
+  const getAllowanceIcon = (type: string) => {
+    switch (type) {
+      case 'housing':
+        return <Home className="h-4 w-4 text-blue-600" />;
+      case 'transport':
+        return <Car className="h-4 w-4 text-green-600" />;
+      case 'medical':
+        return <Heart className="h-4 w-4 text-red-600" />;
+      case 'responsibility':
+        return <Award className="h-4 w-4 text-purple-600" />;
+      case 'overtime':
+        return <Clock className="h-4 w-4 text-orange-600" />;
+      case 'bonus':
+        return <Gift className="h-4 w-4 text-pink-600" />;
+      default:
+        return <Settings className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -69,28 +88,48 @@ export default function CreateSalaryAllowancePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/salary-management/allowances">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Plus className="w-8 h-8" />
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Salary Allowance</h1>
-            <p className="text-gray-600 mt-2">
-              Add a new salary allowance for staff
+            <h1 className="text-3xl font-bold mb-2">Create Salary Allowance</h1>
+            <p className="text-green-100 text-lg">
+              Add a new salary allowance for staff members
             </p>
           </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-green-100">
+            <div className="flex items-center space-x-2">
+              <Plus className="w-4 h-4" />
+              <span className="text-sm">Allowance Management</span>
+            </div>
+            <div className="w-1 h-1 bg-green-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Award className="w-4 h-4" />
+              <span className="text-sm">Staff Benefits</span>
+            </div>
+          </div>
+          <Link
+            href="/salary-management/allowances"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Allowances
+          </Link>
         </div>
       </div>
 
       {/* Form */}
       <Card className="bg-white shadow-sm border border-gray-100">
         <CardHeader>
-          <CardTitle>Allowance Details</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+            {getAllowanceIcon(formData.allowance_type)}
+            <span>Allowance Details</span>
+          </CardTitle>
           <CardDescription>
             Fill in the details for the new salary allowance
           </CardDescription>
@@ -100,7 +139,7 @@ export default function CreateSalaryAllowancePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Allowance Name *</Label>
+                <Label htmlFor="name">Allowance Name <span className="text-red-500">*</span></Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -108,11 +147,12 @@ export default function CreateSalaryAllowancePage() {
                   placeholder="e.g., Housing Allowance"
                   required
                 />
+                <p className="text-xs text-gray-500">Name of the allowance for identification</p>
               </div>
 
               {/* Allowance Type */}
               <div className="space-y-2">
-                <Label htmlFor="allowance_type">Allowance Type *</Label>
+                <Label htmlFor="allowance_type">Allowance Type <span className="text-red-500">*</span></Label>
                 <Select
                   value={formData.allowance_type}
                   onValueChange={(value) => handleInputChange('allowance_type', value)}
@@ -130,11 +170,12 @@ export default function CreateSalaryAllowancePage() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-gray-500">Category of the allowance</p>
               </div>
 
               {/* Amount */}
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount *</Label>
+                <Label htmlFor="amount">Amount <span className="text-red-500">*</span></Label>
                 <Input
                   id="amount"
                   type="number"
@@ -145,6 +186,9 @@ export default function CreateSalaryAllowancePage() {
                   placeholder="0.00"
                   required
                 />
+                <p className="text-xs text-gray-500">
+                  {formData.is_percentage ? 'Percentage of base salary' : 'Fixed amount in UGX'}
+                </p>
               </div>
 
               {/* Is Percentage */}
@@ -160,6 +204,7 @@ export default function CreateSalaryAllowancePage() {
                     {formData.is_percentage ? 'Percentage of base salary' : 'Fixed amount'}
                   </Label>
                 </div>
+                <p className="text-xs text-gray-500">Choose between fixed amount or percentage</p>
               </div>
             </div>
 
@@ -173,6 +218,7 @@ export default function CreateSalaryAllowancePage() {
                 placeholder="Describe the allowance and its purpose..."
                 rows={3}
               />
+              <p className="text-xs text-gray-500">Optional description of the allowance</p>
             </div>
 
             {/* Is Active */}
@@ -188,25 +234,26 @@ export default function CreateSalaryAllowancePage() {
                   {formData.is_active ? 'Active' : 'Inactive'}
                 </Label>
               </div>
+              <p className="text-xs text-gray-500">Whether this allowance is currently active</p>
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
               <Link href="/salary-management/allowances">
-                <Button variant="outline" type="button">
+                <Button variant="outline" type="button" disabled={loading}>
                   Cancel
                 </Button>
               </Link>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || !formData.name || formData.amount <= 0} className="flex items-center space-x-2">
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating...
+                    <LoadingSpinner />
+                    <span>Creating Allowance...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Create Allowance
+                    <Save className="h-4 w-4" />
+                    <span>Create Allowance</span>
                   </>
                 )}
               </Button>

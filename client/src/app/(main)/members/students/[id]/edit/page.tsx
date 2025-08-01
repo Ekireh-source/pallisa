@@ -7,7 +7,7 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchStudentById, updateStudent, clearFieldErrors, clearCurrentStudent } from '@/store/slices/memberStudentSlice';
 import { fetchStreams } from '@/store/slices/memberStreamSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, X, Edit, GraduationCap, Activity, FileText, AlertCircle } from 'lucide-react';
 import type { StudentCreateUpdate } from '@/types';
 
 const ENROLLMENT_STATUS_OPTIONS = [
@@ -36,7 +36,6 @@ export default function EditStudentPage() {
     user_phone: '',
     current_stream: undefined,
     enrollment_status: 'enrolled',
-    admission_number: '',
     admission_date: '',
     graduation_date: '',
   });
@@ -79,7 +78,6 @@ export default function EditStudentPage() {
         user_phone: currentStudent.user_profile_data?.phone || '',
         current_stream: currentStudent.current_stream?.id,
         enrollment_status: currentStudent.enrollment_status,
-        admission_number: currentStudent.admission_number || '',
         admission_date: currentStudent.admission_date || '',
         graduation_date: currentStudent.graduation_date || '',
       });
@@ -120,49 +118,90 @@ export default function EditStudentPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
-  if (loading && !currentStudent) {
+  if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <Edit className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Loading Student Details</h1>
+              <p className="text-blue-100 text-lg">Please wait while we fetch the student information</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-blue-100">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm">Loading...</span>
+              </div>
+            </div>
+            <Link
+              href={`/members/students/${studentId}`}
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Student
+            </Link>
+          </div>
         </div>
         <div className="flex items-center justify-center py-8">
-          <LoadingSpinner />
+          <LoadingSpinner size="lg" />
           <span className="ml-2 text-gray-600">Loading student details...</span>
         </div>
       </div>
     );
   }
 
-  if (error && !currentStudent) {
+  if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Error Loading Student</h1>
+              <p className="text-blue-100 text-lg">Unable to load student details</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-blue-100">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm">Error occurred</span>
+              </div>
+            </div>
+            <Link
+              href="/members/students"
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Students
+            </Link>
+          </div>
         </div>
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Loading Student
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -173,19 +212,45 @@ export default function EditStudentPage() {
   if (!currentStudent) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Student Not Found</h1>
+              <p className="text-blue-100 text-lg">The requested student could not be found</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-blue-100">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm">Not found</span>
+              </div>
+            </div>
+            <Link
+              href="/members/students"
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Students
+            </Link>
+          </div>
         </div>
-        <Card className="bg-yellow-50 border border-yellow-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-yellow-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">Student not found</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-b border-yellow-200">
+            <h3 className="text-lg font-semibold text-yellow-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-yellow-600" />
+              Student Not Found
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+              </div>
+              <p className="text-yellow-700">The requested student could not be found in the system.</p>
             </div>
           </CardContent>
         </Card>
@@ -195,34 +260,59 @@ export default function EditStudentPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href={`/members/students/${studentId}`}>
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Details</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Student</h1>
-            <p className="text-gray-600 mt-1">
-              {currentStudent.user_profile ? 
-                `${currentStudent.user_profile.first_name} ${currentStudent.user_profile.last_name}` : 
-                'Student Details'
-              }
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Edit className="w-8 h-8" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold mb-2">Edit Student</h1>
+            <p className="text-blue-100 text-lg">
+              Update student information for {currentStudent.user_profile_data?.first_name} {currentStudent.user_profile_data?.last_name}
             </p>
+          </div>
+          <Link
+            href={`/members/students/${studentId}`}
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Student
+          </Link>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span className="text-sm">Student Management</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm">Academic Records</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-blue-100">Student ID: {currentStudent.student_id}</span>
           </div>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Updating Student
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -352,20 +442,6 @@ export default function EditStudentPage() {
                 )}
                 {fieldErrors.current_stream && (
                   <p className="text-sm text-red-600">{fieldErrors.current_stream}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="admission_number">Admission Number</Label>
-                <Input
-                  id="admission_number"
-                  name="admission_number"
-                  type="text"
-                  value={formData.admission_number}
-                  onChange={handleInputChange}
-                />
-                {fieldErrors.admission_number && (
-                  <p className="text-sm text-red-600">{fieldErrors.admission_number}</p>
                 )}
               </div>
 

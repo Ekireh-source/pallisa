@@ -8,7 +8,7 @@ import { createStream, clearFieldErrors } from '@/store/slices/memberStreamSlice
 import { fetchClasses } from '@/store/slices/memberClassSlice';
 import { fetchTeachers } from '@/store/slices/memberTeacherSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X, GitBranch } from 'lucide-react';
+import { ArrowLeft, Save, X, GitBranch, GraduationCap, Users } from 'lucide-react';
 import type { StreamCreateUpdate } from '@/types';
 
 export default function CreateStreamPage() {
@@ -93,7 +93,7 @@ export default function CreateStreamPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -102,29 +102,56 @@ export default function CreateStreamPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/streams">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Streams</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create New Stream</h1>
-            <p className="text-gray-600 mt-1">Set up a new academic stream for Pallisa High School</p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <GitBranch className="w-8 h-8" />
           </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Create New Stream</h1>
+            <p className="text-blue-100 text-lg">
+              Set up a new academic stream for Pallisa High School
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <GitBranch className="w-4 h-4" />
+              <span className="text-sm">Stream Management</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <GraduationCap className="w-4 h-4" />
+              <span className="text-sm">Academic Structure</span>
+            </div>
+          </div>
+          <Link
+            href="/members/streams"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Streams
+          </Link>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-red-600" />
+              Error Creating Stream
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -134,7 +161,7 @@ export default function CreateStreamPage() {
       <Card className="bg-white shadow-sm border border-gray-100">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-            <GitBranch className="h-5 w-5" />
+            <GitBranch className="h-5 w-5 text-blue-600" />
             <span>Stream Information</span>
           </CardTitle>
           <CardDescription>

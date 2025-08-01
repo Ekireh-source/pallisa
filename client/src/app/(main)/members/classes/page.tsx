@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchClasses, deleteClass } from '@/store/slices/memberClassSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
 import { 
   Search, 
   Building,
@@ -13,7 +13,14 @@ import {
   Plus,
   Trash2,
   Eye,
-  Edit
+  Edit,
+  Users,
+  Activity,
+  FileText,
+  AlertCircle,
+  Filter,
+  RefreshCw,
+  Upload
 } from 'lucide-react';
 import type { MemberClass } from '@/types';
 
@@ -25,6 +32,9 @@ export default function ClassesPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [classToDelete, setClassToDelete] = useState<number | null>(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -49,9 +59,14 @@ export default function ClassesPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
+    setClassToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (classToDelete) {
       try {
-        await dispatch(deleteClass(id));
+        await dispatch(deleteClass(classToDelete));
         // Refresh the list
         dispatch(fetchClasses({
           page: currentPage,
@@ -61,19 +76,33 @@ export default function ClassesPage() {
         console.error('Error deleting class:', error);
       }
     }
+    setDeleteModalOpen(false);
+    setClassToDelete(null);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setShowFilters(false);
+    setCurrentPage(1);
+  };
+
   const totalPages = Math.ceil(totalCount / itemsPerPage);
+
+  // Calculate statistics
+  const totalClasses = classes.length;
+  const activeClasses = classes.filter(cls => cls.is_active).length;
+  const totalStreams = classes.reduce((sum, cls) => sum + cls.stream_count, 0);
+  const averageStreamsPerClass = totalClasses > 0 ? Math.round(totalStreams / totalClasses) : 0;
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -81,148 +110,428 @@ export default function ClassesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pallisa High School Classes</h1>
-          <p className="text-gray-600 mt-1">Manage class levels and academic structure for Pallisa High School</p>
+    <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+            <Building className="w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Pallisa High School Classes</h1>
+            <p className="text-indigo-100 text-base sm:text-lg">
+              Manage class levels and academic structure for Pallisa High School
+            </p>
+          </div>
         </div>
-        <Link href="/members/classes/create">
-          <Button className="flex items-center space-x-2">
-            <Plus className="h-4 w-4" />
-            <span>Add New Class</span>
-          </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-4 text-indigo-100 text-sm">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>Total: {totalClasses}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span>Active: {activeClasses}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <GraduationCap className="w-4 h-4" />
+              <span>Streams: {totalStreams}</span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex space-x-3">
+            <Button
+              onClick={() => {/* TODO: Add bulk upload functionality */}}
+              disabled={loading}
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 cursor-pointer relative z-10 disabled:opacity-50 disabled:cursor-not-allowed border-0"
+            >
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Bulk Upload
+            </Button>
+            <Link
+              href="/members/classes/create"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer relative z-10"
+            >
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Add Class
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {/* Search */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Search Pallisa High School classes..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Total Classes
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Building className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
             </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{totalClasses}</div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                All Classes
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Active Classes
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{activeClasses}</div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
+                Currently Active
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Total Streams
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{totalStreams}</div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                Across All Classes
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Avg Streams/Class
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{averageStreamsPerClass}</div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-purple-100 text-purple-700">
+                Per Class Average
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Filters */}
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div>
+              <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+                <span>Search Classes</span>
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Find classes by name or description
+              </CardDescription>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2 text-xs sm:text-sm"
+              >
+                <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Filters</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  dispatch(fetchClasses({
+                    page: currentPage,
+                    search: searchTerm,
+                  }));
+                }}
+                className="flex items-center space-x-2 text-xs sm:text-sm"
+                disabled={loading}
+              >
+                <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6">
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Search Pallisa High School classes..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <Button onClick={() => {/* TODO: Implement search */}} className="flex items-center space-x-2 w-full sm:w-auto">
+                <Search className="w-4 h-4" />
+                <span>Search</span>
+              </Button>
+            </div>
+
+            {/* Filters */}
+            {showFilters && (
+              <div className="border-t pt-4 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Status Filter
+                    </label>
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="all">All Classes</option>
+                      <option value="active">Active Only</option>
+                      <option value="inactive">Inactive Only</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Filter Actions */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t space-y-3 sm:space-y-0">
+                  <div className="flex items-center space-x-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAllFilters}
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Clear All Filters</span>
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={() => {/* TODO: Apply filters */}}
+                    className="flex items-center space-x-2"
+                  >
+                    <Filter className="w-4 h-4" />
+                    <span>Apply Filters</span>
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Error Message */}
-      {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <span className="text-sm font-medium">{error}</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Classes List */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-            <Building className="h-5 w-5" />
+      {/* Classes Table */}
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <Building className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
             <span>Pallisa High School Classes ({totalCount})</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-600">
             Manage academic class levels for Pallisa High School
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <LoadingSpinner />
-              <span className="ml-2 text-gray-600">Loading classes...</span>
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Classes</h3>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <Button
+                onClick={() => dispatch(fetchClasses({
+                  page: currentPage,
+                  search: searchTerm,
+                }))}
+                className="flex items-center space-x-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Try Again</span>
+              </Button>
             </div>
           ) : classes.length === 0 ? (
-            <div className="text-center py-8">
-              <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No classes found</h3>
-              <p className="text-gray-600 mb-4">
-                {searchTerm
-                  ? 'No classes match your current search.'
-                  : 'Get started by adding your first class.'}
+            <div className="text-center py-12">
+              <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm 
+                  ? 'No classes found matching your criteria' 
+                  : 'No classes found'
+                }
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm 
+                  ? 'Try adjusting your search criteria'
+                  : 'Get started by adding your first class'
+                }
               </p>
-              {!searchTerm && (
-                <Link href="/members/classes/create">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Class
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                {searchTerm && (
+                  <Button
+                    variant="outline"
+                    onClick={clearAllFilters}
+                    className="flex items-center space-x-2 w-full sm:w-auto"
+                  >
+                    <span>Clear Search</span>
                   </Button>
-                </Link>
-              )}
+                )}
+                {!searchTerm && (
+                  <Link href="/members/classes/create" className="w-full sm:w-auto">
+                    <Button className="flex items-center space-x-2 w-full sm:w-auto">
+                      <Plus className="w-4 h-4" />
+                      <span>Add First Class</span>
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {classes.map((classItem: MemberClass) => (
-                <div
-                  key={classItem.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <h3 className="text-lg font-medium text-gray-900">{classItem.name}</h3>
-                            <Badge variant={classItem.is_active ? 'success' : 'secondary'}>
-                              {classItem.is_active ? 'Active' : 'Inactive'}
-                            </Badge>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Class
+                    </th>
+                    <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Description
+                    </th>
+                    <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                      Streams
+                    </th>
+                    <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                      Status
+                    </th>
+                    <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                      Created
+                    </th>
+                    <th className="px-3 sm:px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {classes.map((classItem: MemberClass) => (
+                    <tr key={classItem.id} className="hover:bg-gray-50 transition-colors duration-200">
+                      <td className="px-3 sm:px-4 py-4">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-medium text-indigo-600">
+                              {classItem.name.charAt(0)}
+                            </span>
                           </div>
-                          <div className="flex items-center space-x-4 mt-2">
-                            <div className="flex items-center space-x-1 text-sm text-gray-600">
-                              <GraduationCap className="h-4 w-4" />
-                              <span>{classItem.stream_count} stream{classItem.stream_count !== 1 ? 's' : ''}</span>
+                          <div className="ml-3 min-w-0 flex-1">
+                            <div className="text-sm font-medium text-gray-900 truncate">
+                              {classItem.name}
                             </div>
-                            <div className="flex items-center space-x-1 text-sm text-gray-600">
-                              <span className="text-xs text-gray-500">Created: {new Date(classItem.created_at).toLocaleDateString()}</span>
+                            <div className="text-xs text-gray-500 truncate">
+                              Class Level
+                            </div>
+                            <div className="text-xs text-gray-500 truncate md:hidden">
+                              {classItem.description || 'No description'}
                             </div>
                           </div>
-                          {classItem.description && (
-                            <p className="text-sm text-gray-600 mt-2 line-clamp-2">{classItem.description}</p>
-                          )}
                         </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Link href={`/members/classes/${classItem.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Link href={`/members/classes/${classItem.id}/edit`}>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(classItem.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td className="px-3 sm:px-4 py-4 hidden md:table-cell">
+                        <div className="text-sm text-gray-900 truncate">
+                          {classItem.description || 'No description'}
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-4 hidden lg:table-cell">
+                        <div className="flex items-center space-x-2">
+                          <GraduationCap className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm text-gray-900">
+                            {classItem.stream_count} stream{classItem.stream_count !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-4 hidden lg:table-cell">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${classItem.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {classItem.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-4 py-4 hidden xl:table-cell">
+                        <div className="text-sm text-gray-900">
+                          {new Date(classItem.created_at).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-4 text-right">
+                        <div className="flex items-center justify-end space-x-1">
+                          <Link href={`/members/classes/${classItem.id}`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center space-x-1 px-2 py-1 h-8"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span className="hidden sm:inline">View</span>
+                            </Button>
+                          </Link>
+                          <Link href={`/members/classes/${classItem.id}/edit`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center space-x-1 px-2 py-1 h-8"
+                            >
+                              <Edit className="w-3 h-3" />
+                              <span className="hidden sm:inline">Edit</span>
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(classItem.id)}
+                            className="flex items-center space-x-1 px-2 py-1 h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span className="hidden sm:inline">Delete</span>
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-6">
+            <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-6 px-4 sm:px-6">
               <div className="text-sm text-gray-700">
                 Showing page {currentPage} of {totalPages}
               </div>
@@ -248,6 +557,18 @@ export default function ClassesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Class"
+        message="Are you sure you want to delete this class? This action cannot be undone and will permanently remove the class record."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 } 

@@ -7,7 +7,8 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { createStudent, clearFieldErrors } from '@/store/slices/memberStudentSlice';
 import { fetchStreams } from '@/store/slices/memberStreamSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X, User, GraduationCap, Heart, FileText } from 'lucide-react';
+import { ArrowLeft, Save, X, User, GraduationCap, Heart, FileText, Users, Plus, AlertCircle } from 'lucide-react';
+import { BulkStudentUpload } from '@/components/forms/BulkStudentUpload';
 import type { StudentCreateUpdate } from '@/types';
 
 const ENROLLMENT_STATUS_OPTIONS = [
@@ -31,6 +32,9 @@ export default function CreateStudentPage() {
   const { streams, loading: streamsLoading } = useAppSelector((state) => state.memberStreams);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
+  // Add mode state for switching between single and bulk upload
+  const [mode, setMode] = useState<'single' | 'bulk'>('single');
+
   const [formData, setFormData] = useState<StudentCreateUpdate>({
     // User creation fields
     user_email: '',
@@ -49,7 +53,6 @@ export default function CreateStudentPage() {
     // Student specific fields
     current_stream: undefined,
     enrollment_status: 'enrolled',
-    admission_number: '',
     admission_date: '',
     graduation_date: '',
     previous_school: '',
@@ -101,6 +104,11 @@ export default function CreateStudentPage() {
       ...cleanedData
     };
     
+    // If user_student_id is provided, also set student_id
+    if (finalData.user_student_id) {
+      finalData.student_id = finalData.user_student_id;
+    }
+    
     try {
       const result = await dispatch(createStudent(finalData));
       if (createStudent.fulfilled.match(result)) {
@@ -128,36 +136,118 @@ export default function CreateStudentPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Add New Student</h1>
-            <p className="text-gray-600 mt-1">Create a comprehensive student record with all required information</p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Plus className="w-8 h-8" />
           </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              {mode === 'single' ? 'Add New Student' : 'Bulk Upload Students'}
+            </h1>
+            <p className="text-blue-100 text-lg">
+              {mode === 'single' 
+                ? 'Create a comprehensive student record with all required information'
+                : 'Upload multiple students at once using an Excel file'
+              }
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <GraduationCap className="w-4 h-4" />
+              <span className="text-sm">Student Management</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm">Academic Records</span>
+            </div>
+          </div>
+          <Link
+            href="/members/students"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Students
+          </Link>
         </div>
       </div>
 
+      {/* Mode Toggle */}
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <User className="w-5 h-5 text-blue-600" />
+            <span>Upload Mode</span>
+          </CardTitle>
+          <CardDescription className="text-gray-600">
+            Choose between single student creation or bulk upload
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">Upload Mode:</span>
+            </div>
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <Button
+                variant={mode === 'single' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setMode('single')}
+                className={`flex items-center space-x-2 ${
+                  mode === 'single' 
+                    ? 'bg-white shadow-sm' 
+                    : 'hover:bg-gray-200'
+                }`}
+              >
+                <User className="h-4 w-4" />
+                <span>Single Student</span>
+              </Button>
+              <Button
+                variant={mode === 'bulk' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setMode('bulk')}
+                className={`flex items-center space-x-2 ${
+                  mode === 'bulk' 
+                    ? 'bg-white shadow-sm' 
+                    : 'hover:bg-gray-200'
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                <span>Bulk Upload</span>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Creating Student
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Create Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Conditional Content */}
+      {mode === 'single' ? (
+        /* Create Form */
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
@@ -428,7 +518,7 @@ export default function CreateStudentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="current_stream">Stream</Label>
+                <Label htmlFor="current_stream">Current Stream</Label>
                 <select
                   id="current_stream"
                   name="current_stream"
@@ -449,20 +539,6 @@ export default function CreateStudentPage() {
                 )}
                 {fieldErrors.current_stream && (
                   <p className="text-sm text-red-600">{fieldErrors.current_stream}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="admission_number">Admission Number</Label>
-                <Input
-                  id="admission_number"
-                  name="admission_number"
-                  type="text"
-                  value={formData.admission_number || ''}
-                  onChange={handleInputChange}
-                />
-                {fieldErrors.admission_number && (
-                  <p className="text-sm text-red-600">{fieldErrors.admission_number}</p>
                 )}
               </div>
             </div>
@@ -612,6 +688,9 @@ export default function CreateStudentPage() {
           </CardContent>
         </Card>
       </form>
+      ) : (
+        <BulkStudentUpload onSuccess={() => router.push('/members/students')} />
+      )}
     </div>
   );
 } 

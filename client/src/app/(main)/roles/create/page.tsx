@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { createRole, clearFieldErrors, fetchPermissions } from '@/store/slices/roleSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X, Shield, CheckSquare, Square } from 'lucide-react';
+import { ArrowLeft, Save, X, Shield, CheckSquare, Square, Plus, User, Activity } from 'lucide-react';
 import type { RoleCreateUpdate } from '@/types';
 
 export default function CreateRolePage() {
@@ -156,37 +156,60 @@ export default function CreateRolePage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/roles">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Roles</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create New Role</h1>
-            <p className="text-gray-600 mt-1">Define a new role and assign permissions</p>
+    <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+            <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create New Role</h1>
+            <p className="text-indigo-100 text-base sm:text-lg">
+              Define a new role and assign permissions
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-4 text-indigo-100 text-sm">
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4" />
+              <span>Available Permissions: {permissions.length}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span>Categories: {permissionCategories.length}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>Selected: {getAllSelectedCount()}</span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex space-x-3">
+            <Link
+              href="/roles"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 cursor-pointer relative z-10"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Back to Roles
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardContent className="p-4 bg-red-50 border-l-4 border-red-500">
             <div className="flex items-center space-x-2 text-red-700">
               <X className="h-5 w-5" />
               <span className="text-sm font-medium">{error}</span>
@@ -198,20 +221,20 @@ export default function CreateRolePage() {
       {/* Create Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Shield className="h-5 w-5 text-blue-600" />
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               <span>Basic Information</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600">
               Create a new role and assign permissions to it
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
                   Role Name <span className="text-red-500">*</span>
                 </Label>
                 <Input
@@ -220,7 +243,7 @@ export default function CreateRolePage() {
                   type="text"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className={fieldErrors.name ? "border-red-500" : ""}
+                  className={`h-11 ${fieldErrors.name ? "border-red-500" : ""}`}
                   placeholder="Enter role name" 
                   required
                 />
@@ -228,7 +251,7 @@ export default function CreateRolePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description</Label>
               <Textarea
                 id="description"
                 name="description"
@@ -236,6 +259,7 @@ export default function CreateRolePage() {
                 onChange={handleInputChange}
                 placeholder="Enter role description"
                 rows={3}
+                className="resize-none"
               />
               {fieldErrors.description && (
                 <p className="text-sm text-red-600">{fieldErrors.description}</p>
@@ -245,17 +269,17 @@ export default function CreateRolePage() {
         </Card>
 
         {/* Permissions */}
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Shield className="h-5 w-5 text-green-600" />
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
               <span>Permissions</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600">
               Select the permissions to assign to this role
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6 space-y-6">
             {/* Select All Button */}
             <div className="flex items-center justify-between">
               <Button
@@ -353,11 +377,11 @@ export default function CreateRolePage() {
         </Card>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={handleCancel}>
+        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+          <Button type="button" variant="outline" onClick={handleCancel} className="px-6 py-2">
             Cancel
           </Button>
-          <Button type="submit" disabled={loading} className="flex items-center space-x-2">
+          <Button type="submit" disabled={loading} className="px-6 py-2 flex items-center space-x-2">
             {loading ? (
               <>
                 <LoadingSpinner className="h-4 w-4" />

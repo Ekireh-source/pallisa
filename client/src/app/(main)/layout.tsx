@@ -13,10 +13,14 @@ export default function MainLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col">
         <SharedNavbar />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {children}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-auto">
+            <div className="max-w-7xl mx-auto w-full p-4 sm:p-6">
+              {children}
+            </div>
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

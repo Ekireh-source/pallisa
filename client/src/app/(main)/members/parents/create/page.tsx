@@ -135,29 +135,56 @@ export default function CreateParentPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/parents">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Parents</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Add New Parent/Guardian</h1>
-            <p className="text-gray-600 mt-1">Create a comprehensive parent/guardian record with all required information</p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <User className="w-8 h-8" />
           </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Add New Parent/Guardian</h1>
+            <p className="text-green-100 text-lg">
+              Create a comprehensive parent/guardian record with all required information
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-green-100">
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span className="text-sm">Parent Management</span>
+            </div>
+            <div className="w-1 h-1 bg-green-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Heart className="w-4 h-4" />
+              <span className="text-sm">Family Records</span>
+            </div>
+          </div>
+          <Link
+            href="/members/parents"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Parents
+          </Link>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-red-600" />
+              Error Creating Parent
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -169,7 +196,7 @@ export default function CreateParentPage() {
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <User className="h-5 w-5 text-blue-600" />
+              <User className="h-5 w-5 text-green-600" />
               <span>Personal Information</span>
             </CardTitle>
             <CardDescription>
@@ -324,15 +351,15 @@ export default function CreateParentPage() {
           </CardContent>
         </Card>
 
-        {/* Emergency Contact Information */}
+        {/* Relationship Information */}
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Heart className="h-5 w-5 text-red-600" />
-              <span>Emergency Contact Information</span>
+              <Heart className="h-5 w-5 text-green-600" />
+              <span>Relationship Information</span>
             </CardTitle>
             <CardDescription>
-              Alternative emergency contact for this parent/guardian
+              Define the relationship type and family connection details
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -402,15 +429,15 @@ export default function CreateParentPage() {
           </CardContent>
         </Card>
 
-        {/* Professional & Contact Information */}
+        {/* Work Information */}
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
               <Home className="h-5 w-5 text-green-600" />
-              <span>Professional & Contact Information</span>
+              <span>Work Information</span>
             </CardTitle>
             <CardDescription>
-              Work details and contact information
+              Professional details and workplace information
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -484,7 +511,7 @@ export default function CreateParentPage() {
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Shield className="h-5 w-5 text-purple-600" />
+              <Shield className="h-5 w-5 text-green-600" />
               <span>Permissions & Access Rights</span>
             </CardTitle>
             <CardDescription>

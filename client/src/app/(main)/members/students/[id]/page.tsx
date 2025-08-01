@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchStudentById, deleteStudent, clearCurrentStudent, restoreStudent } from '@/store/slices/memberStudentSlice';
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
-import { ArrowLeft, Edit, Trash2, User, Mail, Phone, Calendar, GraduationCap, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Activity, FileText } from 'lucide-react';
 
 const ENROLLMENT_STATUS_COLORS = {
   enrolled: 'bg-green-100 text-green-800',
@@ -92,13 +92,31 @@ export default function StudentDetailPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <GraduationCap className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Loading Student Details</h1>
+              <p className="text-blue-100 text-lg">Please wait while we fetch the student information</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-blue-100">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm">Loading...</span>
+              </div>
+            </div>
+            <Link
+              href="/members/students"
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Students
+            </Link>
+          </div>
         </div>
         <div className="flex items-center justify-center py-8">
           <LoadingSpinner />
@@ -111,19 +129,45 @@ export default function StudentDetailPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Error Loading Student</h1>
+              <p className="text-blue-100 text-lg">Unable to load student details</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-blue-100">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm">Error occurred</span>
+              </div>
+            </div>
+            <Link
+              href="/members/students"
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Students
+            </Link>
+          </div>
         </div>
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Loading Student
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -134,19 +178,45 @@ export default function StudentDetailPage() {
   if (!currentStudent) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Student Not Found</h1>
+              <p className="text-blue-100 text-lg">The requested student could not be found</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-blue-100">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm">Not found</span>
+              </div>
+            </div>
+            <Link
+              href="/members/students"
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Students
+            </Link>
+          </div>
         </div>
-        <Card className="bg-yellow-50 border border-yellow-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-yellow-700">
-              <AlertCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">Student not found</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-b border-yellow-200">
+            <h3 className="text-lg font-semibold text-yellow-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-yellow-600" />
+              Student Not Found
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+              </div>
+              <p className="text-yellow-700">The requested student could not be found in the system.</p>
             </div>
           </CardContent>
         </Card>
@@ -156,63 +226,80 @@ export default function StudentDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/students">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Students</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <GraduationCap className="w-8 h-8" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold mb-2">
               {currentStudent.user_profile ? 
                 `${currentStudent.user_profile.first_name} ${currentStudent.user_profile.last_name}` : 
                 'Student Details'
               }
             </h1>
-            <p className="text-gray-600 mt-1">Student ID: {currentStudent.student_id}</p>
+            <p className="text-blue-100 text-lg">Student ID: {currentStudent.student_id}</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Badge className={`${ENROLLMENT_STATUS_COLORS[currentStudent.enrollment_status] || 'bg-gray-100 text-gray-800'} rounded-full`}>
+              {ENROLLMENT_STATUS_LABELS[currentStudent.enrollment_status] || currentStudent.enrollment_status}
+            </Badge>
+            <Link
+              href="/members/students"
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Students
+            </Link>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          {currentStudent.is_active ? (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEdit}
-                className="flex items-center space-x-2"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDeleteModal(true)}
-                className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete</span>
-              </Button>
-            </>
-          ) : (
-            <>
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                Inactive
-              </Badge>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span className="text-sm">Student Management</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm">Academic Records</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            {currentStudent.is_active ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEdit}
+                  className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="flex items-center space-x-2 bg-red-500/20 backdrop-blur-sm text-white border-red-500/30 hover:bg-red-500/30"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete</span>
+                </Button>
+              </>
+            ) : (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowRestoreModal(true)}
-                className="flex items-center space-x-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                className="flex items-center space-x-2 bg-green-500/20 backdrop-blur-sm text-white border-green-500/30 hover:bg-green-500/30"
               >
-                <AlertCircle className="h-4 w-4" />
+                <User className="h-4 w-4" />
                 <span>Restore</span>
               </Button>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

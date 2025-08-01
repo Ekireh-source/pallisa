@@ -545,11 +545,20 @@ export interface MemberStudent {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  // Computed fields
+  // Computed fields from backend serializer
   student_name?: string;
   user_email?: string;
   current_stream_name?: string;
   class_name?: string;
+  // Additional fields from StudentSerializer
+  full_name?: string;
+  email?: string;
+  age?: number;
+  previous_school?: string;
+  special_needs?: string;
+  medical_conditions?: string;
+  allergies?: string;
+  user_profile_data?: UserProfile;
 }
 
 export interface StudentDetail {
@@ -573,7 +582,7 @@ export interface MemberTeacher {
   id: number;
   user_profile: number;
   employee_id: string;
-  employment_type: 'full_time' | 'part_time' | 'contract' | 'volunteer';
+  employment_type: 'full_time' | 'part_time' | 'contract' | 'substitute' | 'volunteer';
   specialization?: string;
   qualification?: string;
   hire_date?: string;
@@ -591,7 +600,7 @@ export interface TeacherDetail {
   user_profile: UserProfile;
   user_profile_data: UserProfile;
   employee_id: string;
-  employment_type: 'full_time' | 'part_time' | 'contract' | 'volunteer';
+  employment_type: 'full_time' | 'part_time' | 'contract' | 'substitute' | 'volunteer';
   specialization?: string;
   qualification?: string;
   hire_date?: string;
@@ -682,6 +691,7 @@ export interface StudentCreateUpdate {
   // User creation fields
   user_email?: string;
   user_student_id?: string;
+  student_id?: string;
   // UserProfile creation fields
   user_first_name?: string;
   user_last_name?: string;
@@ -697,7 +707,6 @@ export interface StudentCreateUpdate {
   // Student specific fields
   current_stream?: number;
   enrollment_status: 'enrolled' | 'transferred' | 'graduated' | 'suspended' | 'withdrawn';
-  admission_number?: string;
   admission_date?: string;
   graduation_date?: string;
   previous_school?: string;
@@ -724,7 +733,7 @@ export interface TeacherCreateUpdate {
   user_role?: string;
   user_role_id?: number;
   // Teacher specific fields
-  employment_type: 'full_time' | 'part_time' | 'contract' | 'volunteer';
+  employment_type: 'full_time' | 'part_time' | 'contract' | 'substitute' | 'volunteer';
   specialization?: string;
   qualification?: string;
   hire_date?: string;
@@ -886,7 +895,7 @@ export interface NonStaffMember {
 
 export interface NonStaffMemberCreateUpdate {
   // Non-staff member specific fields (required first)
-  employment_type: 'full_time' | 'part_time' | 'contract' | 'temporary' | 'volunteer';
+  employment_type: 'full_time' | 'part_time' | 'contract' | 'substitute' | 'volunteer';
   // Optional fields
   user_profile?: number;
   // User creation fields

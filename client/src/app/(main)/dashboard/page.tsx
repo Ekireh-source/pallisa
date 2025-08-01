@@ -19,7 +19,14 @@ import {
   Users,
   Tags,
   RefreshCw,
-  BarChart3
+  BarChart3,
+  GraduationCap,
+  BookOpen,
+  Clock,
+  CheckCircle,
+  TrendingDown,
+  Activity,
+  Zap
 } from 'lucide-react';
 import { 
   expenseApi, 
@@ -248,7 +255,7 @@ export default function DashboardPage() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -260,13 +267,20 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back to Pallisa High School, {user.first_name}!
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Loading dashboard data...
-          </p>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                Welcome back, {user.first_name}!
+              </h1>
+              <p className="text-blue-100">
+                Loading your school dashboard...
+              </p>
+            </div>
+          </div>
         </div>
         <div className="flex items-center justify-center py-16">
           <LoadingSpinner size="lg" />
@@ -279,13 +293,20 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back to Pallisa High School, {user.first_name}!
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Here&apos;s an overview of school operations and financial activities today.
-          </p>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                Welcome back, {user.first_name}!
+              </h1>
+              <p className="text-blue-100">
+                Here's an overview of school operations and financial activities today.
+              </p>
+            </div>
+          </div>
         </div>
         <Card className="bg-red-50 border border-red-200">
           <CardContent className="p-4">
@@ -315,15 +336,21 @@ export default function DashboardPage() {
       change: "Current Term",
       changeType: "neutral" as const,
       icon: DollarSign,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`
+      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
+      gradient: "from-emerald-500 to-teal-500",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600"
     },
     {
       title: "Total Expenses",
       value: formatCurrency(stats?.totalExpenses || 0),
       change: "Current Term",
       changeType: "negative" as const,
-      icon: TrendingUp,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`
+      icon: TrendingDown,
+      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
+      gradient: "from-red-500 to-pink-500",
+      bgColor: "bg-red-50",
+      iconColor: "text-red-600"
     },
     {
       title: "Collected Fees",
@@ -331,7 +358,10 @@ export default function DashboardPage() {
       change: "Current Term",
       changeType: "positive" as const,
       icon: CreditCard,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`
+      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
+      gradient: "from-blue-500 to-indigo-500",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600"
     },
     {
       title: "Net Income",
@@ -339,7 +369,10 @@ export default function DashboardPage() {
       change: stats?.netIncome && stats.netIncome >= 0 ? "Profit" : "Loss",
       changeType: stats?.netIncome && stats.netIncome >= 0 ? "positive" as const : "negative" as const,
       icon: BarChart3,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`
+      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
+      gradient: stats?.netIncome && stats.netIncome >= 0 ? "from-green-500 to-emerald-500" : "from-orange-500 to-red-500",
+      bgColor: stats?.netIncome && stats.netIncome >= 0 ? "bg-green-50" : "bg-orange-50",
+      iconColor: stats?.netIncome && stats.netIncome >= 0 ? "text-green-600" : "text-orange-600"
     }
   ];
 
@@ -349,65 +382,119 @@ export default function DashboardPage() {
       description: "Add a new expense record",
       href: "/expenses/create",
       icon: CreditCard,
-      color: "bg-blue-500"
+      gradient: "from-blue-500 to-indigo-500",
+      hoverGradient: "from-blue-600 to-indigo-600"
     },
     {
       title: "View Reports",
       description: "Access financial reports",
       href: "/reports",
       icon: FileText,
-      color: "bg-green-500"
+      gradient: "from-green-500 to-emerald-500",
+      hoverGradient: "from-green-600 to-emerald-600"
     },
     {
       title: "Manage Categories",
       description: "Organize expense categories",
       href: "/categories",
       icon: Tags,
-      color: "bg-purple-500"
+      gradient: "from-purple-500 to-pink-500",
+      hoverGradient: "from-purple-600 to-pink-600"
     },
     {
       title: "Department Setup",
       description: "Configure departments",
       href: "/departments",
       icon: Building2,
-      color: "bg-orange-500"
+      gradient: "from-orange-500 to-red-500",
+      hoverGradient: "from-orange-600 to-red-600"
+    }
+  ];
+
+  const additionalStats = [
+    {
+      title: "Pending Approvals",
+      value: stats?.pendingExpenses || 0,
+      icon: Clock,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      description: "Expenses awaiting review"
+    },
+    {
+      title: "Active Vendors",
+      value: stats?.totalVendors || 0,
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      description: "Registered vendors"
+    },
+    {
+      title: "Collection Rate",
+      value: stats?.expectedFees && stats.expectedFees > 0 
+        ? `${((stats.collectedFees / stats.expectedFees) * 100).toFixed(1)}%`
+        : '0%',
+      icon: TrendingUp,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      description: "Fees collected vs expected"
     }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back to Pallisa High School, {user.first_name}!
-        </h1>
-        <p className="text-gray-600 mt-1">
-          Here&apos;s an overview of school operations and financial activities today.
-        </p>
+      {/* Welcome Section with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <GraduationCap className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back, {user.first_name}!
+            </h1>
+            <p className="text-blue-100 text-lg">
+              Here's an overview of Pallisa High School operations and financial activities today.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4 text-blue-100">
+          <div className="flex items-center space-x-2">
+            <Activity className="w-4 h-4" />
+            <span className="text-sm">Current Term: {stats?.currentTermName}</span>
+          </div>
+          <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4" />
+            <span className="text-sm">{stats?.currentAcademicYear}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Main Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((stat, index) => (
-          <Card key={index} className="bg-white shadow-sm border border-gray-100">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+          <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+            <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-gray-700">
                 {stat.title}
               </CardTitle>
-              <stat.icon className="h-4 w-4 text-gray-400" />
+              <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+              <div className="text-2xl font-bold text-gray-900 mb-2">{stat.value}</div>
               <div className="flex items-center space-x-2 text-xs text-gray-500">
                 <span 
-                  className={`font-medium ${
-                    stat.changeType === 'positive' ? 'text-green-600' : 
-                    stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-600'
+                  className={`font-medium px-2 py-1 rounded-full ${
+                    stat.changeType === 'positive' ? 'bg-green-100 text-green-700' : 
+                    stat.changeType === 'negative' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                   }`}
                 >
                   {stat.change}
                 </span>
-                <span>{stat.description}</span>
+                <span className="hidden sm:inline">{stat.description}</span>
               </div>
             </CardContent>
           </Card>
@@ -415,72 +502,49 @@ export default function DashboardPage() {
       </div>
 
       {/* Additional Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Pending Approvals
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-gray-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{stats?.pendingExpenses || 0}</div>
-            <p className="text-xs text-gray-500">Expenses awaiting review</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Active Vendors
-            </CardTitle>
-            <Users className="h-4 w-4 text-gray-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{stats?.totalVendors || 0}</div>
-            <p className="text-xs text-gray-500">Registered vendors</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Collection Rate
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-gray-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
-              {stats?.expectedFees && stats.expectedFees > 0 
-                ? `${((stats.collectedFees / stats.expectedFees) * 100).toFixed(1)}%`
-                : '0%'
-              }
-            </div>
-            <p className="text-xs text-gray-500">Fees collected vs expected</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {additionalStats.map((stat, index) => (
+          <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-gray-700">
+                {stat.title}
+              </CardTitle>
+              <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 mb-2">{stat.value}</div>
+              <p className="text-xs text-gray-500">{stat.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Quick Actions */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Quick Actions</CardTitle>
-          <CardDescription>
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <Zap className="w-5 h-5 text-blue-600" />
+            <span>Quick Actions</span>
+          </CardTitle>
+          <CardDescription className="text-gray-600">
             Frequently used actions for school administration and expense management
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <Link key={index} href={action.href}>
-                <div className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center`}>
-                      <action.icon className="h-5 w-5 text-white" />
+                <div className="group p-4 rounded-xl border border-gray-200 hover:border-transparent hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                  <div className="relative flex items-center space-x-3">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                      <action.icon className="h-6 w-6 text-white" />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900 text-sm">{action.title}</h3>
-                      <p className="text-xs text-gray-500 mt-1">{action.description}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">{action.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{action.description}</p>
                     </div>
                   </div>
                 </div>
@@ -490,29 +554,38 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Activity */}
+      {/* Recent Activity & System Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Expenses */}
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-semibold text-gray-900">Recent Expenses</CardTitle>
-              <CardDescription>Latest expense submissions</CardDescription>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  <span>Recent Expenses</span>
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  Latest expense submissions
+                </CardDescription>
+              </div>
+              <Link href="/expenses">
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                  View All
+                </Button>
+              </Link>
             </div>
-            <Link href="/expenses">
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                View All
-              </Button>
-            </Link>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             {recentExpenses.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-gray-400 text-6xl mb-4">📄</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No recent expenses</h3>
-                <p className="text-gray-600 mb-4">No expenses have been recorded yet.</p>
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-10 h-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No recent expenses</h3>
+                <p className="text-gray-600 mb-6">No expenses have been recorded yet.</p>
                 <Link href="/expenses/create">
-                  <Button size="sm">
+                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600">
                     <CreditCard className="h-4 w-4 mr-2" />
                     Add Expense
                   </Button>
@@ -521,17 +594,17 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-4">
                 {recentExpenses.map((expense) => (
-                  <div key={expense.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 text-sm">{expense.title}</h4>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-xs text-gray-500">{expense.category}</span>
-                        <span className="text-xs text-gray-400">•</span>
-                        <span className="text-xs text-gray-500">{formatDate(expense.created_at)}</span>
+                  <div key={expense.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 truncate">{expense.title}</h4>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded-full">{expense.category}</span>
+                        <span className="text-sm text-gray-400">•</span>
+                        <span className="text-sm text-gray-500">{formatDate(expense.created_at)}</span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="font-semibold text-gray-900 text-sm">{formatCurrency(expense.amount)}</span>
+                    <div className="flex items-center space-x-3 ml-4">
+                      <span className="font-bold text-gray-900">{formatCurrency(expense.amount)}</span>
                       {getStatusBadge(expense.status)}
                     </div>
                   </div>
@@ -542,38 +615,57 @@ export default function DashboardPage() {
         </Card>
 
         {/* System Status */}
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">System Overview</CardTitle>
-            <CardDescription>Current system status and alerts</CardDescription>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+            <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>System Overview</span>
+            </CardTitle>
+            <CardDescription className="text-gray-600">
+              Current system status and alerts
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-green-50">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className="flex items-center space-x-4 p-4 rounded-xl bg-green-50 border border-green-200">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
-                <div>
-                  <p className="font-medium text-green-900 text-sm">All Systems Operational</p>
-                  <p className="text-xs text-green-700">Everything is running smoothly</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-green-900">All Systems Operational</p>
+                  <p className="text-sm text-green-700">Everything is running smoothly</p>
                 </div>
               </div>
               
               {stats?.pendingExpenses && stats.pendingExpenses > 0 && (
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-yellow-50">
-                  <AlertCircle className="h-5 w-5 text-yellow-600" />
-                  <div>
-                    <p className="font-medium text-yellow-900 text-sm">{stats.pendingExpenses} Pending Approvals</p>
-                    <p className="text-xs text-yellow-700">Expenses awaiting review</p>
+                <div className="flex items-center space-x-4 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-yellow-900">{stats.pendingExpenses} Pending Approvals</p>
+                    <p className="text-sm text-yellow-700">Expenses awaiting review</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="font-medium text-blue-900 text-sm">Monthly Report Due</p>
-                  <p className="text-xs text-blue-700">Financial report due in 3 days</p>
+              <div className="flex items-center space-x-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-blue-900">Monthly Report Due</p>
+                  <p className="text-sm text-blue-700">Financial report due in 3 days</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4 p-4 rounded-xl bg-purple-50 border border-purple-200">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-purple-900">Academic Progress</p>
+                  <p className="text-sm text-purple-700">Term progress tracking active</p>
                 </div>
               </div>
             </div>

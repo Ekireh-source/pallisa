@@ -5,8 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchClassById, deleteClass, clearCurrentClass } from '@/store/slices/memberClassSlice';
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Edit, Trash2, Building, GraduationCap, Users, AlertCircle, Plus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { ArrowLeft, Edit, Trash2, Building, GraduationCap, Users, AlertCircle, Plus, Activity, FileText, Calendar, Clock } from 'lucide-react';
 
 export default function ClassDetailPage() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function ClassDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function ClassDetailPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/members/classes">
             <Button variant="outline" size="sm" className="flex items-center space-x-2">
@@ -72,9 +72,8 @@ export default function ClassDetailPage() {
             </Button>
           </Link>
         </div>
-        <div className="flex items-center justify-center py-8">
-          <LoadingSpinner />
-          <span className="ml-2 text-gray-600">Loading class details...</span>
+        <div className="flex items-center justify-center py-12">
+          <LoadingSpinner size="lg" />
         </div>
       </div>
     );
@@ -82,7 +81,7 @@ export default function ClassDetailPage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/members/classes">
             <Button variant="outline" size="sm" className="flex items-center space-x-2">
@@ -91,11 +90,19 @@ export default function ClassDetailPage() {
             </Button>
           </Link>
         </div>
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Loading Class
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -105,7 +112,7 @@ export default function ClassDetailPage() {
 
   if (!currentClass) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/members/classes">
             <Button variant="outline" size="sm" className="flex items-center space-x-2">
@@ -114,11 +121,19 @@ export default function ClassDetailPage() {
             </Button>
           </Link>
         </div>
-        <Card className="bg-yellow-50 border border-yellow-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-yellow-700">
-              <AlertCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">Class not found</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-b border-yellow-200">
+            <h3 className="text-lg font-semibold text-yellow-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-yellow-600" />
+              Class Not Found
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+              </div>
+              <p className="text-yellow-700">The requested class could not be found.</p>
             </div>
           </CardContent>
         </Card>
@@ -127,40 +142,53 @@ export default function ClassDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/members/classes">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Classes</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{currentClass.name}</h1>
-            <p className="text-gray-600 mt-1">Class Information</p>
+    <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+            <Building className="w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{currentClass.name}</h1>
+            <p className="text-indigo-100 text-base sm:text-lg">
+              Class Information and Academic Details
+            </p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleEdit}
-            className="flex items-center space-x-2"
-          >
-            <Edit className="h-4 w-4" />
-            <span>Edit</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDelete}
-            className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>Delete</span>
-          </Button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-4 text-indigo-100 text-sm">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>Status: {currentClass.is_active ? 'Active' : 'Inactive'}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <GraduationCap className="w-4 h-4" />
+              <span>{currentClass.streams?.length || 0} Streams</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>{currentClass.streams?.reduce((total, stream) => total + (stream.current_enrollment || 0), 0) || 0} Students</span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex space-x-3">
+            <Link
+              href="/members/classes"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Back to Classes
+            </Link>
+            <Button
+              onClick={handleEdit}
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <Edit className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Edit Class
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -171,7 +199,7 @@ export default function ClassDetailPage() {
           <Card className="bg-white shadow-sm border border-gray-100">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                <Building className="h-5 w-5" />
+                <Building className="h-5 w-5 text-indigo-600" />
                 <span>Class Information</span>
               </CardTitle>
             </CardHeader>
@@ -182,9 +210,9 @@ export default function ClassDetailPage() {
                   <p className="text-gray-900 font-medium">{currentClass.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Academic Level</label>
-                  <Badge variant="secondary" className="mt-1">
-                    {currentClass.name}
+                  <label className="text-sm font-medium text-gray-500">Status</label>
+                  <Badge variant={currentClass.is_active ? 'success' : 'secondary'} className="mt-1">
+                    {currentClass.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
                 <div className="md:col-span-2">
@@ -202,7 +230,10 @@ export default function ClassDetailPage() {
         <div className="space-y-6">
           <Card className="bg-white shadow-sm border border-gray-100">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900">Statistics</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                <Activity className="h-5 w-5 text-indigo-600" />
+                <span>Statistics</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -236,7 +267,7 @@ export default function ClassDetailPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                <GraduationCap className="h-5 w-5" />
+                <GraduationCap className="h-5 w-5 text-indigo-600" />
                 <span>Streams</span>
               </CardTitle>
               <Link href="/members/streams/create">
@@ -250,7 +281,7 @@ export default function ClassDetailPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {currentClass.streams.map((stream, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                <div key={index} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <h4 className="font-medium text-gray-900">{stream.name}</h4>
                   <p className="text-sm text-gray-600 mt-1">
                     {stream.current_enrollment || 0} student{(stream.current_enrollment || 0) !== 1 ? 's' : ''}
@@ -274,7 +305,7 @@ export default function ClassDetailPage() {
         <Card className="bg-white shadow-sm border border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <GraduationCap className="h-5 w-5" />
+              <GraduationCap className="h-5 w-5 text-indigo-600" />
               <span>Streams</span>
             </CardTitle>
           </CardHeader>
@@ -299,23 +330,32 @@ export default function ClassDetailPage() {
       {/* Class Metadata */}
       <Card className="bg-white shadow-sm border border-gray-100">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Metadata</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+            <FileText className="h-5 w-5 text-indigo-600" />
+            <span>Metadata</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <label className="font-medium text-gray-500">Created</label>
-              <p className="text-gray-900">
-                {new Date(currentClass.created_at).toLocaleDateString()} at{' '}
-                {new Date(currentClass.created_at).toLocaleTimeString()}
-              </p>
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-gray-400" />
+              <div>
+                <label className="font-medium text-gray-500">Created</label>
+                <p className="text-gray-900">
+                  {new Date(currentClass.created_at).toLocaleDateString()} at{' '}
+                  {new Date(currentClass.created_at).toLocaleTimeString()}
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="font-medium text-gray-500">Last Updated</label>
-              <p className="text-gray-900">
-                {new Date(currentClass.updated_at).toLocaleDateString()} at{' '}
-                {new Date(currentClass.updated_at).toLocaleTimeString()}
-              </p>
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-gray-400" />
+              <div>
+                <label className="font-medium text-gray-500">Last Updated</label>
+                <p className="text-gray-900">
+                  {new Date(currentClass.updated_at).toLocaleDateString()} at{' '}
+                  {new Date(currentClass.updated_at).toLocaleTimeString()}
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>

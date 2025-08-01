@@ -17,7 +17,10 @@ import {
   Menu,
   X,
   Home,
-  AlertCircle
+  AlertCircle,
+  GraduationCap,
+  Zap,
+  Lock
 } from "lucide-react";
 
 export default function PallisaLoginPage() {
@@ -101,61 +104,43 @@ export default function PallisaLoginPage() {
       password: formData.password,
       ...(loginMethod === 'email' ? { email: formData.email } : { student_id: formData.student_id })
     };
-
-    try {
-      const result = await dispatch(loginUser(credentials));
-      
-      if (loginUser.fulfilled.match(result)) {
-        // Check if email verification is required
-        const userProfile = result.payload.user_profile;
-        // The email_verified field is in the nested user object
-        const isEmailVerified = userProfile?.user?.email_verified;
-        
-        if (userProfile && !isEmailVerified) {
-          router.push(`/verify-email?email=${encodeURIComponent(formData.email || '')}`);
-        } else {
-          router.push('/dashboard');
-        }
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
+    
+    await dispatch(loginUser(credentials));
   };
 
   const handleMethodToggle = (method: 'email' | 'student_id') => {
     setLoginMethod(method);
-    setFormData(prev => ({ 
-      ...prev, 
-      email: '', 
-      student_id: '',
-      password: prev.password 
+    // Clear form data when switching methods
+    setFormData(prev => ({
+      ...prev,
+      email: method === 'email' ? prev.email : '',
+      student_id: method === 'student_id' ? prev.student_id : ''
     }));
+    // Clear errors
     dispatch(clearError());
     setLocalErrors({});
   };
 
-
-
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-white/90 backdrop-blur-xl border-b border-gray-200' : 'bg-transparent'}`}> 
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-white/90 backdrop-blur-xl border-b border-gray-200' : 'bg-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-blue-400 rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
+                <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="text-2xl font-bold text-blue-400">
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 PALLISA
               </span>
             </Link>
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-600 hover:text-blue-400 transition-colors flex items-center">
-                <Home className="w-4 h-4 mr-2" />
+              <Link href="/" className="text-gray-600 hover:text-blue-400 transition-colors flex items-center group">
+                <Home className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                 Home
               </Link>
-              <Link href="/register" className="px-6 py-3 bg-blue-400 text-white rounded-full hover:bg-blue-500 transition-all duration-300">
+              <Link href="/register" className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                 Sign Up
               </Link>
             </div>
@@ -166,43 +151,49 @@ export default function PallisaLoginPage() {
           {isMenuOpen && (
             <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-gray-200 p-6 space-y-4">
               <Link href="/" className="block text-gray-600 hover:text-blue-400 transition-colors">Home</Link>
-              <Link href="/register" className="w-full px-6 py-3 bg-blue-400 text-white rounded-full text-center">
+              <Link href="/register" className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-center">
                 Sign Up
               </Link>
             </div>
           )}
         </div>
       </nav>
+
       {/* Main Content */}
       <div className="min-h-screen flex items-center justify-center px-6 pt-20">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-2xl">
-            {/* Form Header */}
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h2>
-              <p className="text-gray-600">Access your school dashboard</p>
+          {/* Welcome Section */}
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+              <GraduationCap className="w-10 h-10 text-white" />
             </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-600 text-lg">Sign in to access your school dashboard</p>
+          </div>
+
+          {/* Login Card */}
+          <div className="bg-white rounded-3xl p-8 border-0 shadow-2xl backdrop-blur-sm">
             {/* Display general error */}
             {(error || Object.keys(fieldErrors).length > 0) && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                  <p className="text-red-400 text-sm">{error || 'Please fix the errors below'}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                  </div>
+                  <p className="text-red-600 text-sm font-medium">{error || 'Please fix the errors below'}</p>
                 </div>
               </div>
             )}
+
             {/* Login Method Toggle */}
             <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
               <button
                 type="button"
                 onClick={() => handleMethodToggle('email')}
-                className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${
                   loginMethod === 'email'
-                    ? 'bg-blue-400 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-blue-400'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg transform scale-105'
+                    : 'text-gray-600 hover:text-blue-400 hover:bg-gray-50'
                 }`}
               >
                 <Mail className="w-4 h-4 mr-2" />
@@ -211,136 +202,179 @@ export default function PallisaLoginPage() {
               <button
                 type="button"
                 onClick={() => handleMethodToggle('student_id')}
-                className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${
                   loginMethod === 'student_id'
-                    ? 'bg-blue-400 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-blue-400'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg transform scale-105'
+                    : 'text-gray-600 hover:text-blue-400 hover:bg-gray-50'
                 }`}
               >
                 <User className="w-4 h-4 mr-2" />
                 Student ID
               </button>
             </div>
+
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Dynamic Input */}
               {loginMethod === 'email' ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Email Address
                   </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <div className="relative group">
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                      <Mail className="w-5 h-5" />
+                    </div>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Enter your email"
-                      className={`w-full pl-12 pr-4 py-3 bg-gray-100 border rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent ${
-                        getFieldError('email') ? 'border-red-400' : 'border-gray-200 hover:border-blue-100'
+                      className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white ${
+                        getFieldError('email') ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-200'
                       }`}
                     />
                   </div>
                   {getFieldError('email') && (
-                    <p className="text-red-400 text-sm mt-1">{getFieldError('email')}</p>
+                    <p className="text-red-500 text-sm mt-2 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" />
+                      {getFieldError('email')}
+                    </p>
                   )}
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Student ID
                   </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <div className="relative group">
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                      <User className="w-5 h-5" />
+                    </div>
                     <input
                       type="text"
                       name="student_id"
                       value={formData.student_id}
                       onChange={handleInputChange}
                       placeholder="Enter your student ID"
-                      className={`w-full pl-12 pr-4 py-3 bg-gray-100 border rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent ${
-                        getFieldError('student_id') ? 'border-red-400' : 'border-gray-200 hover:border-blue-100'
+                      className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white ${
+                        getFieldError('student_id') ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-200'
                       }`}
                     />
                   </div>
                   {getFieldError('student_id') && (
-                    <p className="text-red-400 text-sm mt-1">{getFieldError('student_id')}</p>
+                    <p className="text-red-500 text-sm mt-2 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" />
+                      {getFieldError('student_id')}
+                    </p>
                   )}
                 </div>
               )}
+
               {/* Password Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Password
                 </label>
-                <div className="relative">
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                    <Lock className="w-5 h-5" />
+                  </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="Enter your password"
-                    className={`w-full pl-4 pr-12 py-3 bg-gray-100 border rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent ${
-                      getFieldError('password') ? 'border-red-400' : 'border-gray-200 hover:border-blue-100'
+                    className={`w-full pl-12 pr-12 py-4 bg-gray-50 border-2 rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white ${
+                      getFieldError('password') ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-200'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {getFieldError('password') && (
-                  <p className="text-red-400 text-sm mt-1">{getFieldError('password')}</p>
+                  <p className="text-red-500 text-sm mt-2 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" />
+                    {getFieldError('password')}
+                  </p>
                 )}
               </div>
+
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between">
-                <label className="flex items-center space-x-2 cursor-pointer">
+                <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-blue-400 bg-gray-100 border-gray-200 rounded focus:ring-blue-400 focus:ring-2"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-600">Remember me</span>
+                  <span className="ml-2 text-sm text-gray-600">Remember me</span>
                 </label>
-                <Link href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-500 transition-colors">
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                   Forgot password?
                 </Link>
               </div>
-              {/* Sign In Button */}
+
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-6 py-3 bg-blue-400 rounded-xl font-semibold text-white hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+                className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? (
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Signing in...
                   </div>
                 ) : (
-                  <>
+                  <div className="flex items-center justify-center">
+                    <Shield className="w-5 h-5 mr-2" />
                     Sign In
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </div>
                 )}
               </button>
             </form>
+
             {/* Sign Up Link */}
-            <div className="text-center mt-6">
-              <p className="text-gray-400">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-blue-400 hover:text-blue-500 transition-colors font-medium">
-                  Create one now
+            <div className="mt-8 text-center">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+                  Sign up here
                 </Link>
               </p>
             </div>
-            
+          </div>
+
+          {/* Features Preview */}
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/20">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <Zap className="w-4 h-4 text-blue-600" />
+              </div>
+              <p className="text-xs text-gray-600">Fast & Secure</p>
+            </div>
+            <div className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/20">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <Shield className="w-4 h-4 text-green-600" />
+              </div>
+              <p className="text-xs text-gray-600">Protected</p>
+            </div>
+            <div className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/20">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <BookOpen className="w-4 h-4 text-purple-600" />
+              </div>
+              <p className="text-xs text-gray-600">Academic</p>
+            </div>
           </div>
         </div>
       </div>

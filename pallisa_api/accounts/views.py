@@ -600,6 +600,12 @@ class RoleListCreateView(APIView):
     @extend_schema(
         tags=["Roles"],
         summary="List all roles",
+        parameters=[
+            OpenApiParameter(name='search', type=str, description='Search in role name and description'),
+            OpenApiParameter(name='is_superadmin', type=bool, description='Filter by super admin status'),
+            OpenApiParameter(name='page', type=int, description='Page number'),
+            OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
+        ],
         responses={200: RoleSerializer(many=True)}
     )
     def get(self, request):
@@ -607,6 +613,20 @@ class RoleListCreateView(APIView):
         
         # Start with all roles
         roles = Role.objects.all()
+        
+        # Apply search filter
+        search = request.query_params.get('search')
+        if search:
+            roles = roles.filter(
+                Q(name__icontains=search) | 
+                Q(description__icontains=search)
+            )
+        
+        # Apply super admin filter
+        is_superadmin = request.query_params.get('is_superadmin')
+        if is_superadmin is not None:
+            is_superadmin_bool = is_superadmin.lower() == 'true'
+            roles = roles.filter(is_superadmin=is_superadmin_bool)
         
         # If user is a school owner, filter by their schools
         if user_profile.user_type == 'school_owner':
@@ -631,9 +651,22 @@ class RoleListCreateView(APIView):
             else:
                 # If no school assigned, only show system roles
                 roles = roles.filter(school__isnull=True)
-            
-        serializer = RoleSerializer(roles, many=True)
-        return Response(serializer.data)
+        
+        # Apply pagination
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+        
+        paginator = Paginator(roles, page_size)
+        page_obj = paginator.get_page(page)
+        
+        serializer = RoleSerializer(page_obj.object_list, many=True)
+        
+        return Response({
+            'count': paginator.count,
+            'next': page_obj.has_next(),
+            'previous': page_obj.has_previous(),
+            'results': serializer.data
+        })
 
 
     @extend_schema(

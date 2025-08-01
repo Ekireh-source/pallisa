@@ -12,7 +12,11 @@ import {
   UserCheck, 
   UserPlus, 
   Calendar,
-  ArrowRight
+  ArrowRight,
+  BookOpen,
+  Building2,
+  Activity,
+  Zap
 } from 'lucide-react';
 
 export default function MembersPage() {
@@ -35,7 +39,7 @@ export default function MembersPage() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -52,7 +56,10 @@ export default function MembersPage() {
       changeType: "positive" as const,
       icon: GraduationCap,
       description: "Active students",
-      href: "/members/students"
+      href: "/members/students",
+      gradient: "from-blue-500 to-indigo-500",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600"
     },
     {
       title: "Teachers",
@@ -61,7 +68,10 @@ export default function MembersPage() {
       changeType: "positive" as const,
       icon: UserCheck,
       description: "Teaching staff",
-      href: "/members/teachers"
+      href: "/members/teachers",
+      gradient: "from-green-500 to-emerald-500",
+      bgColor: "bg-green-50",
+      iconColor: "text-green-600"
     },
     {
       title: "Parents",
@@ -70,16 +80,22 @@ export default function MembersPage() {
       changeType: "positive" as const,
       icon: UserPlus,
       description: "Parent accounts",
-      href: "/members/parents"
+      href: "/members/parents",
+      gradient: "from-purple-500 to-pink-500",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-600"
     },
     {
       title: "Classes",
       value: "18",
       change: "6 streams",
-      changeType: "neutral" as const,
+      changeType: "positive" as const,
       icon: Calendar,
       description: "Academic classes",
-      href: "/members/classes"
+      href: "/members/classes",
+      gradient: "from-orange-500 to-red-500",
+      bgColor: "bg-orange-50",
+      iconColor: "text-orange-600"
     }
   ];
 
@@ -89,101 +105,116 @@ export default function MembersPage() {
       description: "Register a new student",
       href: "/members/students/create",
       icon: UserPlus,
-      color: "bg-blue-500"
+      gradient: "from-blue-500 to-indigo-500",
+      hoverGradient: "from-blue-600 to-indigo-600"
     },
     {
       title: "Add Teacher",
       description: "Add teaching staff",
       href: "/members/teachers/create",
       icon: Users,
-      color: "bg-green-500"
+      gradient: "from-green-500 to-emerald-500",
+      hoverGradient: "from-green-600 to-emerald-600"
     },
     {
       title: "Add Parent",
       description: "Register parent account",
       href: "/members/parents/create",
       icon: UserPlus,
-      color: "bg-purple-500"
+      gradient: "from-purple-500 to-pink-500",
+      hoverGradient: "from-purple-600 to-pink-600"
     },
     {
-      title: "Member Reports",
-      description: "View member analytics",
-      href: "/members/reports",
-      icon: ArrowRight,
-      color: "bg-orange-500"
+      title: "Manage Classes",
+      description: "Organize academic classes",
+      href: "/members/classes",
+      icon: Building2,
+      gradient: "from-orange-500 to-red-500",
+      hoverGradient: "from-orange-600 to-red-600"
     }
   ];
 
-  const memberCategories = [
+  const additionalStats = [
     {
-      title: "Students",
-      description: "Manage student enrollment, records, and academic information",
-      icon: GraduationCap,
-      count: statistics?.total_students || 0,
-      href: "/members/students",
-      color: "border-blue-200 hover:border-blue-300 bg-blue-50"
+      title: "Subjects",
+      value: "25",
+      icon: BookOpen,
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+      description: "Academic subjects"
     },
     {
-      title: "Teachers",
-      description: "Manage teaching staff, assignments, and qualifications",
-      icon: UserCheck,
-      count: 124,
-      href: "/members/teachers",
-      color: "border-green-200 hover:border-green-300 bg-green-50"
+      title: "Streams",
+      value: "6",
+      icon: Activity,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
+      description: "Class streams"
     },
     {
-      title: "Parents",
-      description: "Manage parent accounts and student relationships",
-      icon: UserPlus,
-      count: 267,
-      href: "/members/parents",
-      color: "border-purple-200 hover:border-purple-300 bg-purple-50"
-    },
-    {
-      title: "Classes & Streams",
-      description: "Organize academic classes and student streams",
-      icon: Calendar,
-      count: 18,
-      href: "/members/classes",
-      color: "border-indigo-200 hover:border-indigo-300 bg-indigo-50"
+      title: "Enrollment Rate",
+      value: "94%",
+      icon: Zap,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      description: "Current term"
     }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Members Management
-        </h1>
-        <p className="text-gray-600 mt-1">
-          Manage students, teachers, parents, and academic organization.
-        </p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Users className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Member Management</h1>
+            <p className="text-blue-100 text-lg">
+              Comprehensive management of students, teachers, parents, and academic structures
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4 text-blue-100">
+          <div className="flex items-center space-x-2">
+            <Activity className="w-4 h-4" />
+            <span className="text-sm">Total Members: {statistics?.total_students || 0}</span>
+          </div>
+          <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4" />
+            <span className="text-sm">Active Academic Year</span>
+          </div>
+        </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Main Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {memberStats.map((stat, index) => (
           <Link key={index} href={stat.href}>
-            <Card className="bg-white shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+            <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden cursor-pointer">
+              <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-700">
                   {stat.title}
                 </CardTitle>
-                <stat.icon className="h-4 w-4 text-gray-400" />
+                <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                  <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-2xl font-bold text-gray-900 mb-2">{stat.value}</div>
                 <div className="flex items-center space-x-2 text-xs text-gray-500">
                   <span 
-                    className={`font-medium ${
-                      stat.changeType === 'positive' ? 'text-green-600' : 
-                      stat.changeType === 'neutral' ? 'text-gray-600' : 'text-red-600'
+                    className={`font-medium px-2 py-1 rounded-full ${
+                      stat.changeType === 'positive' ? 'bg-green-100 text-green-700' : 
+                      stat.changeType === 'negative' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     {stat.change}
                   </span>
-                  <span>{stat.description}</span>
+                  <span className="hidden sm:inline">{stat.description}</span>
                 </div>
               </CardContent>
             </Card>
@@ -191,60 +222,50 @@ export default function MembersPage() {
         ))}
       </div>
 
-      {/* Member Categories */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Member Categories</CardTitle>
-          <CardDescription>
-            Access different member management sections
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {memberCategories.map((category, index) => (
-              <Link key={index} href={category.href}>
-                <div className={`p-6 rounded-lg border-2 transition-all duration-200 cursor-pointer ${category.color}`}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                        <category.icon className="h-6 w-6 text-gray-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{category.title}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{category.description}</p>
-                      </div>
-                    </div>
-                    <div className="text-sm font-medium text-gray-700">
-                      {category.count}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {additionalStats.map((stat, index) => (
+          <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-gray-700">
+                {stat.title}
+              </CardTitle>
+              <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 mb-2">{stat.value}</div>
+              <p className="text-xs text-gray-500">{stat.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Quick Actions */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Quick Actions</CardTitle>
-          <CardDescription>
-            Frequently used member management actions
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <Zap className="w-5 h-5 text-blue-600" />
+            <span>Quick Actions</span>
+          </CardTitle>
+          <CardDescription className="text-gray-600">
+            Frequently used actions for member management and administration
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <Link key={index} href={action.href}>
-                <div className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center`}>
-                      <action.icon className="h-5 w-5 text-white" />
+                <div className="group p-4 rounded-xl border border-gray-200 hover:border-transparent hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                  <div className="relative flex items-center space-x-3">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                      <action.icon className="h-6 w-6 text-white" />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900 text-sm">{action.title}</h3>
-                      <p className="text-xs text-gray-500 mt-1">{action.description}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">{action.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{action.description}</p>
                     </div>
                   </div>
                 </div>
@@ -256,39 +277,156 @@ export default function MembersPage() {
 
       {/* Student Statistics Overview */}
       {statistics && (
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">Student Overview</CardTitle>
-            <CardDescription>
-              Current student enrollment statistics
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-700">{statistics.enrolled}</div>
-                <div className="text-xs text-green-600">Enrolled</div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Enrollment Status */}
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+              <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+                <GraduationCap className="w-5 h-5 text-blue-600" />
+                <span>Student Enrollment Status</span>
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Current student enrollment breakdown
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-green-50 border border-green-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <UserCheck className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="font-semibold text-green-900">Enrolled</span>
+                  </div>
+                  <span className="text-2xl font-bold text-green-900">{statistics.enrolled || 0}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 rounded-xl bg-yellow-50 border border-yellow-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <Activity className="w-4 h-4 text-yellow-600" />
+                    </div>
+                    <span className="font-semibold text-yellow-900">Transferred</span>
+                  </div>
+                  <span className="text-2xl font-bold text-yellow-900">{statistics.transferred || 0}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 rounded-xl bg-blue-50 border border-blue-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <GraduationCap className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="font-semibold text-blue-900">Graduated</span>
+                  </div>
+                  <span className="text-2xl font-bold text-blue-900">{statistics.graduated || 0}</span>
+                </div>
               </div>
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-700">{statistics.transferred}</div>
-                <div className="text-xs text-blue-600">Transferred</div>
+            </CardContent>
+          </Card>
+
+          {/* Class Distribution */}
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+              <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+                <Building2 className="w-5 h-5 text-green-600" />
+                <span>Class Distribution</span>
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Students by class level
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {statistics.by_class && Object.entries(statistics.by_class).slice(0, 5).map(([className, count]) => (
+                  <div key={className} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <span className="font-medium text-gray-900">{className}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" 
+                          style={{ width: `${(count / (statistics.total_students || 1)) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">{count}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="text-center p-3 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-700">{statistics.graduated}</div>
-                <div className="text-xs text-purple-600">Graduated</div>
-              </div>
-              <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-700">{statistics.suspended}</div>
-                <div className="text-xs text-yellow-600">Suspended</div>
-              </div>
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="text-2xl font-bold text-red-700">{statistics.withdrawn}</div>
-                <div className="text-xs text-red-600">Withdrawn</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
+
+      {/* Navigation Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link href="/members/students">
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <GraduationCap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Students</h3>
+                  <p className="text-sm text-gray-500">Manage student records</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/members/teachers">
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <UserCheck className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Teachers</h3>
+                  <p className="text-sm text-gray-500">Manage teaching staff</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/members/parents">
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <UserPlus className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Parents</h3>
+                  <p className="text-sm text-gray-500">Manage parent accounts</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/members/classes">
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Building2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Classes</h3>
+                  <p className="text-sm text-gray-500">Manage academic classes</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
     </div>
   );
 } 

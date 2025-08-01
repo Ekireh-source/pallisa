@@ -163,6 +163,11 @@ export const API_ENDPOINTS = {
   TEACHER_ASSIGNMENTS: (id: number) => `/members/teachers/${id}/assignments/`,
   PARENT_CHILDREN: (id: number) => `/members/parents/${id}/children/`,
   
+  // Bulk upload endpoints
+  STUDENT_BULK_UPLOAD: '/members/students/bulk-upload/',
+  TEACHER_BULK_UPLOAD: '/members/teachers/bulk-upload/',
+  NON_STAFF_BULK_UPLOAD: '/members/non-staff-members/bulk-upload/',
+  
   // Role and Permission Management endpoints
   ROLES: '/accounts/roles/',
   ROLE_DETAIL: (id: number) => `/accounts/roles/${id}/`,
@@ -507,6 +512,12 @@ export const studentApi = {
   create: (data: StudentCreateUpdate) => 
     apiPost<StudentDetail>(API_ENDPOINTS.MEMBERS_STUDENTS, data),
   
+  bulkCreate: (students: StudentCreateUpdate[]) =>
+    apiPost<{ students: StudentDetail[]; created_count: number; message: string }>(
+      `${API_ENDPOINTS.MEMBERS_STUDENTS}bulk-upload/`,
+      { students }
+    ),
+  
   update: (id: number, data: Partial<StudentCreateUpdate>) =>
     apiPut<StudentDetail>(API_ENDPOINTS.STUDENT_DETAIL(id), data),
   
@@ -539,6 +550,12 @@ export const teacherApi = {
   
   create: (data: TeacherCreateUpdate) => 
     apiPost<TeacherDetail>(API_ENDPOINTS.MEMBERS_TEACHERS, data),
+  
+  bulkCreate: (teachers: TeacherCreateUpdate[]) =>
+    apiPost<{ teachers: TeacherDetail[]; created_count: number; message: string }>(
+      API_ENDPOINTS.TEACHER_BULK_UPLOAD,
+      { teachers }
+    ),
   
   update: (id: number, data: Partial<TeacherCreateUpdate>) =>
     apiPut<TeacherDetail>(API_ENDPOINTS.TEACHER_DETAIL(id), data),
@@ -606,6 +623,12 @@ export const nonStaffMemberApi = {
   
   create: (data: NonStaffMemberCreateUpdate) => 
     apiPost<NonStaffMember>(API_ENDPOINTS.MEMBERS_NON_STAFF, data),
+  
+  bulkCreate: (nonStaffMembers: NonStaffMemberCreateUpdate[]) =>
+    apiPost<{ nonStaffMembers: NonStaffMember[]; created_count: number; message: string }>(
+      API_ENDPOINTS.NON_STAFF_BULK_UPLOAD,
+      { non_staff_members: nonStaffMembers }
+    ),
   
   update: (id: number, data: Partial<NonStaffMemberCreateUpdate>) =>
     apiPut<NonStaffMember>(API_ENDPOINTS.NON_STAFF_DETAIL(id), data),
@@ -997,11 +1020,21 @@ export const getStaffSalaryList = async (params?: Record<string, string | number
 // Teachers
 export const getTeachers = async (params?: Record<string, string | number | boolean>): Promise<MemberTeacher[]> => {
   const response = await axiosInstance.get('/members/teachers/', { params });
-  return response.data;
+  // Handle paginated response structure
+  if (response.data && typeof response.data === 'object' && 'results' in response.data) {
+    return response.data.results || [];
+  }
+  // Fallback for direct array response
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 // Non-Staff Members
 export const getNonStaffMembers = async (params?: Record<string, string | number | boolean>): Promise<NonStaffMember[]> => {
   const response = await axiosInstance.get('/members/non-staff-members/', { params });
-  return response.data;
+  // Handle paginated response structure
+  if (response.data && typeof response.data === 'object' && 'results' in response.data) {
+    return response.data.results || [];
+  }
+  // Fallback for direct array response
+  return Array.isArray(response.data) ? response.data : [];
 }; 

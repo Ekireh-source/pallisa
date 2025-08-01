@@ -12,24 +12,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+
+# Load environment variables from .env file
+from decouple import Config, RepositoryEnv
+config = Config(RepositoryEnv('.env'))
 
 # Helper function to get environment variables with defaults
 def get_env(key, default=None, cast=None):
-    value = os.environ.get(key, default)
-    if value is None:
+    try:
+        value = config(key, default=default)
+        if value is None:
+            return default
+        
+        if cast is bool:
+            if isinstance(value, bool):
+                return value
+            return str(value).lower() in ('true', '1', 'yes', 'on')
+        elif cast is int:
+            return int(value) if value else default
+        elif cast is list:
+            if isinstance(value, list):
+                return value
+            return [x.strip() for x in value.split(',')] if value else default
+        return value
+    except Exception:
         return default
-    
-    if cast is bool:
-        if isinstance(value, bool):
-            return value
-        return str(value).lower() in ('true', '1', 'yes', 'on')
-    elif cast is int:
-        return int(value) if value else default
-    elif cast is list:
-        if isinstance(value, list):
-            return value
-        return [x.strip() for x in value.split(',')] if value else default
-    return value
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -114,6 +122,11 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "OPTIONS": {
+            "timeout": 30,  # 30 seconds timeout for database operations
+            "check_same_thread": False,  # Allow multiple threads to access the database
+        },
+        "ATOMIC_REQUESTS": False,  # Disable automatic transactions to prevent long-running locks
     }
 }
 

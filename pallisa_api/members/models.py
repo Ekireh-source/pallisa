@@ -166,41 +166,112 @@ class Student(models.Model):
                     year = timezone.now().year
                     school_code = school.name[:3].upper()
                     
-                    # Use transaction-safe ID generation with row-level locking
-                    with transaction.atomic():
-                        # Lock the existing students to prevent race conditions
-                        existing_students = Student.objects.select_for_update().filter(
-                            student_id__startswith=f"{school_code}{year}"
-                        ).order_by('-student_id')
-                        
-                        if existing_students.exists():
-                            # Extract the number from the last student_id and increment
-                            last_student_id = existing_students.first().student_id
+                    # Use a more robust approach for bulk creation
+                    # Get the highest existing student_id for this school and year
+                    from django.db.models import Max
+                    from django.db.models.functions import Substr, Cast
+                    from django.db.models import IntegerField
+                    
+                    # Get the highest number for this school and year
+                    existing_students = Student.objects.filter(
+                        student_id__startswith=f"{school_code}{year}"
+                    ).exclude(student_id='')  # Exclude empty student_ids
+                    
+                    if existing_students.exists():
+                        # Extract the numeric part and find the maximum
+                        max_number = 0
+                        for student in existing_students:
                             try:
                                 # Extract the numeric part (last 4 digits)
-                                last_number = int(last_student_id[-4:])
-                                new_number = last_number + 1
+                                student_id = student.student_id
+                                if len(student_id) >= 4:
+                                    number_part = student_id[-4:]
+                                    number = int(number_part)
+                                    max_number = max(max_number, number)
                             except (ValueError, IndexError):
-                                # If we can't parse the number, start from 1
-                                new_number = 1
-                        else:
-                            # First student for this school and year
-                            new_number = 1
+                                continue
                         
-                        # Generate the new student_id with zero-padding
+                        new_number = max_number + 1
+                    else:
+                        # First student for this school and year
+                        new_number = 1
+                    
+                    # Generate the new student_id with zero-padding
+                    self.student_id = f"{school_code}{year}{new_number:04d}"
+                    
+                    # Check for uniqueness and increment if needed
+                    while Student.objects.filter(student_id=self.student_id).exists():
+                        new_number += 1
                         self.student_id = f"{school_code}{year}{new_number:04d}"
-                        
-                        # Final check for uniqueness within the same transaction
-                        while Student.objects.filter(student_id=self.student_id).exists():
-                            new_number += 1
-                            self.student_id = f"{school_code}{year}{new_number:04d}"
-                            if new_number > 9999:  # Prevent infinite loop
-                                raise ValidationError("Unable to generate unique student ID - too many students for this year")
+                        if new_number > 9999:  # Prevent infinite loop
+                            raise ValidationError("Unable to generate unique student ID - too many students for this year")
         
-        # Ensure user_profile has student user_type
-        if self.user_profile and self.user_profile.user_type != 'student':
-            self.user_profile.user_type = 'student'
-            self.user_profile.save()
+        # Auto-generate admission_number if not provided
+        if not self.admission_number:
+            try:
+                # Get current academic year and term
+                current_academic_year = AcademicYear.objects.filter(is_current=True).first()
+                current_term = Term.objects.filter(is_current=True).first()
+                
+                if current_academic_year:
+                    # Extract year from academic year (e.g., "2024/2025" -> "2024")
+                    year = current_academic_year.name.split('/')[0]
+                    term_code = ""
+                    
+                    if current_term:
+                        # Extract term number (e.g., "Term 1" -> "1")
+                        term_name = current_term.name.lower()
+                        if 'term' in term_name:
+                            term_code = term_name.replace('term', '').strip()
+                        elif 'semester' in term_name:
+                            term_code = term_name.replace('semester', '').strip()
+                        else:
+                            term_code = "1"  # Default to 1 if can't parse
+                    else:
+                        term_code = "1"  # Default to 1 if no current term
+                    
+                    # Get current time components
+                    now = timezone.now()
+                    month = f"{now.month:02d}"
+                    day = f"{now.day:02d}"
+                    hour = f"{now.hour:02d}"
+                    minute = f"{now.minute:02d}"
+                    
+                    # Generate admission number: YYYY-T-MMDD-HHMM-XXXX
+                    # Where XXXX is a sequential number for that day
+                    base_admission = f"{year}-{term_code}-{month}{day}-{hour}{minute}"
+                    
+                    # Find the next sequential number for this base
+                    existing_admissions = Student.objects.filter(
+                        admission_number__startswith=base_admission
+                    ).order_by('-admission_number')
+                    
+                    if existing_admissions.exists():
+                        # Extract the sequential number from the last admission
+                        last_admission = existing_admissions.first().admission_number
+                        try:
+                            # Extract the last 4 digits
+                            last_seq = int(last_admission[-4:])
+                            new_seq = last_seq + 1
+                        except (ValueError, IndexError):
+                            new_seq = 1
+                    else:
+                        new_seq = 1
+                    
+                    # Generate the admission number
+                    self.admission_number = f"{base_admission}-{new_seq:04d}"
+                    
+                    # Check for uniqueness and increment if needed
+                    while Student.objects.filter(admission_number=self.admission_number).exists():
+                        new_seq += 1
+                        self.admission_number = f"{base_admission}-{new_seq:04d}"
+                        if new_seq > 9999:  # Prevent infinite loop
+                            raise ValidationError("Unable to generate unique admission number - too many students for this time period")
+            except Exception as e:
+                # If there's any error in generation, create a simple fallback
+                now = timezone.now()
+                timestamp = now.strftime("%Y%m%d%H%M%S")
+                self.admission_number = f"ADM{timestamp}"
         
         super().save(*args, **kwargs)
 

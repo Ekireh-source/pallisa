@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, User, LogOut, Settings } from "lucide-react";
+import { Bell, User, LogOut, Settings, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState, AppDispatch } from "@/store";
 import { logoutUser } from "@/store/slices/authSlice";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface SharedNavbarProps {
   userName?: string;
@@ -24,6 +25,8 @@ export function SharedNavbar({ userName = "Admin User", userEmail = "admin@schoo
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { toggleSidebar, isMobile } = useSidebar();
+  
   const handleLogout = () => {
     dispatch(logoutUser());
     router.push('/login');
@@ -42,8 +45,20 @@ export function SharedNavbar({ userName = "Admin User", userEmail = "admin@schoo
   const displayEmail = user?.email || userEmail;
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-200 bg-white px-4">
+    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-200 bg-white px-4 shadow-sm">
       <div className="flex items-center gap-2">
+        {/* Mobile menu button */}
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden mobile-menu-button"
+            onClick={toggleSidebar}
+          >
+            <Menu className="h-4 w-4" />
+            <span className="sr-only">Open sidebar</span>
+          </Button>
+        )}
         <h1 className="text-lg font-semibold text-gray-900">Pallisa Expense Manager</h1>
       </div>
       

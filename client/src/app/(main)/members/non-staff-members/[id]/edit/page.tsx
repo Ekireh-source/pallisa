@@ -15,7 +15,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select';
-import { ArrowLeft, Save, X, User, Shield } from 'lucide-react';
+import { ArrowLeft, Save, X, User, Shield, Edit, FileText, AlertCircle } from 'lucide-react';
 import type { NonStaffMemberCreateUpdate } from '@/types';
 import { NonStaffMember } from '@/types';
 
@@ -23,7 +23,7 @@ const EMPLOYMENT_TYPE_OPTIONS = [
   { value: 'full_time', label: 'Full Time' },
   { value: 'part_time', label: 'Part Time' },
   { value: 'contract', label: 'Contract' },
-  { value: 'temporary', label: 'Temporary' },
+  { value: 'substitute', label: 'Substitute' },
   { value: 'volunteer', label: 'Volunteer' },
 ];
 
@@ -75,7 +75,7 @@ export default function EditNonStaffMemberPage() {
     if (currentNonStaffMember) {
       const member = currentNonStaffMember as NonStaffMember;
       setFormData({
-        employment_type: member.employment_type || 'full_time',
+        employment_type: member.employment_type === 'temporary' ? 'substitute' : member.employment_type || 'full_time',
         specialization: member.specialization || '',
         qualification: member.qualification || '',
         hire_date: member.hire_date || '',
@@ -219,29 +219,56 @@ export default function EditNonStaffMemberPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href={`/members/non-staff-members/${nonStaffMemberId}`}>
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Details</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Non-Staff Member</h1>
-            <p className="text-gray-600 mt-1">Update information for {member.full_name || 'Unknown Member'}</p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Edit className="w-8 h-8" />
           </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Edit Non-Staff Member</h1>
+            <p className="text-purple-100 text-lg">
+              Update member information and employment details
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-purple-100">
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span className="text-sm">Member Management</span>
+            </div>
+            <div className="w-1 h-1 bg-purple-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm">Update Records</span>
+            </div>
+          </div>
+          <Link
+            href="/members/non-staff-members"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Members
+          </Link>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Error Updating Member
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -251,84 +278,45 @@ export default function EditNonStaffMemberPage() {
       <Card className="bg-white shadow-sm border border-gray-100">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-            <User className="h-5 w-5 text-blue-600" />
-            <span>Non-Staff Member Information</span>
+            <User className="h-5 w-5 text-purple-600" />
+            <span>Member Information</span>
           </CardTitle>
           <CardDescription>
-            Update the non-staff member&apos;s professional details and role assignment
+            Update the member's professional details and role assignment
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Role Assignment */}
             <div className="space-y-2">
-              <Label htmlFor="user_role_id">
-                <div className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">Role Assignment</span>
-                </div>
-              </Label>
-              <Select 
-                value={formData.user_role_id?.toString() || 'none'} 
-                onValueChange={handleRoleChange}
-              >
-                <SelectTrigger className="w-full h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                  <SelectValue placeholder="Choose a role for this staff member" />
+              <Label htmlFor="user_role_id">Role Assignment</Label>
+              <Select value={formData.user_role_id?.toString() || ''} onValueChange={handleRoleChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role..." />
                 </SelectTrigger>
-                <SelectContent className="max-h-60 bg-white border border-gray-200 shadow-lg">
-                  <SelectItem value="none" className="text-gray-500">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                      <span>No Role Assigned</span>
-                    </div>
-                  </SelectItem>
-                  {staffRoles.length > 0 ? (
-                    staffRoles.map((role) => (
-                      <SelectItem key={role.id} value={role.id.toString()} className="py-3">
-                        <div className="flex flex-col space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                            <span className="font-medium">{role.name}</span>
-                          </div>
-                          {role.description && (
-                            <span className="text-xs text-gray-500 ml-4">{role.description}</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-roles" disabled className="text-gray-400">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                        <span>No roles available</span>
-                      </div>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id.toString()}>
+                      {role.name}
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectContent>
               </Select>
               {fieldErrors.user_role_id && (
                 <p className="text-sm text-red-600">{fieldErrors.user_role_id}</p>
               )}
-              <p className="text-xs text-gray-500">
-                Assigning a role will automatically grant the associated permissions to this staff member.
-              </p>
             </div>
 
-            <hr className="border-gray-200" />
-
-            {/* Professional Information */}
+            {/* Employment Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="employment_type">
-                  Employment Type <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="employment_type">Employment Type</Label>
                 <select
                   id="employment_type"
                   name="employment_type"
                   value={formData.employment_type}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {EMPLOYMENT_TYPE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -356,11 +344,12 @@ export default function EditNonStaffMemberPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="salary">Salary</Label>
+                <Label htmlFor="salary">Salary (UGX)</Label>
                 <Input
                   id="salary"
                   name="salary"
                   type="number"
+                  min="0"
                   step="0.01"
                   value={formData.salary || ''}
                   onChange={handleInputChange}
@@ -451,12 +440,12 @@ export default function EditNonStaffMemberPage() {
                 {loading ? (
                   <>
                     <LoadingSpinner />
-                    <span>Updating Non-Staff Member...</span>
+                    <span>Updating Member...</span>
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4" />
-                    <span>Update Non-Staff Member</span>
+                    <span>Update Member</span>
                   </>
                 )}
               </Button>

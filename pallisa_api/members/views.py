@@ -30,6 +30,7 @@ from .serializers import (
     SalaryPaymentSerializer, SalaryPaymentCreateUpdateSerializer, SalarySummarySerializer
 )
 from accounts.permission import HasPermission
+from .utils import safe_delete_with_relations, create_error_response
 
 
 # Base classes for common functionality
@@ -848,31 +849,188 @@ class StudentStatisticsView(APIView):
         tags=["Students"]
     )
     def get(self, request):
-        """Get comprehensive student statistics"""
+        """Get student statistics and summary"""
+        # Get query parameters
         school_id = request.query_params.get('school_id')  # Note: school filtering no longer available
         
-        queryset = Student.objects.filter(is_active=True)
+        # Build queryset
+        queryset = Student.objects.select_related('current_stream__class_obj')
+        
+        # Apply filters
         # Note: School filtering removed as Class no longer has school field
         
         # Calculate statistics
-        stats = {
-            'total_students': queryset.count(),
-            'enrolled': queryset.filter(enrollment_status='enrolled').count(),
-            'transferred': queryset.filter(enrollment_status='transferred').count(),
-            'graduated': queryset.filter(enrollment_status='graduated').count(),
-            'by_class': {}
-        }
+        total_students = queryset.count()
+        enrolled = queryset.filter(enrollment_status='enrolled').count()
+        transferred = queryset.filter(enrollment_status='transferred').count()
+        graduated = queryset.filter(enrollment_status='graduated').count()
+        suspended = queryset.filter(enrollment_status='suspended').count()
+        withdrawn = queryset.filter(enrollment_status='withdrawn').count()
+        
+        # Get statistics by class
+        by_class = {}
+        class_stats = queryset.values('current_stream__class_obj__name').annotate(
+            count=Count('id')
+        ).order_by('current_stream__class_obj__name')
+        
+        for stat in class_stats:
+            class_name = stat['current_stream__class_obj__name'] or 'Unassigned'
+            by_class[class_name] = stat['count']
+        
+        # Get statistics by stream
+        by_stream = {}
+        stream_stats = queryset.values('current_stream__name').annotate(
+            count=Count('id')
+        ).order_by('current_stream__name')
+        
+        for stat in stream_stats:
+            stream_name = stat['current_stream__name'] or 'Unassigned'
+            by_stream[stream_name] = stat['count']
+        
+        # Get enrollment trend (last 12 months)
+        enrollment_trend = {}
+        from datetime import datetime, timedelta
+        from django.utils import timezone
+        
+        for i in range(12):
+            date = timezone.now() - timedelta(days=30*i)
+            month_key = date.strftime('%Y-%m')
+            count = queryset.filter(
+                created_at__year=date.year,
+                created_at__month=date.month
+            ).count()
+            enrollment_trend[month_key] = count
+        
+        return Response({
+            'total_students': total_students,
+            'enrolled': enrolled,
+            'transferred': transferred,
+            'graduated': graduated,
+            'suspended': suspended,
+            'withdrawn': withdrawn,
+            'by_class': by_class,
+            'by_stream': by_stream,
+            'enrollment_trend': enrollment_trend
+        })
 
-        # Group by class level - updated field reference
-        class_counts = queryset.values(
-            'current_stream__class_obj__name'
-        ).annotate(count=Count('id')).order_by('current_stream__class_obj__name')
 
-        for item in class_counts:
-            class_name = item['current_stream__class_obj__name'] or 'Unassigned'
-            stats['by_class'][class_name] = item['count']
+class BulkStudentUploadView(APIView):
+    """Bulk upload students"""
+    permission_classes = [IsAuthenticated]
 
-        return Response(stats)
+    @extend_schema(
+        summary="Bulk upload students",
+        description="""
+        Upload multiple students at once. Each student in the array can either:
+        
+        1. **Provide an existing user_profile ID** if the user account already exists
+        2. **Provide user creation fields** to automatically create a new user account:
+           - user_email (required): Email address for the new account
+           - user_first_name: First name
+           - user_last_name: Last name  
+           - user_phone: Phone number
+           - user_role_id: Specific role ID (optional, will default to student role)
+        
+        When creating new user accounts:
+        - Random passwords will be generated automatically
+        - Login credentials will be sent to the provided email addresses
+        - Users will be prompted to change their passwords on first login
+        """,
+        request={"type": "object", "properties": {"students": {"type": "array", "items": StudentSerializer}}},
+        responses={
+            201: OpenApiResponse(description="Students created successfully", response=StudentSerializer(many=True)),
+            400: OpenApiResponse(description="Bad request - validation errors")
+        },
+        tags=["Students"]
+    )
+    def post(self, request):
+        """Create multiple students in bulk"""
+        # Handle both WSGIRequest and Request objects
+        if hasattr(request, 'data'):
+            students_data = request.data.get('students', [])
+        else:
+            # Fallback for WSGIRequest
+            import json
+            try:
+                students_data = json.loads(request.body).get('students', [])
+            except (json.JSONDecodeError, AttributeError):
+                students_data = []
+        
+        if not students_data:
+            return Response({'error': 'students list is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        created_students = []
+        errors = []
+        
+        # Pre-generate student IDs to avoid race conditions
+        from members.models import Student
+        from django.utils import timezone
+        
+        # Get the school and year for ID generation
+        school = None
+        if students_data and 'user_role_id' in students_data[0]:
+            from accounts.models import Role
+            try:
+                role = Role.objects.get(id=students_data[0]['user_role_id'])
+                school = role.school
+            except Role.DoesNotExist:
+                pass
+        
+        if not school:
+            from accounts.models import School
+            school = School.objects.first()
+        
+        if school:
+            year = timezone.now().year
+            school_code = school.name[:3].upper()
+            
+            # Get the highest existing student ID for this school and year
+            existing_students = Student.objects.filter(
+                student_id__startswith=f"{school_code}{year}"
+            ).exclude(student_id='')
+            
+            max_number = 0
+            if existing_students.exists():
+                for student in existing_students:
+                    try:
+                        student_id = student.student_id
+                        if len(student_id) >= 4:
+                            number_part = student_id[-4:]
+                            number = int(number_part)
+                            max_number = max(max_number, number)
+                    except (ValueError, IndexError):
+                        continue
+            
+            # Generate student IDs for all students in the batch
+            for i, student_data in enumerate(students_data):
+                if not student_data.get('student_id'):
+                    max_number += 1
+                    student_data['student_id'] = f"{school_code}{year}{max_number:04d}"
+        
+        for i, student_data in enumerate(students_data):
+            serializer = StudentSerializer(data=student_data)
+            if serializer.is_valid():
+                try:
+                    student = serializer.save()
+                    created_students.append(student)
+                except Exception as e:
+                    errors.append({f'student_{i}': f'Creation failed: {str(e)}'})
+            else:
+                errors.append({f'student_{i}': serializer.errors})
+        
+        if errors:
+            return Response({
+                'errors': errors,
+                'created_count': len(created_students),
+                'failed_count': len(errors)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        response_serializer = StudentSerializer(created_students, many=True)
+        return Response({
+            'students': response_serializer.data,
+            'created_count': len(created_students),
+            'message': f'Successfully created {len(created_students)} students'
+        }, status=status.HTTP_201_CREATED)
 
 
 # ==================== TEACHER VIEWS ====================
@@ -1600,8 +1758,15 @@ class NonStaffMemberDetailView(APIView):
     def delete(self, request, pk):
         """Delete a non-staff member"""
         non_staff_member = self.get_object(pk)
-        non_staff_member.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        # Check for related records that might prevent deletion
+        related_fields = ['salary_payments']
+        success, error_message = safe_delete_with_relations(non_staff_member, related_fields)
+        
+        if success:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return create_error_response(error_message, status.HTTP_400_BAD_REQUEST)
 
 
 # ==================== SALARY MANAGEMENT VIEWS ====================
@@ -2178,3 +2343,243 @@ class StaffSalaryListView(APIView):
             'total_staff': total_staff,
             'total_salary_budget': total_salary_budget,
         })
+
+
+# ==================== BULK UPLOAD VIEWS ====================
+
+class BulkTeacherUploadView(APIView):
+    """Bulk upload teachers"""
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Bulk upload teachers",
+        description="""
+        Upload multiple teachers at once. Each teacher in the array can either:
+        
+        1. **Provide an existing user_profile ID** if the user account already exists
+        2. **Provide user creation fields** to automatically create a new user account:
+           - user_email (required): Email address for the new account
+           - user_first_name: First name
+           - user_last_name: Last name  
+           - user_phone: Phone number
+           - user_role_id: Specific role ID (optional, will default to teacher role)
+        
+        When creating new user accounts:
+        - Random passwords will be generated automatically
+        - Login credentials will be sent to the provided email addresses
+        - Users will be prompted to change their passwords on first login
+        """,
+        request={"type": "object", "properties": {"teachers": {"type": "array", "items": TeacherSerializer}}},
+        responses={
+            201: OpenApiResponse(description="Teachers created successfully", response=TeacherSerializer(many=True)),
+            400: OpenApiResponse(description="Bad request - validation errors")
+        },
+        tags=["Teachers"]
+    )
+    def post(self, request):
+        """Create multiple teachers in bulk"""
+        # Handle both WSGIRequest and Request objects
+        if hasattr(request, 'data'):
+            teachers_data = request.data.get('teachers', [])
+        else:
+            # Fallback for WSGIRequest
+            import json
+            try:
+                teachers_data = json.loads(request.body).get('teachers', [])
+            except (json.JSONDecodeError, AttributeError):
+                teachers_data = []
+        
+        if not teachers_data:
+            return Response({'error': 'teachers list is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        created_teachers = []
+        errors = []
+        
+        # Pre-generate employee IDs to avoid race conditions
+        from members.models import Teacher
+        from django.utils import timezone
+        
+        # Get the school and year for ID generation
+        school = None
+        if teachers_data and 'user_role_id' in teachers_data[0]:
+            from accounts.models import Role
+            try:
+                role = Role.objects.get(id=teachers_data[0]['user_role_id'])
+                school = role.school
+            except Role.DoesNotExist:
+                pass
+        
+        if not school:
+            from accounts.models import School
+            school = School.objects.first()
+        
+        if school:
+            year = timezone.now().year
+            school_code = school.name[:3].upper()
+            
+            # Get the highest existing teacher ID for this school and year
+            existing_teachers = Teacher.objects.filter(
+                employee_id__startswith=f"TCH{school_code}{year}"
+            ).exclude(employee_id='')
+            
+            max_number = 0
+            if existing_teachers.exists():
+                for teacher in existing_teachers:
+                    try:
+                        employee_id = teacher.employee_id
+                        if len(employee_id) >= 4:
+                            number_part = employee_id[-4:]
+                            number = int(number_part)
+                            max_number = max(max_number, number)
+                    except (ValueError, IndexError):
+                        continue
+            
+            # Generate employee IDs for all teachers in the batch
+            for i, teacher_data in enumerate(teachers_data):
+                if not teacher_data.get('employee_id'):
+                    max_number += 1
+                    teacher_data['employee_id'] = f"TCH{school_code}{year}{max_number:04d}"
+        
+        for i, teacher_data in enumerate(teachers_data):
+            serializer = TeacherSerializer(data=teacher_data)
+            if serializer.is_valid():
+                try:
+                    teacher = serializer.save()
+                    created_teachers.append(teacher)
+                except Exception as e:
+                    errors.append({f'teacher_{i}': f'Creation failed: {str(e)}'})
+            else:
+                errors.append({f'teacher_{i}': serializer.errors})
+        
+        if errors:
+            return Response({
+                'errors': errors,
+                'created_count': len(created_teachers),
+                'failed_count': len(errors)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        response_serializer = TeacherSerializer(created_teachers, many=True)
+        return Response({
+            'teachers': response_serializer.data,
+            'created_count': len(created_teachers),
+            'message': f'Successfully created {len(created_teachers)} teachers'
+        }, status=status.HTTP_201_CREATED)
+
+
+class BulkNonStaffMemberUploadView(APIView):
+    """Bulk upload non-staff members"""
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Bulk upload non-staff members",
+        description="""
+        Upload multiple non-staff members at once. Each member in the array can either:
+        
+        1. **Provide an existing user_profile ID** if the user account already exists
+        2. **Provide user creation fields** to automatically create a new user account:
+           - user_email (required): Email address for the new account
+           - user_first_name: First name
+           - user_last_name: Last name  
+           - user_phone: Phone number
+           - user_role_id: Specific role ID (optional, will default to non-staff role)
+        
+        When creating new user accounts:
+        - Random passwords will be generated automatically
+        - Login credentials will be sent to the provided email addresses
+        - Users will be prompted to change their passwords on first login
+        """,
+        request={"type": "object", "properties": {"non_staff_members": {"type": "array", "items": NonStaffMemberSerializer}}},
+        responses={
+            201: OpenApiResponse(description="Non-staff members created successfully", response=NonStaffMemberSerializer(many=True)),
+            400: OpenApiResponse(description="Bad request - validation errors")
+        },
+        tags=["NonStaffMembers"]
+    )
+    def post(self, request):
+        """Create multiple non-staff members in bulk"""
+        # Handle both WSGIRequest and Request objects
+        if hasattr(request, 'data'):
+            members_data = request.data.get('non_staff_members', [])
+        else:
+            # Fallback for WSGIRequest
+            import json
+            try:
+                members_data = json.loads(request.body).get('non_staff_members', [])
+            except (json.JSONDecodeError, AttributeError):
+                members_data = []
+        
+        if not members_data:
+            return Response({'error': 'non_staff_members list is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        created_members = []
+        errors = []
+        
+        # Pre-generate employee IDs to avoid race conditions
+        from members.models import NonStaffMember
+        from django.utils import timezone
+        
+        # Get the school and year for ID generation
+        school = None
+        if members_data and 'user_role_id' in members_data[0]:
+            from accounts.models import Role
+            try:
+                role = Role.objects.get(id=members_data[0]['user_role_id'])
+                school = role.school
+            except Role.DoesNotExist:
+                pass
+        
+        if not school:
+            from accounts.models import School
+            school = School.objects.first()
+        
+        if school:
+            year = timezone.now().year
+            school_code = school.name[:3].upper()
+            
+            # Get the highest existing non-staff member ID for this school and year
+            existing_members = NonStaffMember.objects.filter(
+                employee_id__startswith=f"NS{school_code}{year}"
+            ).exclude(employee_id='')
+            
+            max_number = 0
+            if existing_members.exists():
+                for member in existing_members:
+                    try:
+                        employee_id = member.employee_id
+                        if len(employee_id) >= 4:
+                            number_part = employee_id[-4:]
+                            number = int(number_part)
+                            max_number = max(max_number, number)
+                    except (ValueError, IndexError):
+                        continue
+            
+            # Generate employee IDs for all members in the batch
+            for i, member_data in enumerate(members_data):
+                if not member_data.get('employee_id'):
+                    max_number += 1
+                    member_data['employee_id'] = f"NS{school_code}{year}{max_number:04d}"
+        
+        for i, member_data in enumerate(members_data):
+            serializer = NonStaffMemberSerializer(data=member_data)
+            if serializer.is_valid():
+                try:
+                    member = serializer.save()
+                    created_members.append(member)
+                except Exception as e:
+                    errors.append({f'non_staff_member_{i}': f'Creation failed: {str(e)}'})
+            else:
+                errors.append({f'non_staff_member_{i}': serializer.errors})
+        
+        if errors:
+            return Response({
+                'errors': errors,
+                'created_count': len(created_members),
+                'failed_count': len(errors)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        response_serializer = NonStaffMemberSerializer(created_members, many=True)
+        return Response({
+            'non_staff_members': response_serializer.data,
+            'created_count': len(created_members),
+            'message': f'Successfully created {len(created_members)} non-staff members'
+        }, status=status.HTTP_201_CREATED)

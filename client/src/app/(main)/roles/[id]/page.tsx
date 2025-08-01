@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchRoleById, deleteRole } from '@/store/slices/roleSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
-import { ArrowLeft, Edit, Trash2, Shield, Calendar, AlertTriangle } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { ArrowLeft, Edit, Trash2, Shield, Calendar, AlertTriangle, User, Activity, FileText, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Permission } from '@/types';
 
@@ -18,6 +18,7 @@ export default function RoleDetailPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const roleId = Number(params.id);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -30,16 +31,18 @@ export default function RoleDetailPage() {
     }
   }, [isAuthenticated, router, dispatch, roleId]);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (currentRole && !currentRole.is_superadmin) {
-      if (confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
-        try {
-          await dispatch(deleteRole(roleId));
-          router.push('/roles');
-        } catch (error) {
-          console.error('Error deleting role:', error);
-        }
-      }
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await dispatch(deleteRole(roleId));
+      router.push('/roles');
+    } catch (error) {
+      console.error('Error deleting role:', error);
     }
   };
 
@@ -69,38 +72,30 @@ export default function RoleDetailPage() {
     return grouped;
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading role details...</p>
-        </div>
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Role</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Link href="/roles">
-            <Button>Back to Roles</Button>
-          </Link>
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-12">
+          <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-8 text-center">
+              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Role</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <Link href="/roles">
+                <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
+                  Back to Roles
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -108,14 +103,20 @@ export default function RoleDetailPage() {
 
   if (!currentRole) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Role Not Found</h2>
-          <p className="text-gray-600 mb-4">The role you&apos;re looking for doesn&apos;t exist.</p>
-          <Link href="/roles">
-            <Button>Back to Roles</Button>
-          </Link>
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-12">
+          <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-8 text-center">
+              <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Role Not Found</h2>
+              <p className="text-gray-600 mb-6">The role you&apos;re looking for doesn&apos;t exist.</p>
+              <Link href="/roles">
+                <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
+                  Back to Roles
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -124,65 +125,174 @@ export default function RoleDetailPage() {
   const groupedPermissions = groupPermissionsByCategory();
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/roles">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Roles</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{currentRole.name}</h1>
-            <p className="text-gray-600 mt-1">Role Details and Permissions</p>
+    <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+            <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{currentRole.name}</h1>
+            <p className="text-indigo-100 text-base sm:text-lg">
+              Role Details and Permissions
+            </p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Link href={`/roles/${roleId}/edit`}>
-            <Button className="flex items-center space-x-2">
-              <Edit className="h-4 w-4" />
-              <span>Edit Role</span>
-            </Button>
-          </Link>
-          {!currentRole.is_superadmin && (
-            <Button 
-              variant="outline" 
-              className="text-red-600 border-red-200 hover:bg-red-50"
-              onClick={handleDelete}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-4 text-indigo-100 text-sm">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>Type: {currentRole.is_superadmin ? 'Super Admin' : 'Regular Role'}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span>ID: {currentRole.id}</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span>Permissions: {getPermissionCount()}</span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex space-x-3">
+            <Link
+              href="/roles"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 cursor-pointer relative z-10"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          )}
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Back to Roles
+            </Link>
+            <Link
+              href={`/roles/${roleId}/edit`}
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer relative z-10"
+            >
+              <Edit className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Edit Role
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Role Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Role Name
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              {currentRole.name}
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                Role
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Type
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              {currentRole.is_superadmin ? 'Super Admin' : 'Regular'}
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <Badge className={currentRole.is_superadmin ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}>
+                {currentRole.is_superadmin ? 'Super Admin' : 'Regular Role'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Permissions
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              {getPermissionCount()}
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                Total Permissions
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Categories
+            </CardTitle>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              {Object.keys(groupedPermissions).length}
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span className="font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700">
+                Permission Categories
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Role Details */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Shield className="h-5 w-5 text-blue-600" />
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               <span>Role Information</span>
             </CardTitle>
+            <CardDescription className="text-gray-600">
+              Core details about this role
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Role Name</h3>
+                <p className="text-sm font-medium text-gray-600 mb-1">Role Name</p>
                 <p className="text-lg font-semibold text-gray-900">{currentRole.name}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Role Type</h3>
+                <p className="text-sm font-medium text-gray-600 mb-1">Role Type</p>
                 <div className="mt-1">{getSuperAdminBadge(currentRole.is_superadmin)}</div>
               </div>
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Description</h3>
+              <p className="text-sm font-medium text-gray-600 mb-1">Description</p>
               <p className="text-gray-900">
                 {currentRole.description || 'No description provided'}
               </p>
@@ -190,7 +300,7 @@ export default function RoleDetailPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Created</h3>
+                <p className="text-sm font-medium text-gray-600 mb-1">Created</p>
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-900">
@@ -199,7 +309,7 @@ export default function RoleDetailPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
+                <p className="text-sm font-medium text-gray-600 mb-1">Last Updated</p>
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-900">
@@ -212,11 +322,17 @@ export default function RoleDetailPage() {
         </Card>
 
         {/* Statistics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">Statistics</CardTitle>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+              <span>Statistics</span>
+            </CardTitle>
+            <CardDescription className="text-gray-600">
+              Role statistics and metrics
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6 space-y-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">{getPermissionCount()}</div>
               <div className="text-sm text-blue-600">Total Permissions</div>
@@ -241,18 +357,18 @@ export default function RoleDetailPage() {
       </div>
 
       {/* Permissions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-            <Shield className="h-5 w-5 text-green-600" />
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             <span>Assigned Permissions</span>
             <Badge className="ml-2">{getPermissionCount()}</Badge>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-600">
             Manage role permissions and access rights. Users with this role will have access to the selected permissions.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           {currentRole.is_superadmin ? (
             <div className="text-center py-8">
               <Shield className="h-12 w-12 text-purple-500 mx-auto mb-4" />
@@ -299,6 +415,55 @@ export default function RoleDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Quick Actions */}
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+            <span>Quick Actions</span>
+          </CardTitle>
+          <CardDescription className="text-gray-600">
+            Common actions for this role
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex flex-wrap gap-4">
+            <Link href={`/roles/${roleId}/edit`}>
+              <Button className="flex items-center space-x-2">
+                <Edit className="h-4 w-4" />
+                <span>Edit Role</span>
+              </Button>
+            </Link>
+            {!currentRole.is_superadmin && (
+              <Button 
+                variant="outline"
+                className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Delete Role</span>
+              </Button>
+            )}
+            <Link href="/roles">
+              <Button variant="outline" className="flex items-center space-x-2">
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Roles</span>
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ConfirmationModal
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Role Deletion"
+        message={`Are you sure you want to delete the role "${currentRole?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 } 

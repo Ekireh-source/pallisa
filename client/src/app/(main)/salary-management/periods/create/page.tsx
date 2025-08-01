@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox } from '@/components/ui';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox, LoadingSpinner } from '@/components/ui';
+import { ArrowLeft, Save, Loader2, Plus, Calendar, Clock, User, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { createSalaryPeriod, academicYearApi, termApi } from '@/lib/api';
 import { SalaryPeriodCreateUpdate, AcademicYear, Term } from '@/types';
@@ -101,50 +101,72 @@ export default function CreateSalaryPeriodPage() {
   if (!isAuthenticated || fetchingData || academicYears.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">
-            {fetchingData ? 'Loading...' : 'No academic years available. Please create academic years first.'}
-          </p>
-        </div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/salary-management/periods">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Salary Period</h1>
-            <p className="text-gray-600 mt-2">
+    <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+            <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create Salary Period</h1>
+            <p className="text-blue-100 text-base sm:text-lg">
               Add a new salary period for managing payments
             </p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-4 text-blue-100 text-sm">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4" />
+              <span>Academic Years: {academicYears.length}</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4" />
+              <span>Terms: {terms.length}</span>
+            </div>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>Date: {new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex space-x-3">
+            <Link
+              href="/salary-management/periods"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 cursor-pointer relative z-10"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Back to Periods
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <Card className="bg-white shadow-sm border border-gray-100">
-        <CardHeader>
-          <CardTitle>Salary Period Details</CardTitle>
-          <CardDescription>
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            <span>Salary Period Details</span>
+          </CardTitle>
+          <CardDescription className="text-gray-600">
             Fill in the details below to create a new salary period
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Period Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Period Name *</Label>
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Period Name *</Label>
                 <Input
                   id="name"
                   type="text"
@@ -152,12 +174,13 @@ export default function CreateSalaryPeriodPage() {
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   required
+                  className="h-11"
                 />
               </div>
 
               {/* Academic Year */}
               <div className="space-y-2">
-                <Label htmlFor="academic_year">Academic Year *</Label>
+                <Label htmlFor="academic_year" className="text-sm font-medium text-gray-700">Academic Year *</Label>
                 <Select
                   value={formData.academic_year.toString()}
                   onValueChange={(value) => {
@@ -167,7 +190,7 @@ export default function CreateSalaryPeriodPage() {
                     handleInputChange('term', 0);
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue placeholder="Select academic year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -182,12 +205,12 @@ export default function CreateSalaryPeriodPage() {
 
               {/* Term - Required for all periods */}
               <div className="space-y-2">
-                <Label htmlFor="term">Term *</Label>
+                <Label htmlFor="term" className="text-sm font-medium text-gray-700">Term *</Label>
                 <Select
                   value={formData.term?.toString() || ''}
                   onValueChange={(value) => handleInputChange('term', parseInt(value))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue placeholder="Select term" />
                   </SelectTrigger>
                   <SelectContent>
@@ -225,25 +248,27 @@ export default function CreateSalaryPeriodPage() {
 
               {/* Start Date */}
               <div className="space-y-2">
-                <Label htmlFor="start_date">Start Date *</Label>
+                <Label htmlFor="start_date" className="text-sm font-medium text-gray-700">Start Date *</Label>
                 <Input
                   id="start_date"
                   type="date"
                   value={formData.start_date}
                   onChange={(e) => handleInputChange('start_date', e.target.value)}
                   required
+                  className="h-11"
                 />
               </div>
 
               {/* End Date */}
               <div className="space-y-2">
-                <Label htmlFor="end_date">End Date *</Label>
+                <Label htmlFor="end_date" className="text-sm font-medium text-gray-700">End Date *</Label>
                 <Input
                   id="end_date"
                   type="date"
                   value={formData.end_date}
                   onChange={(e) => handleInputChange('end_date', e.target.value)}
                   required
+                  className="h-11"
                 />
               </div>
             </div>
@@ -256,7 +281,7 @@ export default function CreateSalaryPeriodPage() {
                   checked={formData.is_active || false}
                   onChange={(e) => handleInputChange('is_active', e.target.checked)}
                 />
-                <Label htmlFor="is_active">Set as active period</Label>
+                <Label htmlFor="is_active" className="text-sm font-medium text-gray-700">Set as active period</Label>
               </div>
               <p className="text-sm text-gray-500">
                 Only one salary period can be active at a time. Setting this period as active will automatically deactivate any other active periods.
@@ -264,13 +289,13 @@ export default function CreateSalaryPeriodPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex items-center justify-end space-x-4 pt-6 border-t">
+            <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
               <Link href="/salary-management/periods">
-                <Button variant="outline" type="button">
+                <Button variant="outline" type="button" className="px-6 py-2">
                   Cancel
                 </Button>
               </Link>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="px-6 py-2">
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchClassById, updateClass, clearFieldErrors, clearCurrentClass } from '@/store/slices/memberClassSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, X, Building, GraduationCap } from 'lucide-react';
 import type { ClassCreateUpdate } from '@/types';
 
 export default function EditClassPage() {
@@ -91,7 +91,7 @@ export default function EditClassPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function EditClassPage() {
 
   if (loading && !currentClass) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/members/classes">
             <Button variant="outline" size="sm" className="flex items-center space-x-2">
@@ -109,9 +109,8 @@ export default function EditClassPage() {
             </Button>
           </Link>
         </div>
-        <div className="flex items-center justify-center py-8">
-          <LoadingSpinner />
-          <span className="ml-2 text-gray-600">Loading class details...</span>
+        <div className="flex items-center justify-center py-12">
+          <LoadingSpinner size="lg" />
         </div>
       </div>
     );
@@ -119,7 +118,7 @@ export default function EditClassPage() {
 
   if (error && !currentClass) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/members/classes">
             <Button variant="outline" size="sm" className="flex items-center space-x-2">
@@ -128,11 +127,19 @@ export default function EditClassPage() {
             </Button>
           </Link>
         </div>
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-red-600" />
+              Error Loading Class
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -142,7 +149,7 @@ export default function EditClassPage() {
 
   if (!currentClass) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/members/classes">
             <Button variant="outline" size="sm" className="flex items-center space-x-2">
@@ -151,11 +158,19 @@ export default function EditClassPage() {
             </Button>
           </Link>
         </div>
-        <Card className="bg-yellow-50 border border-yellow-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-yellow-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">Class not found</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-b border-yellow-200">
+            <h3 className="text-lg font-semibold text-yellow-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-yellow-600" />
+              Class Not Found
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-yellow-600" />
+              </div>
+              <p className="text-yellow-700">The requested class could not be found.</p>
             </div>
           </CardContent>
         </Card>
@@ -165,29 +180,56 @@ export default function EditClassPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href={`/members/classes/${classId}`}>
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Details</span>
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Class</h1>
-            <p className="text-gray-600 mt-1">{currentClass.name}</p>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <Building className="w-8 h-8" />
           </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Edit Class</h1>
+            <p className="text-indigo-100 text-lg">
+              Update class information for {currentClass.name}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-indigo-100">
+            <div className="flex items-center space-x-2">
+              <Building className="w-4 h-4" />
+              <span className="text-sm">Class Management</span>
+            </div>
+            <div className="w-1 h-1 bg-indigo-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <GraduationCap className="w-4 h-4" />
+              <span className="text-sm">Academic Structure</span>
+            </div>
+          </div>
+          <Link
+            href={`/members/classes/${classId}`}
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Details
+          </Link>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <X className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 flex items-center">
+              <X className="w-5 h-5 mr-2 text-red-600" />
+              Error Updating Class
+            </h3>
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-red-700">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -196,7 +238,10 @@ export default function EditClassPage() {
       {/* Edit Form */}
       <Card className="bg-white shadow-sm border border-gray-100">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Class Information</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+            <GraduationCap className="h-5 w-5 text-indigo-600" />
+            <span>Class Information</span>
+          </CardTitle>
           <CardDescription>
             Update the class details and information
           </CardDescription>

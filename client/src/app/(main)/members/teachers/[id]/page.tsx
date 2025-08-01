@@ -13,6 +13,7 @@ const TEACHER_TYPE_COLORS = {
   full_time: 'bg-green-100 text-green-800',
   part_time: 'bg-blue-100 text-blue-800',
   contract: 'bg-yellow-100 text-yellow-800',
+  substitute: 'bg-orange-100 text-orange-800',
   volunteer: 'bg-purple-100 text-purple-800',
 };
 
@@ -20,6 +21,7 @@ const TEACHER_TYPE_LABELS = {
   full_time: 'Full Time',
   part_time: 'Part Time',
   contract: 'Contract',
+  substitute: 'Substitute',
   volunteer: 'Volunteer',
 };
 
@@ -349,7 +351,7 @@ export default function TeacherDetailPage() {
                     <DollarSign className="h-4 w-4" />
                     <span>Salary</span>
                   </label>
-                  <p className="text-gray-900">${parseFloat(currentTeacher.salary).toLocaleString()}</p>
+                  <p className="text-gray-900">UGX {parseFloat(currentTeacher.salary).toLocaleString()}</p>
                 </div>
               )}
               <div>

@@ -1,364 +1,201 @@
-import React from 'react';
-import { useAppSelector } from '@/store';
-import { User, Permission, UserPermission } from '@/types';
-
-export interface UserPermissions {
-  has_permissions: boolean;
-  permissions: Permission[];
-  role: {
-    id: number;
-    name: string;
-    is_superadmin: boolean;
-  } | null;
-  is_superadmin: boolean;
-}
+import { User, Permission } from '@/types';
 
 /**
- * Hook to get user permissions from Redux store
+ * Check if user has a specific permission
  */
-export const useUserPermissions = (): UserPermissions => {
-  const { user } = useAppSelector((state) => state.auth);
-  
-  if (!user) {
-    return {
-      has_permissions: false,
-      permissions: [],
-      role: null,
-      is_superadmin: false
-    };
-  }
-
-  // If user has a superadmin role, they have all permissions
-  if (user.role?.is_superadmin) {
-    return {
-      has_permissions: true,
-      permissions: [], // SuperAdmin has all permissions implicitly
-      role: {
-        id: user.role.id,
-        name: user.role.name,
-        is_superadmin: true
-      },
-      is_superadmin: true
-    };
-  }
-
-  // Get user's direct permissions
-  const permissions: Permission[] = user.user_permissions?.map(up => ({
-    id: 0, // We don't have the permission ID in UserPermission
-    code: up.code,
-    name: up.name,
-    description: '',
-    category: {
-      id: 0,
-      code: '',
-      name: '',
-      description: '',
-      is_admin: false
-    }
-  })) || [];
-
-  console.log("permissions", permissions);
-  
-  return {
-    has_permissions: true,
-    permissions,
-    role: user.role ? {
-      id: user.role.id,
-      name: user.role.name,
-      is_superadmin: user.role.is_superadmin
-    } : null,
-    is_superadmin: user.role?.is_superadmin || false
-  };
-};
-
-/**
- * Hook to check if user has a specific permission
- */
-export const useHasPermission = (permissionCode: string): boolean => {
-  const userPermissions = useUserPermissions();
-  
-  // SuperAdmin has all permissions
-  if (userPermissions.is_superadmin) {
-    return true;
-  }
-  
-  // Check if user has the specific permission
-  return userPermissions.permissions.some(perm => perm.code === permissionCode);
-};
-
-/**
- * Hook to check if user has any of the specified permissions
- */
-export const useHasAnyPermission = (permissionCodes: string[]): boolean => {
-  const userPermissions = useUserPermissions();
-  
-  // SuperAdmin has all permissions
-  if (userPermissions.is_superadmin) {
-    return true;
-  }
-  
-  // Check if user has any of the specified permissions
-  return permissionCodes.some(code => 
-    userPermissions.permissions.some(perm => perm.code === code)
-  );
-};
-
-/**
- * Hook to check if user has all of the specified permissions
- */
-export const useHasAllPermissions = (permissionCodes: string[]): boolean => {
-  const userPermissions = useUserPermissions();
-  
-  // SuperAdmin has all permissions
-  if (userPermissions.is_superadmin) {
-    return true;
-  }
-  
-  // Check if user has all of the specified permissions
-  return permissionCodes.every(code => 
-    userPermissions.permissions.some(perm => perm.code === code)
-  );
-};
-
-/**
- * Component wrapper that only renders children if user has the required permission
- */
-export const RequirePermission: React.FC<{
-  permission: string;
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}> = ({ permission, children, fallback = null }) => {
-  const hasPermission = useHasPermission(permission);
-  
-  if (!hasPermission) {
-    return React.createElement(React.Fragment, null, fallback);
-  }
-  
-  return React.createElement(React.Fragment, null, children);
-};
-
-/**
- * Component wrapper that only renders children if user has any of the required permissions
- */
-export const RequireAnyPermission: React.FC<{
-  permissions: string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}> = ({ permissions, children, fallback = null }) => {
-  const hasAnyPermission = useHasAnyPermission(permissions);
-  
-  if (!hasAnyPermission) {
-    return React.createElement(React.Fragment, null, fallback);
-  }
-  
-  return React.createElement(React.Fragment, null, children);
-};
-
-/**
- * Component wrapper that only renders children if user has all of the required permissions
- */
-export const RequireAllPermissions: React.FC<{
-  permissions: string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}> = ({ permissions, children, fallback = null }) => {
-  const hasAllPermissions = useHasAllPermissions(permissions);
-  
-  if (!hasAllPermissions) {
-    return React.createElement(React.Fragment, null, fallback);
-  }
-  
-  return React.createElement(React.Fragment, null, children);
-};
-
-/**
- * Utility function to check permissions outside of React components
- */
-export const checkPermission = (user: User | null, permissionCode: string): boolean => {
+export const hasPermission = (user: User | null, permissionCode: string): boolean => {
   if (!user) return false;
   
-  // SuperAdmin has all permissions
-  if (user.role?.is_superadmin) {
-    return true;
+  // Super admin has all permissions
+  if (user.role?.is_superadmin) return true;
+  
+  // Check role-based permissions
+  if (user.role?.permissions) {
+    const hasRolePermission = user.role.permissions.some(
+      (permission: Permission) => permission.code === permissionCode
+    );
+    if (hasRolePermission) return true;
   }
   
-  // Check if user has the specific permission
-  return user.user_permissions?.some((up: UserPermission) => up.code === permissionCode) || false;
+  // Check user-specific permissions
+  if (user.user_permissions) {
+    const hasUserPermission = user.user_permissions.some(
+      (userPermission) => userPermission.code === permissionCode
+    );
+    if (hasUserPermission) return true;
+  }
+  
+  return false;
 };
 
 /**
- * Utility function to check if user has any of the specified permissions
+ * Check if user has any of the specified permissions
  */
-export const checkAnyPermission = (user: User | null, permissionCodes: string[]): boolean => {
-  if (!user) return false;
-  
-  // SuperAdmin has all permissions
-  if (user.role?.is_superadmin) {
-    return true;
-  }
-  
-  // Check if user has any of the specified permissions
-  return permissionCodes.some(code => 
-    user.user_permissions?.some((up: UserPermission) => up.code === code)
-  ) || false;
+export const hasAnyPermission = (user: User | null, permissionCodes: readonly string[]): boolean => {
+  return permissionCodes.some(code => hasPermission(user, code));
 };
 
 /**
- * Utility function to check if user has all of the specified permissions
+ * Check if user has all of the specified permissions
  */
-export const checkAllPermissions = (user: User | null, permissionCodes: string[]): boolean => {
-  if (!user) return false;
-  
-  // SuperAdmin has all permissions
-  if (user.role?.is_superadmin) {
-    return true;
-  }
-  
-  // Check if user has all of the specified permissions
-  return permissionCodes.every(code => 
-    user.user_permissions?.some((up: UserPermission) => up.code === code)
-  ) || false;
+export const hasAllPermissions = (user: User | null, permissionCodes: readonly string[]): boolean => {
+  return permissionCodes.every(code => hasPermission(user, code));
 };
 
 /**
- * Permission constants for easy reference
+ * Permission codes for different sections
  */
 export const PERMISSIONS = {
-  // Admin permissions
-  ADMIN: {
-    MANAGE_ROLES: 'admin.manage_roles',
-    MANAGE_PERMISSIONS: 'admin.manage_permissions',
-    MANAGE_USERS: 'admin.manage_users',
-    MANAGE_SALARIES: 'admin.manage_salaries',
-    VIEW_USERS: 'admin.view_users',
-    EDIT_USERS: 'admin.edit_users',
-    DELETE_USERS: 'admin.delete_users',
-    VIEW_DOCUMENTS: 'admin.view_documents',
-    CREATE_DOCUMENTS: 'admin.create_documents',
-    EDIT_DOCUMENTS: 'admin.edit_documents',
-    DELETE_DOCUMENTS: 'admin.delete_documents',
-    VIEW_REPORTS: 'admin.view_reports',
-  },
+  // Dashboard
+  VIEW_DASHBOARD: 'admin.access_dashboard',
   
-  // Student permissions
-  STUDENTS: {
-    VIEW_STUDENTS: 'students.view_students',
-    CREATE_STUDENT: 'students.create_student',
-    EDIT_STUDENT: 'students.edit_student',
-    DELETE_STUDENT: 'students.delete_student',
-  },
+  // Expense Management
+  VIEW_EXPENSES: 'expenses.view_expenses',
+  CREATE_EXPENSES: 'expenses.manage_expenses',
+  EDIT_EXPENSES: 'expenses.manage_expenses',
+  DELETE_EXPENSES: 'expenses.manage_expenses',
+  APPROVE_EXPENSES: 'expenses.approve_expenses',
   
-  // Teacher permissions
-  TEACHERS: {
-    VIEW_TEACHERS: 'teachers.view_teachers',
-    CREATE_TEACHER: 'teachers.create_teacher',
-    EDIT_TEACHER: 'teachers.edit_teacher',
-    DELETE_TEACHER: 'teachers.delete_teacher',
-  },
+  VIEW_CATEGORIES: 'expenses.view_categories',
+  MANAGE_CATEGORIES: 'expenses.manage_categories',
   
-  // Expense permissions
-  EXPENSES: {
-    VIEW_EXPENSES: 'expenses.view_expenses',
-    CREATE_EXPENSE: 'expenses.create_expense',
-    EDIT_EXPENSE: 'expenses.edit_expense',
-    DELETE_EXPENSE: 'expenses.delete_expense',
-    APPROVE_EXPENSE: 'expenses.approve_expense',
-  },
+  VIEW_DEPARTMENTS: 'expenses.view_departments',
+  MANAGE_DEPARTMENTS: 'expenses.manage_departments',
   
-  // Fee permissions
-  FEES: {
-    VIEW_FEES: 'fees.view_fees',
-    CREATE_FEE: 'fees.create_fee',
-    EDIT_FEE: 'fees.edit_fee',
-    DELETE_FEE: 'fees.delete_fee',
-  },
+  VIEW_VENDORS: 'expenses.view_vendors',
+  MANAGE_VENDORS: 'expenses.manage_vendors',
   
-  // Salary permissions
-  SALARY: {
-    VIEW_SALARY_PERIODS: 'salary.view_salary_periods',
-    MANAGE_SALARY_PERIODS: 'salary.manage_salary_periods',
-    VIEW_ALLOWANCES: 'salary.view_allowances',
-    MANAGE_ALLOWANCES: 'salary.manage_allowances',
-    VIEW_DEDUCTIONS: 'salary.view_deductions',
-    MANAGE_DEDUCTIONS: 'salary.manage_deductions',
-    VIEW_PAYMENTS: 'salary.view_payments',
-    MANAGE_PAYMENTS: 'salary.manage_payments',
-    VIEW_SUMMARIES: 'salary.view_summaries',
-    VIEW_STAFF_SALARIES: 'salary.view_staff_salaries',
-    PROCESS_PAYMENTS: 'salary.process_payments',
-  },
+  VIEW_TERMS: 'expenses.view_terms',
+  MANAGE_TERMS: 'expenses.manage_terms',
   
-  // Report permissions
-  REPORTS: {
-    VIEW_REPORTS: 'reports.view_reports',
-    EXPORT_REPORTS: 'reports.export_reports',
-  },
+  VIEW_ACADEMIC_YEARS: 'expenses.view_academic_years',
+  MANAGE_ACADEMIC_YEARS: 'expenses.manage_academic_years',
+  
+  // Fees Management
+  VIEW_FEES: 'fees.view_fee_categories',
+  MANAGE_FEES: 'fees.manage_fee_categories',
+  VIEW_FEE_CATEGORIES: 'fees.view_fee_categories',
+  MANAGE_FEE_CATEGORIES: 'fees.manage_fee_categories',
+  VIEW_FEE_STRUCTURES: 'fees.view_fee_structures',
+  MANAGE_FEE_STRUCTURES: 'fees.manage_fee_structures',
+  VIEW_FEE_PAYMENTS: 'fees.view_payments',
+  MANAGE_FEE_PAYMENTS: 'fees.manage_payments',
+  VIEW_FEE_BALANCES: 'fees.view_fee_balances',
+  VIEW_FEE_SUMMARIES: 'fees.view_collection_summaries',
+  VIEW_SCHOLARSHIPS: 'fees.view_scholarships',
+  MANAGE_SCHOLARSHIPS: 'fees.manage_scholarships',
+  
+  // Members Management
+  VIEW_STUDENTS: 'members.view_students',
+  MANAGE_STUDENTS: 'members.manage_students',
+  BULK_UPLOAD_STUDENTS: 'members.bulk_upload_students',
+  
+  VIEW_TEACHERS: 'members.view_teachers',
+  MANAGE_TEACHERS: 'members.manage_teachers',
+  BULK_UPLOAD_TEACHERS: 'members.bulk_upload_teachers',
+  
+  VIEW_NON_STAFF: 'members.view_non_staff',
+  MANAGE_NON_STAFF: 'members.manage_non_staff',
+  BULK_UPLOAD_NON_STAFF: 'members.bulk_upload_non_staff',
+  
+  VIEW_PARENTS: 'members.view_parents',
+  MANAGE_PARENTS: 'members.manage_parents',
+  
+  VIEW_CLASSES: 'members.view_classes',
+  MANAGE_CLASSES: 'members.manage_classes',
+  
+  VIEW_STREAMS: 'members.view_streams',
+  MANAGE_STREAMS: 'members.manage_streams',
+  
+  VIEW_SUBJECTS: 'members.view_subjects',
+  MANAGE_SUBJECTS: 'members.manage_subjects',
+  
+  // Salary Management
+  VIEW_SALARIES: 'salary.view_salary_periods',
+  MANAGE_SALARIES: 'admin.manage_salaries',
+  VIEW_SALARY_PERIODS: 'salary.view_salary_periods',
+  MANAGE_SALARY_PERIODS: 'salary.manage_salary_periods',
+  VIEW_SALARY_ALLOWANCES: 'salary.view_allowances',
+  MANAGE_SALARY_ALLOWANCES: 'salary.manage_allowances',
+  VIEW_SALARY_DEDUCTIONS: 'salary.view_deductions',
+  MANAGE_SALARY_DEDUCTIONS: 'salary.manage_deductions',
+  VIEW_SALARY_PAYMENTS: 'salary.view_payments',
+  MANAGE_SALARY_PAYMENTS: 'salary.manage_payments',
+  VIEW_SALARY_REPORTS: 'salary.view_summaries',
+  VIEW_SALARY_SETTINGS: 'salary.view_staff_salaries',
+  
+  // System Administration
+  VIEW_ROLES: 'admin.view_roles',
+  MANAGE_ROLES: 'admin.manage_roles',
+  VIEW_PERMISSIONS: 'admin.view_permissions',
+  MANAGE_PERMISSIONS: 'admin.manage_permissions',
 } as const;
 
 /**
- * Permission groups for common operations
+ * Permission groups for sidebar sections
  */
 export const PERMISSION_GROUPS = {
-  // Full admin access
-  FULL_ADMIN: [
-    PERMISSIONS.ADMIN.MANAGE_ROLES,
-    PERMISSIONS.ADMIN.MANAGE_PERMISSIONS,
-    PERMISSIONS.ADMIN.MANAGE_USERS,
-    PERMISSIONS.ADMIN.VIEW_DOCUMENTS,
-    PERMISSIONS.ADMIN.VIEW_REPORTS,
-  ],
-  
-  // Student management
-  STUDENT_MANAGEMENT: [
-    PERMISSIONS.STUDENTS.VIEW_STUDENTS,
-    PERMISSIONS.STUDENTS.CREATE_STUDENT,
-    PERMISSIONS.STUDENTS.EDIT_STUDENT,
-    PERMISSIONS.STUDENTS.DELETE_STUDENT,
-  ],
-  
-  // Teacher management
-  TEACHER_MANAGEMENT: [
-    PERMISSIONS.TEACHERS.VIEW_TEACHERS,
-    PERMISSIONS.TEACHERS.CREATE_TEACHER,
-    PERMISSIONS.TEACHERS.EDIT_TEACHER,
-    PERMISSIONS.TEACHERS.DELETE_TEACHER,
-  ],
-  
-  // Expense management
+  // Expense Management
   EXPENSE_MANAGEMENT: [
-    PERMISSIONS.EXPENSES.VIEW_EXPENSES,
-    PERMISSIONS.EXPENSES.CREATE_EXPENSE,
-    PERMISSIONS.EXPENSES.EDIT_EXPENSE,
-    PERMISSIONS.EXPENSES.DELETE_EXPENSE,
-    PERMISSIONS.EXPENSES.APPROVE_EXPENSE,
+    PERMISSIONS.VIEW_EXPENSES,
+    PERMISSIONS.VIEW_CATEGORIES,
+    PERMISSIONS.VIEW_DEPARTMENTS,
+    PERMISSIONS.VIEW_VENDORS,
+    PERMISSIONS.VIEW_TERMS,
+    PERMISSIONS.VIEW_ACADEMIC_YEARS,
   ],
   
-  // Fee management
-  FEE_MANAGEMENT: [
-    PERMISSIONS.FEES.VIEW_FEES,
-    PERMISSIONS.FEES.CREATE_FEE,
-    PERMISSIONS.FEES.EDIT_FEE,
-    PERMISSIONS.FEES.DELETE_FEE,
+  // Fees Management
+  FEES_MANAGEMENT: [
+    PERMISSIONS.VIEW_FEES,
+    PERMISSIONS.VIEW_FEE_CATEGORIES,
+    PERMISSIONS.VIEW_FEE_STRUCTURES,
+    PERMISSIONS.VIEW_FEE_PAYMENTS,
+    PERMISSIONS.VIEW_FEE_BALANCES,
+    PERMISSIONS.VIEW_FEE_SUMMARIES,
+    PERMISSIONS.VIEW_SCHOLARSHIPS,
   ],
   
-  // Salary management
+  // Members Management
+  MEMBERS_MANAGEMENT: [
+    PERMISSIONS.VIEW_STUDENTS,
+    PERMISSIONS.VIEW_TEACHERS,
+    PERMISSIONS.VIEW_NON_STAFF,
+    PERMISSIONS.VIEW_PARENTS,
+    PERMISSIONS.VIEW_CLASSES,
+    PERMISSIONS.VIEW_STREAMS,
+    PERMISSIONS.VIEW_SUBJECTS,
+  ],
+  
+  // Salary Management
   SALARY_MANAGEMENT: [
-    PERMISSIONS.SALARY.VIEW_SALARY_PERIODS,
-    PERMISSIONS.SALARY.MANAGE_SALARY_PERIODS,
-    PERMISSIONS.SALARY.VIEW_ALLOWANCES,
-    PERMISSIONS.SALARY.MANAGE_ALLOWANCES,
-    PERMISSIONS.SALARY.VIEW_DEDUCTIONS,
-    PERMISSIONS.SALARY.MANAGE_DEDUCTIONS,
-    PERMISSIONS.SALARY.VIEW_PAYMENTS,
-    PERMISSIONS.SALARY.MANAGE_PAYMENTS,
-    PERMISSIONS.SALARY.VIEW_SUMMARIES,
-    PERMISSIONS.SALARY.VIEW_STAFF_SALARIES,
-    PERMISSIONS.SALARY.PROCESS_PAYMENTS,
+    PERMISSIONS.VIEW_SALARIES,
+    PERMISSIONS.VIEW_SALARY_PERIODS,
+    PERMISSIONS.VIEW_SALARY_ALLOWANCES,
+    PERMISSIONS.VIEW_SALARY_DEDUCTIONS,
+    PERMISSIONS.VIEW_SALARY_PAYMENTS,
+    PERMISSIONS.VIEW_SALARY_REPORTS,
+    PERMISSIONS.VIEW_SALARY_SETTINGS,
   ],
   
-  // Report access
-  REPORT_ACCESS: [
-    PERMISSIONS.REPORTS.VIEW_REPORTS,
-    PERMISSIONS.REPORTS.EXPORT_REPORTS,
+  // System Administration
+  SYSTEM_ADMIN: [
+    PERMISSIONS.MANAGE_ROLES,
+    PERMISSIONS.VIEW_PERMISSIONS,
   ],
-} as const; 
+} as const;
+
+/**
+ * Check if user can access a specific section
+ */
+export const canAccessSection = (user: User | null, section: keyof typeof PERMISSION_GROUPS): boolean => {
+  const permissions = PERMISSION_GROUPS[section];
+  return hasAnyPermission(user, permissions);
+};
+
+/**
+ * Check if user can access a specific item within a section
+ */
+export const canAccessItem = (user: User | null, permissionCode: string): boolean => {
+  return hasPermission(user, permissionCode);
+}; 

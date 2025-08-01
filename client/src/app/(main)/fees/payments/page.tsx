@@ -10,7 +10,14 @@ import {
   ArrowDown,
   Plus,
   XCircle,
-  Eye
+  Eye,
+  CreditCard,
+  DollarSign,
+  CheckCircle,
+  Clock,
+  Activity,
+  Calendar,
+  Zap
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
@@ -101,98 +108,62 @@ export default function FeePaymentsPage() {
   // Load stats
   const loadStats = async () => {
     try {
-      const statsData = await apiGet<FeePaymentStats>(`${API_ENDPOINTS.FEES}payments/stats/`);
-      setStats(statsData);
+      const data = await apiGet<FeePaymentStats>(`${API_ENDPOINTS.FEES}payments/stats/`);
+      setStats(data);
     } catch (err) {
       console.error('Error loading stats:', err);
     }
   };
 
-  // Load payments on component mount
   useEffect(() => {
-    loadPayments(1, searchTerm);
+    loadPayments();
     loadStats();
-  }, [loadPayments, searchTerm]);
+  }, [loadPayments]);
 
-  // Handle search with debouncing
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page when searching
-      loadPayments(1, searchTerm);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, loadPayments]);
-
-  // Handle page change
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
     loadPayments(page, searchTerm);
   };
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
+    const newOrder = field === sortField && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(newOrder);
+    // TODO: Implement server-side sorting
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4" />;
+    if (field !== sortField) {
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
     }
-    return sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+    return sortOrder === 'asc' ? 
+      <ArrowUp className="w-4 h-4 text-blue-600" /> : 
+      <ArrowDown className="w-4 h-4 text-blue-600" />;
   };
 
-  // Client-side sorting for current page
-  const sortedPayments = [...payments].sort((a, b) => {
-    let aValue: string | number = '';
-    let bValue: string | number = '';
+  const handleSearch = () => {
+    loadPayments(1, searchTerm);
+  };
 
-    switch (sortField) {
-      case 'student_name':
-        aValue = a.student_name || '';
-        bValue = b.student_name || '';
-        break;
-      case 'category_name':
-        aValue = a.category_name || '';
-        bValue = b.category_name || '';
-        break;
-      case 'amount_paid':
-        aValue = parseFloat(a.amount_paid) || 0;
-        bValue = parseFloat(b.amount_paid) || 0;
-        break;
-      case 'payment_date':
-        aValue = new Date(a.payment_date).getTime();
-        bValue = new Date(b.payment_date).getTime();
-        break;
-      case 'payment_status':
-        aValue = a.payment_status || '';
-        bValue = b.payment_status || '';
-        break;
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
     }
-
-    if (sortOrder === 'asc') {
-      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-    } else {
-      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-    }
-  });
+  };
 
   const getStatusBadge = (status: string) => {
-    if (status === 'completed') {
-      return <Badge className="bg-green-100 text-green-800 border-0">Completed</Badge>;
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-800 border-0">Completed</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-0">Pending</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-100 text-red-800 border-0">Failed</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 border-0">{status}</Badge>;
     }
-    if (status === 'pending') {
-      return <Badge className="bg-yellow-100 text-yellow-800 border-0">Pending</Badge>;
-    }
-    return <Badge className="bg-gray-100 text-gray-800 border-0">{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>;
   };
 
   const formatCurrency = (amount: string) => {
-    if (!amount) return 'UGX 0';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'UGX',
@@ -202,7 +173,6 @@ export default function FeePaymentsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -215,287 +185,349 @@ export default function FeePaymentsPage() {
     loadStats();
   };
 
-  // Stats cards data
-  const statsCards = [
-    {
-      title: "Total Payments",
-      value: stats.total_payments,
-      color: "text-blue-600"
-    },
-    {
-      title: "Completed",
-      value: stats.completed_payments,
-      color: "text-green-600"
-    },
-    {
-      title: "Pending",
-      value: stats.pending_payments,
-      color: "text-yellow-600"
-    },
-    {
-      title: "Total Amount",
-      value: formatCurrency(stats.total_amount),
-      color: "text-purple-600"
-    }
-  ];
+  const MobilePaymentCard = ({ payment }: { payment: FeePayment }) => (
+    <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold text-gray-900 truncate">{payment.student_name}</h3>
+        {getStatusBadge(payment.payment_status)}
+      </div>
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-gray-600">Amount:</span>
+          <span className="font-semibold text-gray-900">{formatCurrency(payment.amount_paid)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Category:</span>
+          <span className="text-gray-900">{payment.category_name}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Date:</span>
+          <span className="text-gray-900">{formatDate(payment.payment_date)}</span>
+        </div>
+      </div>
+      <div className="flex justify-end mt-3 space-x-2">
+        <Link href={`/fees/payments/${payment.id}`}>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-1" />
+            View
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Fee Payments</h1>
-              <p className="text-gray-600 mt-1">Track and manage all student fee payments</p>
+    <div className="space-y-6">
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <CreditCard className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Fee Payments</h1>
+            <p className="text-blue-100 text-lg">
+              Track and manage student fee payments with comprehensive oversight
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-blue-100">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span className="text-sm">Total Payments: {totalCount}</span>
             </div>
-            <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={loading}
-                className="flex items-center space-x-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Export</span>
-              </Button>
-              <Link href="/fees/payments/create">
-                <Button size="sm" className="flex items-center space-x-2">
-                  <Plus className="h-4 w-4" />
-                  <span>Add Payment</span>
-                </Button>
-              </Link>
+            <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4" />
+              <span className="text-sm">Current Term</span>
+            </div>
+          </div>
+          <Link
+            href="/fees/payments/create"
+            className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Record Payment
+          </Link>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Payments</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total_payments}</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <CreditCard className="w-6 h-6 text-white" />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {statsCards.map((stat, index) => (
-            <Card key={index} className="bg-white shadow-sm border border-gray-100">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Search and Filters */}
-        <Card className="bg-white shadow-sm border border-gray-100 mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search payments by student, category, year, or term..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Completed</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.completed_payments}</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="w-6 h-6 text-white" />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Error Display */}
-        {error && (
-          <Card className="bg-red-50 border border-red-200 mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 text-red-700">
-                <XCircle className="h-5 w-5" />
-                <span className="text-sm font-medium">{error}</span>
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Pending</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.pending_payments}</p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* Payments Table */}
-        <Card className="bg-white shadow-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Fee Payments ({totalCount})
-            </CardTitle>
-            <CardDescription>
-              {searchTerm ? 'Filtered payment records' : 'All payment records'}
-              {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <LoadingSpinner />
-                <span className="ml-2 text-gray-600">Loading payments...</span>
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden group hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Amount</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.total_amount)}</p>
               </div>
-            ) : totalCount === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-gray-400 text-6xl mb-4">📄</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No payments found</h3>
-                <p className="text-gray-600 mb-4">
-                  {searchTerm ? 'Try adjusting your search terms.' : 'Get started by recording a new payment.'}
-                </p>
-                {!searchTerm && (
-                  <Link href="/fees/payments/create">
-                    <Button className="flex items-center space-x-2">
-                      <Plus className="h-4 w-4" />
-                      <span>Add Payment</span>
-                    </Button>
-                  </Link>
-                )}
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <DollarSign className="w-6 h-6 text-white" />
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        <button
-                          onClick={() => handleSort('student_name')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Student</span>
-                          {getSortIcon('student_name')}
-                        </button>
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        <button
-                          onClick={() => handleSort('category_name')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Category</span>
-                          {getSortIcon('category_name')}
-                        </button>
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Academic Year</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Term</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        <button
-                          onClick={() => handleSort('amount_paid')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Amount</span>
-                          {getSortIcon('amount_paid')}
-                        </button>
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Method</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        <button
-                          onClick={() => handleSort('payment_date')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Date</span>
-                          {getSortIcon('payment_date')}
-                        </button>
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        <button
-                          onClick={() => handleSort('payment_status')}
-                          className="flex items-center space-x-1 hover:text-gray-900"
-                        >
-                          <span>Status</span>
-                          {getSortIcon('payment_status')}
-                        </button>
-                      </th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-600">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedPayments.map((payment) => (
-                      <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-4 px-4">
-                          <div className="font-medium text-gray-900">{payment.student_name}</div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-gray-900">{payment.category_name}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-gray-600">{payment.academic_year_name}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-gray-600">{payment.term_name}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="font-semibold text-gray-900">{formatCurrency(payment.amount_paid)}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-gray-600 capitalize">{payment.payment_method.replace('_', ' ')}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-gray-600">{formatDate(payment.payment_date)}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          {getStatusBadge(payment.payment_status)}
-                        </td>
-                        <td className="py-4 px-4 text-right">
-                          <Link href={`/fees/payments/${payment.id}`}>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 ? (
-              <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-6">
-                <div className="text-sm text-gray-700">
-                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} results
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2"
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-700 px-4">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2"
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            ) : totalCount > 0 ? (
-              <div className="flex items-center justify-center border-t border-gray-200 pt-4 mt-6">
-                <div className="text-sm text-gray-700">
-                  Showing all {totalCount} results (single page)
-                </div>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Search className="w-5 h-5 mr-2 text-blue-600" />
+              Search Payments
+            </h3>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+        
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by student name, category, or payment method..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Results Summary */}
+      <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg border-0 p-6">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <CreditCard className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} payments
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => {/* TODO: Implement export */}}
+            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 p-12">
+          <div className="flex items-center justify-center">
+            <LoadingSpinner size="lg" />
+            <span className="ml-4 text-gray-600">Loading payments...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+          <div className="flex items-center space-x-3">
+            <XCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-red-800">Error Loading Payments</h3>
+              <p className="text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payments Table */}
+      {!loading && !error && payments.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
+          {/* Desktop Table */}
+          <div className="hidden lg:block">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors" onClick={() => handleSort('student_name')}>
+                      <div className="flex items-center space-x-1">
+                        <span>Student</span>
+                        {getSortIcon('student_name')}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors" onClick={() => handleSort('category_name')}>
+                      <div className="flex items-center space-x-1">
+                        <span>Category</span>
+                        {getSortIcon('category_name')}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors" onClick={() => handleSort('amount_paid')}>
+                      <div className="flex items-center space-x-1">
+                        <span>Amount</span>
+                        {getSortIcon('amount_paid')}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors" onClick={() => handleSort('payment_date')}>
+                      <div className="flex items-center space-x-1">
+                        <span>Date</span>
+                        {getSortIcon('payment_date')}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors" onClick={() => handleSort('payment_status')}>
+                      <div className="flex items-center space-x-1">
+                        <span>Status</span>
+                        {getSortIcon('payment_status')}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {payments.map((payment) => (
+                    <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{payment.student_name}</div>
+                        <div className="text-sm text-gray-500">{payment.academic_year_name} - {payment.term_name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{payment.category_name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(payment.amount_paid)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(payment.payment_date)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(payment.payment_status)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <Link href={`/fees/payments/${payment.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden space-y-4 p-6">
+            {payments.map((payment) => (
+              <MobilePaymentCard key={payment.id} payment={payment} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && payments.length === 0 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 p-12 text-center">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CreditCard className="w-10 h-10 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No payments found</h3>
+          <p className="text-gray-600 mb-6">No payments match your current search criteria.</p>
+          <div className="flex items-center justify-center space-x-4">
+            <button
+              onClick={() => setSearchTerm('')}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            >
+              Clear Search
+            </button>
+            <Link
+              href="/fees/payments/create"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+            >
+              <Plus className="w-5 h-5 mr-2 inline" />
+              Record First Payment
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-2xl shadow-lg border-0 p-6">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

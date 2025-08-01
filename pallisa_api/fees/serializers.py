@@ -6,6 +6,7 @@ from .models import (
 from members.serializers import StudentSerializer, ClassSerializer
 from expenses.serializers import AcademicYearSerializer, TermSerializer
 from accounts.serializers import UserProfileSerializer
+from decimal import Decimal
 
 
 class FeeCategorySerializer(serializers.ModelSerializer):
@@ -225,11 +226,19 @@ class FeePaymentCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Validate and calculate discount if scholarship is provided"""
+        print(f"Validating fee payment data: {data}")
+        
+        # Ensure discount_amount is not None
+        if data.get('discount_amount') is None:
+            data['discount_amount'] = Decimal('0.00')
+        
+        # Validate and calculate discount if scholarship is provided
         if data.get('scholarship') and not data.get('discount_amount'):
             scholarship = data['scholarship']
             base_amount = data['amount_paid']
             data['discount_amount'] = scholarship.calculate_discount(base_amount)
         
+        print(f"Validated data: {data}")
         return data
 
 

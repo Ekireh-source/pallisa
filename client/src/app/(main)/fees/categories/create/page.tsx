@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost, API_ENDPOINTS } from "@/lib/api";
+import { ArrowLeft } from 'lucide-react';
 
 export default function CreateFeeCategoryPage() {
   const router = useRouter();
@@ -34,32 +35,25 @@ export default function CreateFeeCategoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <div className="mb-8">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-4">
-              <li>
-                <div>
-                  <Link href="/fees/categories" className="text-gray-400 hover:text-gray-500">
-                    Categories
-                  </Link>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="ml-4 text-sm font-medium text-gray-500">Create Category</span>
-                </div>
-              </li>
-            </ol>
-          </nav>
-          <div className="mt-4">
-            <h1 className="text-3xl font-bold text-gray-900">Create Fee Category</h1>
-            <p className="mt-2 text-gray-600">
+        {/* Header with Responsive Back Button */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-3">
+              <Link
+                href="/fees/categories"
+                className="inline-flex items-center px-3 py-2 text-sm sm:text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Back to Fee Categories</span>
+                <span className="sm:hidden">Back</span>
+              </Link>
+            </div>
+          </div>
+          <div className="mt-4 sm:mt-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create Fee Category</h1>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
               Add a new category to organize your fees better
             </p>
           </div>
@@ -84,7 +78,7 @@ export default function CreateFeeCategoryPage() {
 
         {/* Form */}
         <div className="bg-white shadow rounded-lg">
-          <form onSubmit={handleSubmit} className="space-y-6 p-6">
+          <form onSubmit={handleSubmit} className="space-y-6 p-4 sm:p-6">
             {/* Category Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -139,17 +133,17 @@ export default function CreateFeeCategoryPage() {
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-between pt-6 border-t">
+            <div className="flex flex-col sm:flex-row sm:justify-between pt-6 border-t space-y-3 sm:space-y-0">
               <Link
                 href="/fees/categories"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 {loading ? (
                   <>
