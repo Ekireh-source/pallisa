@@ -14,10 +14,6 @@ from pathlib import Path
 import os
 from decouple import config
 
-# Load environment variables from .env file
-from decouple import Config, RepositoryEnv
-config = Config(RepositoryEnv('.env'))
-
 # Helper function to get environment variables with defaults
 def get_env(key, default=None, cast=None):
     try:

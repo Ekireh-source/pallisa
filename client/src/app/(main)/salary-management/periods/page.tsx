@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
+import { Button, Badge, LoadingSpinner } from '@/components/ui';
 import { 
   Calendar, 
   Plus, 
@@ -17,8 +17,6 @@ import {
   Search,
   RefreshCw,
   Activity,
-  DollarSign,
-  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPeriods, deleteSalaryPeriod } from '@/lib/api';

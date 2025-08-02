@@ -38,11 +38,11 @@ export default function RoleDetailPage() {
   };
 
   const confirmDelete = async () => {
-    try {
-      await dispatch(deleteRole(roleId));
-      router.push('/roles');
-    } catch (error) {
-      console.error('Error deleting role:', error);
+        try {
+          await dispatch(deleteRole(roleId));
+          router.push('/roles');
+        } catch (error) {
+          console.error('Error deleting role:', error);
     }
   };
 
@@ -86,14 +86,14 @@ export default function RoleDetailPage() {
         <div className="flex items-center justify-center py-12">
           <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-8 text-center">
-              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Role</h2>
               <p className="text-gray-600 mb-6">{error}</p>
-              <Link href="/roles">
+          <Link href="/roles">
                 <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
                   Back to Roles
                 </Button>
-              </Link>
+          </Link>
             </CardContent>
           </Card>
         </div>
@@ -107,14 +107,14 @@ export default function RoleDetailPage() {
         <div className="flex items-center justify-center py-12">
           <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-8 text-center">
-              <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Role Not Found</h2>
               <p className="text-gray-600 mb-6">The role you&apos;re looking for doesn&apos;t exist.</p>
-              <Link href="/roles">
+          <Link href="/roles">
                 <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
                   Back to Roles
                 </Button>
-              </Link>
+          </Link>
             </CardContent>
           </Card>
         </div>
@@ -163,7 +163,7 @@ export default function RoleDetailPage() {
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Back to Roles
-            </Link>
+          </Link>
             <Link
               href={`/roles/${roleId}/edit`}
               className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer relative z-10"

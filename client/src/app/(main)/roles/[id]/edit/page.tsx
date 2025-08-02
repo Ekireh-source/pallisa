@@ -186,14 +186,14 @@ export default function EditRolePage() {
         <div className="flex items-center justify-center py-12">
           <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-8 text-center">
-              <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Role</h2>
               <p className="text-gray-600 mb-6">{error}</p>
-              <Link href="/roles">
+          <Link href="/roles">
                 <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
                   Back to Roles
                 </Button>
-              </Link>
+          </Link>
             </CardContent>
           </Card>
         </div>
@@ -207,14 +207,14 @@ export default function EditRolePage() {
         <div className="flex items-center justify-center py-12">
           <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-8 text-center">
-              <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Role Not Found</h2>
               <p className="text-gray-600 mb-6">The role you&apos;re looking for doesn&apos;t exist.</p>
-              <Link href="/roles">
+          <Link href="/roles">
                 <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
                   Back to Roles
                 </Button>
-              </Link>
+          </Link>
             </CardContent>
           </Card>
         </div>
@@ -261,7 +261,7 @@ export default function EditRolePage() {
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Back to Role
-            </Link>
+          </Link>
           </div>
         </div>
       </div>

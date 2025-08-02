@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner, ConfirmationModal } from '@/components/ui';
-import { Plus, Search, Filter, Edit, Trash2, Eye, DollarSign, CreditCard, Wallet, Activity, FileText, AlertCircle, RefreshCw, Upload } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { Plus, Search, Filter, Edit, Trash2, Eye, DollarSign, CreditCard, Wallet, Activity, FileText, RefreshCw, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPayments, deleteSalaryPayment } from '@/lib/api';
 import { SalaryPayment } from '@/types';

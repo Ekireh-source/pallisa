@@ -23,6 +23,7 @@ from .auth_views import (
     LogoutView,
     VerifyEmailView,
     ResendVerificationEmailView,
+    TokenRefreshView,
 )
 
 urlpatterns = [
@@ -32,6 +33,9 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('verify-email/', VerifyEmailView.as_view(), name='verify-email'),
     path('resend-verification/', ResendVerificationEmailView.as_view(), name='resend-verification'),
+    
+    # JWT Token endpoints
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     
     # User management endpoints
     path('profiles/', UserProfileListView.as_view(), name='profile-list'),

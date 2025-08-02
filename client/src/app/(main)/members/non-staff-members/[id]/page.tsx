@@ -7,12 +7,8 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchNonStaffMemberById, deleteNonStaffMember } from '@/store/slices/memberNonStaffSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Edit, Trash2, User, Briefcase, Heart, Calendar, DollarSign, Award, Phone, Mail, MapPin, Shield, AlertCircle } from 'lucide-react';
-import type { NonStaffMember } from '@/types';
-import type { UserProfile, Role, Permission } from '@/types';
 
-interface NonStaffMemberWithProfile extends NonStaffMember {
-  user_profile_data?: UserProfile & { role?: Role };
-}
+
 
 export default function NonStaffMemberDetailPage() {
   const router = useRouter();
@@ -71,19 +67,7 @@ export default function NonStaffMemberDetailPage() {
     return types[type] || type;
   };
 
-  const getGenderLabel = (gender: string) => {
-    const genders: Record<string, string> = {
-      'M': 'Male',
-      'F': 'Female',
-      'O': 'Other'
-    };
-    return genders[gender] || gender;
-  };
 
-  function getFullName(profile?: UserProfile): string {
-    if (!profile) return 'N/A';
-    return [profile.first_name, profile.other_name, profile.last_name].filter(Boolean).join(' ') || 'N/A';
-  }
 
   if (!isAuthenticated) {
     return (

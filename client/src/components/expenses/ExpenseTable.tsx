@@ -4,7 +4,7 @@ import { Expense } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 
 interface ExpenseTableProps {
   expenses: Expense[];

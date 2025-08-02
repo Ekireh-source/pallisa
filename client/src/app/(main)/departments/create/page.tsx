@@ -258,7 +258,7 @@ export default function CreateDepartmentPage() {
               <ul className="space-y-2 text-sm text-blue-700">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Use clear, descriptive names that reflect the department's function</span>
+                  <span>Use clear, descriptive names that reflect the department&apos;s function</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>

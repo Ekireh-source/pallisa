@@ -16,7 +16,6 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { cn } from '@/lib/utils';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
 
 interface FeeOverride {

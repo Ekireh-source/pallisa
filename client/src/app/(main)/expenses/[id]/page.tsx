@@ -17,7 +17,6 @@ import {
   DollarSign, 
   FileText, 
   CheckCircle, 
-  Clock, 
   X, 
   Edit, 
   Trash2, 

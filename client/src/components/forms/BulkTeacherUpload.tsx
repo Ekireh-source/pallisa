@@ -58,6 +58,64 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
   const [previewData, setPreviewData] = useState<TeacherData[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
+
+  const validateData = useCallback((data: TeacherData[]): ValidationError[] => {
+    const errors: ValidationError[] = [];
+    
+    data.forEach((teacher, index) => {
+      const row = index + 2; // +2 because Excel is 1-indexed and we have a header row
+      
+      // Required fields
+      if (!teacher.user_first_name?.trim()) {
+        errors.push({ row, field: 'First Name', message: 'First name is required' });
+      }
+      if (!teacher.user_last_name?.trim()) {
+        errors.push({ row, field: 'Last Name', message: 'Last name is required' });
+      }
+      if (!teacher.user_email?.trim()) {
+        errors.push({ row, field: 'Email', message: 'Email is required' });
+      }
+      if (!teacher.employment_type) {
+        errors.push({ row, field: 'Employment Type', message: 'Employment type is required' });
+      }
+      
+      // Email validation
+      if (teacher.user_email && !isValidEmail(teacher.user_email)) {
+        errors.push({ row, field: 'Email', message: 'Invalid email format' });
+      }
+      
+      // Phone validation
+      if (teacher.user_phone && !isValidPhone(teacher.user_phone)) {
+        errors.push({ row, field: 'Phone Number', message: 'Invalid phone number format' });
+      }
+      
+      // Date validation
+      if (teacher.user_dob && !isValidDate(teacher.user_dob)) {
+        errors.push({ row, field: 'Date of Birth', message: 'Invalid date format (YYYY-MM-DD)' });
+      }
+      if (teacher.hire_date && !isValidDate(teacher.hire_date)) {
+        errors.push({ row, field: 'Hire Date', message: 'Invalid date format (YYYY-MM-DD)' });
+      }
+      
+      // Gender validation
+      if (teacher.user_gender && !['M', 'F', 'O'].includes(teacher.user_gender)) {
+        errors.push({ row, field: 'Gender', message: 'Gender must be M, F, or O' });
+      }
+      
+      // Employment type validation
+      if (teacher.employment_type && !['full_time', 'part_time', 'contract', 'substitute', 'volunteer'].includes(teacher.employment_type)) {
+        errors.push({ row, field: 'Employment Type', message: 'Invalid employment type' });
+      }
+      
+      // Years of experience validation
+      if (teacher.years_of_experience !== undefined && (teacher.years_of_experience < 0 || teacher.years_of_experience > 50)) {
+        errors.push({ row, field: 'Years of Experience', message: 'Years of experience must be between 0 and 50' });
+      }
+    });
+    
+    return errors;
+  }, []);
+
   const parseExcelFile = useCallback(async (selectedFile: File) => {
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
@@ -167,7 +225,7 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
       console.error('Error parsing Excel file:', error);
       toast.error('Error parsing Excel file. Please check the file format.');
     }
-  }, []);
+  }, [validateData]);
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -197,62 +255,7 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
     parseExcelFile(selectedFile);
   }, [parseExcelFile]);
 
-  const validateData = (data: TeacherData[]): ValidationError[] => {
-    const errors: ValidationError[] = [];
-    
-    data.forEach((teacher, index) => {
-      const row = index + 2; // +2 because Excel is 1-indexed and we have a header row
-      
-      // Required fields
-      if (!teacher.user_first_name?.trim()) {
-        errors.push({ row, field: 'First Name', message: 'First name is required' });
-      }
-      if (!teacher.user_last_name?.trim()) {
-        errors.push({ row, field: 'Last Name', message: 'Last name is required' });
-      }
-      if (!teacher.user_email?.trim()) {
-        errors.push({ row, field: 'Email', message: 'Email is required' });
-      }
-      if (!teacher.employment_type) {
-        errors.push({ row, field: 'Employment Type', message: 'Employment type is required' });
-      }
-      
-      // Email validation
-      if (teacher.user_email && !isValidEmail(teacher.user_email)) {
-        errors.push({ row, field: 'Email', message: 'Invalid email format' });
-      }
-      
-      // Phone validation
-      if (teacher.user_phone && !isValidPhone(teacher.user_phone)) {
-        errors.push({ row, field: 'Phone Number', message: 'Invalid phone number format' });
-      }
-      
-      // Date validation
-      if (teacher.user_dob && !isValidDate(teacher.user_dob)) {
-        errors.push({ row, field: 'Date of Birth', message: 'Invalid date format (YYYY-MM-DD)' });
-      }
-      if (teacher.hire_date && !isValidDate(teacher.hire_date)) {
-        errors.push({ row, field: 'Hire Date', message: 'Invalid date format (YYYY-MM-DD)' });
-      }
-      
-      // Gender validation
-      if (teacher.user_gender && !['M', 'F', 'O'].includes(teacher.user_gender)) {
-        errors.push({ row, field: 'Gender', message: 'Gender must be M, F, or O' });
-      }
-      
-      // Employment type validation
-      if (teacher.employment_type && !['full_time', 'part_time', 'contract', 'substitute', 'volunteer'].includes(teacher.employment_type)) {
-        errors.push({ row, field: 'Employment Type', message: 'Invalid employment type' });
-      }
-      
-      // Years of experience validation
-      if (teacher.years_of_experience !== undefined && (teacher.years_of_experience < 0 || teacher.years_of_experience > 50)) {
-        errors.push({ row, field: 'Years of Experience', message: 'Years of experience must be between 0 and 50' });
-      }
-    });
-    
-    return errors;
-  };
+  
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

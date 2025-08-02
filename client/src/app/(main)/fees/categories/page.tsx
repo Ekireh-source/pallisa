@@ -16,7 +16,6 @@ import {
   Clock
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { cn } from '@/lib/utils';
 import { apiGet, apiDelete, API_ENDPOINTS } from '@/lib/api';
 
 interface FeeCategory {

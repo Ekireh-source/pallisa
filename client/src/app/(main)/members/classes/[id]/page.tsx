@@ -4,9 +4,9 @@ import React, { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
-import { fetchClassById, deleteClass, clearCurrentClass } from '@/store/slices/memberClassSlice';
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
-import { ArrowLeft, Edit, Trash2, Building, GraduationCap, Users, AlertCircle, Plus, Activity, FileText, Calendar, Clock } from 'lucide-react';
+import { fetchClassById, clearCurrentClass } from '@/store/slices/memberClassSlice';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
+import { ArrowLeft, Edit, Building, GraduationCap, Users, AlertCircle, Plus, Activity, FileText, Calendar, Clock } from 'lucide-react';
 
 export default function ClassDetailPage() {
   const router = useRouter();
@@ -39,16 +39,7 @@ export default function ClassDetailPage() {
     router.push(`/members/classes/${classId}/edit`);
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
-      try {
-        await dispatch(deleteClass(classId));
-        router.push('/members/classes');
-      } catch (error) {
-        console.error('Error deleting class:', error);
-      }
-    }
-  };
+ 
 
   if (!isAuthenticated) {
     return (

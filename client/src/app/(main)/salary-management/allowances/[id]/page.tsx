@@ -175,7 +175,7 @@ export default function SalaryAllowanceDetailPage() {
             >
               <Edit className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Edit Allowance
-            </Link>
+          </Link>
           </div>
         </div>
       </div>
@@ -194,8 +194,8 @@ export default function SalaryAllowanceDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              {allowance.is_percentage ? `${allowance.amount}%` : formatCurrency(allowance.amount)}
-            </div>
+                  {allowance.is_percentage ? `${allowance.amount}%` : formatCurrency(allowance.amount)}
+              </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <span className="font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">
                 {allowance.is_percentage ? 'of base salary' : 'per month'}
@@ -216,8 +216,8 @@ export default function SalaryAllowanceDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 capitalize">
-              {allowance.allowance_type.replace('_', ' ')}
-            </div>
+                  {allowance.allowance_type.replace('_', ' ')}
+              </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <Badge className={getAllowanceColor(allowance.allowance_type)}>
                 {allowance.allowance_type.replace('_', ' ')}
@@ -234,7 +234,7 @@ export default function SalaryAllowanceDetailPage() {
             </CardTitle>
             <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${allowance.is_active ? 'bg-green-50' : 'bg-red-50'}`}>
               <div className={`w-4 h-4 sm:w-5 sm:h-5 ${allowance.is_active ? 'text-green-600' : 'text-red-600'}`}>
-                {allowance.is_active ? '✓' : '✗'}
+                  {allowance.is_active ? '✓' : '✗'}
               </div>
             </div>
           </CardHeader>
@@ -267,27 +267,27 @@ export default function SalaryAllowanceDetailPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Allowance Name</p>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Allowance Name</p>
                   <p className="text-gray-900 font-semibold">{allowance.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Allowance Type</p>
-                  <Badge className={getAllowanceColor(allowance.allowance_type)}>
-                    {allowance.allowance_type.replace('_', ' ')}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Amount</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Allowance Type</p>
+                <Badge className={getAllowanceColor(allowance.allowance_type)}>
+                  {allowance.allowance_type.replace('_', ' ')}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Amount</p>
                   <p className="text-gray-900 font-semibold">
-                    {allowance.is_percentage ? `${allowance.amount}%` : formatCurrency(allowance.amount)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Amount Type</p>
-                  <Badge className={allowance.is_percentage ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800'}>
-                    {allowance.is_percentage ? 'Percentage' : 'Fixed Amount'}
-                  </Badge>
+                  {allowance.is_percentage ? `${allowance.amount}%` : formatCurrency(allowance.amount)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Amount Type</p>
+                <Badge className={allowance.is_percentage ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800'}>
+                  {allowance.is_percentage ? 'Percentage' : 'Fixed Amount'}
+                </Badge>
                 </div>
               </div>
             </div>
@@ -308,25 +308,25 @@ export default function SalaryAllowanceDetailPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Status</p>
-                  <div className="flex items-center space-x-2">
-                    {allowance.is_active ? (
-                      <Badge className="bg-green-100 text-green-800">
-                        Active
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800">
-                        Inactive
-                      </Badge>
-                    )}
-                  </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Status</p>
+                <div className="flex items-center space-x-2">
+                  {allowance.is_active ? (
+                    <Badge className="bg-green-100 text-green-800">
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-100 text-red-800">
+                      Inactive
+                    </Badge>
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Usage</p>
-                  <p className="text-gray-900">
-                    {allowance.is_percentage ? 'of base salary' : 'per month'}
-                  </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Usage</p>
+                <p className="text-gray-900">
+                  {allowance.is_percentage ? 'of base salary' : 'per month'}
+                </p>
                 </div>
               </div>
             </div>

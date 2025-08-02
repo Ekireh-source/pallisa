@@ -151,7 +151,7 @@ export default function EditVendorPage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">Vendor Not Found</h1>
               <p className="text-red-100 text-lg">
-                The vendor you're looking for doesn't exist.
+                The vendor you&apos;  re looking for doesn&apos;t exist.
               </p>
             </div>
           </div>

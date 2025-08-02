@@ -8,24 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
-import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/Select';
 import { 
   Plus, 
   Search, 
-  MoreHorizontal, 
   Edit, 
   Trash2, 
   Eye, 
@@ -40,7 +25,6 @@ import {
   RefreshCw 
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { BulkNonStaffUpload } from '@/components/forms/BulkNonStaffUpload';
 
@@ -62,7 +46,6 @@ const EMPLOYMENT_TYPE_LABELS = {
 
 export default function NonStaffMembersPage() {
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const { nonStaffMembers, loading, error } = useAppSelector((state) => state.memberNonStaff);
   
   const [searchTerm, setSearchTerm] = useState('');

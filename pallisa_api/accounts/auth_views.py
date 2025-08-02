@@ -4,6 +4,7 @@ from rest_framework import status, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.views import TokenRefreshView as JWTTokenRefreshView
 from drf_spectacular.utils import extend_schema
 from django.core.cache import cache
 from django.utils.decorators import method_decorator
@@ -356,3 +357,36 @@ class ResendVerificationEmailView(APIView):
                 {"error": "Failed to resend OTP. Please try again."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             ) 
+
+
+class TokenRefreshView(JWTTokenRefreshView):
+    """
+    Refresh JWT access token using refresh token
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    @extend_schema(
+        summary="Refresh JWT access token",
+        description="Refresh the JWT access token using a valid refresh token.",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "refresh": {"type": "string", "description": "The refresh token"}
+                },
+                "required": ["refresh"]
+            }
+        },
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "access": {"type": "string", "description": "New access token"}
+                }
+            },
+            401: {"description": "Invalid or expired refresh token"},
+            400: {"description": "Invalid request data"}
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs) 

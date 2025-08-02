@@ -91,7 +91,6 @@ export default function StreamsPage() {
   const totalStreams = streams.length;
   const activeStreams = streams.filter(stream => stream.is_active).length;
   const totalStudents = streams.reduce((sum, stream) => sum + (stream.current_enrollment || 0), 0);
-  const totalCapacity = streams.reduce((sum, stream) => sum + (stream.capacity || 0), 0);
   const averageEnrollment = totalStreams > 0 ? Math.round(totalStudents / totalStreams) : 0;
 
   if (!isAuthenticated) {

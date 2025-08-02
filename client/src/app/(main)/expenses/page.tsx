@@ -15,7 +15,6 @@ import {
 import { fetchExpenseCategories } from '@/store/slices/expenseCategorySlice';
 import { fetchDepartments } from '@/store/slices/departmentSlice';
 import { fetchTerms } from '@/store/slices/termSlice';
-import { restoreAuthFromTokens } from '@/store/slices/authSlice';
 import { ExpenseTable } from '@/components/expenses/ExpenseTable';
 import { Pagination } from '@/components/ui/Pagination';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -304,16 +303,6 @@ export default function ExpensesPage() {
     }
   };
 
-  // Handle authentication refresh (for debugging)
-  const handleRefreshAuth = async () => {
-    try {
-      await dispatch(restoreAuthFromTokens()).unwrap();
-      console.log('Authentication refreshed successfully');
-    } catch (error) {
-      console.error('Failed to refresh authentication:', error);
-      router.push('/login');
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

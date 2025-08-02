@@ -12,7 +12,6 @@ import {
   Calendar, 
   Info,
   AlertCircle,
-  CheckCircle,
   Clock
 } from 'lucide-react';
 
@@ -105,7 +104,7 @@ export default function CreateAcademicYearPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Create Academic Year</h1>
             <p className="text-blue-100 text-lg">
-              Add a new academic year to organize your school's terms and expenses
+              Add a new academic year to organize your school&apos;s terms and expenses
             </p>
           </div>
         </div>
@@ -321,7 +320,7 @@ export default function CreateAcademicYearPage() {
               <ul className="space-y-2 text-sm text-blue-700">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Use clear naming conventions like "2023-2024" or "Academic Year 2024"</span>
+                  <span>Use clear naming conventions like &quot;2023-2024&quot; or &quot;Academic Year 2024&quot;</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -329,7 +328,7 @@ export default function CreateAcademicYearPage() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Only one academic year should be marked as "current" at a time</span>
+                  <span>Only one academic year should be marked as &quot;current&quot; at a time</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>

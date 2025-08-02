@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
-import { ArrowLeft, Edit, Calendar, DollarSign, Users, Clock, CheckCircle, AlertCircle, Trash2, AlertTriangle, Activity, FileText, Settings } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, Users, Clock, Trash2, Activity, FileText, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPeriod, deleteSalaryPeriod } from '@/lib/api';
 import { SalaryPeriod } from '@/types';
@@ -88,7 +88,7 @@ export default function SalaryPeriodDetailPage() {
   if (!isAuthenticated || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+          <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function SalaryPeriodDetailPage() {
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Period Not Found</h1>
-          <p className="text-gray-600 mb-6">The period you're looking for doesn't exist or has been removed.</p>
+          <p className="text-gray-600 mb-6">The period you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Link href="/salary-management/periods">
             <Button className="bg-indigo-600 hover:bg-indigo-700">
               Back to Periods
@@ -252,66 +252,66 @@ export default function SalaryPeriodDetailPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
 
       {/* Period Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Period Information */}
+            {/* Period Information */}
         <Card className="border-0 shadow-lg overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-              <span>Period Information</span>
-            </CardTitle>
+                  <span>Period Information</span>
+                </CardTitle>
             <CardDescription className="text-gray-600">
               Core details about this salary period
             </CardDescription>
-          </CardHeader>
+              </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                 <p className="text-sm font-medium text-gray-600">Period Name</p>
                 <p className="text-gray-900 font-semibold">{period.name}</p>
-              </div>
-              <div>
+                  </div>
+                  <div>
                 <p className="text-sm font-medium text-gray-600">Academic Year</p>
-                <p className="text-gray-900">{period.academic_year_name}</p>
-              </div>
-            </div>
-            <div>
+                    <p className="text-gray-900">{period.academic_year_name}</p>
+                  </div>
+                </div>
+                <div>
               <p className="text-sm font-medium text-gray-600">Term</p>
-              <p className="text-gray-900">{period.term_name}</p>
-            </div>
-          </CardContent>
-        </Card>
+                  <p className="text-gray-900">{period.term_name}</p>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Date Range */}
+            {/* Date Range */}
         <Card className="border-0 shadow-lg overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-              <span>Date Range</span>
-            </CardTitle>
+                  <span>Date Range</span>
+                </CardTitle>
             <CardDescription className="text-gray-600">
               Start and end dates for this period
             </CardDescription>
-          </CardHeader>
+              </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                 <p className="text-sm font-medium text-gray-600">Start Date</p>
                 <p className="text-gray-900 font-semibold">{formatDate(period.start_date)}</p>
-              </div>
-              <div>
+                  </div>
+                  <div>
                 <p className="text-sm font-medium text-gray-600">End Date</p>
                 <p className="text-gray-900 font-semibold">{formatDate(period.end_date)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
       </div>
 
-      {/* Status Information */}
+            {/* Status Information */}
       <Card className="border-0 shadow-lg overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
           <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
@@ -321,36 +321,36 @@ export default function SalaryPeriodDetailPage() {
           <CardDescription className="text-gray-600">
             Current status and permissions for this period
           </CardDescription>
-        </CardHeader>
+              </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
               <p className="text-sm font-medium text-gray-600">Status</p>
-              <div className="mt-1">
-                {period.is_active && (
-                  <Badge className="bg-green-100 text-green-800">
-                    Active
-                  </Badge>
-                )}
-                {period.is_closed && (
-                  <Badge className="bg-red-100 text-red-800">
-                    Closed
-                  </Badge>
-                )}
-                {!period.is_active && !period.is_closed && (
-                  <Badge className="bg-yellow-100 text-yellow-800">
-                    Pending
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div>
+                    <div className="mt-1">
+                      {period.is_active && (
+                        <Badge className="bg-green-100 text-green-800">
+                          Active
+                        </Badge>
+                      )}
+                      {period.is_closed && (
+                        <Badge className="bg-red-100 text-red-800">
+                          Closed
+                        </Badge>
+                      )}
+                      {!period.is_active && !period.is_closed && (
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          Pending
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div>
               <p className="text-sm font-medium text-gray-600">Modifiable</p>
-              <p className="text-gray-900">{period.can_be_modified ? 'Yes' : 'No'}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                    <p className="text-gray-900">{period.can_be_modified ? 'Yes' : 'No'}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
       {/* System Information */}
       <Card className="border-0 shadow-lg overflow-hidden">
@@ -387,36 +387,36 @@ export default function SalaryPeriodDetailPage() {
           <CardDescription className="text-gray-600">
             Common actions for this salary period
           </CardDescription>
-        </CardHeader>
+              </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-wrap gap-4">
-            {period.can_be_modified && (
+                {period.can_be_modified && (
               <Link href={`/salary-management/periods/${period.id}/edit`}>
                 <Button className="flex items-center space-x-2">
                   <Edit className="h-4 w-4" />
                   <span>Edit Period</span>
-                </Button>
-              </Link>
-            )}
-            {period.can_be_modified && (
+                    </Button>
+                  </Link>
+                )}
+                {period.can_be_modified && (
               <Button
                 variant="outline"
-                onClick={() => setShowDeleteConfirm(true)}
+                    onClick={() => setShowDeleteConfirm(true)}
                 className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
+                  >
                 <Trash2 className="h-4 w-4" />
                 <span>Delete Period</span>
               </Button>
-            )}
+                )}
             <Link href="/salary-management/periods">
               <Button variant="outline" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Periods</span>
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+                  </Button>
+                </Link>
+                </div>
+              </CardContent>
+            </Card>
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal

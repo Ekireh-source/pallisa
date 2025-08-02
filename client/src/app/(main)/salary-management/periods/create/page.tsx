@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, Loader2, Plus, Calendar, Clock, User, Activity } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Plus, Calendar, Clock, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { createSalaryPeriod, academicYearApi, termApi } from '@/lib/api';
 import { SalaryPeriodCreateUpdate, AcademicYear, Term } from '@/types';

@@ -192,8 +192,8 @@ export default function SalaryDeductionDetailPage() {
               Edit Deduction
             </Link>
           </div>
+          </div>
         </div>
-      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -202,18 +202,18 @@ export default function SalaryDeductionDetailPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-semibold text-gray-700">
               Amount
-            </CardTitle>
+                </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
             </div>
-          </CardHeader>
-          <CardContent>
+              </CardHeader>
+              <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              {deduction.is_percentage ? `${deduction.amount}%` : formatCurrency(deduction.amount)}
-            </div>
+                  {deduction.is_percentage ? `${deduction.amount}%` : formatCurrency(deduction.amount)}
+                </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <span className="font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">
-                {deduction.is_percentage ? 'of base salary' : 'per month'}
+                  {deduction.is_percentage ? 'of base salary' : 'per month'}
               </span>
             </div>
           </CardContent>
@@ -237,9 +237,9 @@ export default function SalaryDeductionDetailPage() {
               <Badge className={getDeductionColor(deduction.deduction_type)}>
                 {deduction.deduction_type.replace('_', ' ')}
               </Badge>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </CardContent>
+            </Card>
 
         <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
@@ -274,30 +274,30 @@ export default function SalaryDeductionDetailPage() {
             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
               <span>Basic Information</span>
-            </CardTitle>
+                </CardTitle>
             <CardDescription className="text-gray-600">
               Core details about this salary deduction
             </CardDescription>
-          </CardHeader>
+              </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+                  <div>
                   <p className="text-sm font-medium text-gray-600">Deduction Name</p>
                   <p className="text-gray-900 font-semibold">{deduction.name}</p>
-                </div>
-                <div>
+                  </div>
+                  <div>
                   <p className="text-sm font-medium text-gray-600">Deduction Type</p>
                   <Badge className={getDeductionColor(deduction.deduction_type)}>
-                    {deduction.deduction_type.replace('_', ' ')}
-                  </Badge>
-                </div>
+                        {deduction.deduction_type.replace('_', ' ')}
+                      </Badge>
+                    </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Amount</p>
                   <p className="text-gray-900 font-semibold">
                     {deduction.is_percentage ? `${deduction.amount}%` : formatCurrency(deduction.amount)}
                   </p>
-                </div>
+                  </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Amount Type</p>
                   <Badge className={deduction.is_percentage ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800'}>
@@ -305,11 +305,11 @@ export default function SalaryDeductionDetailPage() {
                   </Badge>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
+              </CardContent>
+            </Card>
 
-        {/* Status Information */}
+            {/* Status Information */}
         <Card className="border-0 shadow-lg overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
@@ -319,11 +319,11 @@ export default function SalaryDeductionDetailPage() {
             <CardDescription className="text-gray-600">
               Current status and availability
             </CardDescription>
-          </CardHeader>
+              </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+                  <div>
                   <p className="text-sm font-medium text-gray-600">Status</p>
                   <div className="flex items-center space-x-2">
                     {deduction.is_active ? (
@@ -335,19 +335,19 @@ export default function SalaryDeductionDetailPage() {
                         Inactive
                       </Badge>
                     )}
+                    </div>
                   </div>
-                </div>
-                <div>
+                  <div>
                   <p className="text-sm font-medium text-gray-600">Usage</p>
                   <p className="text-gray-900">
                     {deduction.is_percentage ? 'of base salary' : 'per month'}
                   </p>
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
       {/* Description */}
       {deduction.description && (
@@ -360,11 +360,11 @@ export default function SalaryDeductionDetailPage() {
             <CardDescription className="text-gray-600">
               Detailed description of this deduction
             </CardDescription>
-          </CardHeader>
+              </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <p className="text-gray-900">{deduction.description}</p>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
       )}
 
       {/* System Information */}
@@ -377,20 +377,20 @@ export default function SalaryDeductionDetailPage() {
           <CardDescription className="text-gray-600">
             Technical details and timestamps
           </CardDescription>
-        </CardHeader>
+              </CardHeader>
         <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+                <div>
               <p className="text-sm font-medium text-gray-600">Created</p>
-              <p className="text-gray-900">{formatDateTime(deduction.created_at)}</p>
-            </div>
-            <div>
+                  <p className="text-gray-900">{formatDateTime(deduction.created_at)}</p>
+                </div>
+                <div>
               <p className="text-sm font-medium text-gray-600">Last Updated</p>
-              <p className="text-gray-900">{formatDateTime(deduction.updated_at)}</p>
+                  <p className="text-gray-900">{formatDateTime(deduction.updated_at)}</p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+              </CardContent>
+            </Card>
 
       {/* Quick Actions */}
       <Card className="border-0 shadow-lg overflow-hidden">

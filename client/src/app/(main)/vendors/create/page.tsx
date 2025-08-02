@@ -106,7 +106,7 @@ export default function CreateVendorPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Create Vendor</h1>
             <p className="text-blue-100 text-lg">
-              Add a new vendor to manage your school's suppliers and service providers
+              Add a new vendor to manage your school&apos;s suppliers and service providers
             </p>
           </div>
         </div>
@@ -283,7 +283,7 @@ export default function CreateVendorPage() {
                   className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 ${
                     fieldErrors.address ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
                   }`}
-                  placeholder="Vendor's physical address"
+                  placeholder="Vendor&apos;s physical address"
                 />
               </div>
               {fieldErrors.address && (

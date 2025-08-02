@@ -8,7 +8,7 @@ import { createStream, clearFieldErrors } from '@/store/slices/memberStreamSlice
 import { fetchClasses } from '@/store/slices/memberClassSlice';
 import { fetchTeachers } from '@/store/slices/memberTeacherSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X, GitBranch, GraduationCap, Users } from 'lucide-react';
+import { ArrowLeft, Save, X, GitBranch, GraduationCap } from 'lucide-react';
 import type { StreamCreateUpdate } from '@/types';
 
 export default function CreateStreamPage() {

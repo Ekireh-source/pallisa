@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -8,9 +7,6 @@ import {
   Search, 
   Download, 
   RefreshCw, 
-  ArrowUpDown, 
-  ArrowUp, 
-  ArrowDown,
   DollarSign,
   AlertCircle,
   CheckCircle,
@@ -21,7 +17,6 @@ import {
   BarChart3,
   Users,
   XCircle,
-  Plus
 } from 'lucide-react';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
 
@@ -54,8 +49,8 @@ export default function StudentFeeBalancesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<SortField>('student_name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortField] = useState<SortField>('student_name');
+  const [sortOrder] = useState<SortOrder>('asc');
 
   useEffect(() => {
     fetchBalances();
@@ -75,23 +70,8 @@ export default function StudentFeeBalancesPage() {
     }
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
+ 
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === 'asc' ? 
-      <ArrowUp className="h-4 w-4 text-gray-600" /> : 
-      <ArrowDown className="h-4 w-4 text-gray-600" />;
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {

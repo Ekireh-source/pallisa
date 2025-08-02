@@ -15,7 +15,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select';
-import { ArrowLeft, Save, X, User, Shield, Edit, FileText, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, User, Edit, FileText, AlertCircle } from 'lucide-react';
 import type { NonStaffMemberCreateUpdate } from '@/types';
 import { NonStaffMember } from '@/types';
 
@@ -156,15 +156,7 @@ export default function EditNonStaffMemberPage() {
   };
 
   // Filter roles to show only staff-appropriate roles (excluding superadmin)
-  const staffRoles = roles.filter(role => 
-    !role.is_superadmin && 
-    (role.name.toLowerCase().includes('staff') || 
-     role.name.toLowerCase().includes('admin') ||
-     role.name.toLowerCase().includes('non-staff') ||
-     role.name.toLowerCase().includes('coordinator') ||
-     role.name.toLowerCase().includes('manager') ||
-     role.name.toLowerCase().includes('assistant'))
-  );
+  
 
   if (!isAuthenticated) {
     return (
@@ -215,7 +207,7 @@ export default function EditNonStaffMemberPage() {
     );
   }
 
-  const member = currentNonStaffMember as NonStaffMember;
+
 
   return (
     <div className="space-y-6">
@@ -282,7 +274,7 @@ export default function EditNonStaffMemberPage() {
             <span>Member Information</span>
           </CardTitle>
           <CardDescription>
-            Update the member's professional details and role assignment
+            Update the member&apos;s professional details and role assignment
           </CardDescription>
         </CardHeader>
         <CardContent>

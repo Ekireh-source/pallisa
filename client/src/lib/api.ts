@@ -44,22 +44,28 @@ axiosInstance.interceptors.response.use(
 
     // If 401 and we have a refresh token, try to refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.log('401 error detected, attempting token refresh...');
       originalRequest._retry = true;
       
       const refreshToken = Cookies.get('refresh_token');
+      console.log('Refresh token available:', !!refreshToken);
+      
       if (refreshToken) {
         try {
+          console.log('Attempting to refresh token...');
           const response = await axios.post(`${BASE_URL}/auth/token/refresh/`, {
             refresh: refreshToken,
           });
           
           const { access } = response.data;
+          console.log('Token refresh successful, setting new access token');
           Cookies.set('access_token', access, { expires: 1 }); // 1 day
           
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return axiosInstance(originalRequest);
-        } catch {
+        } catch (refreshError) {
+          console.log('Token refresh failed:', refreshError);
           // Refresh failed, clear tokens and trigger logout
           clearAuthTokens();
           if (logoutHandler) {
@@ -69,6 +75,7 @@ axiosInstance.interceptors.response.use(
           }
         }
       } else {
+        console.log('No refresh token available, triggering logout');
         // No refresh token, trigger logout
         clearAuthTokens();
         if (logoutHandler) {

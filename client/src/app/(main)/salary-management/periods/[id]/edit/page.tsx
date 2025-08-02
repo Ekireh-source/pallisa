@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, Loader2, Calendar, Edit, User, Clock, Activity } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Calendar, Edit, User, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPeriod, updateSalaryPeriod, academicYearApi, termApi } from '@/lib/api';
 import { SalaryPeriod, SalaryPeriodCreateUpdate, AcademicYear, Term } from '@/types';
@@ -112,7 +112,7 @@ export default function EditSalaryPeriodPage() {
   if (!isAuthenticated || fetching) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+          <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function EditSalaryPeriodPage() {
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Period Not Found</h1>
-          <p className="text-gray-600 mb-6">The period you're looking for doesn't exist or has been removed.</p>
+          <p className="text-gray-600 mb-6">The period you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Link href="/salary-management/periods">
             <Button className="bg-indigo-600 hover:bg-indigo-700">
               Back to Periods
@@ -174,11 +174,11 @@ export default function EditSalaryPeriodPage() {
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Back to Period
             </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Form */}
+        {/* Form */}
       <Card className="border-0 shadow-lg overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
           <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
@@ -190,96 +190,96 @@ export default function EditSalaryPeriodPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Period Name */}
-              <div className="space-y-2">
+                  <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-gray-700">Period Name *</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Enter period name"
+                    <Input
+                      id="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="Enter period name"
                   className="h-11"
-                  required
-                />
-              </div>
-
+                      required
+                    />
+                  </div>
+                  
               {/* Academic Year */}
-              <div className="space-y-2">
+                    <div className="space-y-2">
                 <Label htmlFor="academic_year" className="text-sm font-medium text-gray-700">Academic Year *</Label>
-                <Select value={formData.academic_year.toString()} onValueChange={(value) => handleInputChange('academic_year', parseInt(value))}>
+                      <Select value={formData.academic_year.toString()} onValueChange={(value) => handleInputChange('academic_year', parseInt(value))}>
                   <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Select academic year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {academicYears.map((year) => (
-                      <SelectItem key={year.id} value={year.id.toString()}>
-                        {year.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
+                          <SelectValue placeholder="Select academic year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {academicYears.map((year) => (
+                            <SelectItem key={year.id} value={year.id.toString()}>
+                              {year.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
               {/* Term */}
-              <div className="space-y-2">
+                    <div className="space-y-2">
                 <Label htmlFor="term" className="text-sm font-medium text-gray-700">Term *</Label>
-                <Select value={formData.term.toString()} onValueChange={(value) => handleInputChange('term', parseInt(value))}>
+                      <Select value={formData.term.toString()} onValueChange={(value) => handleInputChange('term', parseInt(value))}>
                   <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Select term" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {terms.map((term) => (
-                      <SelectItem key={term.id} value={term.id.toString()}>
-                        {term.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                          <SelectValue placeholder="Select term" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {terms.map((term) => (
+                            <SelectItem key={term.id} value={term.id.toString()}>
+                              {term.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
               {/* Start Date */}
-              <div className="space-y-2">
+                    <div className="space-y-2">
                 <Label htmlFor="start_date" className="text-sm font-medium text-gray-700">Start Date *</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => handleInputChange('start_date', e.target.value)}
+                      <Input
+                        id="start_date"
+                        type="date"
+                        value={formData.start_date}
+                        onChange={(e) => handleInputChange('start_date', e.target.value)}
                   className="h-11"
-                  required
-                />
-              </div>
-
+                        required
+                      />
+                    </div>
+                    
               {/* End Date */}
-              <div className="space-y-2">
+                    <div className="space-y-2">
                 <Label htmlFor="end_date" className="text-sm font-medium text-gray-700">End Date *</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => handleInputChange('end_date', e.target.value)}
+                      <Input
+                        id="end_date"
+                        type="date"
+                        value={formData.end_date}
+                        onChange={(e) => handleInputChange('end_date', e.target.value)}
                   className="h-11"
-                  required
-                />
-              </div>
+                        required
+                      />
+                    </div>
             </div>
 
             {/* Is Active */}
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_active"
-                  checked={formData.is_active}
-                  onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                />
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="is_active"
+                      checked={formData.is_active}
+                      onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                    />
                 <Label htmlFor="is_active" className="text-sm font-medium text-gray-700">Set as active period</Label>
-              </div>
+                  </div>
               <p className="text-sm text-gray-500">
                 Only one salary period can be active at a time. Setting this period as active will automatically deactivate any other active periods.
-              </p>
+                  </p>
             </div>
 
             {/* Submit Button */}
@@ -290,20 +290,20 @@ export default function EditSalaryPeriodPage() {
                 </Button>
               </Link>
               <Button type="submit" disabled={loading} className="px-6 py-2">
-                {loading ? (
-                  <>
+                    {loading ? (
+                      <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+          </div>
+        </form>
         </CardContent>
       </Card>
     </div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, Loader2, Edit, Home, Car, Heart, Award, Clock, Gift, Settings, Activity, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Edit, Home, Car, Heart, Award, Clock, Gift, Settings, Activity, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryAllowance, updateSalaryAllowance } from '@/lib/api';
 import { SalaryAllowance, SalaryAllowanceCreateUpdate } from '@/types';

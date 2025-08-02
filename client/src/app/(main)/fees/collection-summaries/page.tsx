@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -8,9 +7,6 @@ import {
   Search, 
   Download, 
   RefreshCw, 
-  ArrowUpDown, 
-  ArrowUp, 
-  ArrowDown,
   TrendingUp,
   AlertCircle,
   Users,
@@ -20,7 +16,6 @@ import {
   BarChart3,
   DollarSign,
   Calendar,
-  XCircle,
   Clock
 } from 'lucide-react';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
@@ -69,8 +64,8 @@ export default function FeeCollectionSummariesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<SortField>('academic_year_name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [sortField] = useState<SortField>('academic_year_name');
+  const [sortOrder] = useState<SortOrder>('desc');
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
 
   useEffect(() => {
@@ -102,23 +97,7 @@ export default function FeeCollectionSummariesPage() {
     }
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === 'asc' ? 
-      <ArrowUp className="h-4 w-4 text-gray-600" /> : 
-      <ArrowDown className="h-4 w-4 text-gray-600" />;
-  };
 
   const getEfficiencyBadge = (efficiency: string) => {
     const efficiencyNum = parseFloat(efficiency || '0');
@@ -185,7 +164,6 @@ export default function FeeCollectionSummariesPage() {
 
   const totalExpected = summaries.reduce((sum, summary) => sum + parseFloat(summary.total_expected_with_overrides || '0'), 0);
   const totalCollected = summaries.reduce((sum, summary) => sum + parseFloat(summary.total_collected || '0'), 0);
-  const totalPending = summaries.reduce((sum, summary) => sum + parseFloat(summary.total_pending_collection || '0'), 0);
   const totalStudents = summaries.reduce((sum, summary) => sum + summary.students_with_fees, 0);
   const fullyPaidStudents = summaries.reduce((sum, summary) => sum + summary.fully_paid_students, 0);
 

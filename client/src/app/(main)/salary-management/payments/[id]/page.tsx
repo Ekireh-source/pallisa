@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, CheckCircle, XCircle, Clock, Activity, FileText, Calendar, User, TrendingUp, Settings, Plus, MinusIcon } from 'lucide-react';
+import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, Activity, FileText, Calendar, User, TrendingUp, Settings, Plus, MinusIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryPayment } from '@/lib/api';
 import { SalaryPayment } from '@/types';
@@ -72,22 +72,7 @@ export default function SalaryPaymentDetailPage() {
     }
   };
 
-  const getPaymentStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-6 w-6 text-green-600" />;
-      case 'pending':
-        return <Clock className="h-6 w-6 text-yellow-600" />;
-      case 'processing':
-        return <Activity className="h-6 w-6 text-blue-600" />;
-      case 'failed':
-        return <XCircle className="h-6 w-6 text-red-600" />;
-      case 'cancelled':
-        return <XCircle className="h-6 w-6 text-gray-600" />;
-      default:
-        return <Clock className="h-6 w-6 text-gray-600" />;
-    }
-  };
+ 
 
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
@@ -200,7 +185,7 @@ export default function SalaryPaymentDetailPage() {
             >
               <Edit className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Edit Payment
-            </Link>
+          </Link>
           </div>
         </div>
       </div>
@@ -219,7 +204,7 @@ export default function SalaryPaymentDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              {formatCurrency(payment.net_salary)}
+                  {formatCurrency(payment.net_salary)}
             </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <span className="font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
@@ -237,12 +222,12 @@ export default function SalaryPaymentDetailPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               {formatCurrency(payment.base_salary)}
-            </div>
+              </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <span className="font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">
                 Base Amount
@@ -259,12 +244,12 @@ export default function SalaryPaymentDetailPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               {formatCurrency(payment.allowances)}
-            </div>
+              </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <span className="font-medium px-2 py-1 rounded-full bg-purple-100 text-purple-700">
                 Added
@@ -281,12 +266,12 @@ export default function SalaryPaymentDetailPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <MinusIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               {formatCurrency(payment.deductions)}
-            </div>
+              </div>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <span className="font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">
                 Subtracted

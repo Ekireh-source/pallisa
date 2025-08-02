@@ -7,7 +7,6 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { 
   fetchStudents, 
   deleteStudent, 
-  clearFieldErrors, 
   fetchStudentStatistics 
 } from '@/store/slices/memberStudentSlice';
 import { 
@@ -35,9 +34,7 @@ import {
   Eye, 
   Activity, 
   FileText,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronUp,
+ 
   RefreshCw
 } from 'lucide-react';
 import type { MemberFilters } from '@/types';
@@ -61,7 +58,7 @@ const ENROLLMENT_STATUS_LABELS = {
 export default function StudentsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { students, loading, error, statistics } = useAppSelector((state) => state.memberStudents);
+  const { students, loading, statistics } = useAppSelector((state) => state.memberStudents);
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   // State for filters and search
@@ -70,8 +67,7 @@ export default function StudentsPage() {
   const [streamFilter, setStreamFilter] = useState<string>('');
   const [showInactive, setShowInactive] = useState<boolean>(false);
   const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [sortBy] = useState<'name' | 'student_id' | 'created_at'>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
   
   // State for delete confirmation
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);

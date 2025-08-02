@@ -20,7 +20,6 @@ import { ExpenseCreateUpdate } from '@/types';
 import { 
   ArrowLeft, 
   Edit, 
-  AlertTriangle, 
   FileText, 
   X, 
   Info,

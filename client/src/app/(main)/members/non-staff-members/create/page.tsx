@@ -14,7 +14,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select';
-import { ArrowLeft, Save, X, User, Briefcase, Heart, Shield, Plus, Users, FileText, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, User, Briefcase, Heart, Shield, Plus, Users, FileText, AlertCircle } from 'lucide-react';
 import type { NonStaffMemberCreateUpdate } from '@/types';
 
 const EMPLOYMENT_TYPE_OPTIONS = [

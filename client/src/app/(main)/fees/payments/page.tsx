@@ -17,9 +17,8 @@ import {
   Clock,
   Activity,
   Calendar,
-  Zap
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner } from '@/components/ui';
+import { Button, Badge, LoadingSpinner } from '@/components/ui';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
 
 interface FeePayment {

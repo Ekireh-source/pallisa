@@ -5,12 +5,10 @@ import Link from "next/link";
 import { 
   ArrowLeft, 
   Save, 
-  Loader2, 
   Plus, 
   DollarSign, 
   Calendar, 
   Users, 
-  BookOpen,
   AlertCircle,
   Info,
   CheckCircle

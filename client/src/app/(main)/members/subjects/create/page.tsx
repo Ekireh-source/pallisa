@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X, BookOpen, GraduationCap, Award, Clock } from 'lucide-react';
+import { ArrowLeft, Save, X, BookOpen, GraduationCap } from 'lucide-react';
 
 export default function CreateSubjectPage() {
   const router = useRouter();
@@ -50,6 +50,7 @@ export default function CreateSubjectPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       router.push('/members/subjects');
     } catch (error) {
+      console.warn('Error creating subject:', error);
       setError('Failed to create subject. Please try again.');
     } finally {
       setLoading(false);

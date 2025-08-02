@@ -133,7 +133,7 @@ export default function EditCategoryPage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">Category Not Found</h1>
               <p className="text-red-100 text-lg">
-                The category you're looking for doesn't exist.
+                The category you&apos;re looking for doesn&apos;t exist.
               </p>
             </div>
           </div>

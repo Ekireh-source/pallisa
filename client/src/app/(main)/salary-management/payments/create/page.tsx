@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, Loader2, Plus, CreditCard, User, Calendar, DollarSign, Activity, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Plus, CreditCard, User, Calendar, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { createSalaryPayment, getSalaryPeriods, getTeachers, getNonStaffMembers } from '@/lib/api';
 import { SalaryPaymentCreateUpdate, SalaryPeriod, StaffSalaryInfo } from '@/types';
@@ -245,21 +245,21 @@ export default function CreateSalaryPaymentPage() {
                     {teachers.length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-sm font-semibold text-gray-500">Teachers</div>
-                        {teachers.map((teacher) => (
-                          <SelectItem key={`teacher-${teacher.id}`} value={teacher.id.toString()}>
-                            {teacher.name} (Teacher)
-                          </SelectItem>
-                        ))}
+                    {teachers.map((teacher) => (
+                      <SelectItem key={`teacher-${teacher.id}`} value={teacher.id.toString()}>
+                        {teacher.name} (Teacher)
+                      </SelectItem>
+                    ))}
                       </>
                     )}
                     {nonStaffMembers.length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-sm font-semibold text-gray-500">Non-Staff Members</div>
-                        {nonStaffMembers.map((member) => (
-                          <SelectItem key={`nonstaff-${member.id}`} value={member.id.toString()}>
-                            {member.name} (Non-Staff)
-                          </SelectItem>
-                        ))}
+                    {nonStaffMembers.map((member) => (
+                      <SelectItem key={`nonstaff-${member.id}`} value={member.id.toString()}>
+                        {member.name} (Non-Staff)
+                      </SelectItem>
+                    ))}
                       </>
                     )}
                     {teachers.length === 0 && nonStaffMembers.length === 0 && (

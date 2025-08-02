@@ -5,7 +5,6 @@ import Link from "next/link";
 import { 
   ArrowLeft, 
   Save, 
-  Loader2, 
   Search, 
   User, 
   Plus, 
@@ -240,13 +239,13 @@ export default function CreateFeePaymentPage() {
                     <span>{new Date().toLocaleDateString()}</span>
                   </div>
                 </div>
-                <Link
-                  href="/fees/payments"
+            <Link
+              href="/fees/payments"
                   className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-300 border border-white/30"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Payments
-                </Link>
+            </Link>
               </div>
             </div>
           </div>
@@ -278,355 +277,355 @@ export default function CreateFeePaymentPage() {
           
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Student Search */}
-              <div>
+            {/* Student Search */}
+            <div>
                 <Label htmlFor="student" className="text-sm font-medium text-gray-700">
-                  Student *
+                Student *
                 </Label>
                 <div className="relative mt-2">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <Input
-                    type="text"
-                    id="student"
-                    className={`pl-10 h-11 ${fieldErrors.student ? 'border-red-300 bg-red-50' : ''}`}
-                    placeholder="Search for student by name or ID..."
-                    value={studentSearchTerm}
-                    onChange={(e) => {
-                      setStudentSearchTerm(e.target.value);
-                      setShowStudentDropdown(true);
-                    }}
-                    onFocus={() => setShowStudentDropdown(true)}
-                    required
-                  />
-                  {formData.student && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <span className="text-green-600 text-sm font-medium">
-                        ✓ {getSelectedStudentName()}
-                      </span>
-                    </div>
-                  )}
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
                 </div>
-                
-                {/* Student Dropdown */}
-                {showStudentDropdown && filteredStudents.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                    {filteredStudents.map((student) => (
-                      <div
-                        key={student.id}
-                        className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-blue-50"
-                        onClick={() => handleStudentSelect(student)}
-                      >
-                        <div className="flex items-center">
-                          <User className="h-5 w-5 text-gray-400 mr-2" />
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {student.full_name || student.name}
-                            </div>
-                            {student.student_id && (
-                              <div className="text-sm text-gray-500">
-                                ID: {student.student_id}
-                              </div>
-                            )}
-                            {student.class_name && (
-                              <div className="text-sm text-gray-500">
-                                Class: {student.class_name}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <Input
+                  type="text"
+                  id="student"
+                    className={`pl-10 h-11 ${fieldErrors.student ? 'border-red-300 bg-red-50' : ''}`}
+                  placeholder="Search for student by name or ID..."
+                  value={studentSearchTerm}
+                  onChange={(e) => {
+                    setStudentSearchTerm(e.target.value);
+                    setShowStudentDropdown(true);
+                  }}
+                  onFocus={() => setShowStudentDropdown(true)}
+                  required
+                />
+                {formData.student && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <span className="text-green-600 text-sm font-medium">
+                      ✓ {getSelectedStudentName()}
+                    </span>
                   </div>
                 )}
-                
-                {fieldErrors.student && (
+              </div>
+              
+              {/* Student Dropdown */}
+              {showStudentDropdown && filteredStudents.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                  {filteredStudents.map((student) => (
+                    <div
+                      key={student.id}
+                      className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-blue-50"
+                      onClick={() => handleStudentSelect(student)}
+                    >
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 text-gray-400 mr-2" />
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {student.full_name || student.name}
+                          </div>
+                          {student.student_id && (
+                            <div className="text-sm text-gray-500">
+                              ID: {student.student_id}
+                            </div>
+                          )}
+                          {student.class_name && (
+                            <div className="text-sm text-gray-500">
+                              Class: {student.class_name}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {fieldErrors.student && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {fieldErrors.student}
                   </p>
-                )}
-              </div>
+              )}
+            </div>
 
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                {/* Category */}
-                <div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {/* Category */}
+              <div>
                   <Label htmlFor="category" className="text-sm font-medium text-gray-700">
-                    Fee Category *
+                  Fee Category *
                   </Label>
-                  <select
-                    id="category"
+                <select
+                  id="category"
                     className={`mt-2 w-full h-11 px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
                       fieldErrors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
-                    value={formData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    required
-                  >
-                    <option value="">Select a category...</option>
-                    {categories.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.name}</option>
-                    ))}
-                  </select>
-                  {fieldErrors.category && (
+                  value={formData.category}
+                  onChange={(e) => handleInputChange('category', e.target.value)}
+                  required
+                >
+                  <option value="">Select a category...</option>
+                  {categories.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
+                  ))}
+                </select>
+                {fieldErrors.category && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {fieldErrors.category}
                     </p>
-                  )}
-                </div>
+                )}
+              </div>
 
-                {/* Academic Year */}
-                <div>
+              {/* Academic Year */}
+              <div>
                   <Label htmlFor="academic_year" className="text-sm font-medium text-gray-700">
-                    Academic Year *
+                  Academic Year *
                   </Label>
-                  <select
-                    id="academic_year"
+                <select
+                  id="academic_year"
                     className={`mt-2 w-full h-11 px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
                       fieldErrors.academic_year ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
-                    value={formData.academic_year}
-                    onChange={(e) => handleInputChange('academic_year', e.target.value)}
-                    required
-                  >
-                    <option value="">Select an academic year...</option>
-                    {years.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.name}</option>
-                    ))}
-                  </select>
-                  {fieldErrors.academic_year && (
+                  value={formData.academic_year}
+                  onChange={(e) => handleInputChange('academic_year', e.target.value)}
+                  required
+                >
+                  <option value="">Select an academic year...</option>
+                  {years.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
+                  ))}
+                </select>
+                {fieldErrors.academic_year && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {fieldErrors.academic_year}
                     </p>
-                  )}
-                </div>
+                )}
+              </div>
 
-                {/* Term */}
-                <div>
+              {/* Term */}
+              <div>
                   <Label htmlFor="term" className="text-sm font-medium text-gray-700">
-                    Term *
+                  Term *
                   </Label>
-                  <select
-                    id="term"
+                <select
+                  id="term"
                     className={`mt-2 w-full h-11 px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
                       fieldErrors.term ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
-                    value={formData.term}
-                    onChange={(e) => handleInputChange('term', e.target.value)}
-                    required
-                  >
-                    <option value="">Select a term...</option>
-                    {terms.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.name}</option>
-                    ))}
-                  </select>
-                  {fieldErrors.term && (
+                  value={formData.term}
+                  onChange={(e) => handleInputChange('term', e.target.value)}
+                  required
+                >
+                  <option value="">Select a term...</option>
+                  {terms.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
+                  ))}
+                </select>
+                {fieldErrors.term && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {fieldErrors.term}
                     </p>
-                  )}
-                </div>
+                )}
+              </div>
 
-                {/* Amount Paid */}
-                <div>
+              {/* Amount Paid */}
+              <div>
                   <Label htmlFor="amount_paid" className="text-sm font-medium text-gray-700">
-                    Amount Paid *
+                  Amount Paid *
                   </Label>
                   <div className="relative mt-2">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">UGX</span>
-                    </div>
-                    <Input
-                      type="number"
-                      id="amount_paid"
-                      className={`pl-12 h-11 ${fieldErrors.amount_paid ? 'border-red-300 bg-red-50' : ''}`}
-                      value={formData.amount_paid}
-                      onChange={(e) => handleInputChange('amount_paid', e.target.value)}
-                      required
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                    />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-500 sm:text-sm">UGX</span>
                   </div>
-                  {fieldErrors.amount_paid && (
+                    <Input
+                    type="number"
+                    id="amount_paid"
+                      className={`pl-12 h-11 ${fieldErrors.amount_paid ? 'border-red-300 bg-red-50' : ''}`}
+                    value={formData.amount_paid}
+                    onChange={(e) => handleInputChange('amount_paid', e.target.value)}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
+                </div>
+                {fieldErrors.amount_paid && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {fieldErrors.amount_paid}
                     </p>
-                  )}
-                </div>
+                )}
+              </div>
 
-                {/* Payment Method */}
-                <div>
+              {/* Payment Method */}
+              <div>
                   <Label htmlFor="payment_method" className="text-sm font-medium text-gray-700">
-                    Payment Method *
+                  Payment Method *
                   </Label>
-                  <select
-                    id="payment_method"
+                <select
+                  id="payment_method"
                     className="mt-2 w-full h-11 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    value={formData.payment_method}
-                    onChange={(e) => handleInputChange('payment_method', e.target.value)}
-                    required
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="cheque">Cheque</option>
-                    <option value="mobile_money">Mobile Money</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
+                  value={formData.payment_method}
+                  onChange={(e) => handleInputChange('payment_method', e.target.value)}
+                  required
+                >
+                  <option value="cash">Cash</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="cheque">Cheque</option>
+                  <option value="mobile_money">Mobile Money</option>
+                  <option value="credit_card">Credit Card</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
 
-                {/* Payment Status */}
-                <div>
+              {/* Payment Status */}
+              <div>
                   <Label htmlFor="payment_status" className="text-sm font-medium text-gray-700">
-                    Payment Status *
+                  Payment Status *
                   </Label>
-                  <select
-                    id="payment_status"
+                <select
+                  id="payment_status"
                     className="mt-2 w-full h-11 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    value={formData.payment_status}
-                    onChange={(e) => handleInputChange('payment_status', e.target.value)}
-                    required
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="failed">Failed</option>
-                    <option value="refunded">Refunded</option>
-                  </select>
-                </div>
+                  value={formData.payment_status}
+                  onChange={(e) => handleInputChange('payment_status', e.target.value)}
+                  required
+                >
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                  <option value="refunded">Refunded</option>
+                </select>
+              </div>
 
-                {/* Payment Date */}
-                <div>
+              {/* Payment Date */}
+              <div>
                   <Label htmlFor="payment_date" className="text-sm font-medium text-gray-700">
-                    Payment Date *
+                  Payment Date *
                   </Label>
                   <Input
-                    type="date"
-                    id="payment_date"
+                  type="date"
+                  id="payment_date"
                     className={`mt-2 h-11 ${fieldErrors.payment_date ? 'border-red-300 bg-red-50' : ''}`}
-                    value={formData.payment_date}
-                    onChange={(e) => handleInputChange('payment_date', e.target.value)}
-                    required
-                  />
-                  {fieldErrors.payment_date && (
+                  value={formData.payment_date}
+                  onChange={(e) => handleInputChange('payment_date', e.target.value)}
+                  required
+                />
+                {fieldErrors.payment_date && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {fieldErrors.payment_date}
                     </p>
-                  )}
-                </div>
+                )}
+              </div>
 
-                {/* Due Date */}
-                <div>
+              {/* Due Date */}
+              <div>
                   <Label htmlFor="due_date" className="text-sm font-medium text-gray-700">
-                    Due Date *
+                  Due Date *
                   </Label>
                   <Input
-                    type="date"
-                    id="due_date"
+                  type="date"
+                  id="due_date"
                     className={`mt-2 h-11 ${fieldErrors.due_date ? 'border-red-300 bg-red-50' : ''}`}
-                    value={formData.due_date}
-                    onChange={(e) => handleInputChange('due_date', e.target.value)}
-                    required
-                  />
-                  {fieldErrors.due_date && (
+                  value={formData.due_date}
+                  onChange={(e) => handleInputChange('due_date', e.target.value)}
+                  required
+                />
+                {fieldErrors.due_date && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {fieldErrors.due_date}
                     </p>
-                  )}
-                </div>
+                )}
+              </div>
 
-                {/* Scholarship */}
-                <div>
+              {/* Scholarship */}
+              <div>
                   <Label htmlFor="scholarship" className="text-sm font-medium text-gray-700">
-                    Scholarship
+                  Scholarship
                   </Label>
-                  <select
-                    id="scholarship"
+                <select
+                  id="scholarship"
                     className="mt-2 w-full h-11 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    value={formData.scholarship}
-                    onChange={(e) => handleInputChange('scholarship', e.target.value)}
-                  >
-                    <option value="">None</option>
-                    {scholarships.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.name}</option>
-                    ))}
-                  </select>
-                </div>
+                  value={formData.scholarship}
+                  onChange={(e) => handleInputChange('scholarship', e.target.value)}
+                >
+                  <option value="">None</option>
+                  {scholarships.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
+                  ))}
+                </select>
+              </div>
 
-                {/* Discount Amount */}
-                <div>
+              {/* Discount Amount */}
+              <div>
                   <Label htmlFor="discount_amount" className="text-sm font-medium text-gray-700">
-                    Discount Amount
+                  Discount Amount
                   </Label>
                   <div className="relative mt-2">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">UGX</span>
-                    </div>
-                    <Input
-                      type="number"
-                      id="discount_amount"
-                      className="pl-12 h-11"
-                      value={formData.discount_amount}
-                      onChange={(e) => handleInputChange('discount_amount', e.target.value)}
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                    />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-500 sm:text-sm">UGX</span>
                   </div>
+                    <Input
+                    type="number"
+                    id="discount_amount"
+                      className="pl-12 h-11"
+                    value={formData.discount_amount}
+                    onChange={(e) => handleInputChange('discount_amount', e.target.value)}
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* Notes */}
-              <div>
+            {/* Notes */}
+            <div>
                 <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
-                  Notes
+                Notes
                 </Label>
                 <Textarea
-                  id="notes"
-                  rows={3}
+                id="notes"
+                rows={3}
                   className="mt-2 resize-none"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  placeholder="Optional notes about this payment..."
-                />
-              </div>
+                value={formData.notes}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
+                placeholder="Optional notes about this payment..."
+              />
+            </div>
 
               {/* Form Actions */}
               <div className="pt-6 border-t border-gray-200">
                 <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0">
-                  <Link
-                    href="/fees/payments"
+              <Link
+                href="/fees/payments"
                     className="inline-flex items-center justify-center px-6 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
-                  >
-                    Cancel
-                  </Link>
+              >
+                Cancel
+              </Link>
                   <Button
-                    type="submit"
-                    disabled={loading}
+                type="submit"
+                disabled={loading}
                     className="inline-flex items-center justify-center px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                  >
-                    {loading ? (
-                      <>
+              >
+                {loading ? (
+                  <>
                         <LoadingSpinner size="sm" />
                         <span className="ml-2">Creating...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Create Payment
-                      </>
-                    )}
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Create Payment
+                  </>
+                )}
                   </Button>
                 </div>
-              </div>
-            </form>
+            </div>
+          </form>
           </CardContent>
         </Card>
 
@@ -653,22 +652,22 @@ export default function CreateFeePaymentPage() {
                   <h4 className="text-sm font-medium text-gray-900">Verify details</h4>
                   <p className="text-sm text-gray-600">Ensure the student and category are correct</p>
                 </div>
-              </div>
+        </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                 <div>
                   <h4 className="text-sm font-medium text-gray-900">Record accurately</h4>
                   <p className="text-sm text-gray-600">Record the actual amount paid and payment method</p>
-                </div>
+            </div>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                 <div>
                   <h4 className="text-sm font-medium text-gray-900">Add notes</h4>
                   <p className="text-sm text-gray-600">Use notes for special circumstances</p>
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
           </CardContent>
         </Card>
       </div>

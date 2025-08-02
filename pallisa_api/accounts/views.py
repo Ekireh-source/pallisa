@@ -651,7 +651,7 @@ class RoleListCreateView(APIView):
             else:
                 # If no school assigned, only show system roles
                 roles = roles.filter(school__isnull=True)
-        
+            
         # Apply pagination
         page = int(request.query_params.get('page', 1))
         page_size = int(request.query_params.get('page_size', 20))

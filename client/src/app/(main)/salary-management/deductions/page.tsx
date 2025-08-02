@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
-import { Plus, Search, Filter, Edit, Trash2, Eye, TrendingDown, Shield, Heart, Clock, AlertTriangle, Settings, RefreshCw, XCircle, Activity, DollarSign, CheckCircle, Zap } from 'lucide-react';
+import { Button, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, LoadingSpinner } from '@/components/ui';
+import { Plus, Search, Edit, Trash2, Eye, TrendingDown, Shield, Heart, Clock, AlertTriangle, Settings, RefreshCw, Activity, CheckCircle, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { getSalaryDeductions, deleteSalaryDeduction } from '@/lib/api';
 import { SalaryDeduction } from '@/types';

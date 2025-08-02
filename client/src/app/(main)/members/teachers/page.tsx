@@ -12,21 +12,19 @@ import {
   Edit, 
   Trash2, 
   Eye, 
-  Mail, 
   UserCheck, 
   Calendar, 
   Upload,
   Activity,
   FileText,
   AlertCircle,
-  BarChart3,
   Users,
   TrendingUp,
   Filter,
   RefreshCw
 } from 'lucide-react';
 import { BulkTeacherUpload } from '@/components/forms/BulkTeacherUpload';
-import type { MemberTeacher } from '@/types';
+
 
 const TEACHER_TYPE_COLORS = {
   full_time: 'bg-green-100 text-green-800',
@@ -220,7 +218,7 @@ export default function TeachersPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{teacherStats.total}</div>
@@ -240,7 +238,7 @@ export default function TeachersPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{teacherStats.fullTime}</div>
@@ -260,7 +258,7 @@ export default function TeachersPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{teacherStats.partTime}</div>
@@ -280,7 +278,7 @@ export default function TeachersPage() {
             </CardTitle>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
-            </div>
+              </div>
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{teacherStats.contract}</div>
@@ -333,20 +331,20 @@ export default function TeachersPage() {
                 <span className="hidden sm:inline">Refresh</span>
               </Button>
             </div>
-          </div>
+        </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
             {/* Search Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
               <div className="flex-1">
-                <div className="relative">
+            <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <input
-                    type="text"
+              <input
+                type="text"
                     placeholder="Search teachers by name, ID, or email..."
-                    value={searchTerm}
-                    onChange={handleSearch}
+                value={searchTerm}
+                onChange={handleSearch}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -361,30 +359,30 @@ export default function TeachersPage() {
             {showFilters && (
               <div className="border-t pt-4 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Employment Type
                     </label>
-                    <select
-                      value={selectedType}
-                      onChange={handleTypeFilter}
+              <select
+                value={selectedType}
+                onChange={handleTypeFilter}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
+              >
                       <option value="">All Types</option>
-                      {Object.entries(TEACHER_TYPE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {Object.entries(TEACHER_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
                 </div>
 
                 {/* Filter Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t space-y-3 sm:space-y-0">
                   <div className="flex items-center space-x-4">
-                    <Button
-                      variant="outline"
+              <Button
+                variant="outline"
                       size="sm"
                       onClick={clearAllFilters}
                       className="flex items-center space-x-2"
@@ -395,14 +393,14 @@ export default function TeachersPage() {
                   <Button
                     onClick={() => {/* TODO: Apply filters */}}
                     className="flex items-center space-x-2"
-                  >
+              >
                     <Filter className="w-4 h-4" />
                     <span>Apply Filters</span>
-                  </Button>
-                </div>
-              </div>
-            )}
+              </Button>
+            </div>
           </div>
+            )}
+        </div>
         </CardContent>
       </Card>
 
@@ -438,11 +436,11 @@ export default function TeachersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          {loading ? (
+      {loading ? (
             <div className="flex items-center justify-center py-12">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : filteredTeachers.length === 0 ? (
+            <LoadingSpinner size="lg" />
+        </div>
+      ) : filteredTeachers.length === 0 ? (
             <div className="text-center py-12">
               <UserCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -450,8 +448,8 @@ export default function TeachersPage() {
                   ? 'No teachers found matching your criteria' 
                   : 'No teachers found'
                 }
-              </h3>
-              <p className="text-gray-600 mb-6">
+            </h3>
+            <p className="text-gray-600 mb-6">
                 {searchTerm || selectedType 
                   ? 'Try adjusting your search criteria'
                   : 'Get started by adding your first teacher'
@@ -467,17 +465,17 @@ export default function TeachersPage() {
                     <span>Clear Search</span>
                   </Button>
                 )}
-                {!searchTerm && !selectedType && (
+            {!searchTerm && !selectedType && (
                   <Link href="/members/teachers/create" className="w-full sm:w-auto">
                     <Button className="flex items-center space-x-2 w-full sm:w-auto">
                       <Plus className="w-4 h-4" />
                       <span>Add First Teacher</span>
                     </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          ) : (
+              </Link>
+            )}
+          </div>
+        </div>
+      ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -506,25 +504,25 @@ export default function TeachersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredTeachers.map((teacher) => (
+          {filteredTeachers.map((teacher) => (
                     <tr key={teacher.id} className="hover:bg-gray-50 transition-colors duration-200">
                       <td className="px-3 sm:px-4 py-4">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <UserCheck className="w-4 h-4 text-blue-600" />
-                          </div>
+                    </div>
                           <div className="ml-3 min-w-0 flex-1">
                             <div className="text-sm font-medium text-gray-900 truncate">
-                              {teacher.teacher_name || 'Unknown Teacher'}
-                            </div>
+                        {teacher.teacher_name || 'Unknown Teacher'}
+                    </div>
                             <div className="text-xs text-gray-500 truncate">
                               {teacher.qualification || 'No qualification'}
-                            </div>
+                  </div>
                             <div className="text-xs text-gray-500 truncate md:hidden">
                               ID: {teacher.employee_id}
-                            </div>
-                          </div>
-                        </div>
+                    </div>
+                  </div>
+                </div>
                       </td>
                       <td className="px-3 sm:px-4 py-4 hidden md:table-cell">
                         <div className="text-sm text-gray-900">{teacher.employee_id}</div>
@@ -532,12 +530,12 @@ export default function TeachersPage() {
                       <td className="px-3 sm:px-4 py-4 hidden lg:table-cell">
                         <div className="text-sm text-gray-900 truncate">
                           {teacher.user_email || 'N/A'}
-                        </div>
+                  </div>
                       </td>
                       <td className="px-3 sm:px-4 py-4 hidden lg:table-cell">
                         <div className="text-sm text-gray-900">
                           {teacher.specialization || 'N/A'}
-                        </div>
+                  </div>
                       </td>
                       <td className="px-3 sm:px-4 py-4 hidden md:table-cell">
                         <Badge className={TEACHER_TYPE_COLORS[teacher.employment_type]}>
@@ -547,7 +545,7 @@ export default function TeachersPage() {
                       <td className="px-3 sm:px-4 py-4 hidden xl:table-cell">
                         <div className="text-sm text-gray-900">
                           {teacher.hire_date ? new Date(teacher.hire_date).toLocaleDateString() : 'N/A'}
-                        </div>
+                  </div>
                       </td>
                       <td className="px-3 sm:px-4 py-4 text-right">
                         <div className="flex items-center justify-end space-x-1">
@@ -579,14 +577,14 @@ export default function TeachersPage() {
                             <Trash2 className="w-3 h-3" />
                             <span className="hidden sm:inline">Delete</span>
                           </Button>
-                        </div>
+                </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
+        </div>
+      )}
         </CardContent>
       </Card>
 
@@ -595,31 +593,31 @@ export default function TeachersPage() {
         <Card className="border-0 shadow-lg overflow-hidden">
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-              <div className="text-sm text-gray-700">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} teachers
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="rounded-xl"
-                >
-                  Previous
-                </Button>
-                <span className="px-4 py-2 text-sm text-gray-700">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="rounded-xl"
-                >
-                  Next
-                </Button>
-              </div>
+            <div className="text-sm text-gray-700">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} teachers
             </div>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="rounded-xl"
+              >
+                Previous
+              </Button>
+              <span className="px-4 py-2 text-sm text-gray-700">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="rounded-xl"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
           </CardContent>
         </Card>
       )}

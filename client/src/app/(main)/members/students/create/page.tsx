@@ -7,7 +7,7 @@ import { useAppSelector, useAppDispatch } from '@/store';
 import { createStudent, clearFieldErrors } from '@/store/slices/memberStudentSlice';
 import { fetchStreams } from '@/store/slices/memberStreamSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label, LoadingSpinner } from '@/components/ui';
-import { ArrowLeft, Save, X, User, GraduationCap, Heart, FileText, Users, Plus, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, User, GraduationCap, Heart, FileText, Users, Plus, AlertCircle } from 'lucide-react';
 import { BulkStudentUpload } from '@/components/forms/BulkStudentUpload';
 import type { StudentCreateUpdate } from '@/types';
 

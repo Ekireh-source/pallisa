@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector } from '@/store';
@@ -36,6 +36,7 @@ import {
   apiGet,
   API_ENDPOINTS 
 } from '@/lib/api';
+import { isAuthenticated as checkAuthTokens } from '@/lib/api';
 
 interface DashboardStats {
   totalExpenses: number;
@@ -109,13 +110,7 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, router]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchDashboardData();
-    }
-  }, [isAuthenticated]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -220,11 +215,31 @@ export default function DashboardPage() {
 
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
+      
+      // Handle 401 errors specifically
+      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response) {
+        const status = (err.response as any).status;
+        if (status === 401) {
+          console.log('Authentication error - redirecting to login');
+          router.push('/login');
+          return;
+        }
+      }
+      
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    // Only fetch data if both Redux state shows authenticated AND we have actual tokens
+    if (isAuthenticated && checkAuthTokens()) {
+      fetchDashboardData();
+    }
+  }, [isAuthenticated, fetchDashboardData]);
+
+ 
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -303,7 +318,7 @@ export default function DashboardPage() {
                 Welcome back, {user.first_name}!
               </h1>
               <p className="text-blue-100">
-                Here's an overview of school operations and financial activities today.
+                Here&apos;s an overview of school operations and financial activities today.
               </p>
             </div>
           </div>
@@ -453,7 +468,7 @@ export default function DashboardPage() {
               Welcome back, {user.first_name}!
             </h1>
             <p className="text-blue-100 text-lg">
-              Here's an overview of Pallisa High School operations and financial activities today.
+              Here&apos;s an overview of Pallisa High School operations and financial activities today.
             </p>
           </div>
         </div>

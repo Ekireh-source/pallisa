@@ -26,20 +26,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 
-interface Term {
-  id: number;
-  name: string;
-  academic_year: number;
-  academic_year_name?: string;
-  start_date: string;
-  end_date: string;
-  is_current: boolean;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  expense_count: number;
-  duration_days: number | null;
-}
+
 
 export default function TermsPage() {
   const dispatch = useAppDispatch();

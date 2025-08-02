@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchClasses, deleteClass } from '@/store/slices/memberClassSlice';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, LoadingSpinner, ConfirmationModal } from '@/components/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, LoadingSpinner, ConfirmationModal } from '@/components/ui';
 import { 
   Search, 
   Building,

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { apiGet, API_ENDPOINTS } from '@/lib/api';
-import { cn } from '@/lib/utils';
+
 
 interface Scholarship {
   id: number;
