@@ -217,12 +217,6 @@ class ReportCardViewSet(viewsets.ModelViewSet):
                 final_total = aoi_contribution + exam_contribution
 
                 # ── 5. Persist SubjectReport ───────────────────────────────────
-                # Preserve existing grade — do not recalculate
-                existing_report = SubjectReport.objects.filter(
-                    report_card=report_card, subject=subject
-                ).first()
-                existing_grade = existing_report.grade if existing_report else None
-
                 subject_report, _ = SubjectReport.objects.update_or_create(
                     report_card=report_card,
                     subject=subject,
@@ -232,7 +226,7 @@ class ReportCardViewSet(viewsets.ModelViewSet):
                         'aoi_score': round(aoi_contribution, 2),
                         'exam_raw_score': exam_raw,
                         'exam_score': round(exam_contribution, 2),
-                        'grade': existing_grade,  # keep existing; model will set if None
+                        'grade': None,  # Always recalculate grade on generation
                     }
                 )
 

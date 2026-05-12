@@ -3,7 +3,8 @@ from .views import (
     CampusListCreateView, CampusDetailView,
     SchoolListCreateView, SchoolDetailView,
     SetupStepsListCreateView, SetupStepsDetailView,
-    DocumentListCreateView, DocumentDetailView
+    DocumentListCreateView, DocumentDetailView,
+    DashboardAnalyticsView
 )
 
 urlpatterns = [
@@ -22,4 +23,7 @@ urlpatterns = [
     # Document endpoints
     path('documents/', DocumentListCreateView.as_view(), name='document-list'),
     path('documents/<int:pk>/', DocumentDetailView.as_view(), name='document-detail'),
+
+    # Analytics
+    path('analytics/dashboard/', DashboardAnalyticsView.as_view(), name='dashboard-analytics'),
 ]

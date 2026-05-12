@@ -32,15 +32,28 @@ import {
 } from '@/components/ui';
 import { useAppSelector } from '@/store';
 import Link from 'next/link';
+import { FetchDashboardAnalytics } from '@/features/school/school.service';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, school } = useAppSelector((state) => state.auth);
+  const [analytics, setAnalytics] = useState<any>(null);
+
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      const res = await FetchDashboardAnalytics({school_id: Number(school?.id)});
+      if (res.success) {
+        setAnalytics(res.data);
+      }
+    };
+    loadAnalytics();
+  }, [school]);
 
   const stats = [
     {
       title: "Total Students",
-      value: "1,284",
-      change: "+12.5%",
+      value: analytics ? analytics.total_students : "...",
+      change: "",
       isPositive: true,
       icon: Users,
       bgColor: "bg-primary/10",
@@ -48,8 +61,8 @@ export default function DashboardPage() {
     },
     {
       title: "Total Teachers",
-      value: "86",
-      change: "+2.4%",
+      value: analytics ? analytics.total_teachers : "...",
+      change: "",
       isPositive: true,
       icon: UserCheck,
       bgColor: "bg-emerald-500/10",
@@ -57,17 +70,17 @@ export default function DashboardPage() {
     },
     {
       title: "Monthly Revenue",
-      value: "UGX 45.2M",
-      change: "-4.1%",
-      isPositive: false,
+      value: analytics ? analytics.monthly_revenue : "...",
+      change: "",
+      isPositive: true,
       icon: DollarSign,
       bgColor: "bg-amber-500/10",
       textColor: "text-amber-500",
     },
     {
       title: "Monthly Expenses",
-      value: "UGX 12.8M",
-      change: "+18.2%",
+      value: analytics ? analytics.monthly_expenses : "...",
+      change: "",
       isPositive: false,
       icon: CreditCard,
       bgColor: "bg-rose-500/10",
@@ -75,48 +88,7 @@ export default function DashboardPage() {
     },
   ];
 
-  const recentTransactions = [
-    {
-      id: "1",
-      student: "Akol Sharon",
-      amount: "UGX 450,000",
-      category: "Tuition Fee",
-      date: "May 06, 2026",
-      status: "completed",
-    },
-    {
-      id: "2",
-      student: "Okello James",
-      amount: "UGX 120,000",
-      category: "Library Fee",
-      date: "May 05, 2026",
-      status: "completed",
-    },
-    {
-      id: "3",
-      student: "Nekesa Martha",
-      amount: "UGX 75,000",
-      category: "Sports Fee",
-      date: "May 05, 2026",
-      status: "pending",
-    },
-    {
-      id: "4",
-      student: "Mugisha David",
-      amount: "UGX 320,000",
-      category: "Tuition Fee",
-      date: "May 04, 2026",
-      status: "completed",
-    },
-    {
-      id: "5",
-      student: "Namono Grace",
-      amount: "UGX 150,000",
-      category: "Lab Fee",
-      date: "May 04, 2026",
-      status: "failed",
-    },
-  ];
+  const recentTransactions = analytics ? analytics.recent_transactions : [];
 
   const quickActions = [
     { title: "Register Student", icon: Plus, href: "/members/students", color: "bg-primary" },
@@ -130,7 +102,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {'Admin'}!
+            Welcome back, {user?.first_name || 'Admin'}!
           </h1>
           <p className="text-gray-500 mt-1">
             Here's what's happening at Pallisa High School today.

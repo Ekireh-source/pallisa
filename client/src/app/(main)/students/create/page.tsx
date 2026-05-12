@@ -208,16 +208,7 @@ export default function CreateStudentPage() {
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="student_id">Student ID / Reg No</Label>
-                  <Input 
-                    id="student_id"
-                    placeholder="e.g., STU-2024-001" 
-                    className="h-12 rounded-xl border-gray-200"
-                    {...register('student_id')}
-                  />
-                  {errors.student_id && <ErrorMessage message={errors.student_id.message} />}
-                </div>
+               
 
                 <div className="space-y-2">
                   <Label htmlFor="campus" className="text-sm font-semibold text-gray-700 flex items-center">

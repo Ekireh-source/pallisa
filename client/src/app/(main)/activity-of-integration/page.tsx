@@ -107,8 +107,7 @@ export default function ActivitiesListPage() {
           <Table>
             <TableHeader className="bg-gray-50/50">
               <TableRow>
-                <TableHead className="w-[35%] font-semibold text-gray-900">Activity Title</TableHead>
-                <TableHead className="font-semibold text-gray-900">Topic</TableHead>
+                <TableHead className="w-[45%] font-semibold text-gray-900">Topic & Subject</TableHead>
                 <TableHead className="font-semibold text-gray-900">Academic Period</TableHead>
                 <TableHead className="font-semibold text-gray-900">Max Score</TableHead>
                 <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
@@ -118,8 +117,7 @@ export default function ActivitiesListPage() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-64" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full" /></TableCell>
@@ -127,7 +125,7 @@ export default function ActivitiesListPage() {
                 ))
               ) : activities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-64 text-center">
+                  <TableCell colSpan={4} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center text-gray-500">
                       <Zap className="w-12 h-12 text-gray-200 mb-4" />
                       <p className="text-lg font-medium">No activities found</p>
@@ -145,25 +143,19 @@ export default function ActivitiesListPage() {
                         </div>
                         <div className="flex flex-col">
                           <Link href={`/activity-of-integration/${activity.public_id}`} className="hover:text-rose-600 transition-colors">
-                            <span className="font-semibold">{activity.title}</span>
+                            <span className="font-semibold">{activity.topic_name || `Topic ID: ${activity.topic}`}</span>
                           </Link>
-                          <span className="text-xs text-gray-400 font-normal">
-                            {activity.public_id.slice(0, 8)}...
-                          </span>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-gray-400 font-normal">
+                              {activity.subject_name}
+                            </span>
+                            {activity.competency_area_name && (
+                              <span className="text-[10px] text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                {activity.competency_area_name}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <BookOpen className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="text-sm text-gray-600">{activity.topic_name || `Topic ID: ${activity.topic}`}</span>
-                        </div>
-                        {activity.competency_area_name && (
-                          <span className="text-[10px] text-gray-400 font-medium bg-gray-50 px-2 py-0.5 rounded-full w-fit">
-                            {activity.competency_area_name}
-                          </span>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell>

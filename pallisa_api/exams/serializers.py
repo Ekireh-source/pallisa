@@ -3,6 +3,8 @@ from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamS
 
 
 class CompetencyAreaSerializer(serializers.ModelSerializer):
+    topic_name = serializers.ReadOnlyField(source='topic.name')
+
     class Meta:
         model = CompetencyArea
         fields = '__all__'
@@ -33,7 +35,7 @@ class ActivityOfIntegrationSerializer(serializers.ModelSerializer):
 
 class IntegrationScoreSerializer(serializers.ModelSerializer):
     student_name = serializers.ReadOnlyField(source='student.user_profile.get_full_name')
-    activity_title = serializers.ReadOnlyField(source='activity.title')
+    activity_topic_name = serializers.ReadOnlyField(source='activity.topic.name')
 
     class Meta:
         model = IntegrationScore

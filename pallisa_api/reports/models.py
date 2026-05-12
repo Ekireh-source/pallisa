@@ -116,7 +116,14 @@ class SubjectReport(models.Model):
         self.total_score = self.aoi_score + self.exam_score
         
         if not self.grade:
-            active_grading_system = GradingSystem.objects.filter(is_active=True).first()
+            school = None
+            if getattr(self, 'report_card', None) and getattr(self.report_card, 'student', None) and getattr(self.report_card.student, 'campus', None):
+                school = self.report_card.student.campus.schools.filter(active=True).first()
+
+            active_grading_system = None
+            if school:
+                active_grading_system = GradingSystem.objects.filter(school=school, is_active=True).first()
+                
             if active_grading_system:
                 # Ordering by -min_score is already set on the model Meta
                 boundary = active_grading_system.boundaries.filter(
@@ -128,11 +135,11 @@ class SubjectReport(models.Model):
             if not self.grade:
                 # Fallback to simple grading logic
                 if self.total_score >= 80:
-                    self.grade = 'D1'
+                    self.grade = 'A1'
                 elif self.total_score >= 75:
-                    self.grade = 'D2'
+                    self.grade = 'A2'
                 elif self.total_score >= 66:
-                    self.grade = 'C3'
+                    self.grade = 'B3'
                 elif self.total_score >= 60:
                     self.grade = 'C4'
                 elif self.total_score >= 55:

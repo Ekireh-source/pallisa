@@ -43,7 +43,8 @@ export const StreamSchema = z.object({
 export const StudentSchema = z.object({
   user_email: z.string().email("Invalid email").optional().nullable().or(z.literal(""))
     .transform(val => val === "" ? null : val),
-  student_id: z.string().min(1, "Student ID is required"),
+  student_id: z.string().optional().nullable().or(z.literal(""))
+    .transform(val => val === "" ? null : val),
   campus: z.coerce.number().min(1, "Campus is required"),
   user_first_name: z.string().min(1, "First name is required"),
   user_last_name: z.string().min(1, "Last name is required"),
@@ -73,6 +74,23 @@ export const TeacherSchema = z.object({
   is_active: z.boolean(),
 });
 
+export const TeacherListSchema = z.object({
+  id: z.number(),
+  full_name: z.string(),
+  employee_id: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
+});
+
+export const StudentListSchema = z.object({
+  id: z.number(),
+  full_name: z.string(),
+  student_id: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
+  current_class_name: z.string().optional().nullable(),
+  current_stream_name: z.string().optional().nullable(),
+  admission_number: z.string().optional().nullable(),
+});
+
 export type IClassInput = z.infer<typeof ClassSchema>;
 export type ISubjectInput = z.infer<typeof SubjectSchema>;
 export type IAcademicYearInput = z.infer<typeof AcademicYearSchema>;
@@ -80,3 +98,5 @@ export type ITermInput = z.infer<typeof TermSchema>;
 export type IStreamInput = z.infer<typeof StreamSchema>;
 export type IStudentInput = z.infer<typeof StudentSchema>;
 export type ITeacherInput = z.infer<typeof TeacherSchema>;
+export type ITeacher = z.infer<typeof TeacherListSchema>;
+export type IStudent = z.infer<typeof StudentListSchema>;

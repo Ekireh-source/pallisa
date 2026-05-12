@@ -107,3 +107,14 @@ export const DeleteCampus = async (id: string) => {
     return { success: false, error };
   }
 };
+
+// --- Analytics ---
+
+export const FetchDashboardAnalytics = async (params?: { school_id?: string | number }) => {
+  try {
+    const res = await api.get(`/schools/analytics/dashboard/?${params?.school_id}`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};

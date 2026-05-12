@@ -12,6 +12,11 @@ from .serializers import (
     SetupStepsSerializer, 
     DocumentSerializer
 )
+from django.utils import timezone
+from members.models import Student, Teacher
+from fees.models import FeePayment
+from expenses.models import Expense
+from django.db.models import Sum
 
 logger = logging.getLogger(__name__)
 
@@ -422,3 +427,59 @@ class DocumentDetailView(APIView):
         except Exception as e:
             logger.error(f"Error deleting document {pk}: {str(e)}")
             return Response({"error": "Failed to delete document"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DashboardAnalyticsView(APIView):
+    """
+    Returns analytics for the dashboard.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(summary="Get dashboard analytics")
+    def get(self, request):
+        try:
+            school_id = request.query_params.get('school_id')
+            now = timezone.now()
+            current_month = now.month
+            current_year = now.year
+
+            students_qs = Student.objects.filter(is_active=True)
+            teachers_qs = Teacher.objects.filter(is_active=True)
+            payments_qs = FeePayment.objects.filter(payment_status='completed')
+            expenses_qs = Expense.objects.all()
+
+            if school_id:
+                students_qs = students_qs.filter(campus__schools__id=school_id)
+                teachers_qs = teachers_qs.filter(campus__schools__id=school_id)
+                payments_qs = payments_qs.filter(student__campus__schools__id=school_id)
+
+            total_students = students_qs.count()
+            total_teachers = teachers_qs.count()
+
+            monthly_payments = payments_qs.filter(payment_date__year=current_year, payment_date__month=current_month)
+            monthly_revenue = monthly_payments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+
+            monthly_expenses_qs = expenses_qs.filter(incurred_on__year=current_year, incurred_on__month=current_month)
+            monthly_expenses = monthly_expenses_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+
+            recent_txs = payments_qs.select_related('student__user_profile', 'category').order_by('-payment_date', '-created_at')[:5]
+            transactions = []
+            for tx in recent_txs:
+                transactions.append({
+                    'id': str(tx.id),
+                    'student': tx.student.user_profile.get_full_name() if getattr(tx.student, 'user_profile', None) else tx.student.student_id,
+                    'amount': f"UGX {tx.amount_paid:,.0f}",
+                    'category': tx.category.name if tx.category else "Fee",
+                    'date': tx.payment_date.strftime("%b %d, %Y"),
+                    'status': tx.payment_status,
+                })
+
+            return Response({
+                'total_students': f"{total_students:,}",
+                'total_teachers': f"{total_teachers:,}",
+                'monthly_revenue': f"UGX {monthly_revenue:,.0f}",
+                'monthly_expenses': f"UGX {monthly_expenses:,.0f}",
+                'recent_transactions': transactions
+            })
+        except Exception as e:
+            logger.error(f"Error fetching dashboard analytics: {str(e)}")
+            return Response({"error": "Failed to fetch dashboard analytics"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

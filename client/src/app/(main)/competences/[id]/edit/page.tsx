@@ -9,7 +9,8 @@ import {
   Save, 
   LayoutGrid,
   Loader2,
-  FileText
+  FileText,
+  BookOpen
 } from 'lucide-react';
 import { 
   Button, 
@@ -18,10 +19,15 @@ import {
   Label, 
   ErrorMessage,
   Textarea,
-  Skeleton
+  Skeleton,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui';
 import { CompetencyAreaSchema, ICompetencyAreaInput } from '@/features/exam/exam.schemas';
-import { FetchCompetencyAreaById, UpdateCompetencyArea } from '@/features/exam/exam.service';
+import { FetchCompetencyAreaById, UpdateCompetencyArea, FetchTopics } from '@/features/exam/exam.service';
 import { toast } from 'sonner';
 
 export default function EditCompetencyAreaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,19 +35,31 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
   const { id } = use(params);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [topics, setTopics] = useState<any[]>([]);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ICompetencyAreaInput>({
     resolver: zodResolver(CompetencyAreaSchema),
+    defaultValues: {
+      topic: undefined,
+      name: '',
+      description: '',
+    }
   });
 
   useEffect(() => {
-    const loadArea = async () => {
+    const loadAreaAndTopics = async () => {
       setFetching(true);
+      
+      const topicsRes = await FetchTopics();
+      if (topicsRes.success) setTopics(topicsRes.data.results || topicsRes.data);
+
       const result = await FetchCompetencyAreaById(id);
       if (result.success) {
         reset(result.data);
@@ -51,8 +69,10 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
       }
       setFetching(false);
     };
-    loadArea();
+    loadAreaAndTopics();
   }, [id, reset, router]);
+
+  const selectedTopic = watch('topic');
 
   const onSubmit = async (data: ICompetencyAreaInput) => {
     setLoading(true);
@@ -62,7 +82,7 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
       toast.success("Competency area updated successfully");
       router.push('/competences');
     } else {
-      toast.error(result.error?.message || "Failed to update competency area");
+      toast.error("Failed to update competency area");
     }
     setLoading(false);
   };
@@ -101,6 +121,31 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
           <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="topic" className="text-sm font-semibold text-gray-700 flex items-center">
+                <BookOpen className="w-4 h-4 mr-2 text-indigo-600" />
+                Linked Topic (Optional)
+              </Label>
+              <Select 
+                value={selectedTopic ? selectedTopic.toString() : undefined}
+                onValueChange={(val) => {
+                  setValue('topic', parseInt(val), { shouldValidate: true, shouldDirty: true });
+                }}
+              >
+                <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.topic ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="Select a topic to link..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {topics.map((t) => (
+                    <SelectItem key={t.id} value={t.id.toString()}>
+                      {t.name} ({t.subject_name} - {t.class_name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.topic && <ErrorMessage message={errors.topic.message} />}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
                 <LayoutGrid className="w-4 h-4 mr-2 text-indigo-600" />

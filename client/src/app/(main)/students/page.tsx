@@ -40,6 +40,7 @@ import {
 } from '@/components/ui';
 import { FetchStudents, DeleteStudent } from '@/features/members/members.service';
 import { toast } from 'sonner';
+import { IStudent } from '@/features/members/members.schemas';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
@@ -47,7 +48,7 @@ import { RootState } from '@/store';
 import { selectSchool } from '@/store/auth/selectors';
 
 export default function StudentsListPage() {
-  const [students, setStudents] = useState<any[]>([]);
+  const [students, setStudents] = useState<IStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
@@ -185,7 +186,7 @@ export default function StudentsListPage() {
                         <Avatar className="h-10 w-10 border border-gray-100">
                           <AvatarImage src={student.user_profile_data?.profile_picture} />
                           <AvatarFallback className="bg-indigo-50 text-indigo-700 font-bold">
-                            {student.student_name?.[0] || 'S'}
+                            {student.full_name?.[0] || 'S'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
@@ -193,10 +194,10 @@ export default function StudentsListPage() {
                             href={`/students/${student.id}`}
                             className="font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
                           >
-                            {student.student_name || 'Unnamed Student'}
+                            {student.full_name || 'Unnamed Student'}
                           </Link>
                           <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {student.user_email || 'No email'}
+                            <Mail className="w-3 h-3" /> {student.email || 'No email'}
                           </span>
                         </div>
                       </div>
@@ -210,7 +211,7 @@ export default function StudentsListPage() {
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="text-sm text-gray-900 font-medium">
-                          {student.class_name || 'No Class'}
+                          {student.current_class_name || 'No Class'}
                         </span>
                         <span className="text-xs text-gray-500">
                           {student.current_stream_name || 'No Stream'}

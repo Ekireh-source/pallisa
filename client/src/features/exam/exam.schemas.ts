@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const CompetencyAreaSchema = z.object({
+  topic: z.number().optional().nullable(),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().nullable(),
 });
@@ -8,44 +9,41 @@ export const CompetencyAreaSchema = z.object({
 export type ICompetencyAreaInput = z.infer<typeof CompetencyAreaSchema>;
 
 export const TopicSchema = z.object({
-  subject: z.coerce.number().min(1, "Subject is required"),
-  class_obj: z.coerce.number().min(1, "Class is required"),
+  subject: z.number().min(1, "Subject is required"),
+  class_obj: z.number().min(1, "Class is required"),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().nullable(),
 });
 
 export const ActivitySchema = z.object({
-  topic: z.coerce.number().min(1, "Topic is required"),
-  teacher: z.coerce.number().optional().nullable(),
-  term: z.coerce.number().min(1, "Term is required"),
-  competency_area: z.coerce.number().optional().nullable(),
-  title: z.string().min(1, "Title is required"),
-  scenario: z.string().min(1, "Scenario is required"),
-  task_description: z.string().min(1, "Task description is required"),
-  max_score: z.coerce.number().min(1).default(10),
+  topic: z.number().min(1, "Topic is required"),
+  teacher: z.number().optional().nullable(),
+  term: z.number().min(1, "Term is required"),
+  competency_area: z.number().optional().nullable(),
+  max_score: z.number().min(1),
 });
 
 export const IntegrationScoreSchema = z.object({
-  student: z.coerce.number().min(1),
-  activity: z.coerce.number().min(1),
-  score: z.coerce.number().min(0),
+  student: z.number().min(1),
+  activity: z.number().min(1),
+  score: z.number().min(0),
   teacher_remarks: z.string().optional().nullable(),
 });
 
 export const ExamSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  term: z.coerce.number().min(1, "Term is required"),
-  class_obj: z.coerce.number().min(1, "Class is required"),
+  term: z.number().min(1, "Term is required"),
+  class_obj: z.number().min(1, "Class is required"),
   start_date: z.string(), // ISO date
   end_date: z.string(),   // ISO date
-  is_published: z.boolean().default(false),
+  is_published: z.boolean().optional(),
 });
 
 export const ExamScoreSchema = z.object({
-  exam: z.coerce.number().min(1),
-  student: z.coerce.number().min(1),
-  subject: z.coerce.number().min(1),
-  score: z.coerce.number().min(0).max(100),
+  exam: z.number().min(1),
+  student: z.number().min(1),
+  subject: z.number().min(1),
+  score: z.number().min(0).max(100),
   remarks: z.string().optional().nullable(),
 });
 

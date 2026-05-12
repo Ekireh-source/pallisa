@@ -178,15 +178,15 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">{activity.title}</h1>
-              <Badge className="rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 border-none">
+              <h1 className="text-3xl font-bold text-gray-900">{activity.topic_name}</h1>
+              <Badge className="rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200 border-none">
                 Integration Activity
               </Badge>
             </div>
             <div className="flex items-center gap-4 mt-1 text-gray-500 text-sm">
               <span className="flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4" />
-                {activity.topic_name}
+                {activity.subject_name}
               </span>
               <span className="flex items-center gap-1.5">
                 <Trophy className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
             Edit Activity
           </Button>
           <Button 
-            className="rounded-xl h-11 shadow-lg shadow-blue-200 bg-primary hover:bg-primary/90"
+            className="rounded-xl h-11 shadow-lg shadow-rose-200 bg-rose-600 hover:bg-rose-700 text-white"
             onClick={handleSaveAll}
             disabled={saving}
           >
@@ -210,18 +210,6 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
             Save All Scores
           </Button>
         </div>
-      </div>
-
-      {/* Scenario & Task (Read-only Info) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-white">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Scenario</h3>
-          <p className="text-gray-700 leading-relaxed italic">"{activity.scenario}"</p>
-        </Card>
-        <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-white">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Task Description</h3>
-          <p className="text-gray-700 leading-relaxed">{activity.task_description}</p>
-        </Card>
       </div>
 
       {/* Filters & Bulk Tools */}

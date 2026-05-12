@@ -8,7 +8,8 @@ from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
     StudentStreamHistory, Subject, TeacherSubjectAssignment,
     generate_password, send_login_credentials, NonStaffMember,
-    SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPaymentDetail, SalaryPayment, SalarySummary
+    SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPaymentDetail, SalaryPayment, SalarySummary,
+    generate_student_id
 )
 
 User = get_user_model()
@@ -209,6 +210,21 @@ class StudentSerializer(serializers.ModelSerializer):
         
         # Extract student_id if provided
         student_id = validated_data.pop('student_id', None)
+        
+        # Auto-generate student_id if not provided and school info is available
+        if not student_id and not validated_data.get('user_profile') and user_fields['user_email']:
+            # Try to get school from campus or role
+            campus_id = validated_data.get('campus')
+            if campus_id:
+                try:
+                    campus = Campus.objects.get(id=campus_id)
+                    student_id = generate_student_id(campus.school)
+                except Exception:
+                    pass
+        
+        # If student_id was generated, ensure user_fields uses it
+        if student_id and not user_fields['user_student_id']:
+            user_fields['user_student_id'] = student_id
         
         profile_fields = {
             'user_first_name': validated_data.pop('user_first_name', None),

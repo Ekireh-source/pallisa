@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +9,8 @@ import {
   Save, 
   LayoutGrid,
   Loader2,
-  FileText
+  FileText,
+  BookOpen
 } from 'lucide-react';
 import { 
   Button, 
@@ -17,15 +18,29 @@ import {
   Input, 
   Label, 
   ErrorMessage,
-  Textarea
+  Textarea,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui';
 import { CompetencyAreaSchema, ICompetencyAreaInput } from '@/features/exam/exam.schemas';
-import { CreateCompetencyArea } from '@/features/exam/exam.service';
+import { CreateCompetencyArea, FetchTopics } from '@/features/exam/exam.service';
 import { toast } from 'sonner';
 
 export default function CreateCompetencyAreaPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [topics, setTopics] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadTopics = async () => {
+      const res = await FetchTopics();
+      if (res.success) setTopics(res.data.results || res.data);
+    };
+    loadTopics();
+  }, []);
 
   const {
     register,
@@ -34,6 +49,7 @@ export default function CreateCompetencyAreaPage() {
   } = useForm<ICompetencyAreaInput>({
     resolver: zodResolver(CompetencyAreaSchema),
     defaultValues: {
+      topic: undefined,
       name: '',
       description: '',
     }
@@ -47,7 +63,7 @@ export default function CreateCompetencyAreaPage() {
       toast.success("Competency area created successfully");
       router.push('/competences');
     } else {
-      toast.error(result.error?.message || "Failed to create competency area");
+      toast.error("Failed to create competency area");
     }
     setLoading(false);
   };
@@ -72,6 +88,26 @@ export default function CreateCompetencyAreaPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
           <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="topic" className="text-sm font-semibold text-gray-700 flex items-center">
+                <BookOpen className="w-4 h-4 mr-2 text-indigo-600" />
+                Linked Topic (Optional)
+              </Label>
+              <Select onValueChange={(val) => register('topic').onChange({ target: { value: parseInt(val), name: 'topic' } })}>
+                <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.topic ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="Select a topic to link..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {topics.map((t) => (
+                    <SelectItem key={t.id} value={t.id.toString()}>
+                      {t.name} ({t.subject_name} - {t.class_name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.topic && <ErrorMessage message={errors.topic.message} />}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
                 <LayoutGrid className="w-4 h-4 mr-2 text-indigo-600" />

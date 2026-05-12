@@ -111,10 +111,54 @@ class Stream(models.Model):
         return max(0, self.capacity - self.current_enrollment)
 
 
+def generate_student_id(school):
+    """Generate a unique student ID based on school and year"""
+    if not school:
+        return None
+        
+    year = timezone.now().year
+    school_code = school.name[:3].upper()
+    
+    # Get the highest existing student_id for this school and year
+    # We use Student.objects here which is fine as it's defined in this file
+    existing_students = Student.objects.filter(
+        student_id__startswith=f"{school_code}{year}"
+    ).exclude(student_id='')
+    
+    max_number = 0
+    if existing_students.exists():
+        for student in existing_students:
+            try:
+                # Extract the numeric part (last 4 digits)
+                student_id = student.student_id
+                if len(student_id) >= 4:
+                    number_part = student_id[-4:]
+                    number = int(number_part)
+                    max_number = max(max_number, number)
+            except (ValueError, IndexError):
+                continue
+        
+        new_number = max_number + 1
+    else:
+        new_number = 1
+    
+    # Generate the new student_id with zero-padding
+    student_id = f"{school_code}{year}{new_number:04d}"
+    
+    # Check for uniqueness and increment if needed
+    while Student.objects.filter(student_id=student_id).exists():
+        new_number += 1
+        student_id = f"{school_code}{year}{new_number:04d}"
+        if new_number > 9999:
+            raise ValidationError("Unable to generate unique student ID - too many students for this year")
+            
+    return student_id
+
+
 class Student(models.Model):
     """Model to represent student-specific information"""
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='student_profile')
-    student_id = models.CharField(max_length=20, unique=True, db_index=True)
+    student_id = models.CharField(max_length=20, unique=True, db_index=True, null=True, blank=True)
     campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
     admission_number = models.CharField(max_length=50, blank=True, null=True)
     admission_date = models.DateField(default=get_current_date)
@@ -165,49 +209,11 @@ class Student(models.Model):
             else:
                 # Auto-generate student_id
                 school = self.user_profile.role.school if self.user_profile and self.user_profile.role else None
+                if not school and self.campus:
+                    school = self.campus.school
+                
                 if school:
-                    year = timezone.now().year
-                    school_code = school.name[:3].upper()
-                    
-                    # Use a more robust approach for bulk creation
-                    # Get the highest existing student_id for this school and year
-                    from django.db.models import Max
-                    from django.db.models.functions import Substr, Cast
-                    from django.db.models import IntegerField
-                    
-                    # Get the highest number for this school and year
-                    existing_students = Student.objects.filter(
-                        student_id__startswith=f"{school_code}{year}"
-                    ).exclude(student_id='')  # Exclude empty student_ids
-                    
-                    if existing_students.exists():
-                        # Extract the numeric part and find the maximum
-                        max_number = 0
-                        for student in existing_students:
-                            try:
-                                # Extract the numeric part (last 4 digits)
-                                student_id = student.student_id
-                                if len(student_id) >= 4:
-                                    number_part = student_id[-4:]
-                                    number = int(number_part)
-                                    max_number = max(max_number, number)
-                            except (ValueError, IndexError):
-                                continue
-                        
-                        new_number = max_number + 1
-                    else:
-                        # First student for this school and year
-                        new_number = 1
-                    
-                    # Generate the new student_id with zero-padding
-                    self.student_id = f"{school_code}{year}{new_number:04d}"
-                    
-                    # Check for uniqueness and increment if needed
-                    while Student.objects.filter(student_id=self.student_id).exists():
-                        new_number += 1
-                        self.student_id = f"{school_code}{year}{new_number:04d}"
-                        if new_number > 9999:  # Prevent infinite loop
-                            raise ValidationError("Unable to generate unique student ID - too many students for this year")
+                    self.student_id = generate_student_id(school)
         
         # Auto-generate admission_number if not provided
         if not self.admission_number:

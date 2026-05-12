@@ -103,7 +103,8 @@ export default function CompetencyAreasListPage() {
           <Table>
             <TableHeader className="bg-gray-50/50">
               <TableRow>
-                <TableHead className="w-[40%] font-semibold text-gray-900">Name</TableHead>
+                <TableHead className="w-[30%] font-semibold text-gray-900">Name</TableHead>
+                <TableHead className="font-semibold text-gray-900">Topic</TableHead>
                 <TableHead className="font-semibold text-gray-900">Description</TableHead>
                 <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
               </TableRow>
@@ -113,13 +114,14 @@ export default function CompetencyAreasListPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-64" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full" /></TableCell>
                   </TableRow>
                 ))
               ) : areas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-64 text-center">
+                  <TableCell colSpan={4} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center text-gray-500">
                       <LayoutGrid className="w-12 h-12 text-gray-200 mb-4" />
                       <p className="text-lg font-medium">No competency areas found</p>
@@ -137,6 +139,16 @@ export default function CompetencyAreasListPage() {
                         </div>
                         <span>{area.name}</span>
                       </div>
+                    </TableCell>
+                    <TableCell className="text-gray-900 font-medium">
+                      {area.topic_name ? (
+                        <div className="flex items-center">
+                          <BookOpen className="w-4 h-4 mr-2 text-gray-400" />
+                          {area.topic_name}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 italic">No topic linked</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-gray-600">
                       <span className="line-clamp-1">{area.description || 'No description'}</span>

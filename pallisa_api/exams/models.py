@@ -30,6 +30,7 @@ class CompetencyArea(models.Model):
     """
     Represents a broader area of competency within a subject.
     """
+    topic = models.ForeignKey(Topics, on_delete=models.CASCADE, related_name='competency_areas', null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,15 +50,12 @@ class ActivityOfIntegration(models.Model):
     competency_area = models.ForeignKey(CompetencyArea, on_delete=models.SET_NULL, null=True, blank=True, related_name='activities')
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, related_name='integration_activities')
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    scenario = models.TextField(help_text="The real-life situation or problem presented to the student")
-    task_description = models.TextField(help_text="What the student is expected to do")
     max_score = models.PositiveIntegerField(default=10, help_text="Usually out of 10 marks for AoI")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.title} ({self.topic.subject.code})"
+        return f"AoI: {self.topic.name} ({self.topic.subject.code})"
 
 
 class IntegrationScore(models.Model):
@@ -84,7 +82,7 @@ class IntegrationScore(models.Model):
             raise ValidationError(f"Score cannot be greater than the maximum score ({self.activity.max_score})")
 
     def __str__(self):
-        return f"{self.student.student_id} - {self.activity.title}: {self.score}"
+        return f"{self.student.student_id} - AoI {self.activity.topic.name}: {self.score}"
     
     
     

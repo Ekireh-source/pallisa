@@ -41,11 +41,12 @@ import {
 } from '@/components/ui';
 import { FetchTeachers, DeleteTeacher } from '@/features/members/members.service';
 import { toast } from 'sonner';
+import { ITeacher } from '@/features/members/members.schemas';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function TeachersListPage() {
-  const [teachers, setTeachers] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<ITeacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
@@ -168,13 +169,13 @@ export default function TeachersListPage() {
                         <Avatar className="h-10 w-10 border border-gray-100">
                           <AvatarImage src={teacher.user_profile_data?.profile_picture} />
                           <AvatarFallback className="bg-indigo-50 text-indigo-700 font-bold">
-                            {teacher.teacher_name?.[0] || 'T'}
+                            {teacher.full_name?.[0] || 'T'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">{teacher.teacher_name || 'Unnamed Teacher'}</span>
+                          <span className="font-medium text-gray-900">{teacher.full_name || 'Unnamed Teacher'}</span>
                           <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {teacher.user_email || 'No email'}
+                            <Mail className="w-3 h-3" /> {teacher.email || 'No email'}
                           </span>
                         </div>
                       </div>
