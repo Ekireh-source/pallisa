@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from .models import PermissionCategory, UserProfile, EmailVerificationToken, CustomUser, Document, Role, Permission, UserPermission, School, Campus
+from .models import PermissionCategory, UserProfile, EmailVerificationToken, CustomUser, Document, Role, Permission, UserPermission
+from schools.models import School, Campus
+from schools.serializers import SchoolSerializer, CampusSerializer
 from .utils import send_verification_email
 
 
@@ -161,22 +163,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     
 
 
-class SchoolSerializer(serializers.ModelSerializer):
-    """Serializer for School creation and management"""
-    
-    class Meta:
-        model = School
-        fields = ['id', 'name', 'address', 'phone', 'email', 'website', 'owner', 'created_at', 'is_active']
-        read_only_fields = ['id', 'owner', 'created_at']
 
-
-class CampusSerializer(serializers.ModelSerializer):
-    """Serializer for Campus creation and management"""
-    
-    class Meta:
-        model = Campus
-        fields = ['id', 'name', 'school', 'address', 'phone', 'created_at', 'is_active']
-        read_only_fields = ['id', 'school', 'created_at']
 
 
 class SchoolCampusCreationSerializer(serializers.Serializer):
@@ -225,7 +212,7 @@ class UserRegistrationSerializer(serializers.Serializer):
     emergency_contact_email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     
     # School and Campus data
-    school_data = SchoolCampusCreationSerializer(required=False)
+    # Removed as per requirement
     
     def validate_email(self, value):
         """Check that the email is not already in use"""
@@ -235,12 +222,6 @@ class UserRegistrationSerializer(serializers.Serializer):
     
     def validate(self, data):
         """Custom validation for registration data"""
-        # School data is required since only school owners can register
-        if not data.get('school_data'):
-            raise serializers.ValidationError({
-                'school_data': 'School information is required for registration.'
-            })
-        
         return data
     
     @transaction.atomic
@@ -249,12 +230,9 @@ class UserRegistrationSerializer(serializers.Serializer):
         user_data = {
             'email': validated_data.pop('email'),
             'password': validated_data.pop('password'),
-            'email_verified': False,  # User needs to verify email
-            'is_active': True,  # User can log in but with limited access
+            'email_verified': False,
+            'is_active': True,
         }
-        
-        # Extract school data if provided
-        school_data = validated_data.pop('school_data', None)
         
         # Create user
         user = User.objects.create_user(**user_data)
@@ -264,44 +242,11 @@ class UserRegistrationSerializer(serializers.Serializer):
         profile_data['user_type'] = 'school_owner'  # Hard-code user_type
         profile = UserProfile.objects.create(user=user, **profile_data)
         
-        # Create school and campus if school_data is provided
-        school = None
-        campus = None
-        if school_data:
-            # Create school with the user as owner
-            school = School.objects.create(
-                name=school_data['school_name'],
-                address=school_data.get('school_address', ''),
-                phone=school_data.get('school_phone', ''),
-                email=school_data.get('school_email', ''),
-                website=school_data.get('school_website', ''),
-                owner=profile
-            )
-            
-            # Create campus for the school
-            campus = Campus.objects.create(
-                name=school_data['campus_name'],
-                school=school,
-                address=school_data.get('campus_address', ''),
-                phone=school_data.get('campus_phone', '')
-            )
-            
-            # Create setup steps tracker for the school
-            from .models import SetupSteps
-            SetupSteps.objects.create(
-                school=school,
-                basic_info_completed=True  # Since we just created basic info
-            )
-        
         # Generate OTP verification token
         token_obj, otp = EmailVerificationToken.create_for_user(user)
         
         # Send verification email with OTP
         send_verification_email(user, otp)
-        
-        # Store school and campus info on profile for easy access
-        profile._created_school = school
-        profile._created_campus = campus
         
         return profile
 

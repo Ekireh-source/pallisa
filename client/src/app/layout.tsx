@@ -1,10 +1,6 @@
-'use client';
-
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Provider } from 'react-redux';
-import { store } from '@/store';
-import { AuthProvider } from '@/components/AuthProvider';
-import { Toaster } from 'sonner';
+import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "Pallisa High School Management System",
+  description: "Complete management solution for Pallisa High School - Teachers, Students, Parents & Academic Records",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,19 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <title>Pallisa High School Management System</title>
-        <meta name="description" content="Complete management solution for Pallisa High School - Teachers, Students, Parents & Academic Records" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Provider store={store}>
-          <AuthProvider>
-            {children}
-            <Toaster position="top-right" richColors />
-          </AuthProvider>
-        </Provider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

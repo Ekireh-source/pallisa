@@ -7,13 +7,8 @@ import { Button, Card } from '@/components/ui';
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard');
-    }
-  }, [isAuthenticated, router]);
+ 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

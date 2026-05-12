@@ -1,692 +1,324 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAppSelector } from '@/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import React from 'react';
 import { 
-  CreditCard, 
+  Users, 
+  UserCheck, 
   DollarSign, 
-  TrendingUp, 
+  CreditCard, 
+  ArrowUpRight, 
+  ArrowDownRight,
+  Plus,
   Calendar,
-  FileText,
-  AlertCircle,
-  Building2,
-  Users,
-  Tags,
-  RefreshCw,
-  BarChart3,
+  ChevronRight,
   GraduationCap,
-  BookOpen,
   Clock,
-  CheckCircle,
-  TrendingDown,
-  Activity,
-  Zap
+  Settings
 } from 'lucide-react';
 import { 
-  expenseApi, 
-  vendorApi, 
-  studentApi, 
-  teacherApi,
-  apiGet,
-  API_ENDPOINTS 
-} from '@/lib/api';
-import { isAuthenticated as checkAuthTokens } from '@/lib/api';
-
-interface DashboardStats {
-  totalExpenses: number;
-  pendingExpenses: number;
-  totalVendors: number;
-  monthlyExpenses: number;
-  totalStudents: number;
-  totalTeachers: number;
-  totalFeePayments: number;
-  totalFeeAmount: number;
-  // New fields for term-specific financial data
-  expectedFees: number;
-  collectedFees: number;
-  netIncome: number;
-  currentTermName: string;
-  currentAcademicYear: string;
-}
-
-interface Expense {
-  id: number;
-  title: string;
-  amount: number;
-  category_name?: string;
-  created_at: string;
-  status: string;
-}
-
-interface FeePayment {
-  id: number;
-  amount_paid: string;
-  created_at: string;
-}
-
-interface Term {
-  id: number;
-  name: string;
-  is_current: boolean;
-  academic_year: number;
-  academic_year_name: string;
-}
-
-interface FeeCollectionSummary {
-  id: number;
-  term: number;
-  academic_year: number;
-  total_expected_with_overrides: string;
-  total_collected: string;
-}
-
-interface RecentExpense {
-  id: number;
-  title: string;
-  amount: number;
-  category: string;
-  created_at: string;
-  status: string;
-}
+  Button, 
+  Card, 
+  Badge,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Progress
+} from '@/components/ui';
+import { useAppSelector } from '@/store';
+import Link from 'next/link';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector((state) => state.auth);
 
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentExpenses, setRecentExpenses] = useState<RecentExpense[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, router]);
-
-  const fetchDashboardData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch data in parallel
-      const [
-        expensesResponse,
-        vendorsResponse,
-        studentsResponse,
-        teachersResponse,
-        feePayments,
-        expenseSummary,
-        termsResponse,
-        feeCollectionSummariesResponse
-      ] = await Promise.all([
-        expenseApi.getAll({ page_size: 5 }), // Recent expenses
-        vendorApi.getAll(),
-        studentApi.getAll(),
-        teacherApi.getAll(),
-        apiGet<{ results: FeePayment[] }>(API_ENDPOINTS.FEES + 'payments/'),
-        expenseApi.getSummary(),
-        apiGet<{ results: Term[] }>(API_ENDPOINTS.TERMS),
-        apiGet<{ results: FeeCollectionSummary[] }>(API_ENDPOINTS.FEES + 'collection-summaries/')
-      ]);
-
-      // Extract terms from paginated response
-      const terms = termsResponse.results || [];
-      
-      // Extract fee collection summaries from paginated response
-      const feeCollectionSummaries = feeCollectionSummariesResponse.results || [];
-      
-      // Get current term
-      const currentTerm = terms.find(term => term.is_current);
-      
-      // Get current term's fee collection summary
-      const currentTermSummary = currentTerm ? feeCollectionSummaries.find(summary => 
-        Number(summary.term) === Number(currentTerm.id) && Number(summary.academic_year) === Number(currentTerm.academic_year)
-      ) : null;
-
-      // Handle paginated response for expenses
-      let expenses: Expense[] = [];
-      if (expensesResponse && typeof expensesResponse === 'object' && 'results' in expensesResponse) {
-        expenses = (expensesResponse as { results: Expense[] }).results || [];
-      } else if (Array.isArray(expensesResponse)) {
-        expenses = expensesResponse;
-      } else {
-        console.warn('Unexpected expenses response structure:', expensesResponse);
-        expenses = [];
-      }
-
-      // Handle paginated responses for vendors, students, and teachers
-      const vendors = Array.isArray(vendorsResponse) ? vendorsResponse : [];
-      const students = Array.isArray(studentsResponse) ? studentsResponse : [];
-      const teachers = Array.isArray(teachersResponse) ? teachersResponse : [];
-
-      // Calculate statistics
-      const totalExpenseAmount = expenses.reduce((sum: number, e: Expense) => sum + (e.amount || 0), 0);
-      const pendingExpenses = expenses.filter((e: Expense) => e.status === 'Pending Approval').length;
-      const totalVendors = vendors.length;
-      const totalStudents = students.length;
-      const totalTeachers = teachers.length;
-      const totalFeePayments = feePayments.results?.length || 0;
-      
-      // Calculate total amounts
-      const totalFeeAmount = (feePayments.results || []).reduce((sum: number, p: FeePayment) => sum + parseFloat(p.amount_paid || '0'), 0);
-      
-      // Get monthly expenses from summary
-      const monthlyExpenses = expenseSummary?.total_expenses || totalExpenseAmount;
-
-      // Calculate term-specific financial data
-      const expectedFees = currentTermSummary ? parseFloat(currentTermSummary.total_expected_with_overrides || '0') : 0;
-      const collectedFees = currentTermSummary ? parseFloat(currentTermSummary.total_collected || '0') : 0;
-      const netIncome = collectedFees - totalExpenseAmount;
-
-      setStats({
-        totalExpenses: totalExpenseAmount,
-        pendingExpenses,
-        totalVendors,
-        monthlyExpenses,
-        totalStudents,
-        totalTeachers,
-        totalFeePayments,
-        totalFeeAmount,
-        expectedFees,
-        collectedFees,
-        netIncome,
-        currentTermName: currentTerm?.name || 'No Current Term',
-        currentAcademicYear: currentTerm?.academic_year_name || 'N/A'
-      });
-
-      // Set recent expenses
-      const recent = expenses.slice(0, 5).map((expense: Expense) => ({
-        id: expense.id,
-        title: expense.title,
-        amount: expense.amount,
-        category: expense.category_name || 'Uncategorized',
-        created_at: expense.created_at,
-        status: expense.status
-      }));
-
-      setRecentExpenses(recent);
-
-    } catch (err) {
-      console.error('Error fetching dashboard data:', err);
-      
-      // Handle 401 errors specifically
-      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response) {
-        const status = (err.response as any).status;
-        if (status === 401) {
-          console.log('Authentication error - redirecting to login');
-          router.push('/login');
-          return;
-        }
-      }
-      
-      setError('Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
-
-  useEffect(() => {
-    // Only fetch data if both Redux state shows authenticated AND we have actual tokens
-    if (isAuthenticated && checkAuthTokens()) {
-      fetchDashboardData();
-    }
-  }, [isAuthenticated, fetchDashboardData]);
-
- 
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'UGX',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const getStatusBadge = (status: string) => {
-    if (status === 'Approved') {
-      return <Badge className="bg-green-100 text-green-800 border-0">Approved</Badge>;
-    }
-    if (status === 'Pending') {
-      return <Badge className="bg-yellow-100 text-yellow-800 border-0">Pending</Badge>;
-    }
-    return <Badge className="bg-gray-100 text-gray-800 border-0">{status}</Badge>;
-  };
-
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">
-                Welcome back, {user.first_name}!
-              </h1>
-              <p className="text-blue-100">
-                Loading your school dashboard...
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center justify-center py-16">
-          <LoadingSpinner size="lg" />
-          <span className="ml-2 text-gray-600">Loading dashboard data...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">
-                Welcome back, {user.first_name}!
-              </h1>
-              <p className="text-blue-100">
-                Here&apos;s an overview of school operations and financial activities today.
-              </p>
-            </div>
-          </div>
-        </div>
-        <Card className="bg-red-50 border border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">{error}</span>
-            </div>
-            <Button 
-              onClick={fetchDashboardData} 
-              variant="outline" 
-              size="sm" 
-              className="mt-2"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const statsCards = [
+  const stats = [
     {
-      title: "Expected Fees",
-      value: formatCurrency(stats?.expectedFees || 0),
-      change: "Current Term",
-      changeType: "neutral" as const,
+      title: "Total Students",
+      value: "1,284",
+      change: "+12.5%",
+      isPositive: true,
+      icon: Users,
+      bgColor: "bg-primary/10",
+      textColor: "text-primary",
+    },
+    {
+      title: "Total Teachers",
+      value: "86",
+      change: "+2.4%",
+      isPositive: true,
+      icon: UserCheck,
+      bgColor: "bg-emerald-500/10",
+      textColor: "text-emerald-500",
+    },
+    {
+      title: "Monthly Revenue",
+      value: "UGX 45.2M",
+      change: "-4.1%",
+      isPositive: false,
       icon: DollarSign,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
-      gradient: "from-emerald-500 to-teal-500",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-600"
+      bgColor: "bg-amber-500/10",
+      textColor: "text-amber-500",
     },
     {
-      title: "Total Expenses",
-      value: formatCurrency(stats?.totalExpenses || 0),
-      change: "Current Term",
-      changeType: "negative" as const,
-      icon: TrendingDown,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
-      gradient: "from-red-500 to-pink-500",
-      bgColor: "bg-red-50",
-      iconColor: "text-red-600"
-    },
-    {
-      title: "Collected Fees",
-      value: formatCurrency(stats?.collectedFees || 0),
-      change: "Current Term",
-      changeType: "positive" as const,
+      title: "Monthly Expenses",
+      value: "UGX 12.8M",
+      change: "+18.2%",
+      isPositive: false,
       icon: CreditCard,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
-      gradient: "from-blue-500 to-indigo-500",
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-600"
+      bgColor: "bg-rose-500/10",
+      textColor: "text-rose-500",
+    },
+  ];
+
+  const recentTransactions = [
+    {
+      id: "1",
+      student: "Akol Sharon",
+      amount: "UGX 450,000",
+      category: "Tuition Fee",
+      date: "May 06, 2026",
+      status: "completed",
     },
     {
-      title: "Net Income",
-      value: formatCurrency(stats?.netIncome || 0),
-      change: stats?.netIncome && stats.netIncome >= 0 ? "Profit" : "Loss",
-      changeType: stats?.netIncome && stats.netIncome >= 0 ? "positive" as const : "negative" as const,
-      icon: BarChart3,
-      description: `${stats?.currentTermName} (${stats?.currentAcademicYear})`,
-      gradient: stats?.netIncome && stats.netIncome >= 0 ? "from-green-500 to-emerald-500" : "from-orange-500 to-red-500",
-      bgColor: stats?.netIncome && stats.netIncome >= 0 ? "bg-green-50" : "bg-orange-50",
-      iconColor: stats?.netIncome && stats.netIncome >= 0 ? "text-green-600" : "text-orange-600"
-    }
+      id: "2",
+      student: "Okello James",
+      amount: "UGX 120,000",
+      category: "Library Fee",
+      date: "May 05, 2026",
+      status: "completed",
+    },
+    {
+      id: "3",
+      student: "Nekesa Martha",
+      amount: "UGX 75,000",
+      category: "Sports Fee",
+      date: "May 05, 2026",
+      status: "pending",
+    },
+    {
+      id: "4",
+      student: "Mugisha David",
+      amount: "UGX 320,000",
+      category: "Tuition Fee",
+      date: "May 04, 2026",
+      status: "completed",
+    },
+    {
+      id: "5",
+      student: "Namono Grace",
+      amount: "UGX 150,000",
+      category: "Lab Fee",
+      date: "May 04, 2026",
+      status: "failed",
+    },
   ];
 
   const quickActions = [
-    {
-      title: "Create Expense",
-      description: "Add a new expense record",
-      href: "/expenses/create",
-      icon: CreditCard,
-      gradient: "from-blue-500 to-indigo-500",
-      hoverGradient: "from-blue-600 to-indigo-600"
-    },
-    {
-      title: "View Reports",
-      description: "Access financial reports",
-      href: "/reports",
-      icon: FileText,
-      gradient: "from-green-500 to-emerald-500",
-      hoverGradient: "from-green-600 to-emerald-600"
-    },
-    {
-      title: "Manage Categories",
-      description: "Organize expense categories",
-      href: "/categories",
-      icon: Tags,
-      gradient: "from-purple-500 to-pink-500",
-      hoverGradient: "from-purple-600 to-pink-600"
-    },
-    {
-      title: "Department Setup",
-      description: "Configure departments",
-      href: "/departments",
-      icon: Building2,
-      gradient: "from-orange-500 to-red-500",
-      hoverGradient: "from-orange-600 to-red-600"
-    }
-  ];
-
-  const additionalStats = [
-    {
-      title: "Pending Approvals",
-      value: stats?.pendingExpenses || 0,
-      icon: Clock,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-      description: "Expenses awaiting review"
-    },
-    {
-      title: "Active Vendors",
-      value: stats?.totalVendors || 0,
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      description: "Registered vendors"
-    },
-    {
-      title: "Collection Rate",
-      value: stats?.expectedFees && stats.expectedFees > 0 
-        ? `${((stats.collectedFees / stats.expectedFees) * 100).toFixed(1)}%`
-        : '0%',
-      icon: TrendingUp,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      description: "Fees collected vs expected"
-    }
+    { title: "Register Student", icon: Plus, href: "/members/students", color: "bg-primary" },
+    { title: "Record Expense", icon: CreditCard, href: "/expenses", color: "bg-primary" },
+    { title: "Collect Payment", icon: DollarSign, href: "/fees/payments", color: "bg-primary" },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section with Gradient */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-            <GraduationCap className="w-8 h-8" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {user.first_name}!
-            </h1>
-            <p className="text-blue-100 text-lg">
-              Here&apos;s an overview of Pallisa High School operations and financial activities today.
-            </p>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, {'Admin'}!
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Here's what's happening at Pallisa High School today.
+          </p>
         </div>
-        <div className="flex items-center space-x-4 text-blue-100">
-          <div className="flex items-center space-x-2">
-            <Activity className="w-4 h-4" />
-            <span className="text-sm">Current Term: {stats?.currentTermName}</span>
-          </div>
-          <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4" />
-            <span className="text-sm">{stats?.currentAcademicYear}</span>
-          </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="h-11 rounded-xl bg-white hover:bg-gray-50 transition-colors">
+            <Calendar className="w-4 h-4 mr-2 text-primary" />
+            Term 1, 2026
+          </Button>
+          <Button className="h-11 rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-transform">
+            <Plus className="w-4 h-4 mr-2" />
+            New Enrollment
+          </Button>
         </div>
       </div>
 
-      {/* Main Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsCards.map((stat, index) => (
-          <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
-            <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-semibold text-gray-700">
-                {stat.title}
-              </CardTitle>
-              <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => (
+          <Card key={i} className="p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-white shadow-sm ring-1 ring-gray-100">
+            <div className="flex justify-between items-start">
+              <div className={`p-3 rounded-2xl ${stat.bgColor}`}>
+                <stat.icon className={`w-6 h-6 ${stat.textColor}`} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 mb-2">{stat.value}</div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <span 
-                  className={`font-medium px-2 py-1 rounded-full ${
-                    stat.changeType === 'positive' ? 'bg-green-100 text-green-700' : 
-                    stat.changeType === 'negative' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
-                  }`}
+              <Badge 
+                variant={stat.isPositive ? "secondary" : "destructive"} 
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  stat.isPositive ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : ""
+                }`}
+              >
+                {stat.isPositive ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
+                {stat.change}
+              </Badge>
+            </div>
+            <div className="mt-4">
+              <h3 className="text-gray-500 text-sm font-medium">{stat.title}</h3>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Recent Transactions */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Recent Fee Payments</h2>
+              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90 hover:bg-primary/10 font-semibold" asChild>
+                <Link href="/fees/payments">View All <ChevronRight className="w-4 h-4 ml-1" /></Link>
+              </Button>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-gray-50/50">
+                  <TableRow>
+                    <TableHead className="font-semibold text-gray-900">Student</TableHead>
+                    <TableHead className="font-semibold text-gray-900">Category</TableHead>
+                    <TableHead className="font-semibold text-gray-900">Date</TableHead>
+                    <TableHead className="font-semibold text-gray-900">Amount</TableHead>
+                    <TableHead className="font-semibold text-gray-900">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentTransactions.map((tx) => (
+                    <TableRow key={tx.id} className="hover:bg-gray-50/50 transition-colors">
+                      <TableCell className="font-medium text-gray-900">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8 ring-2 ring-white">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                              {tx.student.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          {tx.student}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600">{tx.category}</TableCell>
+                      <TableCell className="text-gray-500 text-sm">{tx.date}</TableCell>
+                      <TableCell className="font-bold text-gray-900">{tx.amount}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={tx.status === 'completed' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'}
+                          className={`rounded-full capitalize ${
+                            tx.status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
+                            tx.status === 'pending' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''
+                          }`}
+                        >
+                          {tx.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+
+          {/* Performance Summary (Placeholder) */}
+          <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Enrollment Trends</h2>
+            <div className="h-[200px] w-full flex items-end justify-between gap-2 px-2">
+              {[65, 45, 75, 55, 90, 70, 85].map((h, i) => (
+                <div key={i} className="flex-1 group relative">
+                  <div 
+                    className="w-full bg-primary/20 rounded-t-lg group-hover:bg-primary transition-all duration-300"
+                    style={{ height: `${h}%` }}
+                  />
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                    {h}%
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-2 text-center font-medium">Day {i+1}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        {/* Right Column - Sidebar Widgets */}
+        <div className="space-y-6">
+          {/* Quick Actions */}
+          <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 gap-3">
+              {quickActions.map((action, i) => (
+                <Button 
+                  key={i} 
+                  variant="outline" 
+                  className="h-14 justify-start px-4 hover:bg-gray-50 border-gray-100 rounded-2xl group transition-all"
+                  asChild
                 >
-                  {stat.change}
-                </span>
-                <span className="hidden sm:inline">{stat.description}</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Additional Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {additionalStats.map((stat, index) => (
-          <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-semibold text-gray-700">
-                {stat.title}
-              </CardTitle>
-              <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 mb-2">{stat.value}</div>
-              <p className="text-xs text-gray-500">{stat.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <Card className="border-0 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
-          <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
-            <Zap className="w-5 h-5 text-blue-600" />
-            <span>Quick Actions</span>
-          </CardTitle>
-          <CardDescription className="text-gray-600">
-            Frequently used actions for school administration and expense management
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action, index) => (
-              <Link key={index} href={action.href}>
-                <div className="group p-4 rounded-xl border border-gray-200 hover:border-transparent hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                  <div className="relative flex items-center space-x-3">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md`}>
-                      <action.icon className="h-6 w-6 text-white" />
+                  <Link href={action.href}>
+                    <div className={`p-2 rounded-xl ${action.color} text-white mr-3 transition-transform group-hover:scale-110`}>
+                      <action.icon className="w-5 h-5" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">{action.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1">{action.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Activity & System Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Expenses */}
-        <Card className="border-0 shadow-lg overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <span>Recent Expenses</span>
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Latest expense submissions
-                </CardDescription>
-              </div>
-              <Link href="/expenses">
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                  View All
+                    <span className="font-semibold text-gray-700">{action.title}</span>
+                    <ChevronRight className="w-4 h-4 ml-auto text-gray-400 group-hover:text-gray-900" />
+                  </Link>
                 </Button>
-              </Link>
+              ))}
             </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            {recentExpenses.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-10 h-10 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No recent expenses</h3>
-                <p className="text-gray-600 mb-6">No expenses have been recorded yet.</p>
-                <Link href="/expenses/create">
-                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Add Expense
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {recentExpenses.map((expense) => (
-                  <div key={expense.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 truncate">{expense.title}</h4>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded-full">{expense.category}</span>
-                        <span className="text-sm text-gray-400">•</span>
-                        <span className="text-sm text-gray-500">{formatDate(expense.created_at)}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3 ml-4">
-                      <span className="font-bold text-gray-900">{formatCurrency(expense.amount)}</span>
-                      {getStatusBadge(expense.status)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </Card>
 
-        {/* System Status */}
-        <Card className="border-0 shadow-lg overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
-            <CardTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span>System Overview</span>
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              Current system status and alerts
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
+          {/* Setup Progress */}
+          <Card className="p-6 border-none bg-primary text-white shadow-xl shadow-primary/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="font-bold">School Setup</h2>
+            </div>
+            <p className="text-white/80 text-sm mb-4">
+              Complete your school profile to unlock all features.
+            </p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-medium">
+                <span>Progress</span>
+                <span>65%</span>
+              </div>
+              <Progress value={65} className="h-2 bg-white/20" />
+            </div>
+            <Button className="w-full mt-6 bg-white text-primary hover:bg-white/90 border-none font-bold h-11 rounded-xl shadow-md hover:-translate-y-0.5 transition-all">
+              Finish Setup
+            </Button>
+          </Card>
+
+          {/* Activity Feed */}
+          <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">System Activity</h2>
             <div className="space-y-4">
-              <div className="flex items-center space-x-4 p-4 rounded-xl bg-green-50 border border-green-200">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-green-900">All Systems Operational</p>
-                  <p className="text-sm text-green-700">Everything is running smoothly</p>
-                </div>
-              </div>
-              
-              {stats?.pendingExpenses && stats.pendingExpenses > 0 && (
-                <div className="flex items-center space-x-4 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-yellow-600" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-yellow-900">{stats.pendingExpenses} Pending Approvals</p>
-                    <p className="text-sm text-yellow-700">Expenses awaiting review</p>
+              {[
+                { text: "New staff member registered", time: "2 hours ago", icon: UserCheck, color: "text-emerald-500" },
+                { text: "Monthly expense report generated", time: "5 hours ago", icon: Clock, color: "text-blue-500" },
+                { text: "Fee category 'Lab Fees' updated", time: "Yesterday", icon: Settings, color: "text-amber-500" },
+              ].map((activity, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className={`mt-1 h-2 w-2 rounded-full ${activity.color.replace('text-', 'bg-')}`} />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{activity.text}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{activity.time}</p>
                   </div>
                 </div>
-              )}
-
-              <div className="flex items-center space-x-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-blue-900">Monthly Report Due</p>
-                  <p className="text-sm text-blue-700">Financial report due in 3 days</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4 p-4 rounded-xl bg-purple-50 border border-purple-200">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-purple-900">Academic Progress</p>
-                  <p className="text-sm text-purple-700">Term progress tracking active</p>
-                </div>
-              </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
-} 
+}

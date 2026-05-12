@@ -156,6 +156,7 @@ class ClassListCreateView(APIView):
     @extend_schema(
         summary="List all class levels",
         parameters=[
+            OpenApiParameter(name='campus_id', type=int, description='Filter by campus ID'),
             OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
             OpenApiParameter(name='search', type=str, description='Search in name and description'),
             OpenApiParameter(name='page', type=int, description='Page number'),
@@ -167,15 +168,18 @@ class ClassListCreateView(APIView):
     def get(self, request):
         """Get list of class levels with filtering and pagination"""
         # Get query parameters
+        campus_id = request.query_params.get('campus_id')
         search = request.query_params.get('search')
         is_active = request.query_params.get('is_active')
         page = int(request.query_params.get('page', 1))
         page_size = int(request.query_params.get('page_size', 20))
 
         # Build queryset with optimizations
-        queryset = Class.objects.order_by('name')
+        queryset = Class.objects.select_related('campus').order_by('name')
         
         # Apply filters
+        if campus_id:
+            queryset = queryset.filter(campus_id=campus_id)
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search) | Q(description__icontains=search)
@@ -567,7 +571,7 @@ class StudentListCreateView(APIView):
     @extend_schema(
         summary="List all students",
         parameters=[
-            OpenApiParameter(name='school_id', type=int, description='Filter by school ID'),
+            OpenApiParameter(name='campus_id', type=int, description='Filter by campus ID'),
             OpenApiParameter(name='stream_id', type=int, description='Filter by stream ID'),
             OpenApiParameter(name='class_id', type=int, description='Filter by class ID'),
             OpenApiParameter(name='enrollment_status', type=str, description='Filter by enrollment status'),
@@ -581,7 +585,7 @@ class StudentListCreateView(APIView):
     def get(self, request):
         """Get list of students with filtering and pagination"""
         # Get query parameters
-        school_id = request.query_params.get('school_id')  # Note: school filtering no longer available
+        campus_id = request.query_params.get('campus_id')
         stream_id = request.query_params.get('stream_id')
         class_id = request.query_params.get('class_id')
         enrollment_status = request.query_params.get('enrollment_status')
@@ -592,13 +596,14 @@ class StudentListCreateView(APIView):
 
         # Build queryset with optimizations
         queryset = Student.objects.select_related(
-            'user_profile__user', 'current_stream__class_obj'
+            'user_profile__user', 'current_stream__class_obj', 'campus'
         ).prefetch_related('parent_student_relationships__parent__user_profile').order_by('student_id')
         
         # Apply filters
-        # Note: School filtering removed as Class no longer has school field
         if not include_inactive:
             queryset = queryset.filter(is_active=True)
+        if campus_id:
+            queryset = queryset.filter(campus_id=campus_id)
         if stream_id:
             queryset = queryset.filter(current_stream_id=stream_id)
         if class_id:

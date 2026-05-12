@@ -18,3 +18,15 @@ export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 export { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './sheet';
 export { ConfirmationModal } from './confirmation-modal';
 export { Progress } from './progress'; 
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from './table';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from './dialog';

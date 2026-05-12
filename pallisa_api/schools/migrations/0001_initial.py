@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("accounts", "0003_remove_campus_school_remove_school_owner"),
+        ("accounts", "0002_setupsteps_school_campus_role_school_and_more"),
     ]
 
     operations = [

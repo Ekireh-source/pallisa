@@ -6,7 +6,8 @@ from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
-from accounts.models import CustomUser, UserProfile, School, Campus, Role
+from accounts.models import CustomUser, UserProfile, Role
+from schools.models import School, Campus
 from expenses.models import AcademicYear, Term
 from django.core.exceptions import ValidationError
 
@@ -65,6 +66,7 @@ School Administration
 class Class(models.Model):
     """Model to represent class levels (formerly Grade)"""
     name = models.CharField(max_length=50)  # e.g., "Grade 1", "Primary 1", "S1"
+    campus = models.ForeignKey(Campus, on_delete=models.CASCADE, related_name='classes')
     description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -113,6 +115,7 @@ class Student(models.Model):
     """Model to represent student-specific information"""
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='student_profile')
     student_id = models.CharField(max_length=20, unique=True, db_index=True)
+    campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
     admission_number = models.CharField(max_length=50, blank=True, null=True)
     admission_date = models.DateField(default=get_current_date)
     current_stream = models.ForeignKey(Stream, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')

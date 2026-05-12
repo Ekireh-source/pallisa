@@ -102,7 +102,7 @@ export default function ModernPallisaLanding() {
             {/* Right: Login and Get Started Button */}
             <div className="flex justify-end items-center space-x-4">
               <Link href="/login" className="text-gray-600 hover:text-blue-400 transition-colors">Login</Link>
-              <Link href="/register" className="px-6 py-3 bg-blue-400 text-white rounded-full hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <Link href="/register" className="px-6 py-3 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                 Get Started
               </Link>
             </div>
@@ -130,7 +130,7 @@ export default function ModernPallisaLanding() {
               <Link href="#about" className="block text-gray-600 hover:text-blue-400 transition-colors">About</Link>
               <Link href="#contact" className="block text-gray-600 hover:text-blue-400 transition-colors">Contact</Link>
               <Link href="/login" className="block w-full text-left text-gray-600 hover:text-blue-400 transition-colors">Login</Link>
-              <Link href="/register" className="w-full px-6 py-3 bg-blue-400 text-white rounded-full text-center">
+              <Link href="/register" className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-full text-center">
                 Get Started
               </Link>
             </div>
@@ -159,7 +159,7 @@ export default function ModernPallisaLanding() {
           </p>
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Link href="/dashboard" className="group px-8 py-4 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center">
+            <Link href="/dashboard" className="group px-8 py-4 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center">
               Access School Portal
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -327,7 +327,7 @@ export default function ModernPallisaLanding() {
                   </div>
                 ))}
               </div>
-              <Link href="/auth/register" className="px-8 py-4 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center">
+              <Link href="/auth/register" className="px-8 py-4 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center">
                 Start Your Journey
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
@@ -349,7 +349,7 @@ export default function ModernPallisaLanding() {
                 education management with cutting-edge technology and unparalleled support.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/dashboard" className="px-10 py-4 bg-blue-400 text-white rounded-full font-bold text-lg hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl">
+                <Link href="/dashboard" className="px-10 py-4 bg-primary text-primary-foreground rounded-full font-bold text-lg hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl">
                   Access School Portal
                   <ArrowRight className="ml-2 w-5 h-5 inline" />
                 </Link>

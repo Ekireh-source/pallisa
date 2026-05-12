@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from accounts.models import UserProfile, School, Campus, Role
+from accounts.models import UserProfile, Role
+from schools.models import School, Campus
 from expenses.models import AcademicYear
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
@@ -52,19 +53,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class SchoolSerializer(serializers.ModelSerializer):
-    """Basic school serializer"""
+    """Basic school serializer using schools.models.School"""
     class Meta:
         model = School
-        fields = ['id', 'name', 'address', 'phone', 'email']
+        fields = ['id', 'name', 'address', 'phone_number', 'email'] # Corrected phone to phone_number
 
 
 class CampusSerializer(serializers.ModelSerializer):
-    """Basic campus serializer"""
+    """Basic campus serializer using schools.models.Campus"""
     school_name = serializers.CharField(source='school.name', read_only=True)
     
     class Meta:
         model = Campus
-        fields = ['id', 'name', 'school', 'school_name', 'address', 'phone']
+        fields = ['id', 'name', 'school', 'school_name', 'address', 'phone_number'] # Corrected phone to phone_number
 
 
 class AcademicYearSerializer(serializers.ModelSerializer):
@@ -77,14 +78,15 @@ class AcademicYearSerializer(serializers.ModelSerializer):
 class ClassSerializer(serializers.ModelSerializer):
     """Serializer for Class (grade levels)"""
     stream_count = serializers.SerializerMethodField()
+    campus_name = serializers.CharField(source='campus.name', read_only=True)
     
     class Meta:
         model = Class
         fields = [
-            'id', 'name', 'description',
+            'id', 'name', 'campus', 'campus_name', 'description',
             'is_active', 'stream_count', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'stream_count']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'stream_count', 'campus_name']
     
     def get_stream_count(self, obj):
         return obj.streams.filter(is_active=True).count()
@@ -110,6 +112,7 @@ class StudentSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user_profile.user.email', read_only=True)
     current_stream_name = serializers.CharField(source='current_stream.name', read_only=True)
     current_class_name = serializers.CharField(source='current_stream.class_obj.name', read_only=True)
+    campus_name = serializers.CharField(source='campus.name', read_only=True)
     age = serializers.SerializerMethodField()
     
     # User creation fields (required when user_profile not provided)
@@ -142,7 +145,7 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [
-            'id', 'user_profile', 'user_profile_data', 'student_id', 'admission_number', 'admission_date',
+            'id', 'user_profile', 'user_profile_data', 'student_id', 'campus', 'campus_name', 'admission_number', 'admission_date',
             'current_stream', 'current_stream_name', 'current_class_name', 'previous_school',
             'special_needs', 'medical_conditions', 'allergies', 'enrollment_status',
             'is_active', 'full_name', 'email', 'age', 'created_at', 'updated_at',
@@ -153,7 +156,7 @@ class StudentSerializer(serializers.ModelSerializer):
             'user_phone', 'user_emergency_contact', 'user_emergency_phone', 
             'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id'
         ]
-        read_only_fields = ['id', 'admission_number', 'created_at', 'updated_at', 'full_name', 'email', 'age']
+        read_only_fields = ['id', 'admission_number', 'created_at', 'updated_at', 'full_name', 'email', 'age', 'campus_name']
         extra_kwargs = {
             'user_profile': {'required': False, 'allow_null': True}
         }

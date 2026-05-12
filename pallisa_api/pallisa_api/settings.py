@@ -77,6 +77,9 @@ INSTALLED_APPS = [
     "expenses",
     "members",
     "fees",
+    "schools",
+    "exams",
+    "reports",
 ]
 
 MIDDLEWARE = [

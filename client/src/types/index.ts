@@ -64,6 +64,7 @@ export interface LoginResponse {
   access: string;
   refresh: string;
   user_profile: User;
+  school?: School;
   message?: string;
 }
 
@@ -79,8 +80,10 @@ export interface EmailVerificationResponse {
   access: string;
   refresh: string;
   user_profile: User;
+  school?: School;
   message: string;
 }
+
 
 export interface ResendVerificationResponse {
   message: string;
@@ -94,10 +97,11 @@ export interface School {
   phone?: string;
   email?: string;
   website?: string;
-  owner?: User;
+  owner?: number;
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  campus?: number;
 }
 
 export interface Campus {
@@ -396,6 +400,26 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
+export interface GradeBoundary {
+  id: number;
+  grading_system: number;
+  grade: string;
+  min_score: number;
+  max_score: number;
+  remarks?: string;
+  points?: number;
+}
+
+export interface GradingSystem {
+  id: number;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  boundaries: GradeBoundary[];
+  created_at: string;
+  updated_at: string;
+}
+
 // Form Types
 export interface FormField {
   name: string;
@@ -477,6 +501,23 @@ export interface ClassDetail {
   updated_at: string;
   stream_count: number;
   streams: MemberStream[];
+}
+
+export interface SubjectReport {
+  id: number;
+  subject: number;
+  subject_name: string;
+  subject_code: string;
+  teacher: number;
+  teacher_name: string;
+  aoi_raw_score: number; // Raw sum
+  aoi_score: number; // 20% contribution
+  exam_raw_score: number; // Raw out of 100
+  exam_score: number; // 80% contribution
+  total_score: number; // 100% total
+  grade?: string;
+  remarks?: string;
+  competency_scores: SubjectCompetencyScore[];
 }
 
 export interface MemberSubject {
@@ -928,7 +969,7 @@ export interface NonStaffMemberState {
   error: string | null;
   fieldErrors: FormErrors;
   totalCount: number;
-} 
+}
 
 // ==================== ROLE & PERMISSION MANAGEMENT TYPES ====================
 
@@ -991,7 +1032,7 @@ export interface RoleFilters {
   is_superadmin?: boolean;
   page?: number;
   page_size?: number;
-} 
+}
 
 // ==================== SALARY MANAGEMENT TYPES ====================
 
@@ -1219,3 +1260,70 @@ export interface StaffSalaryState {
   loading: boolean;
   error: string | null;
 } 
+
+// ==================== REPORT CARD TYPES ====================
+
+export interface SubjectCompetencyScore {
+  id: number;
+  assessment_type: 'aoi' | 'exam';
+  competency_name: string;
+  score: number;
+  max_score: number;
+}
+
+export interface SubjectReport {
+  id: number;
+  subject: number;
+  subject_name: string;
+  subject_code: string;
+  teacher: number;
+  teacher_name: string;
+  aoi_raw_score: number;   // Sum of raw AOI scores
+  aoi_score: number;       // 20% contribution (out of 20)
+  exam_raw_score: number;  // Raw exam score (out of 100)
+  exam_score: number;      // 80% contribution (out of 80)
+  total_score: number;     // Final total (out of 100)
+  grade?: string;
+  remarks?: string;
+  competency_scores: SubjectCompetencyScore[];
+}
+
+export interface ReportCard {
+  id: number;
+  public_id: string;
+  student: number;
+  student_name: string;
+  student_id_code: string;
+  academic_year: number;
+  academic_year_name: string;
+  term: number;
+  term_name: string;
+  class_obj: number;
+  class_name: string;
+  stream: number;
+  stream_name: string;
+  total_score: number;
+  average_score: number;
+  overall_grade?: string;
+  position?: number;
+  out_of?: number;
+  class_teacher?: number;
+  class_teacher_name?: string;
+  class_teacher_remarks?: string;
+  head_teacher_remarks?: string;
+  attendance_days_present: number;
+  attendance_total_days: number;
+  is_published: boolean;
+  subject_reports: SubjectReport[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GenerateReportData {
+  academic_year: number;
+  term: number;
+  class_obj?: number;
+  stream?: number;
+  student?: number;
+  school?: number;
+}

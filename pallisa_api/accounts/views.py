@@ -88,8 +88,6 @@ class LoginView(APIView):
             email = serializer.validated_data.get('email')
             student_id = serializer.validated_data.get('student_id')
             password = serializer.validated_data['password']
-
-            print(request.data)
             
             # Determine username for authentication
             username = email if email else student_id

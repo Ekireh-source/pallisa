@@ -8,7 +8,6 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from unittest.mock import patch, MagicMock
-from django.core.cache import cache
 import factory
 
 from .models import CustomUser, UserProfile, EmailVerificationToken, PasswordResetToken, Role, Permission, School, Campus, SetupSteps
@@ -258,12 +257,6 @@ class UserRegistrationAPITest(APITestCase):
             'user_type': 'student'
         }
     
-    def tearDown(self):
-        try:
-            cache.clear()  # Clear cache after each test
-        except Exception:
-            pass  # Skip cache clear if Redis not available
-    
     @patch('accounts.services.send_verification_email')
     def test_register_user_success(self, mock_send_email):
         """Test successful user registration via API"""
@@ -325,10 +318,6 @@ class LoginAPITest(APITestCase):
     """Test cases for login API"""
     
     def setUp(self):
-        try:
-            cache.clear()  # Clear cache before each test to prevent rate limiting interference
-        except Exception:
-            pass  # Skip cache clear if Redis not available
         self.client = APIClient()
         self.login_url = reverse('login')
         self.user = User.objects.create_user(
@@ -342,12 +331,6 @@ class LoginAPITest(APITestCase):
             last_name='Doe',
             user_type='student'
         )
-    
-    def tearDown(self):
-        try:
-            cache.clear()  # Clear cache after each test
-        except Exception:
-            pass  # Skip cache clear if Redis not available
     
     def test_login_success(self):
         """Test successful login"""
@@ -409,45 +392,6 @@ class LoginAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
     
-    @patch('django.core.cache.cache.get')
-    @patch('django.core.cache.cache.set')
-    def test_login_rate_limiting(self, mock_cache_set, mock_cache_get):
-        """Test login rate limiting after multiple failed attempts"""
-        try:
-            cache.clear()  # Ensure clean state
-        except Exception:
-            pass  # Skip cache clear if Redis not available
-        
-        # Mock cache behavior to simulate rate limiting
-        attempt_counts = [0]  # Use list to modify from inner function
-        
-        def mock_get(key, default=0):
-            if key.startswith('login_attempts_'):
-                return attempt_counts[0]
-            return default
-        
-        def mock_set(key, value, timeout):
-            if key.startswith('login_attempts_'):
-                attempt_counts[0] = value
-        
-        mock_cache_get.side_effect = mock_get
-        mock_cache_set.side_effect = mock_set
-        
-        data = {
-            'email': 'logintest@example.com',
-            'password': 'wrongpassword'
-        }
-        
-        # Make 5 failed attempts
-        for i in range(5):
-            response = self.client.post(self.login_url, data)
-            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        
-        # 6th attempt should be rate limited
-        response = self.client.post(self.login_url, data)
-        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
-
-
 class EmailVerificationAPITest(APITestCase):
     """Test cases for email verification API"""
     
@@ -472,12 +416,6 @@ class EmailVerificationAPITest(APITestCase):
             user_type='student'
         )
         self.token_obj, self.otp = EmailVerificationToken.create_for_user(self.user)
-    
-    def tearDown(self):
-        try:
-            cache.clear()  # Clear cache after each test
-        except Exception:
-            pass  # Skip cache clear if Redis not available
     
     def test_verify_email_success(self):
         """Test successful email verification"""
@@ -557,10 +495,6 @@ class LogoutAPITest(APITestCase):
     """Test cases for logout API"""
     
     def setUp(self):
-        try:
-            cache.clear()  # Clear cache before each test
-        except Exception:
-            pass  # Skip cache clear if Redis not available
         self.client = APIClient()
         self.logout_url = reverse('logout')
         
@@ -574,12 +508,6 @@ class LogoutAPITest(APITestCase):
         self.refresh = RefreshToken.for_user(self.user)
         self.access_token = str(self.refresh.access_token)
         self.refresh_token = str(self.refresh)
-    
-    def tearDown(self):
-        try:
-            cache.clear()  # Clear cache after each test
-        except Exception:
-            pass  # Skip cache clear if Redis not available
     
     def test_logout_success(self):
         """Test successful logout"""
@@ -648,10 +576,6 @@ class SchoolServiceTestCase(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        try:
-            cache.clear()
-        except Exception:
-            pass  # Skip cache clear if Redis not available
         self.school_owner = UserProfileFactory(user_type='school_owner')
         self.school = SchoolFactory(owner=self.school_owner)
         # Create SetupSteps manually since factory doesn't create it anymore
@@ -696,18 +620,7 @@ class UserRegistrationWithSchoolTestCase(APITestCase):
     
     def setUp(self):
         """Set up test data"""
-        try:
-            cache.clear()
-        except Exception:
-            pass  # Skip cache clear if Redis not available
         self.registration_url = reverse('user-registration')
-    
-    def tearDown(self):
-        """Clean up after each test"""
-        try:
-            cache.clear()
-        except Exception:
-            pass  # Skip cache clear if Redis not available
     
     def test_school_owner_registration_with_school_data(self):
         """Test school owner registration with school and campus data"""

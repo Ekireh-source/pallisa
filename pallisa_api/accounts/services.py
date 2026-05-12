@@ -5,7 +5,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
 from typing import Tuple, Optional, Dict, Any
 
-from .models import CustomUser, UserProfile, EmailVerificationToken, PasswordResetToken, School, Campus, SetupSteps
+from .models import CustomUser, UserProfile, EmailVerificationToken, PasswordResetToken
+from schools.models import School, Campus, SetupSteps
 from .utils import send_verification_email
 
 
@@ -13,7 +14,7 @@ class AuthenticationService:
     """Service class for handling authentication operations"""
     
     @staticmethod
-    def register_user(email: str, password: str, profile_data: Dict[str, Any], school_data: Optional[Dict[str, Any]] = None) -> Tuple[UserProfile, str, Optional[School], Optional[Campus]]:
+    def register_user(email: str, password: str, profile_data: Dict[str, Any]) -> Tuple[UserProfile, str]:
         """
         Register a new user with profile data and optionally create school and campus
         
@@ -24,7 +25,7 @@ class AuthenticationService:
             school_data: Optional school and campus creation data
             
         Returns:
-            Tuple of (UserProfile instance, OTP code, School instance or None, Campus instance or None)
+            Tuple of (UserProfile instance, OTP code)
             
         Raises:
             serializers.ValidationError: If email already exists or other validation errors
@@ -46,12 +47,6 @@ class AuthenticationService:
             profile_data['user_type'] = 'school_owner'  # Hard-code user_type
             profile = UserProfile.objects.create(user=user, **profile_data)
             
-            # Create school and campus if school_data is provided
-            school = None
-            campus = None
-            if school_data:
-                school, campus = AuthenticationService._create_school_and_campus(profile, school_data)
-            
             # Generate OTP verification token
             token_obj, otp = EmailVerificationToken.create_for_user(user)
             
@@ -62,7 +57,7 @@ class AuthenticationService:
                 # Log the error but don't fail the registration
                 print(f"Failed to send verification email: {str(e)}")
             
-            return profile, otp, school, campus
+            return profile, otp
     
     @staticmethod
     def _create_school_and_campus(owner_profile: UserProfile, school_data: Dict[str, Any]) -> Tuple[School, Campus]:
@@ -224,26 +219,25 @@ class AuthenticationService:
             
             # Add school information if user is school owner
             if profile.user_type == 'school_owner':
-                owned_schools = profile.owned_schools.filter(is_active=True)
+                owned_schools = School.objects.filter(owner=user, active=True)
                 if owned_schools.exists():
                     school = owned_schools.first()
                     data['school'] = {
                         'id': school.id,
                         'name': school.name,
                         'address': school.address,
-                        'phone': school.phone,
+                        'phone': school.phone_number, # Corrected from phone to phone_number
                         'email': school.email,
-                        'website': school.website,
                     }
                     
                     # Add campus information
-                    campuses = school.campuses.filter(is_active=True)
+                    campuses = school.campuses.filter(active=True) # Corrected from is_active to active
                     data['campuses'] = [
                         {
                             'id': campus.id,
                             'name': campus.name,
                             'address': campus.address,
-                            'phone': campus.phone,
+                            'phone': campus.phone_number, # Corrected from phone to phone_number
                         }
                         for campus in campuses
                     ]
@@ -364,17 +358,17 @@ class SchoolService:
     """Service class for school management operations"""
     
     @staticmethod
-    def get_schools_for_owner(owner_profile: UserProfile):
+    def get_schools_for_owner(user: CustomUser):
         """
-        Get all schools owned by a user profile
+        Get all schools owned by a user
         
         Args:
-            owner_profile: UserProfile instance
+            user: CustomUser instance
             
         Returns:
             QuerySet of School instances
         """
-        return School.objects.filter(owner=owner_profile, is_active=True).select_related('owner')
+        return School.objects.filter(owner=user, active=True).select_related('owner')
     
     @staticmethod
     def get_school_with_campuses(school_id: int, owner_profile: UserProfile) -> Optional[School]:

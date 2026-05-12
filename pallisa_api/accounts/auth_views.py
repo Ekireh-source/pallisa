@@ -6,13 +6,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenRefreshView as JWTTokenRefreshView
 from drf_spectacular.utils import extend_schema
-from django.core.cache import cache
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 import logging
 
 from .models import CustomUser, UserProfile, EmailVerificationToken
+from schools.models import School
 from .serializers import (
     UserRegistrationSerializer,
     LoginSerializer,
@@ -45,8 +44,6 @@ class UserRegistrationView(APIView):
                 "properties": {
                     "message": {"type": "string"},
                     "user": UserProfileSerializer,
-                    "school": SchoolSerializer,
-                    "campus": CampusSerializer,
                     "requires_verification": {"type": "boolean"}
                 }
             },
@@ -62,12 +59,11 @@ class UserRegistrationView(APIView):
             # Extract user and profile data
             email = serializer.validated_data.pop('email')
             password = serializer.validated_data.pop('password')
-            school_data = serializer.validated_data.pop('school_data', None)
             profile_data = serializer.validated_data
             
             # Register user through service
-            profile, otp, school, campus = AuthenticationService.register_user(
-                email, password, profile_data, school_data
+            profile, otp = AuthenticationService.register_user(
+                email, password, profile_data
             )
             
             logger.info(f"User registered successfully: {email}")
@@ -78,12 +74,6 @@ class UserRegistrationView(APIView):
                 "user": UserProfileSerializer(profile, context={'request': request}).data,
                 "requires_verification": True
             }
-            
-            # Add school and campus information if created
-            if school:
-                response_data["school"] = SchoolSerializer(school, context={'request': request}).data
-            if campus:
-                response_data["campus"] = CampusSerializer(campus, context={'request': request}).data
             
             return Response(response_data, status=status.HTTP_201_CREATED)
             
@@ -100,27 +90,6 @@ class LoginView(APIView):
     Authenticate a user and return JWT tokens
     """
     permission_classes = [permissions.AllowAny]
-    
-    def get_cache_key(self, identifier):
-        """Generate cache key for rate limiting"""
-        return f"login_attempts_{identifier}"
-    
-    def is_rate_limited(self, identifier):
-        """Check if user is rate limited"""
-        cache_key = self.get_cache_key(identifier)
-        attempts = cache.get(cache_key, 0)
-        return attempts >= 5  # Max 5 attempts per hour
-    
-    def increment_attempts(self, identifier):
-        """Increment login attempts counter"""
-        cache_key = self.get_cache_key(identifier)
-        attempts = cache.get(cache_key, 0)
-        cache.set(cache_key, attempts + 1, 3600)  # 1 hour timeout
-    
-    def clear_attempts(self, identifier):
-        """Clear login attempts counter"""
-        cache_key = self.get_cache_key(identifier)
-        cache.delete(cache_key)
     
     @extend_schema(
         summary="Login and get JWT tokens",
@@ -144,24 +113,15 @@ class LoginView(APIView):
         
         identifier = email or student_id
         
-        # Check rate limiting
-        if self.is_rate_limited(identifier):
-            logger.warning(f"Rate limited login attempt for: {identifier}")
-            return Response(
-                {"error": "Too many login attempts. Please try again later."},
-                status=status.HTTP_429_TOO_MANY_REQUESTS
-            )
-        
         try:
             # Authenticate user through service
             user = AuthenticationService.authenticate_user(email=email, student_id=student_id, password=password)
             
             if not user:
-                self.increment_attempts(identifier)
                 logger.warning(f"Failed login attempt for: {identifier}")
                 return Response(
                     {"error": "Invalid credentials"}, 
-                    status=status.HTTP_401_UNAUTHORIZED
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             
             # Check if email is verified
@@ -173,9 +133,6 @@ class LoginView(APIView):
                     "email": user.email
                 }, status=status.HTTP_401_UNAUTHORIZED)
             
-            # Clear rate limiting on successful auth
-            self.clear_attempts(identifier)
-            
             # Generate tokens
             tokens = AuthenticationService.generate_tokens(user)
             
@@ -184,10 +141,15 @@ class LoginView(APIView):
             
             logger.info(f"Successful login for: {user.email}")
             
+            # Get school information from the schools app
+            school = School.objects.filter(owner=user).first()
+            school_data = SchoolSerializer(school, context={'request': request}).data if school else None
+            
             return Response({
                 **tokens,
                 'user_profile': UserProfileSerializer(user.profile, context={'request': request}).data,
-                'user_info': profile_data
+                'user_info': profile_data,
+                'school': school_data
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -327,20 +289,9 @@ class ResendVerificationEmailView(APIView):
         
         email = serializer.validated_data['email']
         
-        # Rate limiting for resend requests
-        cache_key = f"resend_otp_{email}"
-        if cache.get(cache_key):
-            return Response(
-                {"error": "Please wait before requesting another OTP."}, 
-                status=status.HTTP_429_TOO_MANY_REQUESTS
-            )
-        
         try:
             # Resend OTP through service
             otp = AuthenticationService.resend_verification_otp(email)
-            
-            # Set rate limiting (1 minute)
-            cache.set(cache_key, True, 60)
             
             logger.info(f"Verification OTP resent to: {email}")
             

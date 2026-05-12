@@ -175,7 +175,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+          className="fixed inset-0 z-40 bg-white bg-opacity-75 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}

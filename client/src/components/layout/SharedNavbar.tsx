@@ -13,8 +13,8 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState, AppDispatch } from "@/store";
-import { logoutUser } from "@/store/slices/authSlice";
 import { useSidebar } from "@/components/ui/sidebar";
+import { logoutStart } from "@/store/auth/actions";
 
 interface SharedNavbarProps {
   userName?: string;
@@ -24,15 +24,17 @@ interface SharedNavbarProps {
 export function SharedNavbar({ userName = "Admin User", userEmail = "admin@school.edu" }: SharedNavbarProps) {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user: userState } = useSelector((state: RootState) => state.auth);
+  const user = userState.value;
   const { toggleSidebar, isMobile } = useSidebar();
   
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(logoutStart());
     router.push('/login');
   };
 
   const getInitials = (name: string) => {
+    if (!name || name === "Admin User") return "AU";
     return name
       .split(' ')
       .map(word => word.charAt(0))
@@ -41,11 +43,11 @@ export function SharedNavbar({ userName = "Admin User", userEmail = "admin@schoo
       .slice(0, 2);
   };
 
-  const displayName = user?.first_name + " " + user?.last_name || userName;
+  const displayName = user ? `${user.first_name} ${user.last_name}` : userName;
   const displayEmail = user?.email || userEmail;
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-200 bg-white px-4 shadow-sm">
+    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-100 bg-white px-4">
       <div className="flex items-center gap-2">
         {/* Mobile menu button */}
         {isMobile && (
