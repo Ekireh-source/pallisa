@@ -46,11 +46,27 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { selectSchool } from '@/store/auth/selectors';
+import * as XLSX from 'xlsx';
+import { BulkUploadStudents, FetchStreams } from '@/features/members/members.service';
+import { FetchCampuses } from '@/features/school/school.service';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui';
+import { Download, Upload, FileSpreadsheet, AlertCircle } from 'lucide-react';
 
 export default function StudentsListPage() {
   const [students, setStudents] = useState<IStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [campuses, setCampuses] = useState<any[]>([]);
+  const [streams, setStreams] = useState<any[]>([]);
   const router = useRouter();
 
   // Get school from selector
@@ -73,9 +89,100 @@ export default function StudentsListPage() {
     setLoading(false);
   };
 
+  const loadReferenceData = async () => {
+    const [campusesRes, streamsRes] = await Promise.all([
+      FetchCampuses(),
+      FetchStreams()
+    ]);
+    if (campusesRes.success) setCampuses(campusesRes.data.results || campusesRes.data);
+    if (streamsRes.success) setStreams(streamsRes.data.results || streamsRes.data);
+  };
+
   useEffect(() => {
     loadStudents();
+    loadReferenceData();
   }, [searchTerm, school?.campus]);
+
+  const downloadTemplate = () => {
+    const template = [
+      {
+        user_email: 'student@example.com',
+        user_first_name: 'John',
+        user_last_name: 'Doe',
+        user_gender: 'M',
+        campus: school?.campus || 1,
+        current_stream: 1,
+        student_id: '',
+        admission_number: 'ADM001',
+        enrollment_status: 'enrolled'
+      }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(template);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Students Template");
+    
+    // Add info about IDs
+    const info = [
+      ["Note: campus and current_stream must be valid IDs from the lists below."],
+      ["Genders: M (Male), F (Female), O (Other)"],
+      ["Status: enrolled, graduated, suspended, transferred, withdrawn"],
+      [""],
+      ["AVAILABLE CAMPUSES:"],
+      ["ID", "Name"],
+      ...campuses.map(c => [c.id, c.name]),
+      [""],
+      ["AVAILABLE STREAMS:"],
+      ["ID", "Name", "Class"],
+      ...streams.map(s => [s.id, s.name, s.class_name])
+    ];
+    const wsInfo = XLSX.utils.aoa_to_sheet(info);
+    XLSX.utils.book_append_sheet(wb, wsInfo, "Reference Data");
+
+    XLSX.writeFile(wb, "students_bulk_upload_template.xlsx");
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        setIsUploading(true);
+        const data = event.target?.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+        if (jsonData.length === 0) {
+          toast.error("The file is empty");
+          setIsUploading(false);
+          return;
+        }
+
+        const result = await BulkUploadStudents({ students: jsonData });
+        if (result.success) {
+          toast.success(`Successfully uploaded ${result.data.created_count} students`);
+          setIsUploadModalOpen(false);
+          loadStudents();
+        } else {
+          const errorMessage = result.error?.response?.data?.error || "Failed to upload students";
+          toast.error(errorMessage);
+          console.error("Bulk upload error:", result.error);
+        }
+      } catch (error) {
+        toast.error("Error parsing Excel file");
+        console.error(error);
+      } finally {
+        setIsUploading(false);
+        // Reset file input
+        e.target.value = '';
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
 
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this student?")) {
@@ -108,8 +215,12 @@ export default function StudentsListPage() {
           <p className="text-gray-500 mt-1">Manage student enrollment and profiles.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="rounded-xl h-11 border-gray-200" onClick={() => toast.info("Bulk upload coming soon")}>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button 
+            variant="outline" 
+            className="rounded-xl h-11 border-gray-200" 
+            onClick={() => setIsUploadModalOpen(true)}
+          >
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
             Bulk Upload
           </Button>
           <Button className="shadow-lg shadow-primary/20 rounded-xl h-11 bg-primary hover:bg-primary/90" asChild>
@@ -269,6 +380,83 @@ export default function StudentsListPage() {
           </Table>
         </div>
       </Card>
+
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+          <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white">
+            <DialogHeader>
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                <Upload className="w-6 h-6 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-white">Bulk Student Upload</DialogTitle>
+              <DialogDescription className="text-indigo-100 mt-2">
+                Upload multiple students at once using an Excel template.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="p-8 space-y-6">
+            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3 text-amber-800 text-sm">
+              <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <p>
+                Ensure your Excel file follows the template structure. Campus and Stream must use their numeric IDs.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-16 rounded-2xl border-dashed border-2 hover:bg-indigo-50 hover:border-indigo-200 flex flex-col items-center justify-center gap-1 group transition-all"
+                onClick={downloadTemplate}
+              >
+                <div className="flex items-center text-indigo-600 font-semibold">
+                  <Download className="w-4 h-4 mr-2 group-hover:bounce" />
+                  Download Template
+                </div>
+                <span className="text-[10px] text-gray-500 font-normal">Excel file with sample data and reference IDs</span>
+              </Button>
+
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  disabled={isUploading}
+                />
+                <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-indigo-200 bg-indigo-50/30 group-hover:bg-indigo-50 group-hover:border-indigo-300'}`}>
+                  {isUploading ? (
+                    <>
+                      <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm font-medium text-indigo-600">Processing File...</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-indigo-900">Click to upload Excel file</p>
+                        <p className="text-xs text-gray-500">Max size 5MB (.xlsx, .xls)</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="p-6 bg-gray-50/50 border-t border-gray-100 flex sm:justify-center">
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsUploadModalOpen(false)}
+              className="rounded-xl hover:bg-white"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

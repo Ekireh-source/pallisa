@@ -210,7 +210,7 @@ class Student(models.Model):
                 # Auto-generate student_id
                 school = self.user_profile.role.school if self.user_profile and self.user_profile.role else None
                 if not school and self.campus:
-                    school = self.campus.school
+                    school = self.campus.schools.first()
                 
                 if school:
                     self.student_id = generate_student_id(school)

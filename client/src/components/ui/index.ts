@@ -29,4 +29,4 @@ export {
   TableCaption,
 } from './table';
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
-export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from './dialog';
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from './dialog';

@@ -98,12 +98,18 @@ export default function CreateExamPage() {
             className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
             onClick={() => router.back()}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">New Examination</h1>
-            <p className="text-gray-500 mt-1">Schedule a new assessment period for the school.</p>
+            <h1 className="text-3xl font-bold text-gray-900">Schedule Exam</h1>
+            <p className="text-gray-500 mt-1">Create a new assessment period for your school.</p>
           </div>
+        </div>
+        <div className="hidden md:flex items-center gap-3 bg-primary/5 px-4 py-2 rounded-2xl border border-primary/10">
+          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+            <ClipboardCheck className="w-4 h-4" />
+          </div>
+          <span className="text-sm font-semibold text-primary font-medium">Bulk Creation Enabled</span>
         </div>
       </div>
 
@@ -115,13 +121,13 @@ export default function CreateExamPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <ClipboardCheck className="w-4 h-4 mr-2 text-amber-500" />
+                    <ClipboardCheck className="w-4 h-4 mr-2 text-primary" />
                     Examination Name
                   </Label>
                   <Input 
                     id="name"
                     placeholder="e.g., End of Term 1 Exams" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-amber-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -130,13 +136,13 @@ export default function CreateExamPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="start_date" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-amber-500" />
+                      <Calendar className="w-4 h-4 mr-2 text-primary" />
                       Start Date
                     </Label>
                     <Input 
                       id="start_date"
                       type="date"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-amber-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('start_date')}
                     />
                     {errors.start_date && <ErrorMessage message="Start date is required" />}
@@ -144,13 +150,13 @@ export default function CreateExamPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="end_date" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-amber-500" />
+                      <Calendar className="w-4 h-4 mr-2 text-primary" />
                       End Date
                     </Label>
                     <Input 
                       id="end_date"
                       type="date"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-amber-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('end_date')}
                     />
                     {errors.end_date && <ErrorMessage message="End date is required" />}
@@ -164,7 +170,7 @@ export default function CreateExamPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-amber-500" />
+                <Clock className="w-5 h-5 mr-2 text-primary" />
                 Period & Status
               </h3>
               
@@ -173,13 +179,14 @@ export default function CreateExamPage() {
                   <Label className="text-sm font-semibold text-gray-700">Target Class</Label>
                   <Select 
                     disabled={fetchingData}
-                    onValueChange={(val) => setValue('class_obj', parseInt(val))}
+                    onValueChange={(val) => setValue('class_obj', val === 'all' ? 'all' : parseInt(val))}
                     value={selectedClass?.toString()}
                   >
                     <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
                       <SelectValue placeholder="Select Class" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectItem value="all" className="font-bold text-primary">All Classes</SelectItem>
                       {classes.map((c) => (
                         <SelectItem key={c.id} value={c.id.toString()}>
                           {c.name}
@@ -227,7 +234,7 @@ export default function CreateExamPage() {
             <div className="pt-2">
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl shadow-lg shadow-amber-200 font-bold bg-amber-600 hover:bg-amber-700"
+                className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary hover:bg-primary/90"
                 disabled={loading || fetchingData}
               >
                 {loading ? (

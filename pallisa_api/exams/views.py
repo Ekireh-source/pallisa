@@ -445,6 +445,43 @@ class ExamListCreateView(APIView):
 
     @extend_schema(summary="Create a new exam", request=ExamSerializer, responses={201: ExamSerializer})
     def post(self, request):
+        data = request.data.copy()
+        class_obj_val = data.get('class_obj')
+        
+        if class_obj_val == 'all':
+            from members.models import Class
+            try:
+                # Determine which classes to create exams for
+                # Usually we want classes belonging to the same school as the user
+                classes = Class.objects.filter(is_active=True)
+                
+                # Filter by user's school if possible
+                profile = getattr(request.user, 'profile', None)
+                if profile and profile.role and profile.role.school:
+                    # Get all campuses for this school
+                    school = profile.role.school
+                    classes = classes.filter(campus__schools=school)
+                
+                if not classes.exists():
+                    return Response({"error": "No active classes found to create exams for"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                created_exams = []
+                for cls in classes:
+                    exam_data = data.copy()
+                    exam_data['class_obj'] = cls.id
+                    serializer = ExamSerializer(data=exam_data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        created_exams.append(serializer.data)
+                    else:
+                        # If one fails, we might want to know, but let's continue for others
+                        logger.warning(f"Failed to create bulk exam for class {cls.id}: {serializer.errors}")
+                
+                return Response(created_exams, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error(f"Error in bulk exam creation: {str(e)}")
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         serializer = ExamSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

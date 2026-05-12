@@ -44,11 +44,24 @@ import { toast } from 'sonner';
 import { ITeacher } from '@/features/members/members.schemas';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import * as XLSX from 'xlsx';
+import { BulkUploadTeachers } from '@/features/members/members.service';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui';
+import { Download, Upload, FileSpreadsheet, AlertCircle } from 'lucide-react';
 
 export default function TeachersListPage() {
   const [teachers, setTeachers] = useState<ITeacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
 
   const loadTeachers = async () => {
@@ -65,6 +78,81 @@ export default function TeachersListPage() {
   useEffect(() => {
     loadTeachers();
   }, [searchTerm]);
+
+  const downloadTemplate = () => {
+    const template = [
+      {
+        user_email: 'teacher@example.com',
+        user_first_name: 'Jane',
+        user_last_name: 'Smith',
+        user_gender: 'F',
+        user_phone: '+1234567890',
+        employment_type: 'full_time',
+        specialization: 'Mathematics',
+        joining_date: '2024-01-01',
+        employee_id: ''
+      }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(template);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Teachers Template");
+    
+    // Add info about types
+    const info = [
+      ["Employment Types: full_time, part_time, contract, substitute, volunteer"],
+      ["Genders: M (Male), F (Female), O (Other)"],
+      ["Date Format: YYYY-MM-DD"],
+      [""],
+      ["Note: Leave employee_id blank to autogenerate."]
+    ];
+    const wsInfo = XLSX.utils.aoa_to_sheet(info);
+    XLSX.utils.book_append_sheet(wb, wsInfo, "Instructions");
+
+    XLSX.writeFile(wb, "teachers_bulk_upload_template.xlsx");
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        setIsUploading(true);
+        const data = event.target?.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+        if (jsonData.length === 0) {
+          toast.error("The file is empty");
+          setIsUploading(false);
+          return;
+        }
+
+        const result = await BulkUploadTeachers({ teachers: jsonData });
+        if (result.success) {
+          toast.success(`Successfully uploaded ${result.data.created_count} teachers`);
+          setIsUploadModalOpen(false);
+          loadTeachers();
+        } else {
+          const errorMessage = result.error?.response?.data?.error || "Failed to upload teachers";
+          toast.error(errorMessage);
+          console.error("Bulk upload error:", result.error);
+        }
+      } catch (error) {
+        toast.error("Error parsing Excel file");
+        console.error(error);
+      } finally {
+        setIsUploading(false);
+        // Reset file input
+        e.target.value = '';
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
 
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this teacher?")) {
@@ -97,9 +185,13 @@ export default function TeachersListPage() {
           <p className="text-gray-500 mt-1">Manage school faculty and academic staff.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="rounded-xl h-11 border-gray-200" onClick={() => toast.info("Exporting coming soon")}>
-            <Plus className="w-4 h-4 mr-2" />
-            Export Data
+          <Button 
+            variant="outline" 
+            className="rounded-xl h-11 border-gray-200" 
+            onClick={() => setIsUploadModalOpen(true)}
+          >
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            Bulk Upload
           </Button>
           <Button className="shadow-lg shadow-primary/20 rounded-xl h-11 bg-primary hover:bg-primary/90" asChild>
             <Link href="/teachers/create">
@@ -237,6 +329,83 @@ export default function TeachersListPage() {
           </Table>
         </div>
       </Card>
+
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+          <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white">
+            <DialogHeader>
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                <Upload className="w-6 h-6 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-white">Bulk Teacher Upload</DialogTitle>
+              <DialogDescription className="text-indigo-100 mt-2">
+                Register multiple teachers at once using an Excel template.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="p-8 space-y-6">
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex gap-3 text-indigo-800 text-sm">
+              <AlertCircle className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
+              <p>
+                Download the template, fill in the details, and upload it back. Login credentials will be sent to the teachers' emails.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-16 rounded-2xl border-dashed border-2 hover:bg-indigo-50 hover:border-indigo-200 flex flex-col items-center justify-center gap-1 group transition-all"
+                onClick={downloadTemplate}
+              >
+                <div className="flex items-center text-indigo-600 font-semibold">
+                  <Download className="w-4 h-4 mr-2 group-hover:bounce" />
+                  Download Template
+                </div>
+                <span className="text-[10px] text-gray-500 font-normal">Excel file with sample teacher data</span>
+              </Button>
+
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  disabled={isUploading}
+                />
+                <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-indigo-200 bg-indigo-50/30 group-hover:bg-indigo-50 group-hover:border-indigo-300'}`}>
+                  {isUploading ? (
+                    <>
+                      <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm font-medium text-indigo-600">Processing File...</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-indigo-900">Click to upload Excel file</p>
+                        <p className="text-xs text-gray-500">Max size 5MB (.xlsx, .xls)</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="p-6 bg-gray-50/50 border-t border-gray-100 flex sm:justify-center">
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsUploadModalOpen(false)}
+              className="rounded-xl hover:bg-white"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

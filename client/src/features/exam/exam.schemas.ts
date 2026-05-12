@@ -33,7 +33,7 @@ export const IntegrationScoreSchema = z.object({
 export const ExamSchema = z.object({
   name: z.string().min(1, "Name is required"),
   term: z.number().min(1, "Term is required"),
-  class_obj: z.number().min(1, "Class is required"),
+  class_obj: z.any(), // Allow number or 'all' string
   start_date: z.string(), // ISO date
   end_date: z.string(),   // ISO date
   is_published: z.boolean().optional(),

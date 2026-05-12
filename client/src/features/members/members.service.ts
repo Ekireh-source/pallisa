@@ -315,3 +315,23 @@ export const DeleteStudent = async (id: number | string) => {
     return { success: false, error };
   }
 };
+
+export const BulkUploadStudents = async (data: { students: any[] }) => {
+  try {
+    const res = await api.post(`/members/students/bulk-upload/`, data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const BulkUploadTeachers = async (data: { teachers: any[] }) => {
+  try {
+    const res = await api.post(`/members/teachers/bulk-upload/`, data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+

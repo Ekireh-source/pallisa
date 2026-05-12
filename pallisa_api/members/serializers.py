@@ -218,7 +218,9 @@ class StudentSerializer(serializers.ModelSerializer):
             if campus_id:
                 try:
                     campus = Campus.objects.get(id=campus_id)
-                    student_id = generate_student_id(campus.school)
+                    school = campus.schools.first()
+                    if school:
+                        student_id = generate_student_id(school)
                 except Exception:
                     pass
         
