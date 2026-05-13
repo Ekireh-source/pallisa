@@ -26,7 +26,7 @@ export default function ReportCardDetailPage({ params }: PageProps) {
   const router = useRouter();
   const [reportCard, setReportCard] = useState<ReportCard | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const school = useAppSelector((state) => state.auth.school);
 
   useEffect(() => {
@@ -57,6 +57,7 @@ export default function ReportCardDetailPage({ params }: PageProps) {
 
   const { subject_reports } = reportCard;
 
+  const maxAois = Math.max(...subject_reports.map(s => s.competency_scores.filter(c => c.assessment_type === 'aoi').length), 0);
   const totalAoi = subject_reports.reduce((acc, s) => acc + Number(s.aoi_score || 0), 0);
   const totalExam = subject_reports.reduce((acc, s) => acc + Number(s.exam_score || 0), 0);
   const totalCum = totalAoi + totalExam;
@@ -134,7 +135,11 @@ export default function ReportCardDetailPage({ params }: PageProps) {
             <thead>
               <tr className="bg-[#185FA5] text-white">
                 <th className="px-4 py-3 text-left font-bold border-r border-[#15508a]">Subject</th>
-                <th className="px-3 py-3 text-left font-bold border-r border-[#15508a]">Activities of Integration</th>
+                {Array.from({ length: Math.max(1, maxAois) }).map((_, idx) => (
+                  <th key={idx} className="px-2 py-3 text-center font-bold border-r border-[#15508a]">
+                    AOI {idx + 1}
+                  </th>
+                ))}
                 <th className="px-3 py-3 text-center font-bold border-r border-[#15508a]">AOI<br /><span className="text-[10px] font-normal opacity-80">/20</span></th>
                 <th className="px-3 py-3 text-center font-bold border-r border-[#15508a]">Exam<br /><span className="text-[10px] font-normal opacity-80">/80</span></th>
                 <th className="px-3 py-3 text-center font-bold border-r border-[#15508a]">Total<br /><span className="text-[10px] font-normal opacity-80">/100</span></th>
@@ -156,18 +161,11 @@ export default function ReportCardDetailPage({ params }: PageProps) {
                   return (
                     <tr key={s.id} className={i % 2 === 1 ? "bg-gray-50/80" : "bg-white"}>
                       <td className="px-4 py-3 font-bold text-gray-900 border-r border-b border-gray-200">{s.subject_name}</td>
-                      <td className="px-3 py-2 text-xs text-gray-700 border-r border-b border-gray-200">
-                        {aois.length === 0 ? <span className="text-gray-400 italic">No activities</span> : (
-                          <div className="space-y-1">
-                            {aois.map((a) => (
-                              <div key={a.id} className="flex items-center justify-between gap-4 border-b border-gray-100 last:border-0 pb-1 last:pb-0">
-                                <span className="truncate max-w-[150px] text-gray-500" title={a.competency_name}>{a.competency_name}</span>
-                                <span className="font-bold text-gray-900 whitespace-nowrap">{a.score} / {a.max_score}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </td>
+                      {Array.from({ length: Math.max(1, maxAois) }).map((_, idx) => (
+                        <td key={idx} className="px-3 py-3 text-center font-medium text-gray-700 border-r border-b border-gray-200">
+                          {aois[idx]?.score ?? '—'}
+                        </td>
+                      ))}
                       <td className="px-3 py-3 text-center font-medium text-gray-700 border-r border-b border-gray-200">{s.aoi_score}</td>
                       <td className="px-3 py-3 text-center font-medium text-gray-700 border-r border-b border-gray-200">{s.exam_score}</td>
                       <td className="px-3 py-3 text-center font-black text-gray-900 border-r border-b border-gray-200">{Number(s.aoi_score || 0) + Number(s.exam_score || 0)}</td>
@@ -184,7 +182,7 @@ export default function ReportCardDetailPage({ params }: PageProps) {
               )}
               {subject_reports.length > 0 && (
                 <tr className="bg-gray-100">
-                  <td colSpan={2} className="px-4 py-3 text-right font-black text-gray-900 border-r border-gray-200 uppercase tracking-widest text-xs">Totals</td>
+                  <td colSpan={1 + Math.max(1, maxAois)} className="px-4 py-3 text-right font-black text-gray-900 border-r border-gray-200 uppercase tracking-widest text-xs">Totals</td>
                   <td className="px-3 py-3 text-center font-bold text-gray-900 border-r border-gray-200">{totalAoi}</td>
                   <td className="px-3 py-3 text-center font-bold text-gray-900 border-r border-gray-200">{totalExam}</td>
                   <td className="px-3 py-3 text-center font-black text-indigo-700 text-base border-r border-gray-200">{totalCum}</td>
