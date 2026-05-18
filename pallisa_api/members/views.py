@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
-    StudentStreamHistory, Subject, TeacherSubjectAssignment, NonStaffMember,
+    StudentStreamHistory, Subject, SubjectPaper, TeacherSubjectAssignment, NonStaffMember,
     SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPayment, SalarySummary
 )
 from .serializers import (
@@ -23,7 +23,7 @@ from .serializers import (
     ParentSerializer, ParentDetailSerializer,
     ParentStudentRelationshipSerializer,
     StudentStreamHistorySerializer,
-    SubjectSerializer,
+    SubjectSerializer, SubjectPaperSerializer,
     TeacherSubjectAssignmentSerializer,
     NonStaffMemberSerializer, NonStaffMemberDetailSerializer,
     SalaryPeriodSerializer, SalaryAllowanceSerializer, SalaryDeductionSerializer,
@@ -130,7 +130,7 @@ class BaseDetailAPIView(APIView):
     def get(self, request, pk):
         obj = self.get_object(pk)
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(obj)
+        serializer = serializer_class(obj, context={'request': request})
         return Response(serializer.data)
     
     def put(self, request, pk):
@@ -157,6 +157,7 @@ class ClassListCreateView(APIView):
         summary="List all class levels",
         parameters=[
             OpenApiParameter(name='campus_id', type=int, description='Filter by campus ID'),
+            OpenApiParameter(name='level', type=str, description='Filter by class level (e.g. 0level, Alevel)'),
             OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
             OpenApiParameter(name='search', type=str, description='Search in name and description'),
             OpenApiParameter(name='page', type=int, description='Page number'),
@@ -169,6 +170,7 @@ class ClassListCreateView(APIView):
         """Get list of class levels with filtering and pagination"""
         # Get query parameters
         campus_id = request.query_params.get('campus_id')
+        level = request.query_params.get('level')
         search = request.query_params.get('search')
         is_active = request.query_params.get('is_active')
         page = int(request.query_params.get('page', 1))
@@ -180,6 +182,8 @@ class ClassListCreateView(APIView):
         # Apply filters
         if campus_id:
             queryset = queryset.filter(campus_id=campus_id)
+        if level:
+            queryset = queryset.filter(level=level)
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search) | Q(description__icontains=search)
@@ -191,7 +195,7 @@ class ClassListCreateView(APIView):
         paginator = Paginator(queryset, page_size)
         page_obj = paginator.get_page(page)
 
-        serializer = ClassSerializer(page_obj.object_list, many=True)
+        serializer = ClassSerializer(page_obj.object_list, many=True, context={'request': request})
         return Response({
             'count': paginator.count,
             'next': page_obj.has_next(),
@@ -230,7 +234,7 @@ class ClassDetailView(APIView):
     def get(self, request, pk):
         """Get details of a specific class level"""
         class_obj = self.get_object(pk)
-        serializer = ClassSerializer(class_obj)
+        serializer = ClassSerializer(class_obj, context={'request': request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -326,7 +330,7 @@ class SubjectListCreateView(APIView):
         paginator = Paginator(queryset, page_size)
         page_obj = paginator.get_page(page)
 
-        serializer = SubjectSerializer(page_obj.object_list, many=True)
+        serializer = SubjectSerializer(page_obj.object_list, many=True, context={'request': request})
         return Response({
             'count': paginator.count,
             'next': page_obj.has_next(),
@@ -365,7 +369,7 @@ class SubjectDetailView(APIView):
     def get(self, request, pk):
         """Get details of a specific subject"""
         subject = self.get_object(pk)
-        serializer = SubjectSerializer(subject)
+        serializer = SubjectSerializer(subject, context={'request': request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -393,6 +397,117 @@ class SubjectDetailView(APIView):
         subject = self.get_object(pk)
         subject.is_active = False
         subject.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ==================== SUBJECT PAPER VIEWS ====================
+
+class SubjectPaperListCreateView(APIView):
+    """List all subject papers or create a new one"""
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="List all subject papers",
+        parameters=[
+            OpenApiParameter(name='subject_id', type=int, description='Filter by subject ID'),
+            OpenApiParameter(name='is_active', type=bool, description='Filter by active status'),
+            OpenApiParameter(name='search', type=str, description='Search in paper name and code'),
+            OpenApiParameter(name='page', type=int, description='Page number'),
+            OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
+        ],
+        responses={200: SubjectPaperSerializer(many=True)},
+        tags=["Subject Papers"]
+    )
+    def get(self, request):
+        """Get list of subject papers with filtering and pagination"""
+        subject_id = request.query_params.get('subject_id')
+        search = request.query_params.get('search')
+        is_active = request.query_params.get('is_active')
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+
+        queryset = SubjectPaper.objects.select_related('subject').order_by('subject__code', 'name')
+        
+        if subject_id:
+            queryset = queryset.filter(subject_id=subject_id)
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | 
+                Q(code__icontains=search)
+            )
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page)
+
+        serializer = SubjectPaperSerializer(page_obj.object_list, many=True, context={'request': request})
+        return Response({
+            'count': paginator.count,
+            'next': page_obj.has_next(),
+            'previous': page_obj.has_previous(),
+            'results': serializer.data
+        })
+
+    @extend_schema(
+        summary="Create a new subject paper",
+        request=SubjectPaperSerializer,
+        responses={201: SubjectPaperSerializer},
+        tags=["Subject Papers"]
+    )
+    def post(self, request):
+        """Create a new subject paper"""
+        serializer = SubjectPaperSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubjectPaperDetailView(APIView):
+    """Retrieve, update or delete a subject paper"""
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        """Get subject paper object or return 404"""
+        return get_object_or_404(SubjectPaper.objects.select_related('subject'), pk=pk)
+
+    @extend_schema(
+        summary="Retrieve a subject paper",
+        responses={200: SubjectPaperSerializer},
+        tags=["Subject Papers"]
+    )
+    def get(self, request, pk):
+        """Get details of a specific subject paper"""
+        paper = self.get_object(pk)
+        serializer = SubjectPaperSerializer(paper, context={'request': request})
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Update a subject paper",
+        request=SubjectPaperSerializer,
+        responses={200: SubjectPaperSerializer},
+        tags=["Subject Papers"]
+    )
+    def put(self, request, pk):
+        """Update a subject paper"""
+        paper = self.get_object(pk)
+        serializer = SubjectPaperSerializer(paper, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="Delete a subject paper",
+        responses={204: None},
+        tags=["Subject Papers"]
+    )
+    def delete(self, request, pk):
+        """Soft delete a subject paper by setting is_active to False"""
+        paper = self.get_object(pk)
+        paper.is_active = False
+        paper.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -622,7 +737,7 @@ class StudentListCreateView(APIView):
         paginator = Paginator(queryset, page_size)
         page_obj = paginator.get_page(page)
 
-        serializer = StudentSerializer(page_obj.object_list, many=True)
+        serializer = StudentSerializer(page_obj.object_list, many=True, context={'request': request})
         return Response({
             'count': paginator.count,
             'next': page_obj.has_next(),
@@ -716,7 +831,7 @@ class StudentDetailView(APIView):
     def get(self, request, pk):
         """Get details of a specific student"""
         student = self.get_object(pk)
-        serializer = StudentDetailSerializer(student)
+        serializer = StudentDetailSerializer(student, context={'request': request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -1091,7 +1206,7 @@ class TeacherListCreateView(APIView):
         paginator = Paginator(queryset, page_size)
         page_obj = paginator.get_page(page)
 
-        serializer = TeacherSerializer(page_obj.object_list, many=True)
+        serializer = TeacherSerializer(page_obj.object_list, many=True, context={'request': request})
         return Response({
             'count': paginator.count,
             'next': page_obj.has_next(),
@@ -1183,7 +1298,7 @@ class TeacherDetailView(APIView):
     def get(self, request, pk):
         """Get details of a specific teacher"""
         teacher = self.get_object(pk)
-        serializer = TeacherDetailSerializer(teacher)
+        serializer = TeacherDetailSerializer(teacher, context={'request': request})
         return Response(serializer.data)
 
     @extend_schema(

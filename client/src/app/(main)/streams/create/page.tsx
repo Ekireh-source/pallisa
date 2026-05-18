@@ -140,7 +140,9 @@ export default function CreateStreamPage() {
                     >
                       <option value="">Select a class</option>
                       {classes.map((cls) => (
-                        <option key={cls.id} value={cls.id}>{cls.name}</option>
+                        <option key={cls.id} value={cls.id}>
+                          {cls.name}{cls.level ? ` (${cls.level === '0level' ? 'O-Level' : 'A-Level'})` : ''}
+                        </option>
                       ))}
                     </select>
                     {errors.class_obj && <ErrorMessage message={errors.class_obj.message} />}

@@ -6,11 +6,12 @@ from schools.models import School, Campus
 from expenses.models import AcademicYear
 from .models import (
     Class, Stream, Student, Teacher, Parent, ParentStudentRelationship,
-    StudentStreamHistory, Subject, TeacherSubjectAssignment,
-    generate_password, send_login_credentials, NonStaffMember,
+    StudentStreamHistory, Subject, SubjectPaper, TeacherSubjectAssignment,
+    NonStaffMember,
     SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPaymentDetail, SalaryPayment, SalarySummary,
-    generate_student_id
+    generate_student_id, generate_employee_id, generate_parent_id
 )
+from accounts.utils import generate_password, send_login_credentials
 
 User = get_user_model()
 
@@ -19,6 +20,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for UserProfile with basic info"""
     full_name = serializers.CharField(source='get_full_name', read_only=True)
     user = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
     
     class Meta:
         model = UserProfile
@@ -28,6 +30,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'emergency_contact', 'emergency_phone', 'emergency_contact_address', 'emergency_contact_email'
         ]
         read_only_fields = ['id', 'full_name', 'user_type']
+
+    def get_profile_picture(self, obj):
+        if obj.profile_picture:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_picture.url)
+            return obj.profile_picture.url
+        return None
     
     def get_user(self, obj):
         """Return user object with email if user exists"""
@@ -84,7 +94,7 @@ class ClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = Class
         fields = [
-            'id', 'name', 'campus', 'campus_name', 'description',
+            'id', 'name', 'campus', 'campus_name', 'level', 'description',
             'is_active', 'stream_count', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'stream_count', 'campus_name']
@@ -106,6 +116,20 @@ class SubjectSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
+class SubjectPaperSerializer(serializers.ModelSerializer):
+    """Serializer for SubjectPaper"""
+    subject_name = serializers.ReadOnlyField(source='subject.name')
+    subject_code = serializers.ReadOnlyField(source='subject.code')
+
+    class Meta:
+        model = SubjectPaper
+        fields = [
+            'id', 'subject', 'subject_name', 'subject_code', 'name', 'code',
+            'max_score', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
 class StudentSerializer(serializers.ModelSerializer):
     """Serializer for Student with complete user creation flow"""
     user_profile_data = UserProfileSerializer(source='user_profile', read_only=True)
@@ -113,6 +137,7 @@ class StudentSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user_profile.user.email', read_only=True)
     current_stream_name = serializers.CharField(source='current_stream.name', read_only=True)
     current_class_name = serializers.CharField(source='current_stream.class_obj.name', read_only=True)
+    current_class_level = serializers.CharField(source='current_stream.class_obj.level', read_only=True)
     campus_name = serializers.CharField(source='campus.name', read_only=True)
     age = serializers.SerializerMethodField()
     
@@ -136,6 +161,7 @@ class StudentSerializer(serializers.ModelSerializer):
     user_emergency_contact_address = serializers.CharField(max_length=255, write_only=True, required=False)
     user_emergency_contact_email = serializers.EmailField(write_only=True, required=False)
     user_role_id = serializers.IntegerField(write_only=True, required=False)
+    user_profile_picture = serializers.ImageField(write_only=True, required=False)
     
     # Student specific fields
     previous_school = serializers.CharField(max_length=200, required=False, allow_blank=True)
@@ -147,7 +173,7 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = [
             'id', 'user_profile', 'user_profile_data', 'student_id', 'campus', 'campus_name', 'admission_number', 'admission_date',
-            'current_stream', 'current_stream_name', 'current_class_name', 'previous_school',
+            'current_stream', 'current_stream_name', 'current_class_name', 'current_class_level', 'previous_school',
             'special_needs', 'medical_conditions', 'allergies', 'enrollment_status',
             'is_active', 'full_name', 'email', 'age', 'created_at', 'updated_at',
             # User creation fields
@@ -155,9 +181,10 @@ class StudentSerializer(serializers.ModelSerializer):
             # UserProfile creation fields
             'user_first_name', 'user_last_name', 'user_other_name', 'user_gender', 'user_dob',
             'user_phone', 'user_emergency_contact', 'user_emergency_phone', 
-            'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id'
+            'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id',
+            'user_profile_picture'
         ]
-        read_only_fields = ['id', 'admission_number', 'created_at', 'updated_at', 'full_name', 'email', 'age', 'campus_name']
+        read_only_fields = ['id', 'admission_number', 'created_at', 'updated_at', 'full_name', 'email', 'age', 'campus_name', 'current_class_level']
         extra_kwargs = {
             'user_profile': {'required': False, 'allow_null': True}
         }
@@ -168,9 +195,9 @@ class StudentSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Validate that either user_profile is provided or user creation fields are provided"""
         if not data.get('user_profile'):
-            if not data.get('user_email'):
+            if not data.get('user_email') and not data.get('user_student_id') and not data.get('student_id'):
                 raise serializers.ValidationError({
-                    'user_email': 'Email is required when creating a new user account.'
+                    'user_email': 'Email or Student ID is required when creating a new user account.'
                 })
             if not data.get('user_first_name'):
                 raise serializers.ValidationError({
@@ -240,18 +267,23 @@ class StudentSerializer(serializers.ModelSerializer):
             'user_emergency_contact_address': validated_data.pop('user_emergency_contact_address', None),
             'user_emergency_contact_email': validated_data.pop('user_emergency_contact_email', None),
             'user_role_id': validated_data.pop('user_role_id', None),
+            'user_profile_picture': validated_data.pop('user_profile_picture', None),
         }
         
         # If user_profile is not provided, create the entire hierarchy atomically
-        if not validated_data.get('user_profile') and user_fields['user_email']:
+        if not validated_data.get('user_profile') and (user_fields['user_email'] or user_fields['user_student_id'] or student_id):
             # Step 1: Create User
             generated_password = generate_password()
             user_data = {
-                'email': user_fields['user_email'],
                 'password': generated_password,
             }
+            if user_fields['user_email']:
+                user_data['email'] = user_fields['user_email']
+            
             if user_fields['user_student_id']:
                 user_data['student_id'] = user_fields['user_student_id']
+            elif student_id:
+                user_data['student_id'] = student_id
             
             # Create user
             user = User.objects.create_user(**user_data)
@@ -294,6 +326,10 @@ class StudentSerializer(serializers.ModelSerializer):
                 value = profile_fields.get(field_key)
                 if value:
                     profile_data[model_field] = value
+            
+            # Add profile picture if provided
+            if profile_fields.get('user_profile_picture'):
+                profile_data['profile_picture'] = profile_fields['user_profile_picture']
             
             # Create user profile
             user_profile = UserProfile.objects.create(**profile_data)
@@ -351,6 +387,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     user_emergency_contact_address = serializers.CharField(max_length=255, write_only=True, required=False)
     user_emergency_contact_email = serializers.EmailField(write_only=True, required=False)
     user_role_id = serializers.IntegerField(write_only=True, required=False)
+    user_profile_picture = serializers.ImageField(write_only=True, required=False)
     
     class Meta:
         model = Teacher
@@ -364,7 +401,8 @@ class TeacherSerializer(serializers.ModelSerializer):
             # UserProfile creation fields
             'user_first_name', 'user_last_name', 'user_other_name', 'user_gender', 'user_dob',
             'user_phone', 'user_emergency_contact', 'user_emergency_phone', 
-            'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id'
+            'user_emergency_contact_address', 'user_emergency_contact_email', 'user_role_id',
+            'user_profile_picture'
         ]
         read_only_fields = ['id', 'employee_id', 'created_at', 'updated_at', 'full_name', 'email']
         extra_kwargs = {
@@ -374,10 +412,10 @@ class TeacherSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Validate that either user_profile is provided or user creation fields are provided"""
         if not data.get('user_profile'):
-            if not data.get('user_email'):
-                raise serializers.ValidationError({
-                    'user_email': 'Email is required when creating a new user account.'
-                })
+            if not data.get('user_email') and not data.get('employee_id'):
+                # We'll allow empty email because employee_id will be generated
+                pass
+            
             if not data.get('user_first_name'):
                 raise serializers.ValidationError({
                     'user_first_name': 'First name is required when creating a new user account.'
@@ -386,6 +424,7 @@ class TeacherSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'user_last_name': 'Last name is required when creating a new user account.'
                 })
+        
         return data
     
     @transaction.atomic
@@ -408,17 +447,35 @@ class TeacherSerializer(serializers.ModelSerializer):
             'user_emergency_contact_address': validated_data.pop('user_emergency_contact_address', None),
             'user_emergency_contact_email': validated_data.pop('user_emergency_contact_email', None),
             'user_role_id': validated_data.pop('user_role_id', None),
+            'user_profile_picture': validated_data.pop('user_profile_picture', None),
         }
         
         # If user_profile is not provided, create the entire hierarchy atomically
-        if not validated_data.get('user_profile') and user_fields['user_email']:
+        if not validated_data.get('user_profile'):
             # Step 1: Create User
             generated_password = generate_password()
-            user = User.objects.create_user(
-                email=user_fields['user_email'],
-                password=generated_password
-            )
-            print(f"✓ Created User: {user.email} (ID: {user.id})")
+            
+            # Generate employee ID first to use as username
+            # Try to get school from role or first school
+            school = None
+            if profile_fields['user_role_id']:
+                try:
+                    role = Role.objects.get(id=profile_fields['user_role_id'])
+                    school = role.school
+                except Role.DoesNotExist:
+                    pass
+            
+            employee_id = generate_employee_id(school)
+            
+            user_data = {
+                'password': generated_password,
+                'employee_id': employee_id
+            }
+            if user_fields['user_email']:
+                user_data['email'] = user_fields['user_email']
+            
+            user = User.objects.create_user(**user_data)
+            print(f"✓ Created User: {user.email or user.employee_id} (ID: {user.id})")
             
             # Step 2: Create UserProfile
             # Get or create role
@@ -459,22 +516,30 @@ class TeacherSerializer(serializers.ModelSerializer):
                     profile_data[model_field] = value
             
             # Create user profile
+            # Add profile picture if provided
+            if profile_fields.get('user_profile_picture'):
+                profile_data['profile_picture'] = profile_fields['user_profile_picture']
+            
             user_profile = UserProfile.objects.create(**profile_data)
             print(f"✓ Created UserProfile: {user_profile.get_full_name()} (ID: {user_profile.id})")
             
-            # Set the user_profile for teacher creation
+            # Set the user_profile and employee_id for teacher creation
             validated_data['user_profile'] = user_profile
+            validated_data['employee_id'] = employee_id
             
             # Step 3: Create Teacher
             teacher = super().create(validated_data)
             print(f"✓ Created Teacher: {teacher.employee_id} (ID: {teacher.id})")
             
-            # Step 4: Send login credentials (outside the critical transaction path)
-            try:
-                send_login_credentials(user, generated_password, 'teacher')
-                print(f"✓ Sent login credentials to {user.email}")
-            except Exception as e:
-                print(f"⚠ Failed to send email to {user.email}: {str(e)}")
+            # Step 4: Send login credentials (only if email exists)
+            if user.email:
+                try:
+                    send_login_credentials(user, generated_password, 'teacher')
+                    print(f"✓ Sent login credentials to {user.email}")
+                except Exception as e:
+                    print(f"⚠ Failed to send email to {user.email}: {str(e)}")
+            else:
+                print(f"ℹ No email provided for teacher {teacher.employee_id}, skipping credentials email. Password is: {generated_password}")
             
             return teacher
         
@@ -644,6 +709,7 @@ class ParentSerializer(serializers.ModelSerializer):
 class StreamSerializer(serializers.ModelSerializer):
     """Serializer for Stream"""
     class_obj_name = serializers.CharField(source='class_obj.name', read_only=True)
+    class_obj_level = serializers.CharField(source='class_obj.level', read_only=True)
     class_teacher_name = serializers.CharField(source='class_teacher.user_profile.get_full_name', read_only=True)
     current_enrollment = serializers.SerializerMethodField()
     available_spots = serializers.SerializerMethodField()
@@ -651,12 +717,12 @@ class StreamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stream
         fields = [
-            'id', 'name', 'class_obj', 'class_obj_name',
+            'id', 'name', 'class_obj', 'class_obj_name', 'class_obj_level',
             'class_teacher', 'class_teacher_name',
             'capacity', 'current_enrollment', 'available_spots', 'is_active',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'current_enrollment', 'available_spots']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'current_enrollment', 'available_spots', 'class_obj_level']
     
     def get_current_enrollment(self, obj):
         return obj.current_enrollment

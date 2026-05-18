@@ -13,6 +13,10 @@ urlpatterns = [
     path('subjects/', views.SubjectListCreateView.as_view(), name='subject-list'),
     path('subjects/<int:pk>/', views.SubjectDetailView.as_view(), name='subject-detail'),
     
+    # Subject Papers URLs
+    path('subject-papers/', views.SubjectPaperListCreateView.as_view(), name='subject-paper-list'),
+    path('subject-papers/<int:pk>/', views.SubjectPaperDetailView.as_view(), name='subject-paper-detail'),
+    
     # Streams URLs
     path('streams/', views.StreamListCreateView.as_view(), name='stream-list'),
     path('streams/<int:pk>/', views.StreamDetailView.as_view(), name='stream-detail'),

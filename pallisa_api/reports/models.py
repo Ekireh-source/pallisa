@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from members.models import Student, Subject, Teacher, Class, Stream
-from schools.models import School   
+from schools.models import School
 from expenses.models import AcademicYear, Term
 import uuid
 
@@ -201,6 +201,10 @@ class GradeBoundary(models.Model):
     min_score = models.DecimalField(max_digits=5, decimal_places=2)
     max_score = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     remarks = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(
+        blank=True, null=True,
+        help_text="Full grade descriptor text shown in the grade key table, e.g. 'Exceptional – Demonstrates mastery...'"
+    )
     points = models.PositiveIntegerField(blank=True, null=True, help_text="Aggregate points (e.g., D1=1, F9=9)")
 
     class Meta:
@@ -209,3 +213,54 @@ class GradeBoundary(models.Model):
 
     def __str__(self):
         return f"{self.grade} ({self.min_score}-{self.max_score})"
+
+
+class ReportCardSettings(models.Model):
+    """
+    Per-school settings controlling which sections appear on the printed report card.
+    Created automatically (get_or_create) when first accessed.
+    """
+    school = models.OneToOneField(
+        School,
+        on_delete=models.CASCADE,
+        related_name='report_card_settings'
+    )
+
+    # ── Report sections ──────────────────────────────────────────────────────
+    show_attendance = models.BooleanField(default=True)
+    show_grade_descriptor = models.BooleanField(default=True)
+    show_grade_descriptor_score_range = models.BooleanField(default=True)
+    show_identifier_legend = models.BooleanField(default=True)
+    show_subject_teacher_initials = models.BooleanField(default=True)
+    show_teacher_comment = models.BooleanField(default=True)
+    show_header = models.BooleanField(default=True)
+    show_watermark = models.BooleanField(default=False)
+    show_school_logo = models.BooleanField(default=True)
+    show_school_motto = models.BooleanField(default=True)
+
+    # ── Rank ─────────────────────────────────────────────────────────────────
+    show_overall_student_rank = models.BooleanField(default=True)
+    show_stream_student_rank = models.BooleanField(default=False)
+    show_division_and_aggregate = models.BooleanField(default=True)
+
+    # ── Remarks ──────────────────────────────────────────────────────────────
+    show_class_teacher_remarks = models.BooleanField(default=True)
+    show_head_teacher_remarks = models.BooleanField(default=True)
+
+    # ── Signatures ───────────────────────────────────────────────────────────
+    show_class_teacher_signature = models.BooleanField(default=True)
+    show_head_teacher_signature = models.BooleanField(default=True)
+    show_parent_signature = models.BooleanField(default=False)
+
+    # ── Others ───────────────────────────────────────────────────────────────
+    show_school_dates = models.BooleanField(default=True)
+    show_school_fees = models.BooleanField(default=False)
+
+    # ── Dates (set per print run) ─────────────────────────────────────────────
+    school_closed_on = models.DateField(null=True, blank=True)
+    next_term_begins_on = models.DateField(null=True, blank=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Report Settings for {self.school.name}"

@@ -80,9 +80,31 @@ export const PasswordResetSchema = z.object({
   path: ["confirm_password"],
 });
 
+/**
+ * Permission Schema
+ */
+export const PermissionSchema = z.object({
+  id: z.number(),
+  code: z.string(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+});
+
+/**
+ * Role Schema
+ */
+export const RoleSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Role name is required"),
+  description: z.string().optional().nullable(),
+  permissions: z.array(z.union([z.number(), PermissionSchema])).optional(),
+});
+
 export type ILoginInput = z.infer<typeof LoginSchema>;
 export type ICreateUserInput = z.infer<typeof CreateUserSchema>;
 export type ISchoolCampusInput = z.infer<typeof SchoolCampusSchema>;
 export type IOTPVerificationInput = z.infer<typeof OTPVerificationSchema>;
 export type IForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
 export type IPasswordReset = z.infer<typeof PasswordResetSchema>;
+export type IPermission = z.infer<typeof PermissionSchema>;
+export type IRole = z.infer<typeof RoleSchema>;

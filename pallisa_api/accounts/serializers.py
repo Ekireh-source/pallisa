@@ -35,12 +35,13 @@ class PermissionSerializer(serializers.ModelSerializer):
         
 class RoleSerializer(serializers.ModelSerializer):
     permissions = serializers.PrimaryKeyRelatedField(
-        queryset=Permission.objects.all(), many=True
+        queryset=Permission.objects.all(), many=True, required=False, default=[]
     )
 
     class Meta:
         model = Role
-        fields = ['id', 'name', 'description', 'permissions']
+        fields = ['id', 'name', 'description', 'permissions', 'is_superadmin']
+        read_only_fields = ['is_superadmin']
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)

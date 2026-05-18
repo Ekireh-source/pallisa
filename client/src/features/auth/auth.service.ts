@@ -10,7 +10,8 @@ import {
   IOTPVerificationInput,
   OTPVerificationSchema,
   IForgotPasswordInput,
-  ForgotPasswordSchema
+  ForgotPasswordSchema,
+  IRole
 } from "./auth.schemas";
 import api, { apiRequest } from "@/lib/api";
 
@@ -106,8 +107,7 @@ export const RequestPasswordReset = async ({ data }: { data: IForgotPasswordInpu
     return handleValidationError(validatedData.error);
   }
   try {
-    // Backend endpoint for forgot password might be different, adjusting to standard pattern
-    const res = await api.post(`/accounts/password-reset/`, validatedData.data);
+    const res = await api.post(`/accounts/forgot-password/`, validatedData.data);
     return { success: true, data: res.data };
   } catch (error) {
     return { success: false, error };
@@ -126,9 +126,17 @@ export const PasswordReset = async ({ data }: { data: IPasswordReset }) => {
       new_password: validatedData.data.new_password,
       confirm_password: validatedData.data.confirm_password,
     };
-    const res = await api.post(`/accounts/password-reset-confirm/`, payload);
+    const res = await api.post(`/accounts/reset-password/`, payload);
     return { success: true, data: res.data };
   } catch (error: any) {
+    return { success: false, error };
+  }
+};
+export const FetchRoles = async (params?: any) => {
+  try {
+    const res = await api.get(`/accounts/roles/`);
+    return { success: true, data: res.data };
+  } catch (error) {
     return { success: false, error };
   }
 };

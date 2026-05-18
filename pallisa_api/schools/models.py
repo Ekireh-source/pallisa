@@ -30,6 +30,13 @@ class School(models.Model):
     Represents a school with school_id, campus_id is optional
     """
 
+    LEVEL_CHOICES = (
+        ('primary', 'Primary'),
+        ('secondary', 'Secondary'),
+        ('tertiary', 'Tertiary'),
+
+    )
+
     public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='schools')    
     name = models.CharField(max_length=255)
@@ -45,6 +52,13 @@ class School(models.Model):
         help_text="Optional campus affiliation"
     )
     active = models.BooleanField(default=True)
+    level = models.CharField(max_length=20, default="secondary")
+    report_primary_color = models.CharField(max_length=7, default='#185FA5')
+    report_accent_color = models.CharField(max_length=7, default='#4f46e5')
+    motto = models.CharField(max_length=255, blank=True, null=True, help_text="School motto displayed on report cards")
+    logo = models.ImageField(upload_to='schools/logos/', blank=True, null=True, help_text="School logo used in report header and watermark")
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -16,7 +16,7 @@ from django.utils import timezone
 from members.models import Student, Teacher
 from fees.models import FeePayment
 from expenses.models import Expense
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +129,7 @@ class SchoolListCreateView(APIView):
         summary="List user schools",
         description="Retrieve a list of schools owned by the authenticated user with pagination.",
         parameters=[
+            OpenApiParameter(name='level', type=str, description='Filter by school level (primary, secondary, tertiary)'),
             OpenApiParameter(name='page', type=int, description='Page number'),
             OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
         ],
@@ -136,10 +137,15 @@ class SchoolListCreateView(APIView):
     )
     def get(self, request):
         try:
+            level = request.query_params.get('level')
             if request.user.is_staff:
                 queryset = School.objects.all()
             else:
                 queryset = School.objects.filter(owner=request.user)
+            
+            # Apply level filter if provided
+            if level:
+                queryset = queryset.filter(level=level)
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -186,10 +192,16 @@ class SchoolDetailView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_object(self, public_id):
+    def get_object(self, identifier):
+        # identifier can be an integer id or a UUID public_id
+        if identifier.isdigit():
+            query = Q(id=int(identifier))
+        else:
+            query = Q(public_id=identifier)
+        
         if self.request.user.is_staff:
-            return get_object_or_404(School, public_id=public_id)
-        return get_object_or_404(School, public_id=public_id, owner=self.request.user)
+            return get_object_or_404(School, query)
+        return get_object_or_404(School, query, owner=self.request.user)
 
     @extend_schema(summary="Get school details", responses={200: SchoolSerializer})
     def get(self, request, public_id):
@@ -210,6 +222,10 @@ class SchoolDetailView(APIView):
         except Exception as e:
             logger.error(f"Error updating school {public_id}: {str(e)}")
             return Response({"error": "Failed to update school"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(summary="Partially update school details", request=SchoolSerializer, responses={200: SchoolSerializer})
+    def patch(self, request, public_id):
+        return self.put(request, public_id)
 
     @extend_schema(summary="Delete a school", responses={204: None})
     def delete(self, request, public_id):

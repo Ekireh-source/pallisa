@@ -710,9 +710,10 @@ class RoleDetailView(APIView):
             role = Role.objects.get(pk=pk)
         except Role.DoesNotExist:
             return Response({'error': 'Role not found'}, status=404)
-        serializer = RoleSerializer(role, data=request.data)
+        serializer = RoleSerializer(role, data=request.data, partial=True)
         if serializer.is_valid():
             role = serializer.save()
+            role.sync_users_permissions()
             return Response(RoleSerializer(role).data)
         return Response(serializer.errors, status=400)
 
@@ -724,6 +725,59 @@ class RoleDetailView(APIView):
             return Response({'error': 'Role not found'}, status=404)
         role.delete()
         return Response(status=204)
+
+
+class RoleAssignPermissionsView(APIView):
+    """
+    POST /accounts/roles/<pk>/assign-permissions/
+    Body: { "permission_ids": [1, 2, 3] }
+    Atomically replaces the role's permission set and re-syncs all affected users.
+    """
+    permission_classes = [IsAuthenticated, HasPermission]
+    permission_required_map = {
+        'POST': 'admin.manage_roles',
+    }
+
+    @extend_schema(
+        tags=["Roles"],
+        summary="Set permissions for a role (replaces existing set)",
+        request={
+            'type': 'object',
+            'properties': {
+                'permission_ids': {
+                    'type': 'array',
+                    'items': {'type': 'integer'},
+                    'description': 'Full list of Permission IDs to assign to this role',
+                }
+            },
+            'required': ['permission_ids'],
+        },
+        responses={200: RoleSerializer},
+    )
+    def post(self, request, pk):
+        try:
+            role = Role.objects.get(pk=pk)
+        except Role.DoesNotExist:
+            return Response({'error': 'Role not found'}, status=404)
+
+        permission_ids = request.data.get('permission_ids', [])
+        if not isinstance(permission_ids, list):
+            return Response({'error': 'permission_ids must be a list'}, status=400)
+
+        # Validate all IDs exist
+        permissions = Permission.objects.filter(id__in=permission_ids)
+        if len(permission_ids) > 0 and permissions.count() != len(set(permission_ids)):
+            return Response({'error': 'One or more permission IDs are invalid'}, status=400)
+
+        # Atomically replace
+        role.permissions.set(permissions)
+        role.save()
+
+        # Re-sync every user that holds this role
+        role.sync_users_permissions()
+
+        return Response(RoleSerializer(role).data)
+
     
 @extend_schema(
     summary="List all permissions",
@@ -731,14 +785,94 @@ class RoleDetailView(APIView):
     responses={200: PermissionSerializer(many=True)}
 )
 class PermissionListView(APIView):
-    permission_classes = [IsAuthenticated, HasPermission]
-    permission_required = 'admin.manage_permissions'
-    
+    """
+    Returns paginated permissions with optional search and category filter.
+    Falls back to permissions.json if the DB is empty.
+    Supports: ?page=1&page_size=20&search=...&category=admin
+    """
+    permission_classes = [IsAuthenticated]
+
+    def _load_from_json(self):
+        """Load permissions from JSON file as fallback."""
+        import json as _json
+        file_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'resources', 'permissions.json'
+        )
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = _json.load(f)
+        except (FileNotFoundError, _json.JSONDecodeError):
+            return []
+
+        result = []
+        for cat in data.get('permission_categories', []):
+            cat_data = {
+                'id': None, 'code': cat['code'],
+                'name': cat['name'], 'description': cat.get('description', ''),
+            }
+            for perm in cat.get('permissions', []):
+                result.append({
+                    'id': None, 'code': perm['code'],
+                    'name': perm['name'], 'description': perm.get('description', ''),
+                    'category': cat_data,
+                })
+        return result
+
     def get(self, request):
         permissions = Permission.objects.select_related('category').all()
-        serializer = PermissionSerializer(permissions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK) 
-    
+
+        # Fallback: serve from JSON when DB is empty
+        if not permissions.exists():
+            data = self._load_from_json()
+            search = request.query_params.get('search', '').lower()
+            category = request.query_params.get('category', '').lower()
+            if search:
+                data = [p for p in data if search in p['name'].lower() or search in p['code'].lower()]
+            if category:
+                data = [p for p in data if p['category']['code'].lower() == category]
+            page = int(request.query_params.get('page', 1))
+            page_size = int(request.query_params.get('page_size', 20))
+            start = (page - 1) * page_size
+            end = start + page_size
+            total = len(data)
+            return Response({
+                'count': total,
+                'next': page * page_size < total,
+                'previous': page > 1,
+                'results': data[start:end],
+            }, status=status.HTTP_200_OK)
+
+        # Apply search filter
+        search = request.query_params.get('search', '').strip()
+        if search:
+            permissions = permissions.filter(
+                Q(name__icontains=search) | Q(code__icontains=search) | Q(description__icontains=search)
+            )
+
+        # Apply category filter
+        category = request.query_params.get('category', '').strip()
+        if category:
+            permissions = permissions.filter(category__code__iexact=category)
+
+        # Order by category then name
+        permissions = permissions.order_by('category__name', 'name')
+
+        # Paginate
+        page = int(request.query_params.get('page', 1))
+        page_size = min(int(request.query_params.get('page_size', 20)), 500)
+        paginator = Paginator(permissions, page_size)
+        page_obj = paginator.get_page(page)
+
+        serializer = PermissionSerializer(page_obj.object_list, many=True)
+        return Response({
+            'count': paginator.count,
+            'next': page_obj.has_next(),
+            'previous': page_obj.has_previous(),
+            'results': serializer.data,
+        }, status=status.HTTP_200_OK)
+
+
 @extend_schema(
     tags=["User Permissions"],
     summary="List all permissions assigned to a user",
@@ -865,7 +999,7 @@ class ForgotPasswordView(APIView):
 
         
         # You can customize this URL based on your frontend routing
-        reset_url = f"{settings.FRONTEND_URL}/auth/forgot-password?token={reset_token.token}"
+        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={reset_token.token}"
         
         subject = f"Password Reset Request - {getattr(settings, 'SITE_NAME', 'Your App')}"
         

@@ -47,8 +47,59 @@ export const ExamScoreSchema = z.object({
   remarks: z.string().optional().nullable(),
 });
 
+export const CompetencyAreaListSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  topic: z.number().optional().nullable(),
+  topic_name: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+});
+
+export const TopicListSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  subject: z.number(),
+  subject_name: z.string().optional().nullable(),
+  class_obj: z.number(),
+  class_name: z.string().optional().nullable(),
+});
+
+export const ActivityListSchema = z.object({
+  id: z.string().or(z.number()),
+  public_id: z.string(),
+  topic: z.number(),
+  topic_name: z.string().optional().nullable(),
+  subject_name: z.string().optional().nullable(),
+  competency_area: z.number().optional().nullable(),
+  competency_area_name: z.string().optional().nullable(),
+  term: z.number(),
+  term_name: z.string().optional().nullable(),
+  max_score: z.number(),
+  teacher: z.number().optional().nullable(),
+  teacher_name: z.string().optional().nullable(),
+});
+
+export const ExamListSchema = z.object({
+  id: z.string().or(z.number()),
+  public_id: z.string(),
+  name: z.string(),
+  class_obj: z.any(),
+  class_name: z.string().optional().nullable(),
+  term: z.number(),
+  term_name: z.string().optional().nullable(),
+  start_date: z.string(),
+  end_date: z.string(),
+  is_published: z.boolean(),
+});
+
 export type ITopicInput = z.infer<typeof TopicSchema>;
 export type IActivityInput = z.infer<typeof ActivitySchema>;
 export type IIntegrationScoreInput = z.infer<typeof IntegrationScoreSchema>;
 export type IExamInput = z.infer<typeof ExamSchema>;
 export type IExamScoreInput = z.infer<typeof ExamScoreSchema>;
+
+export type ICompetencyAreaListResponse = z.infer<typeof CompetencyAreaListSchema>;
+export type ITopicListResponse = z.infer<typeof TopicListSchema>;
+export type IActivityListResponse = z.infer<typeof ActivityListSchema>;
+export type IExamListResponse = z.infer<typeof ExamListSchema>;

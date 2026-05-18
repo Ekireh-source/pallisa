@@ -40,24 +40,21 @@ import {
   FetchReportCards,
   GenerateReportCards
 } from '@/features/reports/reports.service';
-import {
-  FetchAcademicYears,
-  FetchTerms,
-  FetchClasses,
-  FetchStreams
-} from '@/features/members/members.service';
+import AcademicYearSearchableSelect from '@/components/selects/academicyearsearchableselect';
+import TermSearchableSelect from '@/components/selects/termsearchableselect';
+import ClassSearchableSelect from '@/components/selects/classsearchableselect';
+import StreamSearchableSelect from '@/components/selects/streamsearchableselect';
 import { toast } from 'sonner';
-import { ReportCard, AcademicYear, Term, MemberClass, MemberStream } from '@/types';
+import { ReportCard } from '@/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Icon } from '@iconify/react';
+import { MainLayout } from '@/components/layout/main-layout';
 
 export default function ReportsPage() {
+  const router = useRouter();
   // Data state
   const [reports, setReports] = useState<ReportCard[]>([]);
-  const [years, setYears] = useState<AcademicYear[]>([]);
-  const [terms, setTerms] = useState<Term[]>([]);
-  const [classes, setClasses] = useState<MemberClass[]>([]);
-  const [streams, setStreams] = useState<MemberStream[]>([]);
 
   // Selection state
   const [selectedYear, setSelectedYear] = useState<string>('');
@@ -69,26 +66,6 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const loadInitialData = async () => {
-    const [yearsRes, classesRes] = await Promise.all([
-      FetchAcademicYears(),
-      FetchClasses()
-    ]);
-
-    if (yearsRes.success) setYears(yearsRes.data.results || yearsRes.data);
-    if (classesRes.success) setClasses(classesRes.data.results || classesRes.data);
-  };
-
-  const loadTerms = async (yearId: string) => {
-    const res = await FetchTerms({ academic_year: yearId });
-    if (res.success) setTerms(res.data.results || res.data);
-  };
-
-  const loadStreams = async (classId: string) => {
-    const res = await FetchStreams({ class_obj: classId });
-    if (res.success) setStreams(res.data.results || res.data);
-  };
 
   const loadReports = async () => {
     setLoading(true);
@@ -109,15 +86,11 @@ export default function ReportsPage() {
   };
 
   useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    if (selectedYear) loadTerms(selectedYear);
+    setSelectedTerm('');
   }, [selectedYear]);
 
   useEffect(() => {
-    if (selectedClass) loadStreams(selectedClass);
+    setSelectedStream('');
   }, [selectedClass]);
 
   useEffect(() => {
@@ -160,90 +133,70 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Student Reports</h1>
-          <p className="text-gray-500 mt-2 text-lg">
-            Calculations: AOIs (20%) + Final Exam (80%). Each activity is shown in detail.
-          </p>
-        </div>
+    <MainLayout
+      title="Student Reports"
+      description="Calculations: AOIs (20%) + Final Exam (80%). Each activity is shown in detail."
+      headerActions={
         <Button
           onClick={handleGenerate}
           disabled={generating}
-          className="rounded-2xl h-12 px-6 bg-primary hover:bg-primary/90"
+          className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent"
         >
           {generating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
           Generate Reports
         </Button>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Reports', value: reports.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Avg. Performance', value: stats.avg, icon: GraduationCap, color: 'text-primary', bg: 'bg-emerald-50' },
-          { label: 'Top Performer', value: stats.top, icon: CheckCircle2, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Positions Ranked', value: stats.ranked, icon: Layers, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-        ].map((stat, i) => (
-          <Card key={i} className="p-4 border-none shadow-sm ring-1 ring-gray-100 flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
-              <stat.icon className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{stat.label}</p>
-              <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-            </div>
-          </Card>
-        ))}
-      </div>
-
+      }
+      stats={[
+        { label: 'Total Reports', value: String(reports.length), icon: 'hugeicons:file-text' },
+        { label: 'Avg. Performance', value: stats.avg, icon: 'hugeicons:graduation-cap' },
+        { label: 'Top Performer', value: stats.top, icon: 'hugeicons:award-01' },
+        { label: 'Positions Ranked', value: String(stats.ranked), icon: 'hugeicons:layers' },
+      ]}
+    >
       {/* Filter Card */}
-      <Card className="p-6 border-none shadow-md ring-1 ring-gray-100">
+      <Card className="p-6 border-none shadow-none ring-0 bg-white">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold">Academic Year</label>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select Year" /></SelectTrigger>
-              <SelectContent>
-                {years.map(y => <SelectItem key={y.id} value={y.id.toString()}>{y.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <AcademicYearSearchableSelect
+              value={selectedYear}
+              onValueChange={setSelectedYear}
+              placeholder="Select Year"
+              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+            />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold">Term</label>
-            <Select value={selectedTerm} onValueChange={setSelectedTerm} disabled={!selectedYear}>
-              <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select Term" /></SelectTrigger>
-              <SelectContent>
-                {terms.map(t => <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <TermSearchableSelect
+              value={selectedTerm}
+              onValueChange={setSelectedTerm}
+              academicYearId={selectedYear}
+              disabled={!selectedYear}
+              placeholder="Select Term"
+              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+            />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold">Class</label>
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="rounded-xl"><SelectValue placeholder="All Classes" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Classes</SelectItem>
-                {classes.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <ClassSearchableSelect
+              value={selectedClass}
+              onValueChange={setSelectedClass}
+              placeholder="All Classes"
+              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+            />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold">Stream</label>
-            <Select value={selectedStream} onValueChange={setSelectedStream} disabled={!selectedClass || selectedClass === 'all'}>
-              <SelectTrigger className="rounded-xl"><SelectValue placeholder="All Streams" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Streams</SelectItem>
-                {streams.map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <StreamSearchableSelect
+              value={selectedStream}
+              onValueChange={setSelectedStream}
+              classId={selectedClass}
+              disabled={!selectedClass || selectedClass === 'all'}
+              placeholder="All Streams"
+              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+            />
           </div>
         </div>
       </Card>
 
       {/* Table */}
-      <Card className="border-none shadow-lg ring-1 ring-gray-100 overflow-hidden">
+      <Card className="border-none shadow-none ring-0 overflow-hidden bg-white">
         <Table>
           <TableHeader className="bg-gray-50/50">
             <TableRow>
@@ -271,12 +224,29 @@ export default function ReportsPage() {
                   </TableCell>
                   <TableCell>{report.position ? `${report.position} / ${report.out_of}` : '--'}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="rounded-xl" asChild>
-                      <Link href={`/reports/${report.id}`}>
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="rounded-xl"><Download className="w-4 h-4" /></Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
+                        <DropdownMenuItem 
+                          className="cursor-pointer py-2 font-medium"
+                          onClick={() => router.push(`/reports/${report.id}`)}
+                        >
+                          <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="cursor-pointer py-2"
+                          onClick={() => toast.success("Download started...")}
+                        >
+                          <Icon icon="hugeicons:download-02" className="w-4 h-4 mr-2" />
+                          Download PDF
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
@@ -284,6 +254,6 @@ export default function ReportsPage() {
           </TableBody>
         </Table>
       </Card>
-    </div>
+    </MainLayout>
   );
 }

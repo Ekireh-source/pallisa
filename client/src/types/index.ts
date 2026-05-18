@@ -90,11 +90,46 @@ export interface ResendVerificationResponse {
 }
 
 // School and Campus Types
+export interface ReportCardSettings {
+  id: number;
+  school: number;
+  // Report sections
+  show_attendance: boolean;
+  show_grade_descriptor: boolean;
+  show_grade_descriptor_score_range: boolean;
+  show_identifier_legend: boolean;
+  show_subject_teacher_initials: boolean;
+  show_teacher_comment: boolean;
+  show_header: boolean;
+  show_watermark: boolean;
+  show_school_logo: boolean;
+  show_school_motto: boolean;
+  // Rank
+  show_overall_student_rank: boolean;
+  show_stream_student_rank: boolean;
+  show_division_and_aggregate: boolean;
+  // Remarks
+  show_class_teacher_remarks: boolean;
+  show_head_teacher_remarks: boolean;
+  // Signatures
+  show_class_teacher_signature: boolean;
+  show_head_teacher_signature: boolean;
+  show_parent_signature: boolean;
+  // Others
+  show_school_dates: boolean;
+  show_school_fees: boolean;
+  // Dates
+  school_closed_on?: string | null;
+  next_term_begins_on?: string | null;
+  updated_at: string;
+}
+
 export interface School {
   id: number;
   name: string;
   address?: string;
   phone?: string;
+  phone_number?: string;
   email?: string;
   website?: string;
   owner?: number;
@@ -102,6 +137,12 @@ export interface School {
   updated_at: string;
   is_active: boolean;
   campus?: number;
+  level?: string;
+  report_primary_color?: string;
+  report_accent_color?: string;
+  motto?: string;
+  logo?: string;
+  report_card_settings?: ReportCardSettings;
 }
 
 export interface Campus {
@@ -407,6 +448,7 @@ export interface GradeBoundary {
   min_score: number;
   max_score: number;
   remarks?: string;
+  description?: string;
   points?: number;
 }
 
@@ -485,6 +527,9 @@ export interface UserProfile {
 export interface MemberClass {
   id: number;
   name: string;
+  campus?: number;
+  campus_name?: string;
+  level?: string;
   description?: string;
   is_active: boolean;
   created_at: string;
@@ -495,6 +540,9 @@ export interface MemberClass {
 export interface ClassDetail {
   id: number;
   name: string;
+  campus?: number;
+  campus_name?: string;
+  level?: string;
   description?: string;
   is_active: boolean;
   created_at: string;
@@ -812,6 +860,8 @@ export interface ParentCreateUpdate {
 
 export interface ClassCreateUpdate {
   name: string;
+  campus?: number;
+  level?: string;
   description?: string;
 }
 
@@ -1294,12 +1344,15 @@ export interface ReportCard {
   student: number;
   student_name: string;
   student_id_code: string;
+  student_picture?: string;
+  student_gender?: string;
   academic_year: number;
   academic_year_name: string;
   term: number;
   term_name: string;
   class_obj: number;
   class_name: string;
+  class_level?: '0level' | 'Alevel';
   stream: number;
   stream_name: string;
   total_score: number;
@@ -1326,4 +1379,14 @@ export interface GenerateReportData {
   stream?: number;
   student?: number;
   school?: number;
+}
+
+
+
+
+export interface IPaginatedResponse<T> {
+  next: string | null;
+  previous: string | null;
+  count: number;
+  results: T[];
 }

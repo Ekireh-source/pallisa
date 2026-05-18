@@ -9,11 +9,11 @@ import { CreateUserSchema, ICreateUserInput } from "@/features/auth/auth.schemas
 import { useAppDispatch, useAppSelector } from "@/store";
 import { clearAuthError } from "@/store/auth/actions";
 import { selectUser } from "@/store/auth/selectors";
-import { 
-  Button, 
-  Input, 
-  Label, 
-  ErrorMessage, 
+import {
+  Button,
+  Input,
+  Label,
+  ErrorMessage,
   SuccessMessage,
   Select,
   SelectContent,
@@ -22,15 +22,15 @@ import {
   SelectValue
 } from "@/components/ui";
 import PasswordInput from "@/components/password-input";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Lock, 
-  Building2, 
-  MapPin, 
-  Globe, 
-  ArrowRight, 
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Building2,
+  MapPin,
+  Globe,
+  ArrowRight,
   ArrowLeft,
   GraduationCap,
   CheckCircle,
@@ -45,9 +45,9 @@ import { UserSignup } from "@/features/auth/auth.service";
 export default function RegisterPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  
+
   const currentUser = useAppSelector(selectUser);
-  
+
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export default function RegisterPage() {
     if (step === 1) {
       fieldsToValidate = ["first_name", "last_name", "email", "phone", "gender", "dob"];
     }
-    
+
     const isStepValid = await trigger(fieldsToValidate as any);
     if (isStepValid) {
       setStep(step + 1);
@@ -140,7 +140,7 @@ export default function RegisterPage() {
   // Watch for successful signup in the state (if we had a success flag)
   // For now, we can check if loading stopped and error is null after submission
   // But usually sagas handle side effects like redirection.
-  
+
   return (
     <div className="space-y-8 max-w-xl mx-auto">
       <div className="flex flex-col items-start gap-2">
@@ -156,11 +156,10 @@ export default function RegisterPage() {
       {/* Progress Bar */}
       <div className="flex items-center gap-2 mb-8">
         {[1, 2].map((s) => (
-          <div 
-            key={s} 
-            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-              s <= step ? "bg-primary" : "bg-gray-200"
-            }`}
+          <div
+            key={s}
+            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${s <= step ? "bg-primary" : "bg-gray-200"
+              }`}
           />
         ))}
       </div>
@@ -183,7 +182,7 @@ export default function RegisterPage() {
                   name="first_name"
                   control={control}
                   render={({ field }) => (
-                    <Input {...field} id="first_name" placeholder="John"  />
+                    <Input {...field} id="first_name" placeholder="John" />
                   )}
                 />
                 {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
@@ -306,9 +305,9 @@ export default function RegisterPage() {
               <Button type="button" variant="outline" onClick={handleBack} className="flex-1 h-12 rounded-full">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || !isValid} 
+              <Button
+                type="submit"
+                disabled={isSubmitting || !isValid}
                 className="flex-1 h-12 rounded-full bg-primary hover:bg-primary/90 text-white"
               >
                 {isSubmitting ? (

@@ -13,20 +13,33 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState, AppDispatch } from "@/store";
-import { useSidebar } from "@/components/ui/sidebar";
 import { logoutStart } from "@/store/auth/actions";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SharedNavbarProps {
   userName?: string;
   userEmail?: string;
+  isSideBarOpen?: boolean;
+  setIsSideBarOpen?: (value: boolean) => void;
 }
 
-export function SharedNavbar({ userName = "Admin User", userEmail = "admin@school.edu" }: SharedNavbarProps) {
+export function SharedNavbar({ 
+  userName = "Admin User", 
+  userEmail = "admin@school.edu",
+  isSideBarOpen,
+  setIsSideBarOpen
+}: SharedNavbarProps) {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { user: userState } = useSelector((state: RootState) => state.auth);
   const user = userState.value;
-  const { toggleSidebar, isMobile } = useSidebar();
+  const isMobile = useIsMobile();
+  
+  const toggleSidebar = () => {
+    if (setIsSideBarOpen && isSideBarOpen !== undefined) {
+      setIsSideBarOpen(!isSideBarOpen);
+    }
+  };
   
   const handleLogout = () => {
     dispatch(logoutStart());

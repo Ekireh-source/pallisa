@@ -14,7 +14,7 @@ urlpatterns = [
     
     # School endpoints (using public_id which is a UUID)
     path('schools/', SchoolListCreateView.as_view(), name='school-list'),
-    path('schools/<uuid:public_id>/', SchoolDetailView.as_view(), name='school-detail'),
+    path('schools/<str:public_id>/', SchoolDetailView.as_view(), name='school-detail'),
     
     # SetupSteps endpoints
     path('setup-steps/', SetupStepsListCreateView.as_view(), name='setup-steps-list'),

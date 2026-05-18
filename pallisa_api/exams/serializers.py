@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, CompetencyArea
+from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, CompetencyArea, ExamPaperScore
 
 
 class CompetencyAreaSerializer(serializers.ModelSerializer):
@@ -62,6 +62,19 @@ class ExamScoreSerializer(serializers.ModelSerializer):
         model = ExamScore
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
+
+
+class ExamPaperScoreSerializer(serializers.ModelSerializer):
+    student_name = serializers.ReadOnlyField(source='student.user_profile.get_full_name')
+    paper_name = serializers.ReadOnlyField(source='paper.name')
+    subject_name = serializers.ReadOnlyField(source='paper.subject.name')
+    subject_code = serializers.ReadOnlyField(source='paper.subject.code')
+
+    class Meta:
+        model = ExamPaperScore
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
 
 
 

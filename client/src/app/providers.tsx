@@ -1,17 +1,16 @@
 'use client';
 
-import { Provider } from 'react-redux';
-import { store } from '@/store';
+import { ReduxProvider } from '@/providers/redux-provider';
 import { AuthProvider } from '@/components/AuthProvider';
 import { Toaster } from 'sonner';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <Provider store={store}>
+    <ReduxProvider>
       <AuthProvider>
         {children}
         <Toaster position="top-right" richColors />
       </AuthProvider>
-    </Provider>
+    </ReduxProvider>
   );
 }

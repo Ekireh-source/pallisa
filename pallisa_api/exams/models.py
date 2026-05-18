@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from members.models import Student, Subject, Teacher, Class, Stream
+from members.models import Student, Subject, Teacher, Class, Stream, SubjectPaper
 from schools.models import School, Campus
 from expenses.models import AcademicYear, Term
 import uuid
@@ -125,4 +125,93 @@ class ExamScore(models.Model):
 
     def __str__(self):
         return f"{self.student.student_id} - {self.subject.code} - {self.exam.name}: {self.score}"
+
+
+class ExamPaperScore(models.Model):
+    """
+    Stores a student's score for a specific subject paper during an exam.
+    """
+    exam = models.ForeignKey(
+        Exam, 
+        on_delete=models.CASCADE, 
+        related_name='paper_scores'
+    )
+    student = models.ForeignKey(
+        Student, 
+        on_delete=models.CASCADE, 
+        related_name='paper_scores'
+    )
+    paper = models.ForeignKey(
+        SubjectPaper, 
+        on_delete=models.CASCADE, 
+        related_name='scores'
+    )
+    score = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2,
+        validators=[MinValueValidator(0)]
+    )
+    remarks = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['exam', 'student', 'paper']
+        verbose_name = "Exam Paper Score"
+        verbose_name_plural = "Exam Paper Scores"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.score > self.paper.max_score:
+            raise ValidationError(f"Score cannot exceed the paper's maximum score of {self.paper.max_score}")
+
+    def __str__(self):
+        return f"{self.student.student_id} - {self.paper.subject.code} {self.paper.name}: {self.score}"
+
+
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver([post_save, post_delete], sender=ExamPaperScore)
+def update_overall_exam_score(sender, instance, **kwargs):
+    """
+    Automatically updates or creates the standard ExamScore record for the subject
+    representing the average of all paper scores.
+    """
+    exam = instance.exam
+    student = instance.student
+    subject = instance.paper.subject
+
+    # 1. Find all papers defined for this subject
+    defined_papers = subject.papers.filter(is_active=True)
+    if not defined_papers.exists():
+        return
+
+    # 2. Get student's scores for these papers
+    paper_scores = ExamPaperScore.objects.filter(
+        exam=exam,
+        student=student,
+        paper__in=defined_papers
+    )
+
+    if paper_scores.exists():
+        # Calculate standard average normalized to 100%
+        total_pct = 0.0
+        for ps in paper_scores:
+            pct = (float(ps.score) / float(ps.paper.max_score)) * 100.0
+            total_pct += pct
+        
+        # We divide by the number of defined papers to compute the true average
+        subject_average = total_pct / defined_papers.count()
+
+        # 3. Save to standard ExamScore (creates if doesn't exist)
+        ExamScore.objects.update_or_create(
+            exam=exam,
+            student=student,
+            subject=subject,
+            defaults={
+                'score': round(subject_average, 2),
+                'remarks': f"Computed automatically from {paper_scores.count()} paper(s)."
+            }
+        )
 

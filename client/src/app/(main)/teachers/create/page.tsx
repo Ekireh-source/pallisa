@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,10 @@ import {
   Calendar,
   Award,
   Info,
-  BadgeCheck
+  BadgeCheck,
+  Camera,
+  Upload,
+  X
 } from 'lucide-react';
 import { 
   Button, 
@@ -22,7 +25,13 @@ import {
   Input, 
   Label, 
   ErrorMessage,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui';
+import { FetchRoles } from '@/features/auth/auth.service';
 import { TeacherSchema, ITeacherInput } from '@/features/members/members.schemas';
 import { CreateTeacher } from '@/features/members/members.service';
 import { toast } from 'sonner';
@@ -31,6 +40,9 @@ import { Switch } from '@/components/ui/switch';
 export default function CreateTeacherPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const {
     register,
@@ -48,23 +60,79 @@ export default function CreateTeacherPage() {
       employee_id: '',
       employment_type: 'full_time',
       is_active: true,
+      user_role_id: undefined,
     }
   });
 
+  const selectedRole = watch('user_role_id');
   const isActive = watch('is_active');
 
-  const onSubmit = async (data: ITeacherInput) => {
-    setLoading(true);
-    const result = await CreateTeacher(data);
-    
-    if (result.success) {
-      toast.success("Teacher registered successfully");
-      router.push('/teachers');
-    } else {
-      toast.error("Failed to register teacher");
-      console.error("Teacher creation error:", result.error);
+  useEffect(() => {
+    const loadRoles = async () => {
+      setLoadingRoles(true);
+      const res = await FetchRoles();
+      if (res.success) {
+        setRoles(res.data.results);
+      }
+      setLoadingRoles(false);
+    };
+    loadRoles();
+  }, []);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size should be less than 2MB");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+        setValue('user_profile_picture', file);
+      };
+      reader.readAsDataURL(file);
     }
-    setLoading(false);
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setValue('user_profile_picture', undefined);
+  };
+
+  const onSubmit = async (values: any) => {
+    const data = values as ITeacherInput;
+    setLoading(true);
+    
+    try {
+      // Create FormData to handle file upload
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          if (key === 'user_profile_picture' && value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+
+      const result = await CreateTeacher(formData);
+      
+      if (result.success) {
+        toast.success("Teacher registered successfully");
+        router.push('/teachers');
+      } else {
+        toast.error("Failed to register teacher");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onInvalid = (errors: any) => {
@@ -124,7 +192,7 @@ export default function CreateTeacherPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="user_email">Email Address</Label>
+                  <Label htmlFor="user_email">Email Address (Optional)</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input 
@@ -150,6 +218,32 @@ export default function CreateTeacherPage() {
                     <option value="O">Other</option>
                   </select>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="user_role_id">System Role</Label>
+                  <Select 
+                    onValueChange={(val) => setValue('user_role_id', parseInt(val))}
+                    value={selectedRole?.toString()}
+                  >
+                    <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.user_role_id ? 'border-red-500' : ''}`}>
+                      <SelectValue placeholder="Select Role" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      {loadingRoles ? (
+                        <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
+                      ) : roles.length === 0 ? (
+                        <div className="p-2 text-center text-sm text-gray-500">No roles found</div>
+                      ) : (
+                        roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {errors.user_role_id && <ErrorMessage message={errors.user_role_id.message} />}
+                </div>
               </div>
             </Card>
 
@@ -161,7 +255,7 @@ export default function CreateTeacherPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="employee_id">Employee ID / Code</Label>
+                  <Label htmlFor="employee_id">Employee ID (Optional, auto-generated)</Label>
                   <Input 
                     id="employee_id"
                     placeholder="e.g., TCH-2024-001" 
@@ -232,6 +326,48 @@ export default function CreateTeacherPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+                <Camera className="w-5 h-5 mr-2 text-indigo-500" />
+                Profile Picture
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors relative overflow-hidden group">
+                  {selectedImage ? (
+                    <div className="relative w-32 h-32">
+                      <img 
+                        src={selectedImage} 
+                        alt="Preview" 
+                        className="w-32 h-32 rounded-xl object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center cursor-pointer py-4 w-full">
+                      <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-indigo-500" />
+                      </div>
+                      <p className="text-sm font-bold text-gray-700">Upload Photo</p>
+                      <p className="text-[10px] text-gray-500 mt-1">JPG, PNG (Max 2MB)</p>
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
+              <h3 className="font-bold text-gray-900 mb-6 flex items-center">
                 <Info className="w-5 h-5 mr-2 text-indigo-500" />
                 Status & Settings
               </h3>
@@ -275,7 +411,7 @@ export default function CreateTeacherPage() {
 
             <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
               <p className="text-xs text-blue-800 leading-relaxed">
-                <strong>Important:</strong> Registering a teacher will automatically create a user account. The teacher will receive an email with their login credentials.
+                <strong>Important:</strong> Registering a teacher will automatically create a user account. They can log in using their <strong>Employee ID</strong> or <strong>Email address</strong>. If an email is provided, they will receive their credentials via email.
               </p>
             </div>
           </div>

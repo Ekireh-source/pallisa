@@ -1,10 +1,13 @@
+"use client";
+
 import { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { GuestRoute } from "@/components/auth/GuestRoute";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-
+    <GuestRoute>
       <div className="h-screen flex">
         <div className="hidden lg:grid lg:w-1/2 bg-[#F8F8FA]">
           <div className="flex items-center gap-4 pl-9 pt-4">
@@ -31,6 +34,6 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <div className="w-full max-w-xl">{children}</div>
         </div>
       </div>
- 
+    </GuestRoute>
   );
 }

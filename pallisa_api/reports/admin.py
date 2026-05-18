@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ReportCard, SubjectReport, SubjectCompetencyScore
+from .models import ReportCard, SubjectReport, SubjectCompetencyScore, GradingSystem, GradeBoundary, ReportCardSettings
 
 
 class SubjectCompetencyScoreInline(admin.TabularInline):
@@ -47,3 +47,21 @@ class SubjectReportAdmin(admin.ModelAdmin):
 class SubjectCompetencyScoreAdmin(admin.ModelAdmin):
     list_display = ('competency_name', 'subject_report', 'assessment_type', 'score', 'max_score')
     list_filter = ('subject_report__subject', 'assessment_type')
+
+
+class GradeBoundaryInline(admin.TabularInline):
+    model = GradeBoundary
+    extra = 1
+
+
+@admin.register(GradingSystem)
+class GradingSystemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'school', 'is_active', 'created_at')
+    list_filter = ('school', 'is_active')
+    inlines = [GradeBoundaryInline]
+
+
+@admin.register(ReportCardSettings)
+class ReportCardSettingsAdmin(admin.ModelAdmin):
+    list_display = ('school', 'show_attendance', 'show_grade_descriptor', 'show_watermark', 'updated_at')
+    list_filter = ('show_attendance', 'show_watermark')

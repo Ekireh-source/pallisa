@@ -178,19 +178,19 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">{activity.topic_name}</h1>
-              <Badge className="rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200 border-none">
+              <h1 className="text-3xl font-bold text-gray-900">{activity?.topic_name}</h1>
+              <Badge className="rounded-full bg-primary text-white border-none">
                 Integration Activity
               </Badge>
             </div>
             <div className="flex items-center gap-4 mt-1 text-gray-500 text-sm">
               <span className="flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4" />
-                {activity.subject_name}
+                {activity?.subject_name}
               </span>
               <span className="flex items-center gap-1.5">
                 <Trophy className="w-4 h-4" />
-                Max Score: {activity.max_score}
+                Max Score: {activity?.max_score}
               </span>
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
             Edit Activity
           </Button>
           <Button 
-            className="rounded-xl h-11 shadow-lg shadow-rose-200 bg-rose-600 hover:bg-rose-700 text-white"
+            className="rounded-xl h-11 bg-primary hover:bg-primary/90 text-white"
             onClick={handleSaveAll}
             disabled={saving}
           >
@@ -265,7 +265,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
               <TableRow>
                 <TableHead className="w-12"></TableHead>
                 <TableHead className="font-semibold text-gray-900">Student Name</TableHead>
-                <TableHead className="w-[150px] font-semibold text-gray-900 text-center">Score (/{activity.max_score})</TableHead>
+                <TableHead className="w-[150px] font-semibold text-gray-900 text-center">Score (/{activity?.max_score})</TableHead>
                 <TableHead className="font-semibold text-gray-900">Teacher Remarks</TableHead>
                 <TableHead className="w-20 text-right"></TableHead>
               </TableRow>

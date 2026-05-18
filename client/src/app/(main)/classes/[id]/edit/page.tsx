@@ -55,6 +55,7 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
 
   const isActive = watch('is_active');
   const selectedCampus = watch('campus');
+  const selectedLevel = watch('level') || undefined;
 
   useEffect(() => {
     const loadCampuses = async () => {
@@ -76,6 +77,7 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
         reset({
           name: result.data.name,
           campus: result.data.campus,
+          level: result.data.level || undefined,
           description: result.data.description || '',
           is_active: result.data.is_active,
         });
@@ -162,7 +164,7 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
           <div className="md:col-span-2 space-y-6">
             <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
                       <Layers className="w-4 h-4 mr-2 text-blue-500" />
@@ -170,11 +172,31 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
                     </Label>
                     <Input
                       id="name"
-                      placeholder="e.g., Primary 1 or Senior 4"
+                      placeholder="e.g., S1, S2, S3"
                       className={`h-12 rounded-xl border-gray-200 focus:ring-blue-500 ${errors.name ? 'border-red-500' : ''}`}
                       {...register('name')}
                     />
                     {errors.name && <ErrorMessage message={errors.name.message} />}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="level" className="text-sm font-semibold text-gray-700 flex items-center">
+                      <Layers className="w-4 h-4 mr-2 text-blue-500" />
+                      Level
+                    </Label>
+                    <Select
+                      onValueChange={(val) => setValue('level', val)}
+                      value={selectedLevel}
+                    >
+                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-blue-500 ${errors.level ? 'border-red-500' : ''}`}>
+                        <SelectValue placeholder="Select Level" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                        <SelectItem value="0level">O-Level</SelectItem>
+                        <SelectItem value="Alevel">A-Level</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.level && <ErrorMessage message={errors.level.message} />}
                   </div>
 
                   <div className="space-y-2">

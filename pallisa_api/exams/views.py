@@ -1,5 +1,4 @@
-from members.models import Subject
-from members.models import Student
+from members.models import Subject, Student, SubjectPaper
 import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,14 +6,15 @@ from rest_framework import status, permissions
 from django.core.paginator import Paginator
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.shortcuts import get_object_or_404
-from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, CompetencyArea
+from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, CompetencyArea, ExamPaperScore
 from .serializers import (
     TopicsSerializer, 
     ActivityOfIntegrationSerializer, 
     IntegrationScoreSerializer, 
     ExamSerializer,
     ExamScoreSerializer,
-    CompetencyAreaSerializer
+    CompetencyAreaSerializer,
+    ExamPaperScoreSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -832,5 +832,220 @@ class ActivityStudentsScoreView(APIView):
             })
 
         return Response(result)
+
+
+class ExamPaperScoreListCreateView(APIView):
+    """
+    List all exam paper scores or create a new score.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="List all exam paper scores",
+        parameters=[
+            OpenApiParameter(name='exam_id', type=int, description='Filter by exam ID'),
+            OpenApiParameter(name='student_id', type=int, description='Filter by student ID'),
+            OpenApiParameter(name='paper_id', type=int, description='Filter by subject paper ID'),
+            OpenApiParameter(name='page', type=int, description='Page number'),
+            OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
+        ],
+        responses={200: ExamPaperScoreSerializer(many=True)}
+    )
+    def get(self, request):
+        try:
+            queryset = ExamPaperScore.objects.all().select_related('exam', 'student__user_profile', 'paper__subject')
+            
+            exam_id = request.query_params.get('exam_id')
+            student_id = request.query_params.get('student_id')
+            paper_id = request.query_params.get('paper_id')
+            
+            if exam_id:
+                queryset = queryset.filter(exam_id=exam_id)
+            if student_id:
+                queryset = queryset.filter(student_id=student_id)
+            if paper_id:
+                queryset = queryset.filter(paper_id=paper_id)
+            
+            page = int(request.query_params.get('page', 1))
+            page_size = int(request.query_params.get('page_size', 20))
+            
+            paginator = Paginator(queryset, page_size)
+            page_obj = paginator.get_page(page)
+            
+            serializer = ExamPaperScoreSerializer(page_obj.object_list, many=True)
+            return Response({
+                'count': paginator.count,
+                'next': page_obj.has_next() and page_obj.next_page_number() or None,
+                'previous': page_obj.has_previous() and page_obj.previous_page_number() or None,
+                'results': serializer.data,
+                'current_page': page_obj.number,
+                'total_pages': paginator.num_pages,
+            })
+        except Exception as e:
+            logger.error(f"Error listing paper scores: {str(e)}")
+            return Response({"error": "Failed to retrieve paper scores"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(summary="Create a new exam paper score", request=ExamPaperScoreSerializer, responses={201: ExamPaperScoreSerializer})
+    def post(self, request):
+        serializer = ExamPaperScoreSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error creating paper score: {str(e)}")
+            return Response({"error": "Failed to create paper score"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ExamPaperScoreDetailView(APIView):
+    """
+    Retrieve, update or delete an exam paper score.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, pk):
+        return get_object_or_404(ExamPaperScore, pk=pk)
+
+    @extend_schema(summary="Get exam paper score details", responses={200: ExamPaperScoreSerializer})
+    def get(self, request, pk):
+        score = self.get_object(pk)
+        serializer = ExamPaperScoreSerializer(score)
+        return Response(serializer.data)
+
+    @extend_schema(summary="Update exam paper score", request=ExamPaperScoreSerializer, responses={200: ExamPaperScoreSerializer})
+    def put(self, request, pk):
+        score = self.get_object(pk)
+        serializer = ExamPaperScoreSerializer(score, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            serializer.save()
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error updating paper score {pk}: {str(e)}")
+            return Response({"error": "Failed to update paper score"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(summary="Delete an exam paper score", responses={204: None})
+    def delete(self, request, pk):
+        try:
+            score = self.get_object(pk)
+            score.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Error deleting paper score {pk}: {str(e)}")
+            return Response({"error": "Failed to delete paper score"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ExamBulkPaperScoreView(APIView):
+    """
+    Update subject paper scores in bulk for a specific exam and paper.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Bulk update exam subject paper scores",
+        request={
+            "type": "object",
+            "properties": {
+                "paper_id": {"type": "integer"},
+                "scores": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "student_id": {"type": "integer"},
+                            "score": {"type": "number"},
+                            "remarks": {"type": "string"},
+                        }
+                     }
+                }
+            }
+        },
+        responses={200: {"type": "object", "properties": {"message": {"type": "string"}}}}
+    )
+    def post(self, request, public_id):
+        exam = get_object_or_404(Exam, public_id=public_id)
+        paper_id = request.data.get('paper_id')
+        scores_data = request.data.get('scores', [])
+
+        if not paper_id:
+            return Response({"error": "Paper ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        paper = get_object_or_404(SubjectPaper, id=paper_id)
+        
+        updated_count = 0
+        created_count = 0
+
+        for item in scores_data:
+            student_id = item.get('student_id')
+            score_val = item.get('score')
+            remarks = item.get('remarks', '')
+
+            if student_id is None or score_val is None:
+                continue
+
+            score_obj, created = ExamPaperScore.objects.update_or_create(
+                exam=exam,
+                student_id=student_id,
+                paper=paper,
+                defaults={
+                    'score': score_val,
+                    'remarks': remarks
+                }
+            )
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
+        return Response({
+            "message": f"Successfully processed {len(scores_data)} paper scores",
+            "created": created_count,
+            "updated": updated_count
+        })
+
+
+class ExamStudentsPaperScoreView(APIView):
+    """
+    Get all students in an exam's class with their current scores for a specific subject paper.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Get students with paper scores for an exam and paper",
+        parameters=[
+            OpenApiParameter(name='paper_id', type=int, description='Subject Paper ID'),
+        ],
+        responses={200: {"type": "array", "items": {"type": "object"}}}
+    )
+    def get(self, request, public_id):
+        exam = get_object_or_404(Exam, public_id=public_id)
+        paper_id = request.query_params.get('paper_id')
+
+        if not paper_id:
+            return Response({"error": "Paper ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        students = Student.objects.filter(current_stream__class_obj=exam.class_obj, is_active=True).select_related('user_profile')
+        
+        scores = ExamPaperScore.objects.filter(exam=exam, paper_id=paper_id)
+        scores_map = {s.student_id: s for s in scores}
+
+        result = []
+        for student in students:
+            score_obj = scores_map.get(student.id)
+            result.append({
+                "student_id": student.id,
+                "student_name": f"{student.user_profile.first_name} {student.user_profile.last_name}",
+                "admission_number": student.admission_number,
+                "score": score_obj.score if score_obj else None,
+                "remarks": score_obj.remarks if score_obj else "",
+                "score_id": score_obj.id if score_obj else None
+            })
+
+        return Response(result)
+
 
 

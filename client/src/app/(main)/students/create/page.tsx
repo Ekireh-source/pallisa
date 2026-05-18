@@ -15,7 +15,10 @@ import {
   Calendar,
   Layers,
   Info,
-  Building2
+  Building2,
+  Camera,
+  Upload,
+  X
 } from 'lucide-react';
 import { 
   Button, 
@@ -45,6 +48,7 @@ export default function CreateStudentPage() {
   const [streams, setStreams] = useState<any[]>([]);
   const [campuses, setCampuses] = useState<any[]>([]);
   const [loadingCampuses, setLoadingCampuses] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   // Get school from selector
   const school = useSelector(selectSchool);
@@ -78,6 +82,28 @@ export default function CreateStudentPage() {
   const isActive = watch('is_active');
   const selectedCampus = watch('campus');
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size should be less than 2MB");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+        setValue('user_profile_picture', file);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setValue('user_profile_picture', undefined);
+  };
+
   // Update campus when school changes
   useEffect(() => {
     if (school?.campus && !selectedCampus) {
@@ -100,17 +126,38 @@ export default function CreateStudentPage() {
     loadData();
   }, []);
 
-  const onSubmit: SubmitHandler<IStudentInput> = async (data) => {
+  const onSubmit = async (values: any) => {
+    const data = values as IStudentInput;
     setLoading(true);
-    const result = await CreateStudent(data);
     
-    if (result.success) {
-      toast.success("Student created successfully");
-      router.push('/students');
-    } else {
-      toast.error(result.error?.message || "Failed to create student");
+    try {
+      // Create FormData to handle file upload
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          if (key === 'user_profile_picture' && value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+
+      const result = await CreateStudent(formData);
+      
+      if (result.success) {
+        toast.success("Student created successfully");
+        router.push('/students');
+      } else {
+        toast.error(result.error?.message || "Failed to create student");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Alert on validation errors
@@ -292,6 +339,48 @@ export default function CreateStudentPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+                <Camera className="w-5 h-5 mr-2 text-indigo-500" />
+                Profile Picture
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors relative overflow-hidden group">
+                  {selectedImage ? (
+                    <div className="relative w-32 h-32">
+                      <img 
+                        src={selectedImage} 
+                        alt="Preview" 
+                        className="w-32 h-32 rounded-xl object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center cursor-pointer py-4 w-full">
+                      <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-indigo-500" />
+                      </div>
+                      <p className="text-sm font-bold text-gray-700">Upload Photo</p>
+                      <p className="text-[10px] text-gray-500 mt-1">JPG, PNG (Max 2MB)</p>
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
+              <h3 className="font-bold text-gray-900 mb-6 flex items-center">
                 <Info className="w-5 h-5 mr-2 text-indigo-500" />
                 Settings
               </h3>
@@ -335,7 +424,7 @@ export default function CreateStudentPage() {
 
             <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
               <p className="text-xs text-amber-800 leading-relaxed">
-                <strong>Note:</strong> Enrolling a student will automatically create a user account if an email address is provided.
+                <strong>Note:</strong> Enrolling a student will automatically create a user account. They can log in using their <strong>Student ID</strong> or <strong>Email address</strong>.
               </p>
             </div>
           </div>

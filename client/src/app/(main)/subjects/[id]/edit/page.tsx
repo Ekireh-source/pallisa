@@ -4,6 +4,7 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Icon } from '@iconify/react';
 import { 
   ChevronLeft, 
   Save, 
@@ -23,10 +24,16 @@ import {
   Textarea,
   Skeleton
 } from '@/components/ui';
-import { SubjectSchema, ISubjectInput } from '@/features/members/members.schemas';
-import { FetchSubjectById, UpdateSubject, DeleteSubject } from '@/features/members/members.service';
+import { 
+  SubjectSchema, 
+  ISubjectInput
+} from '@/features/members/members.schemas';
+import { 
+  FetchSubjectById, 
+  UpdateSubject, 
+  DeleteSubject
+} from '@/features/members/members.service';
 import { toast } from 'sonner';
-
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { Switch } from '@/components/ui/switch';
@@ -38,6 +45,7 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
   const [fetchingData, setFetchingData] = useState(true);
   const { school } = useSelector((state: RootState) => state.auth);
 
+  // Form for Subject
   const {
     register,
     handleSubmit,
@@ -72,6 +80,7 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
     loadData();
   }, [id, reset, router]);
 
+  // Main Subject Submit Handler
   const onSubmit = async (data: ISubjectInput) => {
     if (!school?.id) {
       toast.error("School information missing.");
@@ -86,7 +95,7 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
     
     if (result.success) {
       toast.success("Subject updated successfully");
-      router.push('/subjects');
+      router.push(`/subjects/${id}`);
     } else {
       toast.error(result.error?.message || "Failed to update subject");
     }
@@ -128,13 +137,13 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
             variant="outline" 
             size="sm" 
             className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
+            onClick={() => router.push(`/subjects/${id}`)}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Edit Subject</h1>
-            <p className="text-gray-500 mt-1">Update course details for the school curriculum.</p>
+            <p className="text-gray-500 mt-1">Update course details and settings.</p>
           </div>
         </div>
         <Button 
@@ -239,7 +248,7 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
                 type="button"
                 variant="ghost" 
                 className="w-full mt-2 h-11 rounded-xl text-gray-500"
-                onClick={() => router.back()}
+                onClick={() => router.push(`/subjects/${id}`)}
               >
                 Cancel
               </Button>

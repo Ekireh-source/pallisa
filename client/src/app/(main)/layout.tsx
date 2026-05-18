@@ -7,8 +7,8 @@ import { RootState, AppDispatch } from '@/store';
 import { logoutStart } from '@/store/auth/actions';
 
 import { SharedNavbar } from '@/components/layout/SharedNavbar';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/layout/AppSidebar';
+import DashboardSideBar from '@/components/navigation/dashboard-sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function MainLayout({
   children,
@@ -21,6 +21,8 @@ export default function MainLayout({
   const { accessToken, school, user } = useSelector((state: RootState) => state.auth);
 
   const [mounted, setMounted] = React.useState(false);
+  const [isSideBarOpen, setIsSideBarOpen] = React.useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setMounted(true);
@@ -58,18 +60,23 @@ export default function MainLayout({
     return null;
   }
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="flex flex-col">
-        <SharedNavbar />
-        <div className="flex-1 flex flex-col min-h-0 bg-white">
-          <div className="flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-              {children}
-            </div>
+    <div className="min-h-screen flex bg-gray-50/50 w-full overflow-hidden">
+      <DashboardSideBar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
+      
+      <div 
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
+          isMobile ? 'pl-0' : isSideBarOpen ? 'pl-64' : 'pl-20'
+        }`}
+      >
+        <SharedNavbar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
+        
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+            
+            {children}
           </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </main>
+      </div>
+    </div>
   );
 }

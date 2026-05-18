@@ -3,8 +3,11 @@ import {
   ICampusInput, 
   CampusSchema, 
   ISchoolInput, 
-  SchoolSchema 
+  SchoolSchema,
+  ICampusListResponse,
+  ISchoolListResponse
 } from "./school.schemas";
+import { IPaginatedResponse } from "@/types";
 import api from "@/lib/api";
 
 /**
@@ -20,9 +23,9 @@ const handleValidationError = (error: z.ZodError) => {
 export const FetchSchools = async (params?: any) => {
   try {
     const res = await api.get(`/schools/schools/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ISchoolListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -35,22 +38,42 @@ export const FetchSchoolById = async (id: number | string) => {
   }
 };
 
-export const CreateSchool = async ({ data }: { data: ISchoolInput }) => {
+export const CreateSchool = async ({ data, logo }: { data: ISchoolInput; logo?: File | null }) => {
   const validatedData = SchoolSchema.safeParse(data);
   if (!validatedData.success) {
     return handleValidationError(validatedData.error);
   }
   try {
-    const res = await api.post(`/schools/schools/`, validatedData.data);
+    let res;
+    if (logo) {
+      const fd = new FormData();
+      Object.entries(validatedData.data).forEach(([k, v]) => {
+        if (v !== null && v !== undefined) fd.append(k, String(v));
+      });
+      fd.append('logo', logo);
+      res = await api.post(`/schools/schools/`, fd);
+    } else {
+      res = await api.post(`/schools/schools/`, validatedData.data);
+    }
     return { success: true, data: res.data };
   } catch (error) {
     return { success: false, error };
   }
 };
 
-export const UpdateSchool = async ({ id, data }: { id: string; data: Partial<ISchoolInput> }) => {
+export const UpdateSchool = async ({ id, data, logo }: { id: number | string; data: Partial<ISchoolInput> & { report_primary_color?: string; report_accent_color?: string }; logo?: File | null }) => {
   try {
-    const res = await api.patch(`/schools/schools/${id}/`, data);
+    let res;
+    if (logo) {
+      const fd = new FormData();
+      Object.entries(data).forEach(([k, v]) => {
+        if (v !== null && v !== undefined) fd.append(k, String(v));
+      });
+      fd.append('logo', logo);
+      res = await api.patch(`/schools/schools/${id}/`, fd);
+    } else {
+      res = await api.patch(`/schools/schools/${id}/`, data);
+    }
     return { success: true, data: res.data };
   } catch (error) {
     return { success: false, error };
@@ -71,9 +94,9 @@ export const DeleteSchool = async (id: string) => {
 export const FetchCampuses = async (params?: any) => {
   try {
     const res = await api.get(`/schools/campuses/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ICampusListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 

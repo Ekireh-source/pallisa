@@ -43,6 +43,7 @@ import {
 } from '@/components/ui';
 import { FetchExamById, FetchExamStudentScores, SaveBulkExamScores } from '@/features/exam/exam.service';
 import { FetchSubjects } from '@/features/members/members.service';
+import SubjectSearchableSelect from '@/components/selects/subjectsearchableselect';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -260,16 +261,12 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
               <BookOpen className="w-4 h-4 mr-2 text-amber-500" />
               Select Subject
             </Label>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 shadow-sm">
-                <SelectValue placeholder="Choose a subject to enter marks" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-xl">
-                {subjects.map(s => (
-                  <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SubjectSearchableSelect
+              value={selectedSubject}
+              onValueChange={setSelectedSubject}
+              placeholder="Choose a subject to enter marks"
+              triggerClassName="h-12 rounded-xl bg-white border-gray-200 shadow-sm"
+            />
           </div>
 
           <div className="relative">

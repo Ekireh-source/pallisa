@@ -20,53 +20,16 @@ def get_current_date():
     return timezone.now().date()
 
 
-def generate_password(length=8):
-    """Generate a random password"""
-    return get_random_string(length, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
 
-
-def send_login_credentials(user, password, role_type):
-    """Send login credentials to user via email"""
-    try:
-        # Get the full name from UserProfile, not User
-        full_name = 'User'
-        if hasattr(user, 'profile') and user.profile:
-            full_name = user.profile.get_full_name()
-        elif hasattr(user, 'first_name') and hasattr(user, 'last_name'):
-            full_name = f"{user.first_name} {user.last_name}".strip() or 'User'
-            
-        subject = f'Your {role_type.title()} Account Credentials'
-        message = f"""
-Dear {full_name},
-
-Your {role_type} account has been created successfully.
-
-Login Details:
-Email: {user.email}
-Password: {password}
-
-Please login and change your password immediately.
-
-Best regards,
-School Administration
-        """
-        
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=True,
-        )
-    except Exception as e:
-        # Log the error but don't fail the user creation
-        print(f"Failed to send email to {user.email}: {str(e)}")
-
-
+LEVELS = (
+    ('0level', '0level'),
+    ('Alevel', 'Alevel'),
+)
 class Class(models.Model):
     """Model to represent class levels (formerly Grade)"""
     name = models.CharField(max_length=50)  # e.g., "Grade 1", "Primary 1", "S1"
     campus = models.ForeignKey(Campus, on_delete=models.CASCADE, related_name='classes')
+    level = models.CharField(max_length=50, choices=LEVELS, null=True, blank=True)  # e.g., "Primary", "Secondary"
     description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -153,6 +116,112 @@ def generate_student_id(school):
             raise ValidationError("Unable to generate unique student ID - too many students for this year")
             
     return student_id
+
+
+def generate_employee_id(school=None):
+    """Generate a unique employee ID for a teacher"""
+    if not school:
+        from accounts.models import School
+        school = School.objects.first()
+    
+    if school:
+        year = timezone.now().year
+        school_code = school.name[:3].upper()
+        
+        # Use transaction-safe ID generation with row-level locking
+        with transaction.atomic():
+            # Lock the existing teachers to prevent race conditions
+            # We use string name for model to avoid circular reference if called before class
+            from members.models import Teacher
+            existing_teachers = Teacher.objects.select_for_update().filter(
+                employee_id__startswith=f"T{school_code}{year}"
+            ).order_by('-employee_id')
+            
+            if existing_teachers.exists():
+                # Extract the number from the last employee_id and increment
+                last_employee_id = existing_teachers.first().employee_id
+                try:
+                    # Extract the numeric part (last 3 digits)
+                    last_number = int(last_employee_id[-3:])
+                    new_number = last_number + 1
+                except (ValueError, IndexError):
+                    # If we can't parse the number, start from 1
+                    new_number = 1
+            else:
+                # First teacher for this school and year
+                new_number = 1
+            
+            # Generate the new employee_id with zero-padding
+            employee_id = f"T{school_code}{year}{new_number:03d}"
+            
+            # Final check for uniqueness within the same transaction
+            while Teacher.objects.filter(employee_id=employee_id).exists():
+                new_number += 1
+                employee_id = f"T{school_code}{year}{new_number:03d}"
+                if new_number > 999:  # Prevent infinite loop
+                    raise ValidationError("Unable to generate unique employee ID - too many teachers for this year")
+            return employee_id
+    else:
+        # Fallback: use timestamp-based ID if no school is available
+        timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+        employee_id = f"T{timestamp}"
+        
+        # Ensure uniqueness
+        from members.models import Teacher
+        while Teacher.objects.filter(employee_id=employee_id).exists():
+            import time
+            time.sleep(0.001)
+            timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+            employee_id = f"T{timestamp}"
+        return employee_id
+
+
+def generate_parent_id(school=None):
+    """Generate a unique parent ID"""
+    if not school:
+        from accounts.models import School
+        school = School.objects.first()
+        
+    if school:
+        year = timezone.now().year
+        school_code = school.name[:3].upper()
+        
+        # Use transaction-safe ID generation with row-level locking
+        with transaction.atomic():
+            from members.models import Parent
+            # Lock the existing parents to prevent race conditions
+            existing_parents = Parent.objects.select_for_update().filter(
+                parent_id__startswith=f"P{school_code}{year}"
+            ).order_by('-parent_id')
+            
+            if existing_parents.exists():
+                # Extract the number from the last parent_id and increment
+                last_parent_id = existing_parents.first().parent_id
+                try:
+                    # Extract the numeric part (last 3 digits)
+                    last_number = int(last_parent_id[-3:])
+                    new_number = last_number + 1
+                except (ValueError, IndexError):
+                    # If we can't parse the number, start from 1
+                    new_number = 1
+            else:
+                # First parent for this school and year
+                new_number = 1
+            
+            # Generate the new parent_id with zero-padding
+            parent_id = f"P{school_code}{year}{new_number:03d}"
+            
+            # Final check for uniqueness within the same transaction
+            while Parent.objects.filter(parent_id=parent_id).exists():
+                new_number += 1
+                parent_id = f"P{school_code}{year}{new_number:03d}"
+                if new_number > 999:  # Prevent infinite loop
+                    raise ValidationError("Unable to generate unique parent ID - too many parents for this year")
+            return parent_id
+    else:
+        # Fallback: use timestamp-based ID if no school is available
+        timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+        return f"P{timestamp}"
 
 
 class Student(models.Model):
@@ -350,54 +419,7 @@ class Teacher(models.Model):
             if self.user_profile and self.user_profile.role:
                 school = self.user_profile.role.school
             
-            # If no school from role, try to get from any available school
-            if not school:
-                from accounts.models import School
-                school = School.objects.first()
-            
-            if school:
-                year = timezone.now().year
-                school_code = school.name[:3].upper()
-                
-                # Use transaction-safe ID generation with row-level locking
-                with transaction.atomic():
-                    # Lock the existing teachers to prevent race conditions
-                    existing_teachers = Teacher.objects.select_for_update().filter(
-                        employee_id__startswith=f"T{school_code}{year}"
-                    ).order_by('-employee_id')
-                    
-                    if existing_teachers.exists():
-                        # Extract the number from the last employee_id and increment
-                        last_employee_id = existing_teachers.first().employee_id
-                        try:
-                            # Extract the numeric part (last 3 digits)
-                            last_number = int(last_employee_id[-3:])
-                            new_number = last_number + 1
-                        except (ValueError, IndexError):
-                            # If we can't parse the number, start from 1
-                            new_number = 1
-                    else:
-                        # First teacher for this school and year
-                        new_number = 1
-                    
-                    # Generate the new employee_id with zero-padding
-                    self.employee_id = f"T{school_code}{year}{new_number:03d}"
-                    
-                    # Final check for uniqueness within the same transaction
-                    while Teacher.objects.filter(employee_id=self.employee_id).exists():
-                        new_number += 1
-                        self.employee_id = f"T{school_code}{year}{new_number:03d}"
-                        if new_number > 999:  # Prevent infinite loop
-                            raise ValidationError("Unable to generate unique employee ID - too many teachers for this year")
-            else:
-                # Fallback: use timestamp-based ID if no school is available
-                timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
-                self.employee_id = f"T{timestamp}"
-                
-                # Ensure uniqueness
-                while Teacher.objects.filter(employee_id=self.employee_id).exists():
-                    timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
-                    self.employee_id = f"T{timestamp}"
+            self.employee_id = generate_employee_id(school)
         
         # Ensure user_profile has staff user_type
         if self.user_profile and self.user_profile.user_type not in ['staff', 'admin']:
@@ -555,40 +577,7 @@ class Parent(models.Model):
         # Auto-generate parent_id if not provided
         if not self.parent_id:
             school = self.user_profile.role.school if self.user_profile and self.user_profile.role else None
-            if school:
-                year = timezone.now().year
-                school_code = school.name[:3].upper()
-                
-                # Use transaction-safe ID generation with row-level locking
-                with transaction.atomic():
-                    # Lock the existing parents to prevent race conditions
-                    existing_parents = Parent.objects.select_for_update().filter(
-                        parent_id__startswith=f"P{school_code}{year}"
-                    ).order_by('-parent_id')
-                    
-                    if existing_parents.exists():
-                        # Extract the number from the last parent_id and increment
-                        last_parent_id = existing_parents.first().parent_id
-                        try:
-                            # Extract the numeric part (last 3 digits)
-                            last_number = int(last_parent_id[-3:])
-                            new_number = last_number + 1
-                        except (ValueError, IndexError):
-                            # If we can't parse the number, start from 1
-                            new_number = 1
-                    else:
-                        # First parent for this school and year
-                        new_number = 1
-                    
-                    # Generate the new parent_id with zero-padding
-                    self.parent_id = f"P{school_code}{year}{new_number:03d}"
-                    
-                    # Final check for uniqueness within the same transaction
-                    while Parent.objects.filter(parent_id=self.parent_id).exists():
-                        new_number += 1
-                        self.parent_id = f"P{school_code}{year}{new_number:03d}"
-                        if new_number > 999:  # Prevent infinite loop
-                            raise ValidationError("Unable to generate unique parent ID - too many parents for this year")
+            self.parent_id = generate_parent_id(school)
         
         # Ensure user_profile has parent user_type
         if self.user_profile and self.user_profile.user_type != 'parent':
@@ -689,6 +678,42 @@ class Subject(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name}"
+
+
+class SubjectPaper(models.Model):
+    """
+    Represents an individual paper under a subject (primarily for A-Level, e.g. Paper 1, Paper 2).
+    """
+    subject = models.ForeignKey(
+        Subject, 
+        on_delete=models.CASCADE, 
+        related_name='papers'
+    )
+    name = models.CharField(
+        max_length=100, 
+        help_text="Name of the paper, e.g., 'Paper 1', 'Paper 2'"
+    )
+    code = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True, 
+        help_text="Official paper code, e.g., 'P425/1'"
+    )
+    max_score = models.PositiveIntegerField(
+        default=100, 
+        help_text="Maximum raw marks achievable in this paper"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['subject', 'name']
+        verbose_name = "Subject Paper"
+        verbose_name_plural = "Subject Papers"
+
+    def __str__(self):
+        return f"{self.subject.code} - {self.name}"
 
 
 class TeacherSubjectAssignment(models.Model):

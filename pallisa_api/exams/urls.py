@@ -29,4 +29,10 @@ urlpatterns = [
     path('exam-scores/<int:pk>/', views.ExamScoreDetailView.as_view(), name='exam-scores-detail'),
     path('exams/<uuid:public_id>/bulk-scores/', views.ExamBulkScoreView.as_view(), name='exam-bulk-scores'),
     path('exams/<uuid:public_id>/student-scores/', views.ExamStudentsScoreView.as_view(), name='exam-student-scores'),
+
+    # Exam Paper Scores
+    path('exam-paper-scores/', views.ExamPaperScoreListCreateView.as_view(), name='exam-paper-scores-list-create'),
+    path('exam-paper-scores/<int:pk>/', views.ExamPaperScoreDetailView.as_view(), name='exam-paper-scores-detail'),
+    path('exams/<uuid:public_id>/bulk-paper-scores/', views.ExamBulkPaperScoreView.as_view(), name='exam-bulk-paper-scores'),
+    path('exams/<uuid:public_id>/student-paper-scores/', views.ExamStudentsPaperScoreView.as_view(), name='exam-student-paper-scores'),
 ]

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
+import { Icon } from '@iconify/react';
 import { 
   User, 
   Mail, 
@@ -45,9 +46,11 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui';
-import { FetchStudentById, FetchAcademicYears, FetchTerms } from '@/features/members/members.service';
+import { FetchStudentById } from '@/features/members/members.service';
 import { GenerateReportCards } from '@/features/reports/reports.service';
-import { MemberStudent, AcademicYear, Term } from '@/types';
+import AcademicYearSearchableSelect from '@/components/selects/academicyearsearchableselect';
+import TermSearchableSelect from '@/components/selects/termsearchableselect';
+import { MemberStudent } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -65,8 +68,6 @@ export default function StudentDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showGenModal, setShowGenModal] = useState(false);
-  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-  const [terms, setTerms] = useState<Term[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedTerm, setSelectedTerm] = useState<string>("");
   
@@ -86,27 +87,11 @@ export default function StudentDetailPage({ params }: PageProps) {
     };
 
     loadStudent();
-    loadOptions();
   }, [id, router]);
 
-  const loadOptions = async () => {
-    const [yearsRes, termsRes] = await Promise.all([
-      FetchAcademicYears(),
-      FetchTerms()
-    ]);
-    
-    if (yearsRes.success) {
-      setAcademicYears(yearsRes.data.results || yearsRes.data);
-      const current = (yearsRes.data.results || yearsRes.data).find((y: any) => y.is_current);
-      if (current) setSelectedYear(current.id.toString());
-    }
-    
-    if (termsRes.success) {
-      setTerms(termsRes.data.results || termsRes.data);
-      const current = (termsRes.data.results || termsRes.data).find((t: any) => t.is_current);
-      if (current) setSelectedTerm(current.id.toString());
-    }
-  };
+  useEffect(() => {
+    setSelectedTerm('');
+  }, [selectedYear]);
 
   const handleGenerate = async () => {
     if (!selectedYear || !selectedTerm) {
@@ -220,21 +205,21 @@ export default function StudentDetailPage({ params }: PageProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-white hover:shadow-md transition-all">
-                <MoreVertical className="w-5 h-5" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-2xl p-2 min-w-[200px] shadow-xl border-none ring-1 ring-gray-100">
               <DropdownMenuItem className="rounded-xl p-3 cursor-pointer">
-                <History className="w-4 h-4 mr-3 text-gray-400" />
+                <Icon icon="hugeicons:task-list-done" className="w-4 h-4 mr-3 text-gray-400" />
                 <span>View Attendance</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="rounded-xl p-3 cursor-pointer">
-                <GraduationCap className="w-4 h-4 mr-3 text-gray-400" />
+                <Icon icon="hugeicons:graduation-cap" className="w-4 h-4 mr-3 text-gray-400" />
                 <span>View Results</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="my-2 bg-gray-100" />
               <DropdownMenuItem className="rounded-xl p-3 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700">
-                <Trash2 className="w-4 h-4 mr-3" />
+                <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-3" />
                 <span>Delete Student</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -449,34 +434,24 @@ export default function StudentDetailPage({ params }: PageProps) {
           <div className="space-y-6 py-6">
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Academic Year</label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:ring-indigo-500 font-bold">
-                  <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-xl">
-                  {academicYears.map(year => (
-                    <SelectItem key={year.id} value={year.id.toString()} className="rounded-xl p-3 font-medium">
-                      {year.name} {year.is_current ? "(Current)" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AcademicYearSearchableSelect
+                value={selectedYear}
+                onValueChange={setSelectedYear}
+                placeholder="Select Year"
+                triggerClassName="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:ring-indigo-500 font-bold text-gray-900"
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Term</label>
-              <Select value={selectedTerm} onValueChange={setSelectedTerm}>
-                <SelectTrigger className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:ring-indigo-500 font-bold">
-                  <SelectValue placeholder="Select Term" />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-xl">
-                  {terms.map(term => (
-                    <SelectItem key={term.id} value={term.id.toString()} className="rounded-xl p-3 font-medium">
-                      {term.name} {term.is_current ? "(Current)" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <TermSearchableSelect
+                value={selectedTerm}
+                onValueChange={setSelectedTerm}
+                academicYearId={selectedYear}
+                disabled={!selectedYear}
+                placeholder="Select Term"
+                triggerClassName="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:ring-indigo-500 font-bold text-gray-900"
+              />
             </div>
           </div>
 

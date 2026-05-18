@@ -18,11 +18,13 @@ from django.db.models import Q
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("Users must have an email address")
+    def create_user(self, email=None, password=None, **extra_fields):
+        if not email and not extra_fields.get('student_id') and not extra_fields.get('employee_id'):
+            raise ValueError("Users must have an email address, student_id, or employee_id")
 
-        email = self.normalize_email(email)
+        if email:
+            email = self.normalize_email(email)
+        
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -42,7 +44,7 @@ class CustomUserManager(BaseUserManager):
 
     def get_by_natural_key(self, username):
         """
-        Enable authentication with either email or student_id
+        Enable authentication with either email, student_id, or employee_id
         """
         try:
             return self.get(email=username)
@@ -50,12 +52,16 @@ class CustomUserManager(BaseUserManager):
             try:
                 return self.get(student_id=username)
             except self.model.DoesNotExist:
-                raise
+                try:
+                    return self.get(employee_id=username)
+                except self.model.DoesNotExist:
+                    raise
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True, blank=True, db_index=True)
+    email = models.EmailField(unique=True, blank=True, null=True, db_index=True)
     student_id = models.CharField(max_length=100, unique=True, blank=True, null=True, db_index=True)
+    employee_id = models.CharField(max_length=100, unique=True, blank=True, null=True, db_index=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
@@ -88,6 +94,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         indexes = [
             models.Index(fields=['email']),
             models.Index(fields=['student_id']),
+            models.Index(fields=['employee_id']),
             models.Index(fields=['email_verified']),
         ]
 

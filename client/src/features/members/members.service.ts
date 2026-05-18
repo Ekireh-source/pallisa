@@ -1,11 +1,23 @@
 import api from "@/lib/api";
+import { IPaginatedResponse } from "@/types";
+import { 
+  IClassListResponse, 
+  ISubjectListResponse, 
+  IStreamListResponse, 
+  IAcademicYearListResponse, 
+  ITermListResponse, 
+  ITeacher, 
+  IStudent,
+  ISubjectPaperListResponse 
+} from "./members.schemas";
+
 
 export const FetchClasses = async (params?: any) => {
   try {
     const res = await api.get(`/members/classes/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<IClassListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -48,9 +60,9 @@ export const DeleteClass = async (id: number | string) => {
 export const FetchSubjects = async (params?: any) => {
   try {
     const res = await api.get(`/members/subjects/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ISubjectListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -93,9 +105,9 @@ export const DeleteSubject = async (id: number | string) => {
 export const FetchStreams = async (params?: any) => {
   try {
     const res = await api.get(`/members/streams/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<IStreamListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -138,10 +150,9 @@ export const DeleteStream = async (id: number | string) => {
 export const FetchAcademicYears = async (params?: any) => {
   try {
     const res = await api.get(`/expenses/academic-years/`, params);
-    
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<IAcademicYearListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -184,9 +195,9 @@ export const DeleteAcademicYear = async (id: number | string) => {
 export const FetchTerms = async (params?: any) => {
   try {
     const res = await api.get(`/expenses/terms/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ITermListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -229,9 +240,9 @@ export const DeleteTerm = async (id: number | string) => {
 export const FetchTeachers = async (params?: any) => {
   try {
     const res = await api.get(`/members/teachers/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ITeacher>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -274,9 +285,9 @@ export const DeleteTeacher = async (id: number | string) => {
 export const FetchStudents = async (params?: any) => {
   try {
     const res = await api.get(`/members/students/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<IStudent>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -333,5 +344,43 @@ export const BulkUploadTeachers = async (data: { teachers: any[] }) => {
     return { success: false, error };
   }
 };
+
+
+export const FetchSubjectPapers = async (params?: any) => {
+  try {
+    const res = await api.get(`/members/subject-papers/`, params);
+    return res.data as IPaginatedResponse<ISubjectPaperListResponse>;
+  } catch (error) {
+    return { error };
+  }
+};
+
+export const CreateSubjectPaper = async (data: any) => {
+  try {
+    const res = await api.post(`/members/subject-papers/`, data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const UpdateSubjectPaper = async (id: number | string, data: any) => {
+  try {
+    const res = await api.put(`/members/subject-papers/${id}/`, data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const DeleteSubjectPaper = async (id: number | string) => {
+  try {
+    const res = await api.delete(`/members/subject-papers/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
 
 

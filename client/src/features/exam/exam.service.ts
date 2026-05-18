@@ -4,8 +4,13 @@ import {
   IActivityInput, ActivitySchema,
   IIntegrationScoreInput, IntegrationScoreSchema,
   IExamInput, ExamSchema,
-  IExamScoreInput, ExamScoreSchema
+  IExamScoreInput, ExamScoreSchema,
+  ICompetencyAreaListResponse,
+  ITopicListResponse,
+  IActivityListResponse,
+  IExamListResponse
 } from "./exam.schemas";
+import { IPaginatedResponse } from "@/types";
 import api from "@/lib/api";
 
 /**
@@ -21,9 +26,9 @@ const handleValidationError = (error: z.ZodError) => {
 export const FetchCompetencyAreas = async (params?: any) => {
   try {
     const res = await api.get(`/exams/competency-areas/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ICompetencyAreaListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -68,9 +73,9 @@ export const DeleteCompetencyArea = async (id: number) => {
 export const FetchTopics = async (params?: any) => {
   try {
     const res = await api.get(`/exams/topics/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<ITopicListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -119,9 +124,9 @@ export const DeleteTopic = async (id: number) => {
 export const FetchActivities = async (params?: any) => {
   try {
     const res = await api.get(`/exams/activities/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<IActivityListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 
@@ -212,9 +217,9 @@ export const DeleteIntegrationScore = async (id: number) => {
 export const FetchExams = async (params?: any) => {
   try {
     const res = await api.get(`/exams/exams/`, params);
-    return { success: true, data: res.data };
+    return res.data as IPaginatedResponse<IExamListResponse>
   } catch (error) {
-    return { success: false, error };
+    return { error };
   }
 };
 

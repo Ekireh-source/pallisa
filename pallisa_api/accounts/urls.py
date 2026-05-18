@@ -7,6 +7,7 @@ from .views import (
     ResetPasswordView,
     RoleDetailView,
     RoleListCreateView,
+    RoleAssignPermissionsView,
     UserPermissionListAPIView,
     UserProfileListView,
     UserProfileDetailView,
@@ -56,6 +57,7 @@ urlpatterns = [
     # Role and permission endpoints
     path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
     path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-detail'),
+    path('roles/<int:pk>/assign-permissions/', RoleAssignPermissionsView.as_view(), name='role-assign-permissions'),
     path('permissions/', PermissionListView.as_view()),
     path("user-permissions/assign/", AssignUserPermissionAPIView.as_view(), name="assign-user-permission"),
     path("user-permissions/remove/", RemoveDirectUserPermissionAPIView.as_view(), name="remove-user-permission"),

@@ -15,7 +15,10 @@ import {
   Calendar,
   Layers,
   Info,
-  Trash2
+  Trash2,
+  Camera,
+  Upload,
+  X
 } from 'lucide-react';
 import { 
   Button, 
@@ -37,6 +40,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [streams, setStreams] = useState<any[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const {
     register,
@@ -59,6 +63,28 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
 
   const isActive = watch('is_active');
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size should be less than 2MB");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+        setValue('user_profile_picture', file);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setValue('user_profile_picture', null); // Set to null to indicate removal
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setInitialLoading(true);
@@ -71,6 +97,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
 
       if (studentRes.success) {
         const student = studentRes.data;
+        setSelectedImage(student.user_profile_data?.profile_picture || null);
         reset({
           user_email: student.user_email,
           student_id: student.student_id,
@@ -91,17 +118,42 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
     loadData();
   }, [id, reset, router]);
 
-  const onSubmit = async (data: IStudentInput) => {
+  const onSubmit = async (values: any) => {
+    const data = values as IStudentInput;
     setLoading(true);
-    const result = await UpdateStudent(id, data);
     
-    if (result.success) {
-      toast.success("Student updated successfully");
-      router.push('/students');
-    } else {
-      toast.error("Failed to update student");
+    try {
+      // Create FormData to handle file upload
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          if (key === 'user_profile_picture') {
+             if (value instanceof File) {
+               formData.append(key, value);
+             } else if (value === null) {
+               formData.append(key, ''); // Indicate removal
+             }
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+
+      const result = await UpdateStudent(id, formData);
+      
+      if (result.success) {
+        toast.success("Student updated successfully");
+        router.push('/students');
+      } else {
+        toast.error("Failed to update student");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async () => {
@@ -301,6 +353,48 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
 
           {/* Sidebar */}
           <div className="space-y-6">
+            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
+              <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+                <Camera className="w-5 h-5 mr-2 text-indigo-500" />
+                Profile Picture
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors relative overflow-hidden group">
+                  {selectedImage ? (
+                    <div className="relative w-32 h-32">
+                      <img 
+                        src={selectedImage} 
+                        alt="Preview" 
+                        className="w-32 h-32 rounded-xl object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center cursor-pointer py-4 w-full">
+                      <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-indigo-500" />
+                      </div>
+                      <p className="text-sm font-bold text-gray-700">Upload Photo</p>
+                      <p className="text-[10px] text-gray-500 mt-1">JPG, PNG (Max 2MB)</p>
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </Card>
+
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
                 <Info className="w-5 h-5 mr-2 text-indigo-500" />
