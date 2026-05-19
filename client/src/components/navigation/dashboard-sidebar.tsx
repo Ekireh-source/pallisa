@@ -119,7 +119,7 @@ export default function DashboardSideBar({ isSideBarOpen, setIsSideBarOpen }: Da
             href: "#academic",
             icon: (
                 <Icon
-                    icon="hugeicons:graduation-cap"
+                    icon="hugeicons:global-education"
                     className="!w-6 !h-6"
                     width="28"
                     height="28"
