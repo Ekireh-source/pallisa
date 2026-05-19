@@ -180,8 +180,8 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
       )}
 
       {/* ── Marks Table ── */}
-      <div className="mb-8 overflow-hidden rounded-xl border border-gray-200">
-        <table className="w-full text-sm border-collapse">
+      <div className="mb-8 overflow-x-auto rounded-xl border border-gray-200">
+        <table className="w-full text-sm border-collapse min-w-[800px]">
           <thead>
             <tr className="text-white" style={{ backgroundColor: primaryColor }}>
               <th className="px-4 py-3 text-left font-bold border-r" style={{ borderColor: `${primaryColor}CC` }}>Subject</th>

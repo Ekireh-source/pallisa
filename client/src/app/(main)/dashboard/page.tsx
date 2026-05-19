@@ -97,12 +97,12 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.first_name || 'Admin'}!
+            Welcome back, {'Admin'}!
           </h1>
           <p className="text-gray-500 mt-1">
             Here's what's happening at Pallisa High School today.
@@ -169,13 +169,13 @@ export default function DashboardPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentTransactions.map((tx) => (
+                  {recentTransactions.map((tx: any) => (
                     <TableRow key={tx.id} className="hover:bg-gray-50/50 transition-colors">
                       <TableCell className="font-medium text-gray-900">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8 ring-2 ring-white">
                             <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                              {tx.student.split(' ').map(n => n[0]).join('')}
+                              {tx.student.split(' ').map((n: any) => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
                           {tx.student}

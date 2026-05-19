@@ -29,6 +29,8 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 
+import { IGradingSystemListResponse } from '@/features/reports/reports.schemas';
+
 import { Icon } from '@iconify/react';
 import { MainLayout } from '@/components/layout/main-layout';
 
@@ -39,8 +41,12 @@ export default function GradingSystemsListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchGradingSystems(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchGradingSystems(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const handleDelete = async (id: number) => {
@@ -55,13 +61,13 @@ export default function GradingSystemsListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IGradingSystemListResponse>[] = [
     {
       key: "name",
       header: "System Name",
       cell: (system) => (
         <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <Layers className="w-4 h-4" />
           </div>
           <div>
@@ -154,7 +160,7 @@ export default function GradingSystemsListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search grading systems..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-indigo-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

@@ -28,6 +28,7 @@ import { toast } from 'sonner';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { FetchClassById, FetchStreams, DeleteStream } from '@/features/members/members.service';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { IStreamListResponse } from '@/features/members/members.schemas';
 import Link from 'next/link';
 
 export default function ClassDetailPage() {
@@ -80,13 +81,13 @@ export default function ClassDetailPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IStreamListResponse>[] = [
     {
       key: "name",
       header: "Stream Name",
       cell: (stream) => (
         <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <Layers className="w-4 h-4" />
           </div>
           <div>

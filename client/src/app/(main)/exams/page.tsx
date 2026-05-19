@@ -33,6 +33,8 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 
+import { IExamListResponse } from '@/features/exam/exam.schemas';
+
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function ExamsListPage() {
@@ -41,15 +43,15 @@ export default function ExamsListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchExams(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchExams(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
-  const fetchFromUrl = (url: string, query?: any) => {
-    return getPaginatedFromUrl(url, query);
-  };
-
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this exam?")) {
       const res = await DeleteExam(id);
       if (res.success) {
@@ -61,13 +63,13 @@ export default function ExamsListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IExamListResponse>[] = [
     {
       key: "name",
       header: "Exam Details",
       cell: (exam) => (
         <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <ClipboardCheck className="w-4 h-4" />
           </div>
           <div>
@@ -81,7 +83,7 @@ export default function ExamsListPage() {
       key: "academic_year_name",
       header: "Academic Year",
       cell: (exam) => (
-        <span className="font-medium text-gray-600">{exam.academic_year_name || 'N/A'}</span>
+        <span className="font-medium text-gray-600">{exam.class_obj || 'N/A'}</span>
       ),
     },
     {
@@ -104,7 +106,7 @@ export default function ExamsListPage() {
       key: "status",
       header: "Status",
       cell: (exam) => (
-        exam.active ? (
+        exam.is_published ? (
           <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-3 py-1 flex items-center gap-1 w-fit rounded-full">
             <CheckCircle2 className="w-3 h-3" />
             <span>Active</span>
@@ -130,21 +132,21 @@ export default function ExamsListPage() {
             <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
               <DropdownMenuItem 
                 className="cursor-pointer py-2 font-medium"
-                onClick={() => router.push(`/exams/${exam.id}`)}
+                onClick={() => router.push(`/exams/${exam.public_id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem 
                 className="cursor-pointer py-2"
-                onClick={() => router.push(`/exams/${exam.id}/edit`)}
+                onClick={() => router.push(`/exams/${exam.public_id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem 
                 className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
-                onClick={() => handleDelete(exam.id)}
+                onClick={() => handleDelete(exam.public_id)}
               >
                 <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />
                 Delete
@@ -161,7 +163,7 @@ export default function ExamsListPage() {
       title="Examinations"
       description="Schedule and manage school-wide assessments."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/exams/create">
             <Plus className="w-4 h-4 mr-2" />
             New Exam
@@ -175,7 +177,7 @@ export default function ExamsListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search exams..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-amber-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -185,7 +187,7 @@ export default function ExamsListPage() {
         <div className="p-4">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={fetchFromUrl}
+            fetchFromUrl={getPaginatedFromUrl}
             columns={columns}
             showRowNumbers={false}
             skeletonRows={5}

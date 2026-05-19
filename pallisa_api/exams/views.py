@@ -1,4 +1,6 @@
-from members.models import Subject, Student, SubjectPaper
+from expenses.models import AcademicYear
+from expenses.models import Term
+from members.models import Subject, Student, SubjectPaper, Stream, TeacherSubjectAssignment, Teacher
 import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,7 +8,10 @@ from rest_framework import status, permissions
 from django.core.paginator import Paginator
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.shortcuts import get_object_or_404
-from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, CompetencyArea, ExamPaperScore
+from .models import (
+    Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, 
+    CompetencyArea, ExamPaperScore, ProjectScore, SaAssessment, SaScore
+)
 from .serializers import (
     TopicsSerializer, 
     ActivityOfIntegrationSerializer, 
@@ -14,7 +19,10 @@ from .serializers import (
     ExamSerializer,
     ExamScoreSerializer,
     CompetencyAreaSerializer,
-    ExamPaperScoreSerializer
+    ExamPaperScoreSerializer,
+    ProjectScoreSerializer,
+    SaAssessmentSerializer,
+    SaScoreSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -670,23 +678,45 @@ class ExamBulkScoreView(APIView):
             student_id = item.get('student_id')
             score_val = item.get('score')
             remarks = item.get('remarks', '')
+            papers_data = item.get('papers', {})
 
-            if student_id is None or score_val is None:
+            if student_id is None:
                 continue
 
-            score_obj, created = ExamScore.objects.update_or_create(
-                exam=exam,
-                student_id=student_id,
-                subject=subject,
-                defaults={
-                    'score': score_val,
-                    'remarks': remarks
-                }
-            )
-            if created:
-                created_count += 1
-            else:
-                updated_count += 1
+            if score_val is not None and str(score_val).strip() != "":
+                score_obj, created = ExamScore.objects.update_or_create(
+                    exam=exam,
+                    student_id=student_id,
+                    subject=subject,
+                    defaults={
+                        'score': score_val,
+                        'remarks': remarks
+                    }
+                )
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+
+            for paper_id_str, paper_score in papers_data.items():
+                if paper_score is not None and str(paper_score).strip() != "":
+                    try:
+                        paper = SubjectPaper.objects.get(id=int(paper_id_str), subject=subject)
+                        _, p_created = ExamPaperScore.objects.update_or_create(
+                            exam=exam,
+                            student_id=student_id,
+                            paper=paper,
+                            defaults={
+                                'score': float(paper_score),
+                                'remarks': remarks
+                            }
+                        )
+                        if p_created:
+                            created_count += 1
+                        else:
+                            updated_count += 1
+                    except (SubjectPaper.DoesNotExist, ValueError):
+                        pass
 
         return Response({
             "message": f"Successfully processed {len(scores_data)} scores",
@@ -720,6 +750,14 @@ class ExamStudentsScoreView(APIView):
         # Get existing scores
         scores = ExamScore.objects.filter(exam=exam, subject_id=subject_id)
         scores_map = {s.student_id: s for s in scores}
+        
+        # Get existing paper scores
+        paper_scores = ExamPaperScore.objects.filter(exam=exam, paper__subject_id=subject_id)
+        paper_scores_map = {}
+        for ps in paper_scores:
+            if ps.student_id not in paper_scores_map:
+                paper_scores_map[ps.student_id] = {}
+            paper_scores_map[ps.student_id][str(ps.paper_id)] = ps.score
 
         result = []
         for student in students:
@@ -730,7 +768,8 @@ class ExamStudentsScoreView(APIView):
                 "admission_number": student.admission_number,
                 "score": score_obj.score if score_obj else None,
                 "remarks": score_obj.remarks if score_obj else "",
-                "score_id": score_obj.id if score_obj else None
+                "score_id": score_obj.id if score_obj else None,
+                "papers": paper_scores_map.get(student.id, {})
             })
 
         return Response(result)
@@ -1046,6 +1085,563 @@ class ExamStudentsPaperScoreView(APIView):
             })
 
         return Response(result)
+
+
+class ProjectMatrixView(APIView):
+    """
+    List and batch updates student project competency scores.
+    Class-based view matching the timo API and DRF structure.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Get students project scores matrix",
+        parameters=[
+            OpenApiParameter(name='stream_id', type=int, description='Stream ID', required=False),
+            OpenApiParameter(name='subject_id', type=int, description='Subject ID', required=False),
+            OpenApiParameter(name='competency_number', type=int, description='Competency Index (e.g. 1-4)', required=False),
+        ],
+        responses={200: {"type": "object"}}
+    )
+    def get(self, request, public_id=None):
+        stream_id = request.query_params.get('stream_id')
+        subject_id = request.query_params.get('subject_id')
+        competency_number_param = request.query_params.get('competency_number')
+
+        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
+        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+
+        if not active_year or not active_term:
+            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Handle detail lookup by virtual public_id (e.g. "2-5-1")
+        if public_id:
+            try:
+                stream_id, subject_id, competency_number_str = public_id.split('-')
+                stream_id = int(stream_id)
+                subject_id = int(subject_id)
+                competency_number = int(competency_number_str)
+            except ValueError:
+                return Response({"error": "Invalid project ID format"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            competency_number = int(competency_number_param) if competency_number_param else 1
+
+        # If we have stream and subject, return the matrix scores
+        if stream_id and subject_id:
+            students = Student.objects.filter(current_stream_id=stream_id, is_active=True).select_related('user_profile')
+            
+            project_scores = ProjectScore.objects.filter(
+                subject_id=subject_id,
+                term=active_term,
+                academic_year=active_year,
+                competency_number=competency_number
+            )
+
+            scores_map = {}
+            for ps in project_scores:
+                s_id = ps.student_id
+                if s_id not in scores_map:
+                    scores_map[s_id] = {}
+                scores_map[s_id][ps.sub_criteria] = float(ps.score)
+
+            result_learners = []
+            for student in students:
+                result_learners.append({
+                    "student_id": student.id,
+                    "student_name": f"{student.user_profile.first_name} {student.user_profile.last_name}",
+                    "admission_number": student.admission_number,
+                    "scores": scores_map.get(student.id, {})
+                })
+
+            return Response({
+                "public_id": public_id or f"{stream_id}-{subject_id}-{competency_number}",
+                "stream_id": stream_id,
+                "subject_id": subject_id,
+                "competency_number": competency_number,
+                "active_competencies": [1, 2, 3, 4],
+                "learners": result_learners
+            })
+
+        # Otherwise, return list of unique active/graded projects
+        distinct_scores = ProjectScore.objects.filter(
+            term=active_term,
+            academic_year=active_year
+        ).values(
+            'student__current_stream',
+            'student__current_stream__name',
+            'subject',
+            'subject__name',
+            'competency_number'
+        ).distinct()
+
+        projects_list = []
+        for ds in distinct_scores:
+            s_id = ds['student__current_stream']
+            sub_id = ds['subject']
+            if not s_id or not sub_id:
+                continue
+            virtual_id = f"{s_id}-{sub_id}-{ds['competency_number']}"
+            projects_list.append({
+                "public_id": virtual_id,
+                "stream_id": s_id,
+                "stream_name": ds['student__current_stream__name'],
+                "subject_id": sub_id,
+                "subject_name": ds['subject__name'],
+                "competency_number": ds['competency_number'],
+                "term_name": active_term.name,
+                "academic_year_name": active_year.name,
+            })
+
+        return Response({
+            "count": len(projects_list),
+            "next": None,
+            "previous": None,
+            "results": projects_list
+        })
+
+    @extend_schema(
+        summary="Batch updates student project competency scores"
+    )
+    def post(self, request, public_id=None):
+        subject_id = request.data.get('subject_id')
+        competency_number = request.data.get('competency_number')
+        records = request.data.get('records', [])
+
+        if public_id and (not subject_id or competency_number is None):
+            try:
+                _, parsed_sub, parsed_comp = public_id.split('-')
+                subject_id = int(parsed_sub) if not subject_id else subject_id
+                competency_number = int(parsed_comp) if competency_number is None else competency_number
+            except ValueError:
+                pass
+
+        if not subject_id or competency_number is None:
+            return Response({"error": "subject_id and competency_number are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
+        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+
+        if not active_year or not active_term:
+            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+
+        from django.db import transaction
+        try:
+            with transaction.atomic():
+                ProjectScore.objects.filter(
+                    subject_id=subject_id,
+                    term=active_term,
+                    academic_year=active_year,
+                    competency_number=competency_number
+                ).delete()
+
+                project_scores_to_create = []
+                for r in records:
+                    val = r.get('score')
+                    if val is None or val == '':
+                        continue
+                    project_scores_to_create.append(ProjectScore(
+                        student_id=r['student_id'],
+                        subject_id=subject_id,
+                        term=active_term,
+                        academic_year=active_year,
+                        competency_number=competency_number,
+                        sub_criteria=r['sub_criteria'],
+                        score=val
+                    ))
+                ProjectScore.objects.bulk_create(project_scores_to_create)
+
+            return Response({"message": "Project evaluation scores updated successfully"})
+        except Exception as e:
+            logger.error(f"Error in ProjectMatrix post view: {str(e)}")
+            return Response({"error": "Failed to update project scores matrix"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(
+        summary="Delete student project scores configuration matrix"
+    )
+    def delete(self, request, public_id=None):
+        if not public_id:
+            return Response({"error": "public_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            stream_id, subject_id, competency_number = map(int, public_id.split('-'))
+        except ValueError:
+            return Response({"error": "Invalid public_id format"}, status=status.HTTP_400_BAD_REQUEST)
+
+        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
+        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+
+        if not active_year or not active_term:
+            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+
+        ProjectScore.objects.filter(
+            student__current_stream_id=stream_id,
+            subject_id=subject_id,
+            competency_number=competency_number,
+            term=active_term,
+            academic_year=active_year
+        ).delete()
+
+        return Response({"message": "Project competency scores configuration deleted successfully"})
+
+
+class SaMatrixView(APIView):
+    """
+    List and batch updates student Summative Assessment (SA) matrix scores.
+    Class-based view matching the timo API and DRF structure.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Get students Summative Assessment scores matrix",
+        parameters=[
+            OpenApiParameter(name='stream_id', type=int, description='Stream ID'),
+            OpenApiParameter(name='subject_id', type=int, description='Subject ID'),
+        ],
+        responses={200: {"type": "object"}}
+    )
+    def get(self, request):
+        stream_id = request.query_params.get('stream_id')
+        subject_id = request.query_params.get('subject_id')
+
+        if not stream_id or not subject_id:
+            return Response({"error": "stream_id and subject_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
+        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+
+        if not active_year or not active_term:
+            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+
+        sa_assessment = SaAssessment.objects.filter(
+            stream_id=stream_id,
+            subject_id=subject_id,
+            term=active_term,
+            academic_year=active_year
+        ).first()
+
+        scores_map = {}
+        if sa_assessment:
+            sa_scores = SaScore.objects.filter(sa_assessment=sa_assessment)
+            scores_map = {s.student_id: s for s in sa_scores}
+
+        students = Student.objects.filter(current_stream_id=stream_id, is_active=True).select_related('user_profile')
+
+        result_learners = []
+        for student in students:
+            s_score = scores_map.get(student.id)
+            result_learners.append({
+                "student_id": student.id,
+                "student_name": f"{student.user_profile.first_name} {student.user_profile.last_name}",
+                "admission_number": student.admission_number,
+                "l1": float(s_score.l1) if s_score and s_score.l1 is not None else None,
+                "g1": float(s_score.g1) if s_score and s_score.g1 is not None else None,
+                "l2": float(s_score.l2) if s_score and s_score.l2 is not None else None,
+                "g2": float(s_score.g2) if s_score and s_score.g2 is not None else None,
+                "l3": float(s_score.l3) if s_score and s_score.l3 is not None else None,
+                "g3": float(s_score.g3) if s_score and s_score.g3 is not None else None,
+                "l4": float(s_score.l4) if s_score and s_score.l4 is not None else None,
+                "g4": float(s_score.g4) if s_score and s_score.g4 is not None else None,
+                "l5": float(s_score.l5) if s_score and s_score.l5 is not None else None,
+                "g5": float(s_score.g5) if s_score and s_score.g5 is not None else None,
+            })
+
+        return Response({
+            "sa_id": sa_assessment.id if sa_assessment else None,
+            "total_box": float(sa_assessment.total_box) if sa_assessment else 10.00,
+            "learners": result_learners
+        })
+
+    @extend_schema(
+        summary="Batch updates student Summative Assessment (SA) matrix scores"
+    )
+    def post(self, request):
+        stream_id = request.data.get('stream_id')
+        subject_id = request.data.get('subject_id')
+        total_box = float(request.data.get('total_box', 10.00))
+        records = request.data.get('records', [])
+
+        if not stream_id or not subject_id:
+            return Response({"error": "stream_id and subject_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
+        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+
+        if not active_year or not active_term:
+            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+
+        from django.db import transaction
+        try:
+            with transaction.atomic():
+                sa_assessment, created = SaAssessment.objects.update_or_create(
+                    stream_id=stream_id,
+                    subject_id=subject_id,
+                    term=active_term,
+                    academic_year=active_year,
+                    defaults={
+                        'total_box': total_box,
+                        'teacher': request.user.profile.teacher_profile if hasattr(request.user.profile, 'teacher_profile') else None
+                    }
+                )
+
+                SaScore.objects.filter(sa_assessment=sa_assessment).delete()
+
+                sa_scores_to_create = []
+                for r in records:
+                    sa_scores_to_create.append(SaScore(
+                        sa_assessment=sa_assessment,
+                        student_id=r['student_id'],
+                        l1=r.get('l1') if r.get('l1') != '' and r.get('l1') is not None else None,
+                        g1=r.get('g1') if r.get('g1') != '' and r.get('g1') is not None else None,
+                        l2=r.get('l2') if r.get('l2') != '' and r.get('l2') is not None else None,
+                        g2=r.get('g2') if r.get('g2') != '' and r.get('g2') is not None else None,
+                        l3=r.get('l3') if r.get('l3') != '' and r.get('l3') is not None else None,
+                        g3=r.get('g3') if r.get('g3') != '' and r.get('g3') is not None else None,
+                        l4=r.get('l4') if r.get('l4') != '' and r.get('l4') is not None else None,
+                        g4=r.get('g4') if r.get('g4') != '' and r.get('g4') is not None else None,
+                        l5=r.get('l5') if r.get('l5') != '' and r.get('l5') is not None else None,
+                        g5=r.get('g5') if r.get('g5') != '' and r.get('g5') is not None else None,
+                    ))
+                SaScore.objects.bulk_create(sa_scores_to_create)
+
+            return Response({
+                "message": "SA evaluation scores grid matrix saved successfully",
+                "sa_id": sa_assessment.id
+            })
+        except Exception as e:
+            logger.error(f"Error in SaMatrix post view: {str(e)}")
+            return Response({"error": "Failed to update SA scores matrix"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SaAssessmentListCreateView(APIView):
+    """
+    List all Summative Assessments or create a new one.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="List all Summative Assessments",
+        parameters=[
+            OpenApiParameter(name='page', type=int, description='Page number'),
+            OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
+            OpenApiParameter(name='stream_id', type=int, description='Filter by stream'),
+            OpenApiParameter(name='subject_id', type=int, description='Filter by subject'),
+        ],
+        responses={200: SaAssessmentSerializer(many=True)}
+    )
+    def get(self, request):
+        try:
+            queryset = SaAssessment.objects.all().order_by('-created_at')
+            stream_id = request.query_params.get('stream_id')
+            subject_id = request.query_params.get('subject_id')
+            if stream_id:
+                queryset = queryset.filter(stream_id=stream_id)
+            if subject_id:
+                queryset = queryset.filter(subject_id=subject_id)
+
+            # Pagination
+            page = int(request.query_params.get('page', 1))
+            page_size = int(request.query_params.get('page_size', 10))
+
+            paginator = Paginator(queryset, page_size)
+            page_obj = paginator.get_page(page)
+
+            serializer = SaAssessmentSerializer(page_obj.object_list, many=True)
+            return Response({
+                'count': paginator.count,
+                'next': page_obj.has_next() and page_obj.next_page_number() or None,
+                'previous': page_obj.has_previous() and page_obj.previous_page_number() or None,
+                'results': serializer.data,
+                'current_page': page_obj.number,
+                'total_pages': paginator.num_pages,
+            })
+        except Exception as e:
+            logger.error(f"Error listing sa assessments: {str(e)}")
+            return Response({"error": "Failed to retrieve SA assessments"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(
+        summary="Create a new Summative Assessment",
+        request=SaAssessmentSerializer,
+        responses={201: SaAssessmentSerializer}
+    )
+    def post(self, request):
+        data = request.data.copy()
+        if 'academic_year' not in data or not data.get('academic_year'):
+            active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
+            if active_year:
+                data['academic_year'] = active_year.id
+        if 'term' not in data or not data.get('term'):
+            active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+            if active_term:
+                data['term'] = active_term.id
+
+        serializer = SaAssessmentSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            serializer.save(teacher=request.user.profile.teacher_profile if hasattr(request.user.profile, 'teacher_profile') else None)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error creating sa assessment: {str(e)}")
+            return Response({"error": "Failed to create SA assessment"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SaAssessmentDetailView(APIView):
+    """
+    Retrieve, update or delete a Summative Assessment by public_id.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, public_id):
+        return get_object_or_404(SaAssessment, public_id=public_id)
+
+    @extend_schema(summary="Get Summative Assessment details", responses={200: SaAssessmentSerializer})
+    def get(self, request, public_id):
+        sa = self.get_object(public_id)
+        serializer = SaAssessmentSerializer(sa)
+        return Response(serializer.data)
+
+    @extend_schema(summary="Update Summative Assessment details", request=SaAssessmentSerializer, responses={200: SaAssessmentSerializer})
+    def put(self, request, public_id):
+        sa = self.get_object(public_id)
+        serializer = SaAssessmentSerializer(sa, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            serializer.save()
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error updating sa assessment {public_id}: {str(e)}")
+            return Response({"error": "Failed to update SA assessment"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(summary="Delete a Summative Assessment", responses={204: None})
+    def delete(self, request, public_id):
+        try:
+            sa = self.get_object(public_id)
+            sa.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Error deleting sa assessment {public_id}: {str(e)}")
+            return Response({"error": "Failed to delete SA assessment"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SaAssessmentStudentsScoreView(APIView):
+    """
+    Get all students in an SA assessment's stream with their current scores.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Get students with SA scores for a summative assessment",
+        responses={200: {"type": "array", "items": {"type": "object"}}}
+    )
+    def get(self, request, public_id):
+        sa = get_object_or_404(SaAssessment, public_id=public_id)
+
+        # Get all students in the stream
+        students = Student.objects.filter(
+            current_stream=sa.stream, 
+            is_active=True
+        ).select_related('user_profile')
+        
+        # Get existing scores
+        scores = SaScore.objects.filter(sa_assessment=sa)
+        scores_map = {s.student_id: s for s in scores}
+
+        result = []
+        for student in students:
+            s_score = scores_map.get(student.id)
+            result.append({
+                "student_id": student.id,
+                "student_name": f"{student.user_profile.first_name} {student.user_profile.last_name}",
+                "admission_number": student.admission_number,
+                "l1": float(s_score.l1) if s_score and s_score.l1 is not None else None,
+                "g1": float(s_score.g1) if s_score and s_score.g1 is not None else None,
+                "l2": float(s_score.l2) if s_score and s_score.l2 is not None else None,
+                "g2": float(s_score.g2) if s_score and s_score.g2 is not None else None,
+                "l3": float(s_score.l3) if s_score and s_score.l3 is not None else None,
+                "g3": float(s_score.g3) if s_score and s_score.g3 is not None else None,
+                "l4": float(s_score.l4) if s_score and s_score.l4 is not None else None,
+                "g4": float(s_score.g4) if s_score and s_score.g4 is not None else None,
+                "l5": float(s_score.l5) if s_score and s_score.l5 is not None else None,
+                "g5": float(s_score.g5) if s_score and s_score.g5 is not None else None,
+                "score_id": s_score.id if s_score else None
+            })
+
+        return Response(result)
+
+
+class SaAssessmentBulkScoreView(APIView):
+    """
+    Bulk update SA scores for a specific Summative Assessment.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Bulk update SA scores by assessment public_id",
+        request={
+            "type": "object",
+            "properties": {
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "student_id": {"type": "integer"},
+                            "l1": {"type": "number"},
+                            "g1": {"type": "number"},
+                            "l2": {"type": "number"},
+                            "g2": {"type": "number"},
+                            "l3": {"type": "number"},
+                            "g3": {"type": "number"},
+                            "l4": {"type": "number"},
+                            "g4": {"type": "number"},
+                            "l5": {"type": "number"},
+                            "g5": {"type": "number"},
+                        }
+                    }
+                }
+            }
+        },
+        responses={200: {"type": "object", "properties": {"message": {"type": "string"}}}}
+    )
+    def post(self, request, public_id):
+        sa = get_object_or_404(SaAssessment, public_id=public_id)
+        records = request.data.get('records', [])
+
+        from django.db import transaction
+        try:
+            with transaction.atomic():
+                # Delete existing scores for this assessment
+                SaScore.objects.filter(sa_assessment=sa).delete()
+
+                sa_scores_to_create = []
+                for r in records:
+                    sa_scores_to_create.append(SaScore(
+                        sa_assessment=sa,
+                        student_id=r['student_id'],
+                        l1=r.get('l1') if r.get('l1') != '' and r.get('l1') is not None else None,
+                        g1=r.get('g1') if r.get('g1') != '' and r.get('g1') is not None else None,
+                        l2=r.get('l2') if r.get('l2') != '' and r.get('l2') is not None else None,
+                        g2=r.get('g2') if r.get('g2') != '' and r.get('g2') is not None else None,
+                        l3=r.get('l3') if r.get('l3') != '' and r.get('l3') is not None else None,
+                        g3=r.get('g3') if r.get('g3') != '' and r.get('g3') is not None else None,
+                        l4=r.get('l4') if r.get('l4') != '' and r.get('l4') is not None else None,
+                        g4=r.get('g4') if r.get('g4') != '' and r.get('g4') is not None else None,
+                        l5=r.get('l5') if r.get('l5') != '' and r.get('l5') is not None else None,
+                        g5=r.get('g5') if r.get('g5') != '' and r.get('g5') is not None else None,
+                    ))
+                SaScore.objects.bulk_create(sa_scores_to_create)
+
+            return Response({
+                "message": "SA scores updated successfully",
+                "sa_id": sa.id
+            })
+        except Exception as e:
+            logger.error(f"Error bulk updating SA scores: {str(e)}")
+            return Response({"error": "Failed to bulk update SA scores"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 

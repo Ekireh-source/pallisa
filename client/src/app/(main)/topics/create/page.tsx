@@ -62,8 +62,12 @@ export default function CreateTopicPage() {
         FetchSubjects()
       ]);
 
-      if (classRes.success) setClasses(classRes.data.results || classRes.data);
-      if (subjectRes.success) setSubjects(subjectRes.data.results || subjectRes.data);
+      if (classRes && 'results' in classRes) {
+        setClasses(classRes.results);
+      }
+      if (subjectRes && 'results' in subjectRes) {
+        setSubjects(subjectRes.results);
+      }
       
       setFetchingData(false);
     };
@@ -79,7 +83,7 @@ export default function CreateTopicPage() {
       toast.success("Topic created successfully");
       router.push('/topics');
     } else {
-      toast.error(result.error?.message || "Failed to create topic");
+      toast.error("Failed to create topic");
     }
     setLoading(false);
   };
@@ -112,13 +116,13 @@ export default function CreateTopicPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <BookOpen className="w-4 h-4 mr-2 text-blue-500" />
+                    <BookOpen className="w-4 h-4 mr-2 text-primary" />
                     Topic Name
                   </Label>
                   <Input 
                     id="name"
                     placeholder="e.g., Understanding Cellular Respiration" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-blue-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -126,13 +130,13 @@ export default function CreateTopicPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                    <FileText className="w-4 h-4 mr-2 text-primary" />
                     Description
                   </Label>
                   <Textarea 
                     id="description"
                     placeholder="Provide a detailed description of the learning outcome..." 
-                    className="min-h-[150px] rounded-xl border-gray-200 focus:ring-blue-500 resize-none"
+                    className="min-h-[150px] rounded-xl border-gray-200 focus:ring-primary resize-none"
                     {...register('description')}
                   />
                   {errors.description && <ErrorMessage message={errors.description.message} />}
@@ -145,7 +149,7 @@ export default function CreateTopicPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Layers className="w-5 h-5 mr-2 text-blue-500" />
+                <Layers className="w-5 h-5 mr-2 text-primary" />
                 Classification
               </h3>
               
@@ -197,7 +201,7 @@ export default function CreateTopicPage() {
             <div className="pt-2">
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl shadow-lg shadow-blue-200 font-bold"
+                className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary text-white"
                 disabled={loading || fetchingData}
               >
                 {loading ? (

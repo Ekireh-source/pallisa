@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { ITopicListResponse } from '@/features/exam/exam.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function TopicsListPage() {
@@ -36,8 +37,12 @@ export default function TopicsListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchTopics(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchTopics(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const handleDelete = async (id: number) => {
@@ -52,13 +57,13 @@ export default function TopicsListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ITopicListResponse>[] = [
     {
       key: "name",
       header: "Topic Name",
       cell: (topic) => (
         <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <BookMarked className="w-4 h-4" />
           </div>
           <div>
@@ -141,7 +146,7 @@ export default function TopicsListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search topics..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-blue-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

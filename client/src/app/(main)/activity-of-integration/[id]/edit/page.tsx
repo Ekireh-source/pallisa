@@ -75,10 +75,18 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
         FetchCompetencyAreas()
       ]);
 
-      if (topicsRes.success) setTopics(topicsRes.data.results || topicsRes.data);
-      if (teachersRes.success) setTeachers(teachersRes.data.results || teachersRes.data);
-      if (termsRes.success) setTerms(termsRes.data.results || termsRes.data);
-      if (areasRes.success) setCompetencyAreas(areasRes.data.results || areasRes.data);
+      if (topicsRes && 'results' in topicsRes) {
+        setTopics(topicsRes.results);
+      }
+      if (teachersRes && 'results' in teachersRes) {
+        setTeachers(teachersRes.results);
+      }
+      if (termsRes && 'results' in termsRes) {
+        setTerms(termsRes.results);
+      }
+      if (areasRes && 'results' in areasRes) {
+        setCompetencyAreas(areasRes.results);
+      }
       
       if (activityRes.success) {
         reset({
@@ -166,7 +174,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
           <h3 className="font-bold text-gray-900 mb-6 flex items-center text-lg">
-            <BookOpen className="w-5 h-5 mr-2 text-rose-500" />
+            <BookOpen className="w-5 h-5 mr-2 text-primary" />
             Activity Details
           </h3>
           
@@ -257,7 +265,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                 id="max_score"
                 type="number"
                 placeholder="10" 
-                className={`h-12 rounded-xl border-gray-200 focus:ring-rose-500 ${errors.max_score ? 'border-red-500' : ''}`}
+                className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.max_score ? 'border-red-500' : ''}`}
                 {...register('max_score', { valueAsNumber: true })}
               />
               {errors.max_score && <ErrorMessage message="Valid score required" />}
@@ -277,7 +285,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
           <Button 
             type="submit" 
             disabled={loading}
-            className="h-12 px-10 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-200 transition-all active:scale-95"
+            className="h-12 px-10 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all active:scale-95"
           >
             {loading ? "Updating..." : "Update Activity"}
           </Button>

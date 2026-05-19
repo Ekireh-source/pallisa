@@ -329,13 +329,28 @@ class ReportCardViewSet(viewsets.ModelViewSet):
             is_active=True
         ).select_related('subject', 'teacher')
 
+        if assignments.exists():
+            subject_teacher_pairs = [(a.subject, a.teacher) for a in assignments]
+        else:
+            from members.models import Subject as MemberSubject
+            # Fallback: only include subjects where the student has scores for this term
+            scored_subject_ids = ExamPaperScore.objects.filter(
+                student=student, exam__term_id=term_id
+            ).values_list('paper__subject_id', flat=True).distinct()
+            
+            standard_subject_ids = ExamScore.objects.filter(
+                student=student, exam__term_id=term_id
+            ).values_list('subject_id', flat=True).distinct()
+            
+            all_ids = set(scored_subject_ids).union(set(standard_subject_ids))
+            school_subjects = MemberSubject.objects.filter(id__in=all_ids)
+            subject_teacher_pairs = [(s, None) for s in school_subjects]
+
         subject_reports_data = []
         overall_total = 0.0
         subject_count = 0
 
-        for assignment in assignments:
-            subject = assignment.subject
-            teacher = assignment.teacher
+        for subject, teacher in subject_teacher_pairs:
 
             # 1. Fetch defined active papers for this subject
             defined_papers = SubjectPaper.objects.filter(subject=subject, is_active=True)

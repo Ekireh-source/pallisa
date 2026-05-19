@@ -125,7 +125,7 @@ export const CampusSearchableSelect = memo(
           placeholder={placeholder}
           emptyMessage="No campuses found."
           initialItems={initialItems}
-          label="Campus"
+          // label="Campus"
         />
       </div>
     );

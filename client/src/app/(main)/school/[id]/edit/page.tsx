@@ -45,7 +45,9 @@ export default function EditSchoolPage({ params }: { params: Promise<{ id: strin
     const loadData = async () => {
       setFetchingData(true);
       const [campusRes, schoolRes] = await Promise.all([FetchCampuses(), FetchSchoolById(id)]);
-      if (campusRes.success) setCampuses(campusRes.data.results || campusRes.data);
+      if (campusRes && 'results' in campusRes) {
+        setCampuses(campusRes.results);
+      }
       if (schoolRes.success) {
         const s = schoolRes.data;
         reset({ name: s.name, email: s.email, phone_number: s.phone_number, address: s.address, motto: s.motto || '', campus: s.campus, active: s.active, level: s.level || 'secondary' });

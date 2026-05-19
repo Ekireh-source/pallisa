@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, CompetencyArea, ExamPaperScore
+from .models import (
+    Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, 
+    CompetencyArea, ExamPaperScore, ProjectScore, SaAssessment, SaScore
+)
 
 
 class CompetencyAreaSerializer(serializers.ModelSerializer):
@@ -46,6 +49,7 @@ class IntegrationScoreSerializer(serializers.ModelSerializer):
 class ExamSerializer(serializers.ModelSerializer):
     term_name = serializers.ReadOnlyField(source='term.name')
     class_name = serializers.ReadOnlyField(source='class_obj.name')
+    class_level = serializers.ReadOnlyField(source='class_obj.level')
 
     class Meta:
         model = Exam
@@ -74,6 +78,39 @@ class ExamPaperScoreSerializer(serializers.ModelSerializer):
         model = ExamPaperScore
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
+
+
+class ProjectScoreSerializer(serializers.ModelSerializer):
+    student_name = serializers.ReadOnlyField(source='student.user_profile.get_full_name')
+    subject_name = serializers.ReadOnlyField(source='subject.name')
+
+    class Meta:
+        model = ProjectScore
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class SaAssessmentSerializer(serializers.ModelSerializer):
+    stream_name = serializers.ReadOnlyField(source='stream.name')
+    subject_name = serializers.ReadOnlyField(source='subject.name')
+    teacher_name = serializers.ReadOnlyField(source='teacher.user_profile.get_full_name')
+    term_name = serializers.ReadOnlyField(source='term.name')
+
+    class Meta:
+        model = SaAssessment
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class SaScoreSerializer(serializers.ModelSerializer):
+    student_name = serializers.ReadOnlyField(source='student.user_profile.get_full_name')
+    admission_number = serializers.ReadOnlyField(source='student.admission_number')
+
+    class Meta:
+        model = SaScore
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
 
 
 

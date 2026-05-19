@@ -185,8 +185,8 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
         Layout per subject row:
           Subject | Paper 1 score | Paper 2 score | … | Average % | Grade | Remarks | Teacher
       */}
-      <div className="mb-8 overflow-hidden rounded-xl border border-gray-200">
-        <table className="w-full text-sm border-collapse">
+      <div className="mb-8 overflow-x-auto rounded-xl border border-gray-200">
+        <table className="w-full text-sm border-collapse min-w-[700px]">
           <thead>
             <tr className="text-white" style={{ backgroundColor: primaryColor }}>
               <th className="px-4 py-3 text-left font-bold border-r text-xs" style={{ borderColor: `${primaryColor}CC` }}>Subject</th>
@@ -236,9 +236,14 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
                     {Array.from({ length: maxPapers }).map((_, idx) => {
                       const paper = papers[idx];
                       return (
-                        <td key={idx} className="px-2 py-2.5 text-center border-r border-b border-gray-200 text-xs">
+                        <td key={idx} className="px-2 py-2 text-center border-r border-b border-gray-200 text-xs">
                           {paper ? (
-                            <span className="font-semibold text-gray-800">{Number(paper.score).toFixed(0)}</span>
+                            <div className="flex flex-col items-center justify-center">
+                              <span className="font-semibold text-gray-800 text-[13px]">{Number(paper.score).toFixed(0)}</span>
+                              <span className="text-[8px] text-gray-400 font-medium uppercase tracking-tighter leading-tight mt-0.5 max-w-[60px] truncate" title={paper.competency_name}>
+                                {paper.competency_name.split(' (')[0]}
+                              </span>
+                            </div>
                           ) : (
                             <span className="text-gray-300">—</span>
                           )}
@@ -293,26 +298,8 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
         </table>
       </div>
 
-      {/* ── Paper Legend ── */}
-      {s.show_identifier_legend && maxPapers > 0 && subject_reports.length > 0 && (() => {
-        // Collect paper names from the first subject that has papers
-        const firstWithPapers = subject_reports.find(sr => sr.competency_scores.some(c => c.assessment_type === 'exam'));
-        const paperNames = firstWithPapers?.competency_scores.filter(c => c.assessment_type === 'exam') ?? [];
-        if (!paperNames.length) return null;
-        return (
-          <div className="mb-6 border border-gray-100 rounded-xl p-4 bg-gray-50/40">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Paper Key</p>
-            <div className="flex gap-6 flex-wrap">
-              {paperNames.map((p, i) => (
-                <span key={i} className="text-xs text-gray-600 font-medium">
-                  <span className="font-bold text-gray-800">Paper {i + 1}</span> – {p.competency_name}{' '}
-                  <span className="text-gray-400">(max: {p.max_score})</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
+      {/* ── Removed Global Paper Legend ── */}
+      {/* We now show the dynamic paper names directly inside the score cells since they vary per subject. */}
 
       {/* ── Official Remarks ── */}
       {(s.show_class_teacher_remarks || s.show_head_teacher_remarks) && (

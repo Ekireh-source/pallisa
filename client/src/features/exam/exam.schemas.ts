@@ -103,3 +103,91 @@ export type ICompetencyAreaListResponse = z.infer<typeof CompetencyAreaListSchem
 export type ITopicListResponse = z.infer<typeof TopicListSchema>;
 export type IActivityListResponse = z.infer<typeof ActivityListSchema>;
 export type IExamListResponse = z.infer<typeof ExamListSchema>;
+
+
+// --- Projects Evaluation Matrix ---
+export const ProjectScoreSchema = z.object({
+  student: z.number(),
+  subject: z.number(),
+  competency_number: z.number(),
+  sub_criteria: z.string(),
+  score: z.number(),
+});
+
+export const ProjectBulkSaveSchema = z.object({
+  subject_id: z.number(),
+  competency_number: z.number(),
+  records: z.array(z.object({
+    student_id: z.number(),
+    sub_criteria: z.string(),
+    score: z.number()
+  }))
+});
+
+
+// --- Summative Assessment (SA) Matrix ---
+export const SaAssessmentSchema = z.object({
+  stream: z.number().min(1, "Stream class is required"),
+  subject: z.number().min(1, "Subject is required"),
+  term: z.number().min(1, "Term is required"),
+  academic_year: z.number().min(1, "Academic Year is required"),
+  total_box: z.number().default(10.00),
+  teacher: z.number().optional().nullable(),
+});
+
+export const SaScoreSchema = z.object({
+  student: z.number(),
+  l1: z.number().nullable().optional(),
+  g1: z.number().nullable().optional(),
+  l2: z.number().nullable().optional(),
+  g2: z.number().nullable().optional(),
+  l3: z.number().nullable().optional(),
+  g3: z.number().nullable().optional(),
+  l4: z.number().nullable().optional(),
+  g4: z.number().nullable().optional(),
+  l5: z.number().nullable().optional(),
+  g5: z.number().nullable().optional(),
+});
+
+export const SaBulkSaveSchema = z.object({
+  stream_id: z.number(),
+  subject_id: z.number(),
+  total_box: z.number(),
+  records: z.array(z.object({
+    student_id: z.number(),
+    l1: z.number().nullable().optional(),
+    g1: z.number().nullable().optional(),
+    l2: z.number().nullable().optional(),
+    g2: z.number().nullable().optional(),
+    l3: z.number().nullable().optional(),
+    g3: z.number().nullable().optional(),
+    l4: z.number().nullable().optional(),
+    g4: z.number().nullable().optional(),
+    l5: z.number().nullable().optional(),
+    g5: z.number().nullable().optional(),
+  }))
+});
+
+export const SaAssessmentBulkSaveSchema = z.object({
+  records: z.array(z.object({
+    student_id: z.number(),
+    l1: z.number().nullable().optional(),
+    g1: z.number().nullable().optional(),
+    l2: z.number().nullable().optional(),
+    g2: z.number().nullable().optional(),
+    l3: z.number().nullable().optional(),
+    g3: z.number().nullable().optional(),
+    l4: z.number().nullable().optional(),
+    g4: z.number().nullable().optional(),
+    l5: z.number().nullable().optional(),
+    g5: z.number().nullable().optional(),
+  }))
+});
+
+export type IProjectScoreInput = z.infer<typeof ProjectScoreSchema>;
+export type IProjectBulkSaveInput = z.infer<typeof ProjectBulkSaveSchema>;
+export type ISaAssessmentInput = z.infer<typeof SaAssessmentSchema>;
+export type ISaScoreInput = z.infer<typeof SaScoreSchema>;
+export type ISaBulkSaveInput = z.infer<typeof SaBulkSaveSchema>;
+export type ISaAssessmentBulkSaveInput = z.infer<typeof SaAssessmentBulkSaveSchema>;
+

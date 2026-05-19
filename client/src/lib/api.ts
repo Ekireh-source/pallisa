@@ -75,10 +75,10 @@ axiosJsonInstance.interceptors.response.use(
   async (error: any) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    const isAuthEndpoint = originalRequest.url?.includes("/login/") || 
-                          originalRequest.url?.includes("/register/") || 
-                          originalRequest.url?.includes("/verify-email/") ||
-                          originalRequest.url?.includes("/resend-verification/");
+    const isAuthEndpoint = originalRequest.url?.includes("/login/") ||
+      originalRequest.url?.includes("/register/") ||
+      originalRequest.url?.includes("/verify-email/") ||
+      originalRequest.url?.includes("/resend-verification/");
 
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
@@ -159,7 +159,7 @@ axiosJsonInstance.interceptors.response.use(
           }
           onRefreshed(access);
         }
-        
+
         return axiosJsonInstance(originalRequest);
       } catch (err) {
         store.dispatch(logoutStart());

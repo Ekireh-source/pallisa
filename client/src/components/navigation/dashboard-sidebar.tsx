@@ -149,6 +149,8 @@ export default function DashboardSideBar({ isSideBarOpen, setIsSideBarOpen }: Da
             ),
             submenu: [
                 { title: "Exams", href: "/exams" },
+                { title: "SA Marks Grid", href: "/exams/sa-assessment" },
+                { title: "Projects Matrix", href: "/competences/projects" },
                 { title: "Competency Areas", href: "/competences" },
                 { title: "Activity of Integration", href: "/activity-of-integration" },
                 { title: "Topics", href: "/topics" },

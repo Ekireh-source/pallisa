@@ -58,8 +58,8 @@ export default function CreateClassPage() {
     const loadCampuses = async () => {
       setLoadingCampuses(true);
       const result = await FetchCampuses();
-      if (result.success) {
-        setCampuses(result.data.results || result.data);
+      if (result && 'results' in result) {
+        setCampuses(result.results);
       } else {
         toast.error("Failed to load campuses");
       }
@@ -114,13 +114,13 @@ export default function CreateClassPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Layers className="w-4 h-4 mr-2 text-blue-500" />
+                      <Layers className="w-4 h-4 mr-2 text-primary" />
                       Class Name
                     </Label>
                     <Input
                       id="name"
                       placeholder="e.g., S1, S2, S3"
-                      className={`h-12 rounded-xl border-gray-200 focus:ring-blue-500 ${errors.name ? 'border-red-500' : ''}`}
+                      className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                       {...register('name')}
                     />
                     {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -128,14 +128,14 @@ export default function CreateClassPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="level" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Layers className="w-4 h-4 mr-2 text-blue-500" />
+                      <Layers className="w-4 h-4 mr-2 text-primary" />
                       Level
                     </Label>
                     <Select
                       onValueChange={(val) => setValue('level', val)}
                       value={selectedLevel}
                     >
-                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-blue-500 ${errors.level ? 'border-red-500' : ''}`}>
+                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.level ? 'border-red-500' : ''}`}>
                         <SelectValue placeholder="Select Level" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl shadow-xl border-gray-100">
@@ -148,14 +148,14 @@ export default function CreateClassPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="campus" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Building2 className="w-4 h-4 mr-2 text-blue-500" />
+                      <Building2 className="w-4 h-4 mr-2 text-primary" />
                       Campus
                     </Label>
                     <Select
                       onValueChange={(val) => setValue('campus', parseInt(val))}
                       value={selectedCampus?.toString()}
                     >
-                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-blue-500 ${errors.campus ? 'border-red-500' : ''}`}>
+                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.campus ? 'border-red-500' : ''}`}>
                         <SelectValue placeholder="Select Campus" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl shadow-xl border-gray-100">
@@ -178,13 +178,13 @@ export default function CreateClassPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                    <FileText className="w-4 h-4 mr-2 text-primary" />
                     Description (Optional)
                   </Label>
                   <Textarea
                     id="description"
                     placeholder="Brief description of this grade level..."
-                    className="min-h-[120px] rounded-xl border-gray-200 focus:ring-blue-500"
+                    className="min-h-[120px] rounded-xl border-gray-200 focus:ring-primary"
                     {...register('description')}
                   />
                 </div>
@@ -196,7 +196,7 @@ export default function CreateClassPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <ToggleLeft className="w-5 h-5 mr-2 text-blue-500" />
+                <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
 

@@ -32,6 +32,8 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { FetchStreamById, FetchStudents, DeleteStudent } from '@/features/members/members.service';
 import { getPaginatedFromUrl } from '@/lib/utils';
 
+import { IStudent } from '@/features/members/members.schemas';
+
 export default function StreamDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -52,7 +54,7 @@ export default function StreamDetailPage() {
   const loadStreamDetails = async () => {
     setLoading(true);
     const res = await FetchStreamById(id);
-    if (res.success) {
+    if (res && 'data' in res) {
       setStreamDetails(res.data);
     } else {
       toast.error('Failed to load stream details');
@@ -60,13 +62,17 @@ export default function StreamDetailPage() {
     setLoading(false);
   };
 
-  const fetchFirstPage = (query?: any) => {
+  const fetchFirstPage = async (query?: any) => {
     const enhancedQuery = {
       ...query,
       stream_id: id,
       search: searchTerm,
     };
-    return FetchStudents(enhancedQuery);
+    const res = await FetchStudents(enhancedQuery);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const handleDeleteStudent = async (studentId: number) => {
@@ -82,7 +88,7 @@ export default function StreamDetailPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IStudent>[] = [
     {
       key: "user_first_name",
       header: "Student Name",
@@ -92,7 +98,7 @@ export default function StreamDetailPage() {
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 border border-gray-100 shadow-sm">
               <AvatarImage src={student.user_profile_data?.profile_picture} alt={initials} />
-              <AvatarFallback className="bg-indigo-50 text-indigo-600 font-semibold">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-semibold text-gray-900">{student.user_first_name} {student.user_last_name}</p>

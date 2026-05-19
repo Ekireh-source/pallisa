@@ -35,6 +35,8 @@ import { useRouter } from 'next/navigation';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 
+import { ISchoolListResponse } from '@/features/school/school.schemas';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 function formatImgUrl(url?: string | null) {
@@ -81,19 +83,19 @@ export default function SchoolsListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ISchoolListResponse>[] = [
     {
       key: "name",
       header: "School Name",
       cell: (school) => (
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <div className="p-2 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             {school.logo
               ? <img src={formatImgUrl(school.logo) || ''} alt="" className="w-4 h-4 object-contain" />
               : <Building2 className="w-4 h-4" />}
           </div>
           <div className="flex flex-col">
-            <Link href={`/school/${school.id}`} className="hover:text-indigo-600 hover:underline font-semibold text-gray-900 transition-colors">
+            <Link href={`/school/${school.id}`} className="hover:text-primary hover:underline font-semibold text-gray-900 transition-colors">
               {school.name}
             </Link>
             <span className="text-xs text-gray-400 font-normal">
@@ -114,7 +116,7 @@ export default function SchoolsListPage() {
               school.level === 'primary' 
                 ? 'bg-blue-50 text-blue-700 hover:bg-blue-50/85' 
                 : school.level === 'secondary'
-                  ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-50/85'
+                  ? 'bg-primary/10 text-primary hover:bg-primary/15'
                   : 'bg-purple-50 text-purple-700 hover:bg-purple-50/85'
             }`}
           >
@@ -181,11 +183,11 @@ export default function SchoolsListPage() {
             <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-xl border-gray-100">
               <DropdownMenuItem className="cursor-pointer py-2" onClick={() => router.push(`/school/${school.id}`)}
               >
-                <Eye className="w-4 h-4 mr-2 text-indigo-500" />
+                <Eye className="w-4 h-4 mr-2 text-primary" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer py-2" onClick={() => router.push(`/school/${school.id}/edit`)}>
-                <Edit2 className="w-4 h-4 mr-2 text-blue-600" />
+                <Edit2 className="w-4 h-4 mr-2 text-primary" />
                 Edit School
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer py-2 text-rose-600 focus:text-rose-600" onClick={() => handleDelete(school.id)}>
@@ -200,13 +202,13 @@ export default function SchoolsListPage() {
   ];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Schools</h1>
           <p className="text-gray-500 mt-1">Manage registered schools and institutions.</p>
         </div>
-        <Button className="shadow-lg shadow-blue-200 rounded-xl h-11" asChild>
+        <Button className="shadow-lg shadow-primary/20 rounded-xl h-11" asChild>
           <Link href="/school/create">
             <Plus className="w-4 h-4 mr-2" />
             Add School
@@ -220,7 +222,7 @@ export default function SchoolsListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search schools..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-blue-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

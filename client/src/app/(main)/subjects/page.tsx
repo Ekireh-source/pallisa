@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { ISubjectListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function SubjectsListPage() {
@@ -35,8 +36,12 @@ export default function SubjectsListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchSubjects(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchSubjects(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const handleDelete = async (id: number) => {
@@ -51,18 +56,21 @@ export default function SubjectsListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ISubjectListResponse>[] = [
     {
       key: "name",
       header: "Subject Name",
       cell: (subject) => (
-        <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-            <BookMarked className="w-4 h-4" />
+        <div className="font-bold flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+            <BookMarked className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <p className="text-gray-900 font-semibold">{subject.name}</p>
-            <p className="text-xs text-gray-400">Code: {subject.code || 'N/A'}</p>
+          <div className="min-w-0">
+            <p className="text-gray-900 font-bold text-sm sm:text-base truncate">{subject.name}</p>
+            <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 space-y-0.5">
+              <p className="sm:hidden font-semibold text-primary truncate">Dept: {subject.department || 'General'}</p>
+              <p className="font-semibold text-gray-500">Code: {subject.code || 'N/A'}</p>
+            </div>
           </div>
         </div>
       ),
@@ -70,8 +78,10 @@ export default function SubjectsListPage() {
     {
       key: "department",
       header: "Department",
+      className: "hidden sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
       cell: (subject) => (
-        <span className="font-medium text-gray-600">{subject.department || 'General'}</span>
+        <span className="font-semibold text-gray-600">{subject.department || 'General'}</span>
       ),
     },
     {
@@ -79,11 +89,11 @@ export default function SubjectsListPage() {
       header: "Status",
       cell: (subject) => (
         subject.active ? (
-          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-3 py-1 rounded-full w-fit">
+          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full w-fit text-[10px] sm:text-xs">
             Active
           </Badge>
         ) : (
-          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-3 py-1 rounded-full font-bold w-fit">
+          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold w-fit text-[10px] sm:text-xs">
             Inactive
           </Badge>
         )
@@ -91,32 +101,32 @@ export default function SubjectsListPage() {
     },
     {
       key: "actions",
-      header: <div className="text-right">Actions</div>,
+      header: <div className="text-right pr-2">Actions</div>,
       cell: (subject) => (
-        <div className="text-right">
+        <div className="text-right pr-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-50 rounded-xl">
                 <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
               <DropdownMenuItem 
-                className="cursor-pointer py-2"
+                className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/subjects/${subject.id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View detail
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="cursor-pointer py-2"
+                className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/subjects/${subject.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
+                className="cursor-pointer py-2 text-rose-600 focus:text-rose-600 text-sm"
                 onClick={() => handleDelete(subject.id)}
               >
                 <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />
@@ -134,10 +144,10 @@ export default function SubjectsListPage() {
       title="Subjects"
       description="Manage the school curriculum and course offerings."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/subjects/create">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Subject
+            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
+            <span>Add Subject</span>
           </Link>
         </Button>
       }
@@ -148,7 +158,7 @@ export default function SubjectsListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search subjects..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-emerald-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

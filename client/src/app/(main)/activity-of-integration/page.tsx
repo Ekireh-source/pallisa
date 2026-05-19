@@ -11,7 +11,6 @@ import {
   Button, 
   Card, 
   Input,
-  Badge,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -23,6 +22,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { IActivityListResponse } from '@/features/exam/exam.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function ActivitiesListPage() {
@@ -31,15 +31,15 @@ export default function ActivitiesListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchActivities(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchActivities(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
-  const fetchFromUrl = (url: string, query?: any) => {
-    return getPaginatedFromUrl(url, query);
-  };
-
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this activity?")) {
       const res = await DeleteActivity(id);
       if (res.success) {
@@ -51,13 +51,13 @@ export default function ActivitiesListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IActivityListResponse>[] = [
     {
       key: "name",
       header: "Activity Details",
       cell: (act) => (
         <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <Zap className="w-4 h-4" />
           </div>
           <div>
@@ -126,7 +126,7 @@ export default function ActivitiesListPage() {
       title="Activities of Integration"
       description="Manage assessment tasks for the competency-based curriculum."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent w-full sm:w-auto" asChild>
           <Link href="/activity-of-integration/create">
             <Plus className="w-4 h-4 mr-2" />
             New Activity
@@ -140,7 +140,7 @@ export default function ActivitiesListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search activities..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-rose-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -150,7 +150,7 @@ export default function ActivitiesListPage() {
         <div className="p-4">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={fetchFromUrl}
+            fetchFromUrl={getPaginatedFromUrl}
             columns={columns}
             showRowNumbers={false}
             skeletonRows={5}

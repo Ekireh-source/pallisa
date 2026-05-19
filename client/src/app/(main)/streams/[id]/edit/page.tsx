@@ -63,8 +63,12 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
         FetchTeachers()
       ]);
 
-      if (classesRes.success) setClasses(classesRes.data.results || classesRes.data);
-      if (teachersRes.success) setTeachers(teachersRes.data.results || teachersRes.data);
+      if (classesRes && 'results' in classesRes) {
+        setClasses(classesRes.results);
+      }
+      if (teachersRes && 'results' in teachersRes) {
+        setTeachers(teachersRes.results);
+      }
 
       if (streamRes.success) {
         reset({
@@ -112,7 +116,7 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
 
   if (initialLoading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-8 animate-in fade-in duration-500">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="space-y-2">
@@ -133,25 +137,25 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
+    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50 shrink-0"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Stream</h1>
-            <p className="text-gray-500 mt-1">Modify stream details and assignments.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Edit Stream</h1>
+            <p className="text-gray-500 text-sm sm:text-base mt-1">Modify stream details and assignments.</p>
           </div>
         </div>
         <Button 
           variant="outline" 
-          className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl"
+          className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl w-full sm:w-auto h-11"
           onClick={handleDelete}
           disabled={loading}
         >
@@ -167,13 +171,13 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Layers className="w-4 h-4 mr-2 text-indigo-500" />
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
                     Stream Name
                   </Label>
                   <Input 
                     id="name"
                     placeholder="e.g., Stream A, North Stream" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -182,12 +186,12 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="class_obj" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <School className="w-4 h-4 mr-2 text-indigo-500" />
+                      <School className="w-4 h-4 mr-2 text-primary" />
                       Class
                     </Label>
                     <select
                       id="class_obj"
-                      className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       {...register('class_obj', { valueAsNumber: true })}
                     >
                       <option value="">Select a class</option>
@@ -202,13 +206,13 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
 
                   <div className="space-y-2">
                     <Label htmlFor="capacity" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Users className="w-4 h-4 mr-2 text-indigo-500" />
+                      <Users className="w-4 h-4 mr-2 text-primary" />
                       Capacity
                     </Label>
                     <Input 
                       id="capacity"
                       type="number"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('capacity', { valueAsNumber: true })}
                     />
                     {errors.capacity && <ErrorMessage message={errors.capacity.message} />}
@@ -217,12 +221,12 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
 
                 <div className="space-y-2">
                   <Label htmlFor="class_teacher" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Users className="w-4 h-4 mr-2 text-indigo-500" />
+                    <Users className="w-4 h-4 mr-2 text-primary" />
                     Class Teacher (Optional)
                   </Label>
                   <select
                     id="class_teacher"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     {...register('class_teacher', { valueAsNumber: true })}
                   >
                     <option value="">Select a teacher</option>
@@ -240,7 +244,7 @@ export default function EditStreamPage({ params }: { params: Promise<{ id: strin
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <ToggleLeft className="w-5 h-5 mr-2 text-indigo-500" />
+                <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                 Stream Status
               </h3>
               

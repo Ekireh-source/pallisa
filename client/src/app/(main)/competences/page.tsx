@@ -28,6 +28,7 @@ import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 
 import { Icon } from '@iconify/react';
+import { ICompetencyAreaListResponse } from '@/features/exam/exam.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function CompetencyAreasListPage() {
@@ -36,8 +37,12 @@ export default function CompetencyAreasListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchCompetencyAreas(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchCompetencyAreas(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const handleDelete = async (id: number) => {
@@ -52,13 +57,13 @@ export default function CompetencyAreasListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ICompetencyAreaListResponse>[] = [
     {
       key: "name",
       header: "Competency Area Name",
       cell: (area) => (
         <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <LayoutGrid className="w-4 h-4" />
           </div>
           <div>
@@ -113,7 +118,7 @@ export default function CompetencyAreasListPage() {
       title="Competency Areas"
       description="Broader categories for assessment topics."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/competences/create">
             <Plus className="w-4 h-4 mr-2" />
             New Area
@@ -127,7 +132,7 @@ export default function CompetencyAreasListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search areas..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-indigo-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

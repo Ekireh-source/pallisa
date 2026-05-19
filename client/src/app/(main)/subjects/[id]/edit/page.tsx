@@ -97,7 +97,7 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
       toast.success("Subject updated successfully");
       router.push(`/subjects/${id}`);
     } else {
-      toast.error(result.error?.message || "Failed to update subject");
+      toast.error("Failed to update subject");
     }
     setLoading(false);
   };
@@ -118,7 +118,7 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
 
   if (fetchingData) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-8 animate-in fade-in duration-500">
         <Skeleton className="h-10 w-32" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2"><Skeleton className="h-64 w-full rounded-xl" /></div>
@@ -129,26 +129,26 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50 shrink-0"
             onClick={() => router.push(`/subjects/${id}`)}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Subject</h1>
-            <p className="text-gray-500 mt-1">Update course details and settings.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Edit Subject</h1>
+            <p className="text-gray-500 text-sm sm:text-base mt-1">Update course details and settings.</p>
           </div>
         </div>
         <Button 
           variant="outline" 
-          className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100"
+          className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100 w-full sm:w-auto"
           onClick={handleDelete}
           disabled={loading}
         >

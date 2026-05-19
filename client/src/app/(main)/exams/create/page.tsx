@@ -65,8 +65,12 @@ export default function CreateExamPage() {
         FetchTerms()
       ]);
 
-      if (classRes.success) setClasses(classRes.data.results || classRes.data);
-      if (termRes.success) setTerms(termRes.data.results || termRes.data);
+      if (classRes && 'results' in classRes) {
+        setClasses(classRes.results);
+      }
+      if (termRes && 'results' in termRes) {
+        setTerms(termRes.results);
+      }
       
       setFetchingData(false);
     };
@@ -82,7 +86,7 @@ export default function CreateExamPage() {
       toast.success("Exam scheduled successfully");
       router.push('/exams');
     } else {
-      toast.error(result.error?.message || "Failed to schedule exam");
+      toast.error("Failed to schedule exam");
     }
     setLoading(false);
   };

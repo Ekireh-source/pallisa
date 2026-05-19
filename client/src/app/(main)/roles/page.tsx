@@ -352,7 +352,7 @@ export default function RolesPage() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ minHeight: '70vh' }}>
         {/* ── Left: Role list ── */}
-        <Card className="border-none shadow-none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
+        <Card className="h-[450px] lg:h-auto border-none shadow-none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
           <div className="p-4 border-b border-gray-100">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -418,7 +418,7 @@ export default function RolesPage() {
         </Card>
 
         {/* ── Right: Permission panel ── */}
-        <Card className="lg:col-span-2 border-none shadow-none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
+        <Card className="lg:col-span-2 h-[550px] lg:h-auto border-none shadow-none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
           {selectedRole ? (
             <>
               <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">

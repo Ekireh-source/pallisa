@@ -35,6 +35,7 @@ import { useRouter } from 'next/navigation';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { IClassListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function ClassesListPage() {
@@ -45,11 +46,18 @@ export default function ClassesListPage() {
 
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchClasses(query);
+  const fetchFirstPage = async (query?: any) => {
+    const params = { ...query };
+    if (params.level === 'all') delete params.level;
+    if (params.campus === 'all') delete params.campus;
+    const res = await FetchClasses(params);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this class?")) {
       const res = await DeleteClass(id);
       if (res.success) {
@@ -61,18 +69,28 @@ export default function ClassesListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IClassListResponse>[] = [
     {
       key: "name",
       header: "Class Name",
       cell: (cls) => (
-        <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-            <Layers className="w-4 h-4" />
+        <div className="font-bold flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+            <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <p className="text-gray-900 font-semibold">{cls.name}</p>
-            <p className="text-xs text-gray-400">Level: {cls.level === '0level' ? 'O-Level' : 'A-Level'}</p>
+          <div className="min-w-0">
+            <p className="text-gray-900 font-bold text-sm sm:text-base truncate">{cls.name}</p>
+            <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 space-y-0.5">
+              <p className="sm:hidden font-semibold text-gray-600 truncate flex items-center gap-1">
+                <Building2 className="w-3 h-3 text-primary shrink-0" />
+                <span>{cls.campus_name || 'Main Campus'}</span>
+              </p>
+              <p className="sm:hidden font-semibold text-gray-600 flex items-center gap-1">
+                <Layers className="w-3 h-3 text-primary shrink-0" />
+                <span>{cls.sections_count || 0} Streams</span>
+              </p>
+              <p className="font-semibold text-primary">Level: {cls.level === '0level' ? 'O-Level' : 'A-Level'}</p>
+            </div>
           </div>
         </div>
       ),
@@ -80,8 +98,10 @@ export default function ClassesListPage() {
     {
       key: "campus_name",
       header: "Campus",
+      className: "hidden sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
       cell: (cls) => (
-        <div className="flex items-center text-sm text-gray-600 gap-1.5 font-medium">
+        <div className="flex items-center text-sm text-gray-600 gap-1.5 font-semibold">
           <Building2 className="w-3.5 h-3.5 text-gray-400" />
           <span>{cls.campus_name || 'Main Campus'}</span>
         </div>
@@ -90,8 +110,10 @@ export default function ClassesListPage() {
     {
       key: "sections_count",
       header: "Streams",
+      className: "hidden sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
       cell: (cls) => (
-        <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-none px-3 font-semibold rounded-full">
+        <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-none px-3 font-bold rounded-full text-xs">
           {cls.sections_count || 0} Streams
         </Badge>
       ),
@@ -101,11 +123,11 @@ export default function ClassesListPage() {
       header: "Status",
       cell: (cls) => (
         cls.active ? (
-          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-3 py-1 rounded-full w-fit">
+          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full w-fit text-[10px] sm:text-xs">
             Active
           </Badge>
         ) : (
-          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-3 py-1 rounded-full font-bold w-fit">
+          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold w-fit text-[10px] sm:text-xs">
             Inactive
           </Badge>
         )
@@ -113,32 +135,32 @@ export default function ClassesListPage() {
     },
     {
       key: "actions",
-      header: <div className="text-right">Actions</div>,
+      header: <div className="text-right pr-2">Actions</div>,
       cell: (cls) => (
-        <div className="text-right">
+        <div className="text-right pr-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-50 rounded-xl">
                 <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
               <DropdownMenuItem
-                className="cursor-pointer py-2"
+                className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/classes/${cls.id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer py-2"
+                className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/classes/${cls.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
+                className="cursor-pointer py-2 text-sm text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(cls.id)}
               >
                 <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />
@@ -156,10 +178,10 @@ export default function ClassesListPage() {
       title="Classes"
       description="Manage grade levels and student groups."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/classes/create">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Class
+            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
+            <span>Add Class</span>
           </Link>
         </Button>
       }
@@ -171,7 +193,7 @@ export default function ClassesListPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Search classes..."
-                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-blue-500 w-full"
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

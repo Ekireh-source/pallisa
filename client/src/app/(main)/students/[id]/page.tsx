@@ -70,6 +70,7 @@ export default function StudentDetailPage({ params }: PageProps) {
   const [showGenModal, setShowGenModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedTerm, setSelectedTerm] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("academic");
   
   const school = useSelector(selectSchool);
 
@@ -183,7 +184,7 @@ export default function StudentDetailPage({ params }: PageProps) {
             <p className="text-gray-500 mt-1 font-medium flex items-center gap-2">
               <span className="text-indigo-600 font-bold">ID: {student.student_id}</span>
               <span className="w-1 h-1 rounded-full bg-gray-300" />
-              <span>{student.current_class_name} • {student.current_stream_name}</span>
+              <span>{student.class_name} • {student.current_stream_name}</span>
             </p>
           </div>
         </div>
@@ -300,7 +301,7 @@ export default function StudentDetailPage({ params }: PageProps) {
         {/* Right Column - Detailed Info */}
         <div className="lg:col-span-2 space-y-8">
           <Card className="p-2 border-none shadow-xl shadow-gray-200/50 rounded-[32px] ring-1 ring-gray-100">
-            <Tabs defaultValue="academic" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="bg-transparent border-b border-gray-100 w-full justify-start h-auto p-4 gap-2">
                 <TabsTrigger 
                   value="academic" 
@@ -327,8 +328,8 @@ export default function StudentDetailPage({ params }: PageProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <DetailItem icon={Calendar} label="Admission Date" value={student.admission_date ? format(new Date(student.admission_date), 'PPP') : 'N/A'} color="text-indigo-600" />
                     <DetailItem icon={CheckCircle2} label="Admission Number" value={student.admission_number} color="text-primary" />
-                    <DetailItem icon={GraduationCap} label="Current Stream" value={`${student.current_class_name} - ${student.current_stream_name}`} color="text-amber-600" />
-                    <DetailItem icon={MapPin} label="Campus" value={student.campus_name} color="text-rose-600" />
+                    <DetailItem icon={GraduationCap} label="Current Stream" value={`${student.class_name} - ${student.current_stream_name}`} color="text-amber-600" />
+                    <DetailItem icon={MapPin} label="Campus" value={""} color="text-rose-600" />
                   </div>
 
                   <div className="pt-8 border-t border-gray-100">
@@ -379,7 +380,7 @@ export default function StudentDetailPage({ params }: PageProps) {
                         <div className="absolute left-4 top-1 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-white" />
                         <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
                           <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Currently Enrolled</p>
-                          <h5 className="font-bold text-gray-900 mb-1">{student.current_class_name} • {student.current_stream_name}</h5>
+                          <h5 className="font-bold text-gray-900 mb-1">{student.class_name} • {student.current_stream_name}</h5>
                           <p className="text-sm text-gray-500">Active since admission on {student.admission_date ? format(new Date(student.admission_date), 'PPP') : 'N/A'}</p>
                         </div>
                       </div>

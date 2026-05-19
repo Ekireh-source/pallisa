@@ -30,6 +30,7 @@ import { useRouter } from 'next/navigation';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { ICampusListResponse } from '@/features/school/school.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function CampusesListPage() {
@@ -38,15 +39,15 @@ export default function CampusesListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchCampuses(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchCampuses(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
-  const fetchFromUrl = (url: string, query?: any) => {
-    return getPaginatedFromUrl(url, query);
-  };
-
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this campus?")) {
       const res = await DeleteCampus(id);
       if (res.success) {
@@ -58,18 +59,30 @@ export default function CampusesListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ICampusListResponse>[] = [
     {
       key: "name",
       header: "Campus Name",
       cell: (campus) => (
-        <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-            <Building2 className="w-4 h-4" />
+        <div className="font-bold flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+            <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <p className="text-gray-900 font-semibold">{campus.name}</p>
-            <p className="text-xs text-gray-400">Created: {campus.created_at ? new Date(campus.created_at).toLocaleDateString() : 'N/A'}</p>
+          <div className="min-w-0">
+            <p className="text-gray-900 font-bold text-sm sm:text-base truncate">{campus.name}</p>
+            <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 space-y-0.5">
+              <p className="sm:hidden font-semibold text-gray-600 truncate flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+                <span>{campus.address || 'No Location'}</span>
+              </p>
+              {campus.phone_number && (
+                <p className="sm:hidden font-semibold text-gray-600 flex items-center gap-1">
+                  <Phone className="w-3 h-3 text-gray-400 shrink-0" />
+                  <span>{campus.phone_number}</span>
+                </p>
+              )}
+              <p className="font-medium">Created: {campus.created_at ? new Date(campus.created_at).toLocaleDateString() : 'N/A'}</p>
+            </div>
           </div>
         </div>
       ),
@@ -77,8 +90,10 @@ export default function CampusesListPage() {
     {
       key: "address",
       header: "Location",
+      className: "hidden sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
       cell: (campus) => (
-        <div className="flex items-center text-sm text-gray-600 gap-1">
+        <div className="flex items-center text-sm text-gray-600 gap-1 font-semibold">
           <MapPin className="w-3.5 h-3.5 text-gray-400" />
           <span>{campus.address || 'No Location'}</span>
         </div>
@@ -87,8 +102,10 @@ export default function CampusesListPage() {
     {
       key: "contact",
       header: "Contact",
+      className: "hidden sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
       cell: (campus) => (
-        <div className="text-xs text-gray-600 space-y-1">
+        <div className="text-xs text-gray-600 space-y-1 font-semibold">
           {campus.phone_number && (
             <div className="flex items-center gap-1">
               <Phone className="w-3 h-3 text-gray-400" />
@@ -110,11 +127,11 @@ export default function CampusesListPage() {
       header: "Status",
       cell: (campus) => (
         campus.active ? (
-          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-3 py-1 rounded-full w-fit">
+          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full w-fit text-[10px] sm:text-xs">
             Active
           </Badge>
         ) : (
-          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-3 py-1 rounded-full font-bold w-fit">
+          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold w-fit text-[10px] sm:text-xs">
             Inactive
           </Badge>
         )
@@ -122,32 +139,32 @@ export default function CampusesListPage() {
     },
     {
       key: "actions",
-      header: <div className="text-right">Actions</div>,
+      header: <div className="text-right pr-2">Actions</div>,
       cell: (campus) => (
-        <div className="text-right">
+        <div className="text-right pr-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-50 rounded-xl">
                 <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
               <DropdownMenuItem 
-                className="cursor-pointer py-2 font-medium"
+                className="cursor-pointer py-2 font-medium text-sm"
                 onClick={() => router.push(`/campuses/${campus.id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="cursor-pointer py-2"
+                className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/campuses/${campus.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
+                className="cursor-pointer py-2 text-rose-600 focus:text-rose-600 text-sm"
                 onClick={() => handleDelete(campus.id)}
               >
                 <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />
@@ -165,10 +182,10 @@ export default function CampusesListPage() {
       title="School Campuses"
       description="Manage school campuses and branches."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/campuses/create">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Campus
+            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
+            <span>Add Campus</span>
           </Link>
         </Button>
       }
@@ -179,7 +196,7 @@ export default function CampusesListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search campuses..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-blue-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -189,7 +206,7 @@ export default function CampusesListPage() {
         <div className="p-4">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={fetchFromUrl}
+            fetchFromUrl={getPaginatedFromUrl}
             columns={columns}
             showRowNumbers={false}
             skeletonRows={5}

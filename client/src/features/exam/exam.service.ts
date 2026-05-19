@@ -8,7 +8,11 @@ import {
   ICompetencyAreaListResponse,
   ITopicListResponse,
   IActivityListResponse,
-  IExamListResponse
+  IExamListResponse,
+  ISaAssessmentInput, SaAssessmentSchema,
+  ISaBulkSaveInput, SaBulkSaveSchema,
+  ISaAssessmentBulkSaveInput, SaAssessmentBulkSaveSchema,
+  IProjectBulkSaveInput, ProjectBulkSaveSchema
 } from "./exam.schemas";
 import { IPaginatedResponse } from "@/types";
 import api from "@/lib/api";
@@ -340,3 +344,166 @@ export const DeleteExamScore = async (id: number) => {
     return { success: false, error };
   }
 };
+
+
+// --- Dynamic Matrices (Projects and SA) ---
+
+export const FetchProjectScoreMatrix = async (streamId: number | string, subjectId: number | string, competencyNumber: number) => {
+  try {
+    const res = await api.get(`/exams/projects/matrix/?stream_id=${streamId}&subject_id=${subjectId}&competency_number=${competencyNumber}`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const SaveBulkProjectScores = async (payload: IProjectBulkSaveInput) => {
+  const validatedPayload = ProjectBulkSaveSchema.safeParse(payload);
+  if (!validatedPayload.success) {
+    return handleValidationError(validatedPayload.error);
+  }
+  try {
+    const res = await api.post(`/exams/projects/matrix/`, validatedPayload.data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const FetchProjectScoreMatrixById = async (id: string) => {
+  try {
+    const res = await api.get(`/exams/projects/matrix/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const FetchProjectsList = async (params?: any) => {
+  
+  try {
+    const res = await api.get(`/exams/projects/matrix/`);
+    return res.data;
+  } catch (error) {
+    return { error };
+  }
+};
+
+export const DeleteProject = async (id: string) => {
+  try {
+    const res = await api.delete(`/exams/projects/matrix/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const SaveBulkProjectScoresById = async (id: string, payload: IProjectBulkSaveInput) => {
+  const validatedPayload = ProjectBulkSaveSchema.safeParse(payload);
+  if (!validatedPayload.success) {
+    return handleValidationError(validatedPayload.error);
+  }
+  try {
+    const res = await api.post(`/exams/projects/matrix/${id}/`, validatedPayload.data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const FetchSaScoreMatrix = async (streamId: number | string, subjectId: number | string) => {
+  try {
+    const res = await api.get(`/exams/sa/matrix/?stream_id=${streamId}&subject_id=${subjectId}`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const SaveBulkSaScores = async (payload: any) => {
+  try {
+    const res = await api.post(`/exams/sa/matrix/`, payload);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+
+// --- SA Assessments ---
+
+export const FetchSaAssessments = async (params?: any) => {
+  try {
+    const res = await api.get(`/exams/sa-assessments/`, params);
+    return res.data;
+  } catch (error) {
+    return { error };
+  }
+};
+
+export const FetchSaAssessmentById = async (id: string) => {
+  try {
+    const res = await api.get(`/exams/sa-assessments/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const CreateSaAssessment = async ({ data }: { data: ISaAssessmentInput }) => {
+  const validatedData = SaAssessmentSchema.safeParse(data);
+  if (!validatedData.success) {
+    return handleValidationError(validatedData.error);
+  }
+  try {
+    const res = await api.post(`/exams/sa-assessments/`, validatedData.data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const UpdateSaAssessment = async ({ id, data }: { id: string; data: Partial<ISaAssessmentInput> }) => {
+  const validatedData = SaAssessmentSchema.partial().safeParse(data);
+  if (!validatedData.success) {
+    return handleValidationError(validatedData.error);
+  }
+  try {
+    const res = await api.patch(`/exams/sa-assessments/${id}/`, validatedData.data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const DeleteSaAssessment = async (id: string) => {
+  try {
+    const res = await api.delete(`/exams/sa-assessments/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const FetchSaAssessmentStudentScores = async (id: string) => {
+  try {
+    const res = await api.get(`/exams/sa-assessments/${id}/student-scores/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const SaveBulkSaAssessmentScores = async (id: string, payload: ISaAssessmentBulkSaveInput) => {
+  const validatedPayload = SaAssessmentBulkSaveSchema.safeParse(payload);
+  if (!validatedPayload.success) {
+    return handleValidationError(validatedPayload.error);
+  }
+  try {
+    const res = await api.post(`/exams/sa-assessments/${id}/bulk-scores/`, validatedPayload.data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+

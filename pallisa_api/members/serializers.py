@@ -103,19 +103,6 @@ class ClassSerializer(serializers.ModelSerializer):
         return obj.streams.filter(is_active=True).count()
 
 
-class SubjectSerializer(serializers.ModelSerializer):
-    """Serializer for Subject"""
-    school_name = serializers.CharField(source='school.name', read_only=True)
-    
-    class Meta:
-        model = Subject
-        fields = [
-            'id', 'name', 'code', 'description', 'school', 'school_name',
-            'is_active', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-
 class SubjectPaperSerializer(serializers.ModelSerializer):
     """Serializer for SubjectPaper"""
     subject_name = serializers.ReadOnlyField(source='subject.name')
@@ -126,6 +113,20 @@ class SubjectPaperSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'subject', 'subject_name', 'subject_code', 'name', 'code',
             'max_score', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    """Serializer for Subject"""
+    school_name = serializers.CharField(source='school.name', read_only=True)
+    papers = SubjectPaperSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Subject
+        fields = [
+            'id', 'name', 'code', 'description', 'school', 'school_name',
+            'is_active', 'papers', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

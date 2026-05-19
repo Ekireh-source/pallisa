@@ -66,7 +66,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{topic.name}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-none px-3">
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-none px-3">
                 {topic.subject_name || `Subject ID: ${topic.subject}`}
               </Badge>
               <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-none px-3">
@@ -76,7 +76,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <Button 
-          className="h-11 rounded-xl shadow-lg shadow-blue-200"
+          className="h-11 rounded-xl shadow-lg shadow-primary/20 bg-primary text-white"
           onClick={() => router.push(`/topics/${id}/edit`)}
         >
           <Edit2 className="w-4 h-4 mr-2" />
@@ -89,7 +89,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
           <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
+                <div className="p-3 rounded-xl bg-primary/10 text-primary">
                   <FileText className="w-6 h-6" />
                 </div>
                 <div className="space-y-2">
@@ -117,7 +117,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
         <div className="space-y-6">
           <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
             <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-              <Layers className="w-5 h-5 mr-2 text-blue-500" />
+              <Layers className="w-5 h-5 mr-2 text-primary" />
               Quick Stats
             </h3>
             <div className="space-y-4">

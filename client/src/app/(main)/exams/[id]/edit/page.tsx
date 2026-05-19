@@ -64,8 +64,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         FetchExamById(id)
       ]);
 
-      if (classRes.success) setClasses(classRes.data.results || classRes.data);
-      if (termRes.success) setTerms(termRes.data.results || termRes.data);
+      if (classRes && 'results' in classRes) {
+        setClasses(classRes.results);
+      }
+      if (termRes && 'results' in termRes) {
+        setTerms(termRes.results);
+      }
       
       if (examRes.success) {
         reset({
@@ -168,13 +172,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <ClipboardCheck className="w-4 h-4 mr-2 text-amber-500" />
+                    <ClipboardCheck className="w-4 h-4 mr-2 text-primary" />
                     Examination Name
                   </Label>
                   <Input 
                     id="name"
                     placeholder="e.g., End of Term 1 Exams" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-amber-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -183,13 +187,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="start_date" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-amber-500" />
+                      <Calendar className="w-4 h-4 mr-2 text-primary" />
                       Start Date
                     </Label>
                     <Input 
                       id="start_date"
                       type="date"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-amber-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('start_date')}
                     />
                     {errors.start_date && <ErrorMessage message="Start date is required" />}
@@ -197,13 +201,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
                   <div className="space-y-2">
                     <Label htmlFor="end_date" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-amber-500" />
+                      <Calendar className="w-4 h-4 mr-2 text-primary" />
                       End Date
                     </Label>
                     <Input 
                       id="end_date"
                       type="date"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-amber-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('end_date')}
                     />
                     {errors.end_date && <ErrorMessage message="End date is required" />}
@@ -217,7 +221,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-amber-500" />
+                <Clock className="w-5 h-5 mr-2 text-primary" />
                 Period & Status
               </h3>
               
@@ -278,7 +282,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
             <div className="pt-2">
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl shadow-lg shadow-amber-200 font-bold bg-amber-600 hover:bg-amber-700"
+                className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary hover:bg-primary/90"
                 disabled={loading}
               >
                 {loading ? (

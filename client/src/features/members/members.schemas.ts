@@ -75,32 +75,26 @@ export const StudentSchema = z.object({
 });
 
 export const TeacherSchema = z.object({
-  user_email: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.string().email("Invalid email").optional().nullable()
-  ),
+  user_email: z.union([
+    z.string().email("Invalid email"),
+    z.literal(""),
+    z.null(),
+    z.undefined()
+  ]).transform(val => val === "" ? undefined : val).optional(),
   user_first_name: z.string().min(1, "First name is required"),
   user_last_name: z.string().min(1, "Last name is required"),
   user_gender: z.enum(['M', 'F', 'O']),
-  employee_id: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.string().optional().nullable()
-  ),
+  employee_id: z.string().nullable().or(z.literal(""))
+    .transform(val => val === "" ? undefined : val).optional(),
   employment_type: z.enum(['full_time', 'part_time', 'contract', 'substitute', 'volunteer']),
-  specialization: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.string().optional().nullable()
-  ),
-  qualification: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.string().optional().nullable()
-  ),
-  hire_date: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.string().optional().nullable()
-  ),
+  specialization: z.string().nullable().or(z.literal(""))
+    .transform(val => val === "" ? undefined : val).optional(),
+  qualification: z.string().nullable().or(z.literal(""))
+    .transform(val => val === "" ? undefined : val).optional(),
+  hire_date: z.string().nullable().or(z.literal(""))
+    .transform(val => val === "" ? undefined : val).optional(),
   user_profile_picture: z.any().optional(),
-  user_role_id: z.coerce.number().optional().nullable(),
+  user_role_id: z.number().optional().nullable(),
   is_active: z.boolean(),
 });
 
@@ -195,7 +189,7 @@ export const SubjectPaperSchema = z.object({
   subject: z.number().min(1, "Subject is required"),
   name: z.string().min(1, "Name is required"),
   code: z.string().optional().nullable().or(z.literal("")),
-  max_score: z.coerce.number().min(1, "Max score must be at least 1"),
+  max_score: z.number().min(1, "Max score must be at least 1"),
   is_active: z.boolean(),
 });
 

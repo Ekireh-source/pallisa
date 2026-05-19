@@ -50,6 +50,7 @@ export default function TeacherDetailPage({ params }: PageProps) {
   const router = useRouter();
   const [teacher, setTeacher] = useState<TeacherDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("professional");
 
   useEffect(() => {
     const loadTeacher = async () => {
@@ -239,7 +240,7 @@ export default function TeacherDetailPage({ params }: PageProps) {
         {/* Right Column - Detailed Info */}
         <div className="lg:col-span-2 space-y-8">
           <Card className="p-2 border-none shadow-xl shadow-gray-200/50 rounded-[32px] ring-1 ring-gray-100">
-            <Tabs defaultValue="professional" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="bg-transparent border-b border-gray-100 w-full justify-start h-auto p-4 gap-2">
                 <TabsTrigger 
                   value="professional" 

@@ -39,6 +39,7 @@ import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { ITeacher } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function TeachersListPage() {
@@ -49,8 +50,12 @@ export default function TeachersListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchTeachers(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchTeachers(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const downloadTemplate = () => {
@@ -112,7 +117,7 @@ export default function TeachersListPage() {
           setIsUploadModalOpen(false);
           tableRefreshRef.current?.refresh();
         } else {
-          const errorMessage = result.error?.response?.data?.error || "Failed to upload teachers";
+          const errorMessage = "Failed to upload teachers";
           toast.error(errorMessage);
           console.error("Bulk upload error:", result.error);
         }
@@ -140,7 +145,7 @@ export default function TeachersListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ITeacher>[] = [
     {
       key: "name",
       header: "Teacher",
@@ -148,7 +153,7 @@ export default function TeachersListPage() {
         <div className="font-bold flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-gray-100 rounded-xl">
             <AvatarImage src={teacher.profile_picture} alt={teacher.full_name} className="object-cover" />
-            <AvatarFallback className="bg-indigo-50 text-indigo-700 font-bold rounded-xl">
+            <AvatarFallback className="bg-primary/10 text-primary font-bold rounded-xl">
               {teacher.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'TR'}
             </AvatarFallback>
           </Avatar>
@@ -269,7 +274,7 @@ export default function TeachersListPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search by name, ID or specialization..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-indigo-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -301,21 +306,21 @@ export default function TeachersListPage() {
 
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
         <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-          <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white">
+          <div className="bg-gradient-to-br from-primary to-primary/90 p-8 text-white">
             <DialogHeader>
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
                 <Upload className="w-6 h-6 text-white" />
               </div>
               <DialogTitle className="text-2xl font-bold text-white">Bulk Teacher Upload</DialogTitle>
-              <DialogDescription className="text-indigo-100 mt-2">
+              <DialogDescription className="text-primary-foreground/90 mt-2">
                 Register multiple teachers at once using an Excel template.
               </DialogDescription>
             </DialogHeader>
           </div>
 
           <div className="p-8 space-y-6">
-            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex gap-3 text-indigo-800 text-sm">
-              <AlertCircle className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex gap-3 text-primary text-sm">
+              <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <p>
                 Download the template, fill in the details, and upload it back. Login credentials will be sent to the teachers' emails.
               </p>
@@ -324,10 +329,10 @@ export default function TeachersListPage() {
             <div className="grid grid-cols-1 gap-4">
               <Button 
                 variant="outline" 
-                className="h-16 rounded-2xl border-dashed border-2 hover:bg-indigo-50 hover:border-indigo-200 flex flex-col items-center justify-center gap-1 group transition-all"
+                className="h-16 rounded-2xl border-dashed border-2 hover:bg-primary/10 hover:border-primary/20 flex flex-col items-center justify-center gap-1 group transition-all"
                 onClick={downloadTemplate}
               >
-                <div className="flex items-center text-indigo-600 font-semibold">
+                <div className="flex items-center text-primary font-semibold">
                   <Download className="w-4 h-4 mr-2 group-hover:bounce" />
                   Download Template
                 </div>
@@ -342,19 +347,19 @@ export default function TeachersListPage() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   disabled={isUploading}
                 />
-                <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-indigo-200 bg-indigo-50/30 group-hover:bg-indigo-50 group-hover:border-indigo-300'}`}>
+                <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-primary/20 bg-primary/5 group-hover:bg-primary/10 group-hover:border-primary/30'}`}>
                   {isUploading ? (
                     <>
-                      <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm font-medium text-indigo-600">Processing File...</span>
+                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm font-medium text-primary">Processing File...</span>
                     </>
                   ) : (
                     <>
-                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                      <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                         <Upload className="w-5 h-5" />
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-indigo-900">Click to upload Excel file</p>
+                        <p className="text-sm font-semibold text-primary">Click to upload Excel file</p>
                         <p className="text-xs text-gray-500">Max size 5MB (.xlsx, .xls)</p>
                       </div>
                     </>

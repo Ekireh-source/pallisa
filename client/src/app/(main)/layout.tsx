@@ -64,15 +64,14 @@ export default function MainLayout({
       <DashboardSideBar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
       
       <div 
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
+        className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${
           isMobile ? 'pl-0' : isSideBarOpen ? 'pl-64' : 'pl-20'
         }`}
       >
         <SharedNavbar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
         
-        <main className="flex-1 overflow-auto">
-          <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-            
+        <main className="flex-1 overflow-auto bg-gray-50/50">
+          <div className="w-full">
             {children}
           </div>
         </main>

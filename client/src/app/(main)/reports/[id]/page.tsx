@@ -102,8 +102,8 @@ export default function ReportCardDetailPage({ params }: PageProps) {
       if (rcRes.success) {
         setReportCard(rcRes.data);
         const gradRes = await FetchGradingSystems({ is_active: true });
-        if (gradRes.success && gradRes.data.results?.length > 0) {
-          setGradingSystem(gradRes.data.results[0]);
+        if (gradRes && 'results' in gradRes && gradRes.results.length > 0) {
+          setGradingSystem(gradRes.results[0] as any);
         }
       } else {
         toast.error('Failed to load report card');

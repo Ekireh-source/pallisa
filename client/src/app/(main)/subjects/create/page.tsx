@@ -68,27 +68,27 @@ export default function CreateSubjectPage() {
       toast.success("Subject added successfully");
       router.push('/subjects');
     } else {
-      toast.error(result.error?.message || "Failed to add subject");
+      toast.error("Failed to add subject");
     }
     setLoading(false);
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50 shrink-0"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Add Subject</h1>
-            <p className="text-gray-500 mt-1">Define a new course for the school curriculum.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add Subject</h1>
+            <p className="text-gray-500 text-sm sm:text-base mt-1">Define a new course for the school curriculum.</p>
           </div>
         </div>
       </div>

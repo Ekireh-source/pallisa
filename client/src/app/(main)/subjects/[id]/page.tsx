@@ -156,7 +156,7 @@ export default function SubjectDetailPage({ params }: { params: Promise<{ id: st
       setIsPaperModalOpen(false);
       paperTableRefreshRef.current?.();
     } else {
-      toast.error(result.error?.message || "Failed to save subject paper");
+      toast.error("Failed to save subject paper");
     }
     setPaperLoading(false);
   };
@@ -423,7 +423,7 @@ export default function SubjectDetailPage({ params }: { params: Promise<{ id: st
                   type="number"
                   placeholder="e.g., 100" 
                   className={`h-11 rounded-xl border-gray-200 focus:ring-emerald-500 ${paperErrors.max_score ? 'border-red-500' : ''}`}
-                  {...registerPaper('max_score')}
+                  {...registerPaper('max_score', { valueAsNumber: true })}
                 />
                 {paperErrors.max_score && <ErrorMessage message={paperErrors.max_score.message} />}
               </div>

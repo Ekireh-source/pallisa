@@ -31,7 +31,9 @@ export default function CreateSchoolPage() {
 
   useEffect(() => {
     FetchCampuses().then(r => {
-      if (r.success) setCampuses(r.data.results || r.data);
+      if (r && 'results' in r) {
+        setCampuses(r.results);
+      }
       setFetchingCampuses(false);
     });
   }, []);

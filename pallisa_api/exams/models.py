@@ -215,3 +215,86 @@ def update_overall_exam_score(sender, instance, **kwargs):
             }
         )
 
+
+class ProjectScore(models.Model):
+    """
+    Stores individual criteria-level scores for a student's projects.
+    Maps back to legacy 'project_scores' table.
+    """
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='project_scores')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='project_scores')
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
+    competency_number = models.PositiveIntegerField(help_text="Competency index, e.g., 1, 2, 3, or 4")
+    sub_criteria = models.CharField(max_length=10, help_text="Specific criteria code, e.g., '1.8'")
+    score = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0.0)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['student', 'subject', 'term', 'academic_year', 'sub_criteria']
+        indexes = [
+            models.Index(fields=['subject', 'term', 'academic_year']),
+            models.Index(fields=['student', 'competency_number']),
+        ]
+
+    def __str__(self):
+        return f"{self.student.admission_number} - {self.sub_criteria}: {self.score}"
+
+
+class SaAssessment(models.Model):
+    """
+    Represents the metadata configuration for a stream's Summative Assessment.
+    Maps back to legacy 'sa_assessments' table.
+    """
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    stream = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name='sa_assessments')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='sa_assessments')
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, related_name='sa_assessments')
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
+    total_box = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, help_text="Scaling divisor factor")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['stream', 'subject', 'term', 'academic_year']
+
+    def __str__(self):
+        return f"SA: {self.subject.code} - {self.stream.name} ({self.term.name})"
+
+
+class SaScore(models.Model):
+    """
+    Stores the full milestone-grade matrix row achieved by a student in an SA.
+    Maps back to legacy 'sa_scores' table.
+    """
+    sa_assessment = models.ForeignKey(SaAssessment, on_delete=models.CASCADE, related_name='student_scores')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='sa_scores')
+    
+    # Milestone scores (L) and corresponding descriptors (G)
+    l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    g1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    
+    l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    g2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    
+    l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    g3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    
+    l4 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    g4 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    
+    l5 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    g5 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0.0)])
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['sa_assessment', 'student']
+
+    def __str__(self):
+        return f"{self.student.admission_number} - {self.sa_assessment}"
+
+

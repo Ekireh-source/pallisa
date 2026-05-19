@@ -432,7 +432,7 @@ function PaginatedTableInner<T, Q = unknown>({
 
 	return (
 		<div className={cn("space-y-4 h-full !min-h-[30svh]", className)}>
-			<div className="overflow-x-auto">
+			<div className="w-full overflow-x-auto max-w-full">
 				<Table className={cn(tableClassName, "mb-auto min-w-full")}>
 					<TableHeader>
 						<TableRow className="border-b border-gray-200">
@@ -492,7 +492,7 @@ function PaginatedTableInner<T, Q = unknown>({
 													<TableCell className="w-[0.5rem]">{getRowNumber(index)}</TableCell>
 												)}
 												{columns.map((col) => (
-													<TableCell key={col.key} className={cn("whitespace-nowrap", col.cellClassName)}>
+													<TableCell key={col.key} className={cn("whitespace-normal break-words", col.cellClassName)}>
 														{col?.cell?.(item)}
 													</TableCell>
 												))}
@@ -537,9 +537,9 @@ function PaginatedTableInner<T, Q = unknown>({
 														{showRowNumbers && (
 															<TableCell className="w-2">{getRowNumber(itemIndex)}</TableCell>
 														)}
-														
+
 														{columns.map((col) => (
-															<TableCell key={col.key} className={cn("whitespace-nowrap pl-6 ", col.cellClassName)}>
+															<TableCell key={col.key} className={cn("whitespace-normal break-words pl-6", col.cellClassName)}>
 																{col?.cell?.(item)}
 															</TableCell>
 														))}
@@ -571,7 +571,7 @@ function PaginatedTableInner<T, Q = unknown>({
 												<TableCell className="w-2">{getRowNumber(index)}</TableCell>
 											)}
 											{columns.map((col) => (
-												<TableCell key={col.key} className={cn("whitespace-nowrap", col.cellClassName)}>
+												<TableCell key={col.key} className={cn("whitespace-normal break-words", col.cellClassName)}>
 													{col?.cell?.(item)}
 												</TableCell>
 											))}

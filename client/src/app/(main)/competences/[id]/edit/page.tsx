@@ -58,7 +58,11 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
       setFetching(true);
       
       const topicsRes = await FetchTopics();
-      if (topicsRes.success) setTopics(topicsRes.data.results || topicsRes.data);
+      if (topicsRes && 'results' in topicsRes) {
+        setTopics(topicsRes.results);
+      } else {
+        toast.error("Failed to load topics");
+      }
 
       const result = await FetchCompetencyAreaById(id);
       if (result.success) {
@@ -123,7 +127,7 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="topic" className="text-sm font-semibold text-gray-700 flex items-center">
-                <BookOpen className="w-4 h-4 mr-2 text-indigo-600" />
+                <BookOpen className="w-4 h-4 mr-2 text-primary" />
                 Linked Topic (Optional)
               </Label>
               <Select 
@@ -132,7 +136,7 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
                   setValue('topic', parseInt(val), { shouldValidate: true, shouldDirty: true });
                 }}
               >
-                <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.topic ? 'border-red-500' : ''}`}>
+                <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.topic ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Select a topic to link..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -148,13 +152,13 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
 
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                <LayoutGrid className="w-4 h-4 mr-2 text-indigo-600" />
+                <LayoutGrid className="w-4 h-4 mr-2 text-primary" />
                 Area Name
               </Label>
               <Input 
                 id="name"
                 placeholder="e.g., Critical Thinking & Problem Solving" 
-                className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.name ? 'border-red-500' : ''}`}
+                className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                 {...register('name')}
               />
               {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -162,13 +166,13 @@ export default function EditCompetencyAreaPage({ params }: { params: Promise<{ i
 
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                <FileText className="w-4 h-4 mr-2 text-indigo-600" />
+                <FileText className="w-4 h-4 mr-2 text-primary" />
                 Description (Optional)
               </Label>
               <Textarea 
                 id="description"
                 placeholder="Briefly describe what this competency area covers..." 
-                className="min-h-[120px] rounded-xl border-gray-200 focus:ring-indigo-500"
+                className="min-h-[120px] rounded-xl border-gray-200 focus:ring-primary"
                 {...register('description')}
               />
               {errors.description && <ErrorMessage message={errors.description.message} />}

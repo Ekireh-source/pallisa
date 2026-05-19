@@ -35,4 +35,15 @@ urlpatterns = [
     path('exam-paper-scores/<int:pk>/', views.ExamPaperScoreDetailView.as_view(), name='exam-paper-scores-detail'),
     path('exams/<uuid:public_id>/bulk-paper-scores/', views.ExamBulkPaperScoreView.as_view(), name='exam-bulk-paper-scores'),
     path('exams/<uuid:public_id>/student-paper-scores/', views.ExamStudentsPaperScoreView.as_view(), name='exam-student-paper-scores'),
+
+    # SA Assessments
+    path('sa-assessments/', views.SaAssessmentListCreateView.as_view(), name='sa-assessments-list-create'),
+    path('sa-assessments/<uuid:public_id>/', views.SaAssessmentDetailView.as_view(), name='sa-assessments-detail'),
+    path('sa-assessments/<uuid:public_id>/bulk-scores/', views.SaAssessmentBulkScoreView.as_view(), name='sa-assessment-bulk-scores'),
+    path('sa-assessments/<uuid:public_id>/student-scores/', views.SaAssessmentStudentsScoreView.as_view(), name='sa-assessment-student-scores'),
+
+    # Dynamic Matrices
+    path('projects/matrix/', views.ProjectMatrixView.as_view(), name='project-matrix'),
+    path('projects/matrix/<str:public_id>/', views.ProjectMatrixView.as_view(), name='project-matrix-detail'),
+    path('sa/matrix/', views.SaMatrixView.as_view(), name='sa-matrix'),
 ]

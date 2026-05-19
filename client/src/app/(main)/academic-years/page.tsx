@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import { IAcademicYearListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
 
 export default function AcademicYearsListPage() {
@@ -38,8 +39,12 @@ export default function AcademicYearsListPage() {
   
   const tableRefreshRef = useRef<any>(null);
 
-  const fetchFirstPage = (query?: any) => {
-    return FetchAcademicYears(query);
+  const fetchFirstPage = async (query?: any) => {
+    const res = await FetchAcademicYears(query);
+    if (res && 'error' in res) {
+      throw res.error;
+    }
+    return res;
   };
 
   const handleDelete = async (id: number) => {
@@ -54,18 +59,24 @@ export default function AcademicYearsListPage() {
     }
   };
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IAcademicYearListResponse>[] = [
     {
       key: "name",
       header: "Academic Year",
       cell: (year) => (
-        <div className="font-bold flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-            <CalendarDays className="w-4 h-4" />
+        <div className="font-bold flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+            <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <p className="text-gray-900 font-semibold">{year.name}</p>
-            <p className="text-xs text-gray-400">Created: {format(new Date(year.created_at), 'MMM dd, yyyy')}</p>
+          <div className="min-w-0">
+            <p className="text-gray-900 font-bold text-sm sm:text-base truncate">{year.name}</p>
+            <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 space-y-0.5">
+              <p className="sm:hidden text-gray-600 font-semibold flex items-center gap-1">
+                <Clock className="w-3 h-3 text-gray-400 shrink-0" />
+                <span className="truncate">{format(new Date(year.start_date), 'MMM yy')} - {format(new Date(year.end_date), 'MMM yy')}</span>
+              </p>
+              <p className="font-medium">Created: {format(new Date(year.created_at), 'MMM dd, yyyy')}</p>
+            </div>
           </div>
         </div>
       ),
@@ -73,8 +84,10 @@ export default function AcademicYearsListPage() {
     {
       key: "start_date",
       header: "Duration",
+      className: "hidden sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
       cell: (year) => (
-        <div className="text-gray-600 flex items-center gap-2 text-sm font-medium">
+        <div className="text-gray-600 flex items-center gap-2 text-sm font-semibold">
           <Clock className="w-4 h-4 text-gray-400" />
           <span>{format(new Date(year.start_date), 'MMM yyyy')} - {format(new Date(year.end_date), 'MMM yyyy')}</span>
         </div>
@@ -85,12 +98,12 @@ export default function AcademicYearsListPage() {
       header: "Status",
       cell: (year) => (
         year.active ? (
-          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-3 py-1 flex items-center gap-1 w-fit rounded-full">
-            <CheckCircle2 className="w-3 h-3" />
+          <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-2 sm:px-3 py-0.5 sm:py-1 flex items-center gap-1 w-fit rounded-full text-[10px] sm:text-xs">
+            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-pulse" />
             <span>Active</span>
           </Badge>
         ) : (
-          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-3 py-1 rounded-full font-bold w-fit">
+          <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-none px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold w-fit text-[10px] sm:text-xs">
             Inactive
           </Badge>
         )
@@ -98,25 +111,25 @@ export default function AcademicYearsListPage() {
     },
     {
       key: "actions",
-      header: <div className="text-right">Actions</div>,
+      header: <div className="text-right pr-2">Actions</div>,
       cell: (year) => (
-        <div className="text-right">
+        <div className="text-right pr-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-50 rounded-xl">
                 <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
+            <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-xl border-gray-100">
               <DropdownMenuItem 
-                className="cursor-pointer py-2"
+                className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/academic-years/${year.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
+                className="cursor-pointer py-2 text-sm text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(year.id)}
               >
                 <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />
@@ -134,28 +147,29 @@ export default function AcademicYearsListPage() {
       title="Academic Years"
       description="Manage the school's academic calendar and cycles."
       headerActions={
-        <Button className="rounded-xl lg:justify-end h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+        <Button className="rounded-xl lg:justify-end h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/academic-years/create">
-            <Plus className="w-4 h-4 mr-2" />
-            New Academic Year
+            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
+            <span className="hidden sm:inline">New Academic Year</span>
+            <span className="sm:hidden">New Year</span>
           </Link>
         </Button>
       }
     >
       <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-3 sm:p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search years..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-indigo-500 w-full"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
             fetchFromUrl={getPaginatedFromUrl}
@@ -163,7 +177,7 @@ export default function AcademicYearsListPage() {
             showRowNumbers={false}
             skeletonRows={5}
             className="min-h-0!"
-            tableClassName="[&_td]:py-4"
+            tableClassName="[&_td]:py-3 [&_td]:px-2 [&_th]:px-2"
             query={{ search: searchTerm }}
             deps={[searchTerm]}
             refreshRef={tableRefreshRef}

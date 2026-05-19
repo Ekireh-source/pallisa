@@ -59,8 +59,8 @@ export default function CreateTermPage() {
     const loadYears = async () => {
       setFetchingYears(true);
       const result = await FetchAcademicYears();
-      if (result.success) {
-        setAcademicYears(result.data.results || result.data);
+      if (result && 'results' in result) {
+        setAcademicYears(result.results);
       }
       setFetchingYears(false);
     };
@@ -81,21 +81,21 @@ export default function CreateTermPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50 shrink-0"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">New Term</h1>
-            <p className="text-gray-500 mt-1">Add a new academic term to a specific year.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">New Term</h1>
+            <p className="text-gray-500 text-sm sm:text-base mt-1">Add a new academic term to a specific year.</p>
           </div>
         </div>
       </div>
@@ -108,13 +108,13 @@ export default function CreateTermPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Clock className="w-4 h-4 mr-2 text-violet-500" />
+                    <Clock className="w-4 h-4 mr-2 text-primary" />
                     Term Name
                   </Label>
                   <Input 
                     id="name"
                     placeholder="e.g., Term 1 or Semester 1" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-violet-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message} />}
@@ -123,13 +123,13 @@ export default function CreateTermPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="start_date" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <CalendarDays className="w-4 h-4 mr-2 text-violet-500" />
+                      <CalendarDays className="w-4 h-4 mr-2 text-primary" />
                       Start Date
                     </Label>
                     <Input 
                       id="start_date"
                       type="date"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-violet-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('start_date')}
                     />
                     {errors.start_date && <ErrorMessage message="Start date is required" />}
@@ -137,13 +137,13 @@ export default function CreateTermPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="end_date" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <CalendarDays className="w-4 h-4 mr-2 text-violet-500" />
+                      <CalendarDays className="w-4 h-4 mr-2 text-primary" />
                       End Date
                     </Label>
                     <Input 
                       id="end_date"
                       type="date"
-                      className="h-12 rounded-xl border-gray-200 focus:ring-violet-500"
+                      className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('end_date')}
                     />
                     {errors.end_date && <ErrorMessage message="End date is required" />}
@@ -157,7 +157,7 @@ export default function CreateTermPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <ToggleLeft className="w-5 h-5 mr-2 text-violet-500" />
+                <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
               

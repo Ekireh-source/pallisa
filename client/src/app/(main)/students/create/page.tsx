@@ -119,8 +119,8 @@ export default function CreateStudentPage() {
         FetchCampuses()
       ]);
       
-      if (streamsRes.success) setStreams(streamsRes.data.results || streamsRes.data);
-      if (campusesRes.success) setCampuses(campusesRes.data.results || campusesRes.data);
+      if (streamsRes && 'results' in streamsRes) setStreams(streamsRes.results);
+      if (campusesRes && 'results' in campusesRes) setCampuses(campusesRes.results);
       setLoadingCampuses(false);
     };
     loadData();
@@ -191,7 +191,7 @@ export default function CreateStudentPage() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <User className="w-5 h-5 mr-2 text-indigo-600" />
+                <User className="w-5 h-5 mr-2 text-primary" />
                 Personal Information
               </h3>
               
@@ -237,7 +237,7 @@ export default function CreateStudentPage() {
                   <Label htmlFor="user_gender">Gender</Label>
                   <select
                     id="user_gender"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary"
                     {...register('user_gender')}
                   >
                     <option value="M">Male</option>
@@ -250,7 +250,7 @@ export default function CreateStudentPage() {
 
             <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <GraduationCap className="w-5 h-5 mr-2 text-indigo-600" />
+                <GraduationCap className="w-5 h-5 mr-2 text-primary" />
                 Academic Details
               </h3>
               
@@ -259,14 +259,14 @@ export default function CreateStudentPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="campus" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Building2 className="w-4 h-4 mr-2 text-indigo-600" />
+                    <Building2 className="w-4 h-4 mr-2 text-primary" />
                     Campus
                   </Label>
                   <Select 
                     onValueChange={(val) => setValue('campus', parseInt(val))}
                     value={selectedCampus?.toString()}
                   >
-                    <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.campus ? 'border-red-500' : ''}`}>
+                    <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.campus ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select Campus" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl shadow-xl border-gray-100">
@@ -292,7 +292,7 @@ export default function CreateStudentPage() {
                     <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <select
                       id="current_stream"
-                      className="flex h-12 w-full pl-10 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex h-12 w-full pl-10 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary"
                       {...register('current_stream', { valueAsNumber: true })}
                     >
                       <option value="">Select a stream</option>
@@ -322,7 +322,7 @@ export default function CreateStudentPage() {
                   <Label htmlFor="enrollment_status">Enrollment Status</Label>
                   <select
                     id="enrollment_status"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary"
                     {...register('enrollment_status')}
                   >
                     <option value="enrolled">Enrolled</option>
@@ -339,12 +339,12 @@ export default function CreateStudentPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Camera className="w-5 h-5 mr-2 text-indigo-500" />
+                <Camera className="w-5 h-5 mr-2 text-primary" />
                 Profile Picture
               </h3>
               
               <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors relative overflow-hidden group">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary/60 transition-colors relative overflow-hidden group">
                   {selectedImage ? (
                     <div className="relative w-32 h-32">
                       <img 
@@ -362,8 +362,8 @@ export default function CreateStudentPage() {
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center cursor-pointer py-4 w-full">
-                      <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Upload className="w-8 h-8 text-indigo-500" />
+                      <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-primary" />
                       </div>
                       <p className="text-sm font-bold text-gray-700">Upload Photo</p>
                       <p className="text-[10px] text-gray-500 mt-1">JPG, PNG (Max 2MB)</p>
@@ -381,7 +381,7 @@ export default function CreateStudentPage() {
 
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Info className="w-5 h-5 mr-2 text-indigo-500" />
+                <Info className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
               

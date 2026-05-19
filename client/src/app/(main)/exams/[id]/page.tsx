@@ -42,10 +42,23 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui';
 import { FetchExamById, FetchExamStudentScores, SaveBulkExamScores } from '@/features/exam/exam.service';
-import { FetchSubjects } from '@/features/members/members.service';
+import { FetchSubjects, FetchSubjectById } from '@/features/members/members.service';
 import SubjectSearchableSelect from '@/components/selects/subjectsearchableselect';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { MainLayout } from '@/components/layout/main-layout';
+import Link from 'next/link';
+
+const formatDateSafe = (dateString?: string, formatStr: string = 'MMM d, yyyy') => {
+  if (!dateString) return 'Date not set';
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return 'Date not set';
+    return format(d, formatStr);
+  } catch (e) {
+    return 'Date not set';
+  }
+};
 
 export default function ExamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -54,6 +67,7 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
   const [exam, setExam] = useState<any>(null);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [selectedSubjectData, setSelectedSubjectData] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(true);
@@ -61,17 +75,14 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const isOLevel = exam?.class_level?.toLowerCase() === '0level' || exam?.class_level?.toLowerCase() === 'olevel';
+  const hasPapers = !isOLevel && selectedSubjectData?.papers?.length > 0;
+
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
-      const [examRes, subjectRes] = await Promise.all([
-        FetchExamById(id),
-        FetchSubjects()
-      ]);
-
+      const examRes = await FetchExamById(id);
       if (examRes.success) setExam(examRes.data);
-      if (subjectRes.success) setSubjects(subjectRes.data.results || subjectRes.data);
-      
       setLoading(false);
     };
 
@@ -80,9 +91,19 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     if (selectedSubject) {
+      loadSubjectData();
       loadScores();
+    } else {
+      setSelectedSubjectData(null);
     }
   }, [selectedSubject]);
+
+  const loadSubjectData = async () => {
+    const res = await FetchSubjectById(selectedSubject);
+    if (res.success) {
+      setSelectedSubjectData(res.data);
+    }
+  };
 
   const loadScores = async () => {
     setFetchingScores(true);
@@ -95,10 +116,24 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
     setFetchingScores(false);
   };
 
-  const handleScoreChange = (studentId: number, value: string) => {
-    setStudents(prev => prev.map(s => 
-      s.student_id === studentId ? { ...s, score: value === '' ? null : parseFloat(value) } : s
-    ));
+  const handleScoreChange = (studentId: number, value: string, paperId?: string) => {
+    const numValue = value === '' ? null : parseFloat(value);
+    
+    setStudents(prev => prev.map(s => {
+      if (s.student_id === studentId) {
+        if (paperId) {
+          return {
+            ...s,
+            papers: {
+              ...(s.papers || {}),
+              [paperId]: numValue
+            }
+          };
+        }
+        return { ...s, score: numValue };
+      }
+      return s;
+    }));
   };
 
   const handleRemarksChange = (studentId: number, value: string) => {
@@ -116,7 +151,8 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       scores: students.map(s => ({
         student_id: s.student_id,
         score: s.score,
-        remarks: s.remarks
+        remarks: s.remarks,
+        papers: s.papers || {}
       }))
     };
 
@@ -140,16 +176,40 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       const lines = text.split('\n');
       const newScores: any = {};
       
-      // Basic CSV parsing: AdmissionNumber, Score, Remarks
+      let headers: string[] = [];
+      
       lines.forEach((line, index) => {
-        if (index === 0) return; // Skip header
-        const parts = line.split(',');
+        const parts = line.split(',').map(p => p.trim());
+        if (index === 0) {
+           headers = parts;
+           return;
+        }
+        
         if (parts.length >= 2) {
-          const admNo = parts[0].trim();
-          const score = parseFloat(parts[1].trim());
-          const remarks = parts[2]?.trim() || '';
-          if (admNo && !isNaN(score)) {
-            newScores[admNo] = { score, remarks };
+          const admNo = parts[0];
+          const uploadData: any = { papers: {}, score: null, remarks: '' };
+          
+          if (hasPapers) {
+             let remarksIndex = headers.findIndex(h => h.toLowerCase() === 'remarks');
+             if (remarksIndex === -1) remarksIndex = parts.length - 1;
+             
+             selectedSubjectData.papers.forEach((paper: any) => {
+                const paperIndex = headers.indexOf(paper.name);
+                if (paperIndex !== -1 && parts[paperIndex]) {
+                   const s = parseFloat(parts[paperIndex]);
+                   if (!isNaN(s)) uploadData.papers[paper.id] = s;
+                }
+             });
+             uploadData.remarks = parts[remarksIndex] || '';
+             newScores[admNo] = uploadData;
+          } else {
+             const score = parseFloat(parts[1]);
+             const remarks = parts[2] || '';
+             if (admNo && !isNaN(score)) {
+                uploadData.score = score;
+                uploadData.remarks = remarks;
+                newScores[admNo] = uploadData;
+             }
           }
         }
       });
@@ -157,6 +217,9 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       setStudents(prev => prev.map(s => {
         const upload = newScores[s.admission_number];
         if (upload) {
+          if (hasPapers) {
+             return { ...s, papers: { ...(s.papers || {}), ...upload.papers }, remarks: upload.remarks };
+          }
           return { ...s, score: upload.score, remarks: upload.remarks };
         }
         return s;
@@ -168,13 +231,25 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   const downloadTemplate = () => {
-    const header = "AdmissionNumber,Score,Remarks\n";
-    const rows = students.map(s => `${s.admission_number},${s.score || ''},${s.remarks || ''}`).join('\n');
+    let header = "AdmissionNumber,Score,Remarks\n";
+    if (hasPapers) {
+      const paperNames = selectedSubjectData.papers.map((p: any) => p.name).join(',');
+      header = `AdmissionNumber,${paperNames},Remarks\n`;
+    }
+    
+    const rows = students.map(s => {
+      if (hasPapers) {
+         const paperScores = selectedSubjectData.papers.map((p: any) => s.papers?.[p.id] ?? '').join(',');
+         return `${s.admission_number},${paperScores},${s.remarks || ''}`;
+      }
+      return `${s.admission_number},${s.score ?? ''},${s.remarks || ''}`;
+    }).join('\n');
+    
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${exam.name}_${subjects.find(s => s.id.toString() === selectedSubject)?.name}_Template.csv`;
+    a.download = `${exam.name}_${selectedSubjectData?.name || 'Subject'}_Template.csv`;
     a.click();
   };
 
@@ -185,65 +260,62 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-pulse">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-40" />
+      <MainLayout
+        title={<Skeleton className="h-8 w-48 bg-white/20" />}
+        description="Loading exam details..."
+        backButton={
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50" disabled>
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+        }
+      >
+        <div className="space-y-8 animate-pulse pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Skeleton className="h-24 rounded-xl" />
+            <Skeleton className="h-24 rounded-xl" />
+            <Skeleton className="h-24 rounded-xl" />
+            <Skeleton className="h-24 rounded-xl" />
           </div>
+          <Skeleton className="h-96 w-full rounded-xl" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-24 rounded-xl" />
-        </div>
-        <Skeleton className="h-96 w-full rounded-xl" />
-      </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200"
-            onClick={() => router.push('/exams')}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">{exam.name}</h1>
-              <Badge variant={exam.is_published ? 'default' : 'secondary'} className="rounded-full">
-                {exam.is_published ? 'Published' : 'Draft'}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-4 mt-1 text-gray-500 text-sm">
-              <span className="flex items-center gap-1.5">
-                <Users className="w-4 h-4" />
-                {exam.class_name}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4" />
-                {format(new Date(exam.start_date), 'MMM d')} - {format(new Date(exam.end_date), 'MMM d, yyyy')}
-              </span>
-            </div>
-          </div>
-        </div>
-        
+    <MainLayout
+      title={
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl h-11" onClick={() => router.push(`/exams/${id}/edit`)}>
-            <Edit2 className="w-4 h-4 mr-2" />
-            Edit Settings
+          <span>{exam?.name || "Exam Details"}</span>
+          {exam && (
+            <Badge variant={exam.is_published ? 'default' : 'secondary'} className="rounded-full bg-white/20 text-white hover:bg-white/30 border-none">
+              {exam.is_published ? 'Published' : 'Draft'}
+            </Badge>
+          )}
+        </div>
+      }
+      description={exam ? `${exam.class_name} • ${exam.start_date && exam.end_date ? `${formatDateSafe(exam.start_date, 'MMM d')} - ${formatDateSafe(exam.end_date, 'MMM d, yyyy')}` : 'Date not set'}` : "Manage the scores and records for this examination."}
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 text-white hover:bg-white/20 rounded-full"
+          onClick={() => router.push('/exams')}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      actionCols={2}
+      headerActions={
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <Button variant="outline" className="rounded-xl h-11 bg-white/10 text-white hover:bg-white/20 border-white/20 font-medium w-full sm:w-auto" asChild>
+            <Link href={`/exams/${id}/edit`}>
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit Settings
+            </Link>
           </Button>
           <Button 
-            className="rounded-xl h-11 shadow-lg shadow-amber-200 bg-amber-600 hover:bg-amber-700"
+            className="rounded-xl h-11 shadow-sm bg-white text-primary hover:bg-gray-100 font-bold px-6 w-full sm:w-auto"
             onClick={handleSaveAll}
             disabled={saving || !selectedSubject}
           >
@@ -251,14 +323,15 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
             Save All Marks
           </Button>
         </div>
-      </div>
-
-      {/* Subject & Filters */}
+      }
+    >
+      <div className="space-y-8 animate-in fade-in duration-500 pt-4">
+        {/* Subject & Filters */}
       <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/30">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-700 flex items-center">
-              <BookOpen className="w-4 h-4 mr-2 text-amber-500" />
+              <BookOpen className="w-4 h-4 mr-2 text-primary" />
               Select Subject
             </Label>
             <SubjectSearchableSelect
@@ -337,7 +410,15 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
                 <TableRow>
                   <TableHead className="w-12"></TableHead>
                   <TableHead className="font-semibold text-gray-900">Student Info</TableHead>
-                  <TableHead className="w-[150px] font-semibold text-gray-900 text-center">Score (100%)</TableHead>
+                  {hasPapers ? (
+                    selectedSubjectData.papers.map((paper: any) => (
+                      <TableHead key={paper.id} className="w-[150px] font-semibold text-gray-900 text-center">
+                        {paper.name} ({paper.max_score})
+                      </TableHead>
+                    ))
+                  ) : (
+                    <TableHead className="w-[150px] font-semibold text-gray-900 text-center">Score (100%)</TableHead>
+                  )}
                   <TableHead className="font-semibold text-gray-900">Teacher Remarks</TableHead>
                   <TableHead className="w-20 text-right"></TableHead>
                 </TableRow>
@@ -363,21 +444,39 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
                           <span className="text-xs text-gray-500">{student.admission_number}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Input 
-                          type="number" 
-                          min="0" 
-                          max="100"
-                          placeholder="0.0"
-                          className="h-10 text-center font-bold text-amber-700 bg-amber-50/30 border-amber-100 focus:ring-amber-500 rounded-lg"
-                          value={student.score === null ? '' : student.score}
-                          onChange={(e) => handleScoreChange(student.student_id, e.target.value)}
-                        />
-                      </TableCell>
+                      
+                      {hasPapers ? (
+                        selectedSubjectData.papers.map((paper: any) => (
+                          <TableCell key={paper.id}>
+                            <Input 
+                              type="number" 
+                              min="0" 
+                              max={paper.max_score}
+                              placeholder="0.0"
+                              className="h-10 text-center font-bold text-primary bg-primary/5 border-primary/10 focus:ring-primary rounded-lg"
+                              value={student.papers?.[paper.id] ?? ''}
+                              onChange={(e) => handleScoreChange(student.student_id, e.target.value, paper.id.toString())}
+                            />
+                          </TableCell>
+                        ))
+                      ) : (
+                        <TableCell>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="100"
+                            placeholder="0.0"
+                            className="h-10 text-center font-bold text-primary bg-primary/5 border-primary/10 focus:ring-primary rounded-lg"
+                            value={student.score === null ? '' : student.score}
+                            onChange={(e) => handleScoreChange(student.student_id, e.target.value)}
+                          />
+                        </TableCell>
+                      )}
+                      
                       <TableCell>
                         <Input 
                           placeholder="Optional remarks..."
-                          className="h-10 rounded-lg border-gray-100 focus:ring-amber-500"
+                          className="h-10 rounded-lg border-gray-100 focus:ring-primary"
                           value={student.remarks}
                           onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
                         />
@@ -397,6 +496,7 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         )}
       </Card>
-    </div>
+      </div>
+    </MainLayout>
   );
 }
