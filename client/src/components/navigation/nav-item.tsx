@@ -47,7 +47,7 @@ export const NavItemComponent = ({
     const router = useRouter();
 
     return (
-        <div key={`${item.title}-${index}`} className="w-full py-1">
+        <div key={`${item.title}-${index}`} className="w-full py-1 relative">
             <Button
                 disabled={!item.href || (item.href.startsWith("#") && !item.submenu?.length)}
                 variant="ghost"
@@ -78,6 +78,15 @@ export const NavItemComponent = ({
                     )
                 ) : null}
             </Button>
+
+            {/* Render Tooltip when collapsed */}
+            {isTooltipVisible && !isSideBarOpen && !isMobileView && (
+                <div className="absolute left-[4.5rem] top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-gray-900 text-white font-medium text-xs rounded-md shadow-xl z-[100] pointer-events-none whitespace-nowrap flex items-center animate-in fade-in zoom-in-95 duration-100">
+                    {item.title}
+                    {/* Tooltip Arrow */}
+                    <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-4 border-r-gray-900" />
+                </div>
+            )}
 
             {/* Render Submenu (Level 2) */}
             {isSideBarOpen && item.submenu && isExpanded && (

@@ -62,19 +62,17 @@ export function SharedNavbar({
   return (
     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-100 bg-white px-4">
       <div className="flex items-center gap-2">
-        {/* Mobile menu button */}
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden mobile-menu-button"
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-4 w-4" />
-            <span className="sr-only">Open sidebar</span>
-          </Button>
-        )}
-        <h1 className="text-lg font-semibold text-gray-900">Pallisa Expense Manager</h1>
+        {/* Sidebar toggle button (Mobile & Desktop) */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mobile-menu-button"
+          onClick={toggleSidebar}
+        >
+          <Menu className="h-5 w-5 text-gray-600" />
+          <span className="sr-only">Toggle sidebar</span>
+        </Button>
+        <h1 className="text-lg font-semibold text-gray-900 ml-2">Report Card System</h1>
       </div>
       
       <div className="flex items-center gap-4">

@@ -147,7 +147,7 @@ export default function AcademicYearsListPage() {
       title="Academic Years"
       description="Manage the school's academic calendar and cycles."
       headerActions={
-        <Button className="rounded-xl lg:justify-end h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
+        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
           <Link href="/academic-years/create">
             <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
             <span className="hidden sm:inline">New Academic Year</span>

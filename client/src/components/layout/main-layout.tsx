@@ -85,7 +85,7 @@ export function MainLayout({
                     {headerActions && (
                         <div className={cn("flex justify-end items-center w-full sm:w-auto", actionCols === 1 ? "lg:col-span-1" : actionCols === 2 ? "lg:col-span-2" : "lg:col-span-3")}>
                             {/* Desktop View */}
-                            <div className="hidden sm:block w-full">
+                            <div className="hidden sm:flex sm:justify-end w-full">
                                 {headerActions}
                             </div>
 
