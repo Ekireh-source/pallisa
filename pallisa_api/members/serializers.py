@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from accounts.models import UserProfile, Role
+from accounts.models import UserProfile, Role, EmailVerificationToken
 from schools.models import School, Campus
 from expenses.models import AcademicYear
 from .models import (
@@ -11,7 +11,7 @@ from .models import (
     SalaryPeriod, SalaryAllowance, SalaryDeduction, SalaryPaymentDetail, SalaryPayment, SalarySummary,
     generate_student_id, generate_employee_id, generate_parent_id
 )
-from accounts.utils import generate_password, send_login_credentials
+from accounts.utils import generate_password, send_login_credentials, send_verification_email
 
 User = get_user_model()
 
@@ -81,9 +81,11 @@ class CampusSerializer(serializers.ModelSerializer):
 
 class AcademicYearSerializer(serializers.ModelSerializer):
     """Basic academic year serializer"""
+    school = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
+
     class Meta:
         model = AcademicYear
-        fields = ['id', 'name', 'start_date', 'end_date', 'is_current', 'is_active']
+        fields = ['id', 'school', 'name', 'start_date', 'end_date', 'is_current', 'is_active']
 
 
 class ClassSerializer(serializers.ModelSerializer):
@@ -140,6 +142,12 @@ class StudentSerializer(serializers.ModelSerializer):
     current_class_name = serializers.CharField(source='current_stream.class_obj.name', read_only=True)
     current_class_level = serializers.CharField(source='current_stream.class_obj.level', read_only=True)
     campus_name = serializers.CharField(source='campus.name', read_only=True)
+    campus = serializers.PrimaryKeyRelatedField(
+        queryset=Campus.objects.all(),
+        required=True,
+        allow_null=False,
+        error_messages={'required': 'Campus is required.', 'null': 'Campus cannot be null.'}
+    )
     age = serializers.SerializerMethodField()
     
     # User creation fields (required when user_profile not provided)
@@ -173,7 +181,7 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [
-            'id', 'user_profile', 'user_profile_data', 'student_id', 'campus', 'campus_name', 'admission_number', 'admission_date',
+            'id', 'user_profile', 'user_profile_data', 'student_id', 'lin', 'campus', 'campus_name', 'admission_number', 'admission_date',
             'current_stream', 'current_stream_name', 'current_class_name', 'current_class_level', 'previous_school',
             'special_needs', 'medical_conditions', 'allergies', 'enrollment_status',
             'is_active', 'full_name', 'email', 'age', 'created_at', 'updated_at',
@@ -288,7 +296,6 @@ class StudentSerializer(serializers.ModelSerializer):
             
             # Create user
             user = User.objects.create_user(**user_data)
-            print(f"✓ Created User: {user.email} (ID: {user.id})")
             
             # Step 2: Create UserProfile
             # Get or create role
@@ -347,13 +354,16 @@ class StudentSerializer(serializers.ModelSerializer):
             student = super().create(validated_data)
             print(f"✓ Created Student: {student.student_id} (ID: {student.id})")
             
-            # Step 4: Send login credentials (outside the critical transaction path)
+            # Step 4: Send login credentials and verification email (outside the critical transaction path)
             try:
-                send_login_credentials(user, generated_password, 'student')
-                print(f"✓ Sent login credentials to {user.email}")
-            except Exception as e:
-                # Log error but don't fail the creation
-                print(f"⚠ Failed to send email to {user.email}: {str(e)}")
+                if user.email:
+                    send_login_credentials(user, generated_password, 'student')
+                    
+                    if not user.email_verified:
+                        _, otp = EmailVerificationToken.create_for_user(user)
+                        send_verification_email(user, otp)
+            except Exception:
+                pass
             
             return student
         
@@ -369,6 +379,13 @@ class TeacherSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user_profile.get_full_name', read_only=True)
     email = serializers.CharField(source='user_profile.user.email', read_only=True)
     school_name = serializers.CharField(source='user_profile.role.school.name', read_only=True)
+    campus_name = serializers.CharField(source='campus.name', read_only=True)
+    campus = serializers.PrimaryKeyRelatedField(
+        queryset=Campus.objects.all(),
+        required=True,
+        allow_null=False,
+        error_messages={'required': 'Campus is required.', 'null': 'Campus cannot be null.'}
+    )
     
     # User creation fields (required when user_profile not provided)
     user_email = serializers.EmailField(write_only=True, required=False)
@@ -393,7 +410,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = [
-            'id', 'user_profile', 'user_profile_data', 'employee_id', 'hire_date', 'qualification',
+            'id', 'user_profile', 'user_profile_data', 'campus', 'campus_name', 'employee_id', 'hire_date', 'qualification',
             'specialization', 'years_of_experience', 'previous_experience',
             'employment_type', 'salary', 'is_active', 'full_name', 'email',
             'school_name', 'created_at', 'updated_at',
@@ -532,15 +549,17 @@ class TeacherSerializer(serializers.ModelSerializer):
             teacher = super().create(validated_data)
             print(f"✓ Created Teacher: {teacher.employee_id} (ID: {teacher.id})")
             
-            # Step 4: Send login credentials (only if email exists)
+            # Step 4: Send login credentials and verification email (only if email exists)
             if user.email:
                 try:
                     send_login_credentials(user, generated_password, 'teacher')
-                    print(f"✓ Sent login credentials to {user.email}")
-                except Exception as e:
-                    print(f"⚠ Failed to send email to {user.email}: {str(e)}")
-            else:
-                print(f"ℹ No email provided for teacher {teacher.employee_id}, skipping credentials email. Password is: {generated_password}")
+                    print(f"✓ Sent login credentials to {generated_password}")
+                    
+                    if not user.email_verified:
+                        _, otp = EmailVerificationToken.create_for_user(user)
+                        send_verification_email(user, otp)
+                except Exception:
+                    pass
             
             return teacher
         
@@ -694,12 +713,16 @@ class ParentSerializer(serializers.ModelSerializer):
             parent = super().create(validated_data)
             print(f"✓ Created Parent: {parent.user_profile.get_full_name()} (ID: {parent.id})")
             
-            # Step 4: Send login credentials (outside the critical transaction path)
+            # Step 4: Send login credentials and verification email (outside the critical transaction path)
             try:
-                send_login_credentials(user, generated_password, 'parent')
-                print(f"✓ Sent login credentials to {user.email}")
-            except Exception as e:
-                print(f"⚠ Failed to send email to {user.email}: {str(e)}")
+                if user.email:
+                    send_login_credentials(user, generated_password, 'parent')
+                    
+                    if not user.email_verified:
+                        _, otp = EmailVerificationToken.create_for_user(user)
+                        send_verification_email(user, otp)
+            except Exception:
+                pass
             
             return parent
         
@@ -932,12 +955,16 @@ class NonStaffMemberSerializer(serializers.ModelSerializer):
             non_staff_member = super().create(validated_data)
             print(f"✓ Created NonStaffMember: {non_staff_member.employee_id} (ID: {non_staff_member.id})")
             
-            # Step 4: Send login credentials (outside the critical transaction path)
+            # Step 4: Send login credentials and verification email (outside the critical transaction path)
             try:
-                send_login_credentials(user, generated_password, 'non-staff')
-                print(f"✓ Sent login credentials to {user.email}")
-            except Exception as e:
-                print(f"⚠ Failed to send email to {user.email}: {str(e)}")
+                if user.email:
+                    send_login_credentials(user, generated_password, 'non-staff')
+                    
+                    if not user.email_verified:
+                        _, otp = EmailVerificationToken.create_for_user(user)
+                        send_verification_email(user, otp)
+            except Exception:
+                pass
             
             return non_staff_member
         

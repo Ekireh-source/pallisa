@@ -135,7 +135,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
 
   if (fetchingData) {
     return (
-      <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="w-full space-y-8 animate-in fade-in duration-500">
         <Skeleton className="h-10 w-32" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -143,7 +143,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

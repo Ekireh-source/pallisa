@@ -40,7 +40,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Role
-        fields = ['id', 'name', 'description', 'permissions', 'is_superadmin']
+        fields = ['id', 'name', 'description', 'permissions', 'is_superadmin', 'school']
         read_only_fields = ['is_superadmin']
 
     def to_representation(self, instance):

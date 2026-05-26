@@ -31,6 +31,9 @@ import { FetchExamById, UpdateExam, DeleteExam } from '@/features/exam/exam.serv
 import { FetchClasses, FetchTerms } from '@/features/members/members.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -119,52 +122,49 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
   if (fetchingData) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32" />
+        <div className="w-full space-y-8 animate-in fade-in duration-500">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
+            <div><Skeleton className="h-64 w-full rounded-xl" /></div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
-          <div><Skeleton className="h-64 w-full rounded-xl" /></div>
-        </div>
-      </div>
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Examination</h1>
-            <p className="text-gray-500 mt-1">Update assessment period details.</p>
-          </div>
-        </div>
+    return (
+      <MainLayout
+      title="Edit Examination"
+      description="Update assessment period details."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 text-white hover:bg-white/20 rounded-full"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
         <Button 
           variant="outline" 
-          className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100"
+          className="h-11 rounded-xl bg-white/10 text-white hover:bg-white/20 border-white/20"
           onClick={handleDelete}
           disabled={loading}
         >
           <Trash2 className="w-4 h-4 mr-2" />
           Delete
         </Button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4 animate-in fade-in duration-500">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Form Area */}
           <div className="md:col-span-2 space-y-6">
@@ -304,6 +304,6 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
       </form>
-    </div>
+    </MainLayout>
   );
 }

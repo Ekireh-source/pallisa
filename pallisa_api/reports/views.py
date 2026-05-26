@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django.db.models import Avg, Sum
 from .models import ReportCard, SubjectReport, SubjectCompetencyScore, GradingSystem, GradeBoundary, ReportCardSettings
 from .serializers import (
@@ -10,14 +11,25 @@ from .serializers import (
 from exams.models import IntegrationScore, ExamScore, ActivityOfIntegration, ExamPaperScore
 from members.models import Student, TeacherSubjectAssignment, SubjectPaper
 from expenses.models import AcademicYear, Term
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+import weasyprint
+from accounts.permission import filter_by_school
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class GradingSystemViewSet(viewsets.ModelViewSet):
     queryset = GradingSystem.objects.all()
     serializer_class = GradingSystemSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         qs = super().get_queryset()
+        qs = filter_by_school(qs, self.request)
         school_id = self.request.query_params.get('school')
         if school_id:
             qs = qs.filter(school_id=school_id)
@@ -27,9 +39,11 @@ class GradeBoundaryViewSet(viewsets.ModelViewSet):
     queryset = GradeBoundary.objects.all()
     serializer_class = GradeBoundarySerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
     
     def get_queryset(self):
         qs = super().get_queryset()
+        qs = filter_by_school(qs, self.request, school_field_path='grading_system__school')
         system_id = self.request.query_params.get('grading_system')
         if system_id:
             qs = qs.filter(grading_system_id=system_id)
@@ -40,9 +54,11 @@ class ReportCardViewSet(viewsets.ModelViewSet):
     queryset = ReportCard.objects.all()
     serializer_class = ReportCardSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         queryset = ReportCard.objects.all()
+        queryset = filter_by_school(queryset, self.request, school_field_path='student__campus__schools')
         student_id = self.request.query_params.get('student_id', None)
         academic_year = self.request.query_params.get('academic_year', None)
         term = self.request.query_params.get('term', None)
@@ -92,6 +108,8 @@ class ReportCardViewSet(viewsets.ModelViewSet):
         students = Student.objects.filter(is_active=True).select_related(
             'user_profile', 'campus', 'current_stream__class_obj'
         )
+        students = filter_by_school(students, request, school_field_path='campus__schools')
+        
         if student_id:
             students = students.filter(id=student_id)
         elif stream_id:
@@ -176,6 +194,42 @@ class ReportCardViewSet(viewsets.ModelViewSet):
             "message": f"Successfully generated/updated {len(response_data)} report card(s).",
             "results": response_data
         }, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'])
+    def generate_pdf(self, request, pk=None):
+        report_card = self.get_object()
+        student = report_card.student
+        class_obj = report_card.class_obj
+        
+        school = None
+        if student.campus:
+            school = student.campus.schools.first()
+            
+        settings = getattr(school, 'reportcardsettings', None) if school else None
+        
+        serializer = self.get_serializer(report_card)
+        data = serializer.data
+        
+        class_level = (class_obj.level or '0level').lower()
+        if 'alevel' in class_level:
+            template_name = 'reports/alevel_report.html'
+        else:
+            template_name = 'reports/olevel_report.html'
+            
+        context = {
+            'report': data,
+            'settings': settings,
+            'school': school,
+            'primary_color': school.report_primary_color if school and hasattr(school, 'report_primary_color') else '#0fa88a',
+            'accent_color': school.report_accent_color if school and hasattr(school, 'report_accent_color') else '#162032',
+        }
+        
+        html_string = render_to_string(template_name, context)
+        pdf_file = weasyprint.HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()
+        
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{data["student_name"].replace(" ", "_")}_Report.pdf"'
+        return response
 
     def _compute_olevel_report(self, student, academic_year_id, term_id, class_obj, stream, report_card):
         """
@@ -481,6 +535,11 @@ class SubjectReportViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SubjectReport.objects.all()
     serializer_class = SubjectReportSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return filter_by_school(qs, self.request, school_field_path='report_card__student__campus__schools')
 
 
 class ReportCardSettingsViewSet(viewsets.ViewSet):

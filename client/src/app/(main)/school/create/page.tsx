@@ -7,12 +7,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, Save, Building2, Mail, Phone, MapPin, Loader2, ToggleLeft, Quote, ImagePlus, X } from 'lucide-react';
 import { Button, Card, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, ErrorMessage } from '@/components/ui';
 import { SchoolSchema, ISchoolInput } from '@/features/school/school.schemas';
-import { CreateSchool, FetchCampuses } from '@/features/school/school.service';
+import { CreateSchool, FetchCampuses, FetchSchoolById } from '@/features/school/school.service';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store';
+import { setSchool } from '@/store/auth/actions';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { MainLayout } from '@/components/layout/main-layout';
 
 export default function CreateSchoolPage() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
   const [fetchingCampuses, setFetchingCampuses] = useState(true);
   const [campuses, setCampuses] = useState<any[]>([]);
@@ -48,7 +53,17 @@ export default function CreateSchoolPage() {
   const onSubmit: SubmitHandler<ISchoolInput> = async (data) => {
     setLoading(true);
     const result = await CreateSchool({ data, logo: logoFile });
-    if (result.success) {
+    
+    if (result.success && 'data' in result) {
+      // Fetch the full school data using the returned ID
+      const schoolId = result.data?.id || result.data?.school_id;
+      if (schoolId) {
+        const fetchRes = await FetchSchoolById(schoolId);
+        if (fetchRes.success && 'data' in fetchRes && fetchRes.data) {
+          dispatch(setSchool(fetchRes.data));
+        }
+      }
+      
       toast.success('School created successfully');
       router.push('/school');
     } else {
@@ -58,18 +73,17 @@ export default function CreateSchoolPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" className="h-10 w-10 p-0 rounded-full border-gray-200" onClick={() => router.back()}>
+    <MainLayout
+      title="Add School"
+      description="Register a new institution in the system."
+      backButton={
+        <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2" onClick={() => router.back()}>
           <ChevronLeft className="w-5 h-5" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Add School</h1>
-          <p className="text-gray-500 mt-1">Register a new institution in the system.</p>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main form */}
           <div className="md:col-span-2 space-y-6">
@@ -204,7 +218,8 @@ export default function CreateSchoolPage() {
             </div>
           </div>
         </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </MainLayout>
   );
 }

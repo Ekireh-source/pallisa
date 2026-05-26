@@ -7,8 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import { studentApi } from '@/lib/api';
+import { BulkUploadStudents, ValidateBulkStudents, BulkUploadStudentsAsync } from '@/features/members/members.service';
 import type { StudentCreateUpdate } from '@/types';
+import { useSelector } from 'react-redux';
+import { selectSchool } from '@/store/auth/selectors';
 
 interface StudentData {
   first_name: string;
@@ -47,6 +49,7 @@ interface BulkStudentUploadProps {
 }
 
 export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
+  const school = useSelector(selectSchool);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
@@ -252,80 +255,142 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
     return dateObj instanceof Date && !isNaN(dateObj.getTime());
   };
 
-  const handleUpload = async () => {
+  const [isValidated, setIsValidated] = useState(false);
+  const [duplicates, setDuplicates] = useState<any[]>([]);
+  const [apiErrors, setApiErrors] = useState<any[]>([]);
+
+  const handleValidate = async () => {
     if (!file || previewData.length === 0) {
       toast.error('Please select a file first');
       return;
     }
 
     if (validationErrors.length > 0) {
-      toast.error(`Please fix ${validationErrors.length} validation errors before uploading`);
+      toast.error(`Please fix ${validationErrors.length} validation errors before validating`);
       return;
     }
 
     setIsUploading(true);
-    setUploadProgress({
-      total: previewData.length,
-      processed: 0,
-      success: 0,
-      failed: 0,
-      errors: []
+    try {
+      const studentsData = getApiData();
+      const res = await ValidateBulkStudents({ students: studentsData });
+      
+      if (!res.success) {
+        throw res.error;
+      }
+      
+      const { duplicate_count, duplicates: dups, field_error_count, field_errors } = res.data;
+      
+      let hasIssues = false;
+
+      if (duplicate_count > 0) {
+        setDuplicates(dups);
+        hasIssues = true;
+      } else {
+        setDuplicates([]);
+      }
+
+      if (field_error_count > 0) {
+        setApiErrors(field_errors);
+        hasIssues = true;
+      } else {
+        setApiErrors([]);
+      }
+
+      if (hasIssues) {
+        if (field_error_count > 0) {
+          toast.error(`Found ${field_error_count} invalid records. Please fix them in your spreadsheet.`);
+          setIsValidated(false);
+        } else {
+          toast.warning(`Found ${duplicate_count} potential duplicates`);
+        }
+      } else {
+        setIsValidated(true);
+        toast.success('Validation passed! Ready to upload.');
+      }
+    } catch (error) {
+      toast.error('Validation failed');
+      console.error(error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const getApiData = () => {
+    return previewData.map(student => {
+      const apiData: any = {
+        enrollment_status: 'enrolled',
+        campus: school?.campus,
+      };
+      if (student.email) apiData.user_email = student.email;
+      if (student.first_name) apiData.user_first_name = student.first_name;
+      if (student.last_name) apiData.user_last_name = student.last_name;
+      if (student.gender) {
+        apiData.user_gender = student.gender === 'male' ? 'M' : student.gender === 'female' ? 'F' : 'O';
+      }
+      if (student.date_of_birth) apiData.user_dob = student.date_of_birth;
+      if (student.phone_number) apiData.user_phone = student.phone_number;
+      if (student.parent_name) apiData.user_emergency_contact = student.parent_name;
+      if (student.parent_phone) apiData.user_emergency_phone = student.parent_phone;
+      if (student.address) apiData.user_emergency_contact_address = student.address;
+      if (student.parent_email) apiData.user_emergency_contact_email = student.parent_email;
+      if (student.stream_id) apiData.current_stream = student.stream_id;
+      if (student.previous_school) apiData.previous_school = student.previous_school;
+      if (student.special_needs) apiData.special_needs = student.special_needs;
+      if (student.medical_conditions) apiData.medical_conditions = student.medical_conditions;
+      if (student.allergies) apiData.allergies = student.allergies;
+      return apiData;
     });
+  };
+
+  const handleUpload = async (background: boolean = false) => {
+    if (!isValidated && !background) {
+      toast.error('Please validate data first');
+      return;
+    }
+
+    setIsUploading(true);
+    
+    if (!background) {
+      setUploadProgress({
+        total: previewData.length,
+        processed: 0,
+        success: 0,
+        failed: 0,
+        errors: []
+      });
+    }
 
     try {
-      // Transform all students to match the API structure
-      const studentsData = previewData.map(student => {
-        const apiData: Partial<StudentCreateUpdate> = {
-          enrollment_status: 'enrolled', // Required field
-        };
-
-        // Only add fields that have values
-        if (student.email) apiData.user_email = student.email;
-        if (student.first_name) apiData.user_first_name = student.first_name;
-        if (student.last_name) apiData.user_last_name = student.last_name;
-        if (student.gender) {
-          apiData.user_gender = student.gender === 'male' ? 'M' : student.gender === 'female' ? 'F' : 'O';
-        }
-        if (student.date_of_birth) apiData.user_dob = student.date_of_birth;
-        if (student.phone_number) apiData.user_phone = student.phone_number;
-        if (student.parent_name) apiData.user_emergency_contact = student.parent_name;
-        if (student.parent_phone) apiData.user_emergency_phone = student.parent_phone;
-        if (student.address) apiData.user_emergency_contact_address = student.address;
-        if (student.parent_email) apiData.user_emergency_contact_email = student.parent_email;
-        if (student.stream_id) apiData.current_stream = student.stream_id;
-        if (student.previous_school) apiData.previous_school = student.previous_school;
-        if (student.special_needs) apiData.special_needs = student.special_needs;
-        if (student.medical_conditions) apiData.medical_conditions = student.medical_conditions;
-        if (student.allergies) apiData.allergies = student.allergies;
-
-        return apiData;
-      });
-
-      console.log('Attempting to create students with data:', studentsData);
+      const studentsData = getApiData();
       
-      // Use the bulk upload endpoint
-      const result = await studentApi.bulkCreate(studentsData as StudentCreateUpdate[]);
+      if (background) {
+        const res = await BulkUploadStudentsAsync({ students: studentsData });
+        if (!res.success) throw res.error;
+        toast.success('Background upload started! Check back later.');
+        onSuccess?.();
+        clearFile();
+        return;
+      }
+      
+      const result = await BulkUploadStudents({ students: studentsData });
+      if (!result.success) throw result.error;
+      
+      const data = result.data;
 
-      console.log('Bulk upload successful:', result);
       setUploadProgress(prev => prev ? {
         ...prev,
         processed: prev.total,
-        success: result.created_count || prev.total,
+        success: data.created_count || prev.total,
         failed: 0
       } : null);
       
-      toast.success(`Successfully uploaded ${result.created_count} students!`);
-      onSuccess?.(); // Call the success callback
-
-      // Reset form
-      setFile(null);
-      setPreviewData([]);
-      setValidationErrors([]);
-      setUploadProgress(null);
+      toast.success(`Successfully uploaded ${data.created_count} students!`);
+      onSuccess?.();
+      clearFile();
     } catch (error: any) {
       console.error('Upload error:', error);
       
-      // Handle partial success if available
       if (error?.response?.data) {
         const errorData = error.response.data;
         const createdCount = errorData.created_count || 0;
@@ -336,10 +401,10 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
           processed: prev.total,
           success: createdCount,
           failed: failedCount,
-          errors: errorData.errors ? errorData.errors.map((error: any, index: number) => ({
+          errors: errorData.errors ? errorData.errors.map((err: any, index: number) => ({
             row: index + 1,
             field: 'general',
-            message: JSON.stringify(error)
+            message: JSON.stringify(err)
           })) : []
         } : null);
         
@@ -391,7 +456,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
         'Parent Name': 'Michael Smith',
         'Parent Phone': '+256701234570',
         'Parent Email': 'michael.smith@example.com',
-        'Stream ID': 2, // Optional - can be assigned later
+        'Stream ID': "", // Optional - can be assigned later
         'Previous School': 'Entebbe Junior School',
         'Special Needs': 'Dyslexia support needed',
         'Medical Conditions': 'Asthma',
@@ -411,6 +476,9 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
     setPreviewData([]);
     setValidationErrors([]);
     setUploadProgress(null);
+    setIsValidated(false);
+    setDuplicates([]);
+    setApiErrors([]);
   };
 
   return (
@@ -524,7 +592,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
             {previewData.length > 0 && (
               <div className="space-y-2">
                 <h3 className="font-medium">Preview ({previewData.length} students)</h3>
-                <div className="max-h-60 overflow-y-auto border rounded-lg">
+                <div className="max-h-96 overflow-y-auto border rounded-lg">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
@@ -536,8 +604,8 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
                       </tr>
                     </thead>
                     <tbody>
-                      {previewData.slice(0, 10).map((student, index) => (
-                        <tr key={index} className="border-t">
+                      {previewData.map((student, index) => (
+                        <tr key={index} className="border-t hover:bg-gray-50">
                           <td className="px-3 py-2">
                             {student.first_name} {student.last_name}
                           </td>
@@ -547,37 +615,115 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
                           <td className="px-3 py-2">{student.stream_id || '-'}</td>
                         </tr>
                       ))}
-                      {previewData.length > 10 && (
-                        <tr>
-                          <td colSpan={5} className="px-3 py-2 text-center text-gray-500">
-                            ... and {previewData.length - 10} more students
-                          </td>
-                        </tr>
-                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
             )}
 
-            {/* Upload Button */}
-            <Button
-              onClick={handleUpload}
-              disabled={!file || isUploading || validationErrors.length > 0}
-              className="w-full"
-            >
-              {isUploading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Uploading...
-                </>
+            {/* API Field Errors Preview */}
+            {apiErrors.length > 0 && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <h3 className="font-medium text-red-900">
+                    {apiErrors.length} Invalid Record{apiErrors.length !== 1 ? 's' : ''} Found
+                  </h3>
+                </div>
+                <div className="space-y-2 max-h-40 overflow-y-auto mb-3">
+                  {apiErrors.map((err, index) => (
+                    <div key={index} className="text-sm text-red-800">
+                      <span className="font-medium">Row {err.index + 2} ({err.first_name} {err.last_name}):</span>{' '}
+                      {Object.entries(err.errors).map(([key, value]) => `${key}: ${value}`).join(' | ')}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-red-600 mt-2">
+                  Please fix these errors in your spreadsheet and re-upload. You cannot proceed until these are fixed.
+                </p>
+              </div>
+            )}
+
+            {/* Duplicates Preview */}
+            {duplicates.length > 0 && (
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                  <h3 className="font-medium text-orange-900">
+                    {duplicates.length} Potential Duplicate{duplicates.length !== 1 ? 's' : ''} Found
+                  </h3>
+                </div>
+                <div className="space-y-2 max-h-40 overflow-y-auto mb-3">
+                  {duplicates.map((dup, index) => (
+                    <div key={index} className="text-sm text-orange-800">
+                      <span className="font-medium">Row {dup.index + 2} ({dup.first_name} {dup.last_name}):</span> {dup.reasons.join(', ')}
+                    </div>
+                  ))}
+                </div>
+                {apiErrors.length === 0 && (
+                  <Button 
+                    onClick={() => setIsValidated(true)}
+                    variant="outline" 
+                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                    size="sm"
+                  >
+                    Ignore and Continue
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              {!isValidated ? (
+                <Button
+                  onClick={handleValidate}
+                  disabled={!file || isUploading || validationErrors.length > 0}
+                  className="w-full"
+                >
+                  {isUploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      Validating...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Validate {previewData.length} Students
+                    </>
+                  )}
+                </Button>
               ) : (
                 <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload {previewData.length} Students
+                  <Button
+                    onClick={() => handleUpload(false)}
+                    disabled={isUploading}
+                    className="flex-1"
+                  >
+                    {isUploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Now
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => handleUpload(true)}
+                    disabled={isUploading}
+                    variant="secondary"
+                    className="flex-1"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload in Background
+                  </Button>
                 </>
               )}
-            </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

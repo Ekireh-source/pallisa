@@ -37,6 +37,9 @@ import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { IClassListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function ClassesListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +57,7 @@ export default function ClassesListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: string) => {
@@ -174,16 +177,18 @@ export default function ClassesListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_CLASSES}>
     <MainLayout
       title="Classes"
       description="Manage grade levels and student groups."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/classes/create">
-            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span>Add Class</span>
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Class",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/classes/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -244,5 +249,6 @@ export default function ClassesListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

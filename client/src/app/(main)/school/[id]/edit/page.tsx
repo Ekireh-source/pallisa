@@ -11,6 +11,7 @@ import { FetchSchoolById, UpdateSchool, DeleteSchool, FetchCampuses } from '@/fe
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
+import { MainLayout } from '@/components/layout/main-layout';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -98,7 +99,7 @@ export default function EditSchoolPage({ params }: { params: Promise<{ id: strin
 
   if (fetchingData) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="w-full space-y-8">
         <div className="flex items-center gap-4"><Skeleton className="h-10 w-10 rounded-full" /><div className="space-y-2"><Skeleton className="h-8 w-48" /><Skeleton className="h-4 w-32" /></div></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
@@ -111,27 +112,26 @@ export default function EditSchoolPage({ params }: { params: Promise<{ id: strin
   const displayLogo = logoPreview || formatImgUrl(existingLogo);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" className="h-10 w-10 p-0 rounded-full border-gray-200" onClick={() => router.back()}>
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit School</h1>
-            <p className="text-gray-500 mt-1">Update registration details for this institution.</p>
-          </div>
-        </div>
+    <MainLayout
+      title="Edit School"
+      description="Update registration details for this institution."
+      backButton={
+        <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2" onClick={() => router.back()}>
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="rounded-xl h-10 gap-2" asChild>
+          <Button variant="outline" size="sm" className="rounded-xl h-10 gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20" asChild>
             <Link href={`/school/${id}`}><Eye className="w-4 h-4" /> View</Link>
           </Button>
-          <Button variant="outline" className="h-10 rounded-xl text-rose-600 hover:bg-rose-50 border-rose-100" onClick={handleDelete} disabled={loading}>
+          <Button variant="outline" className="h-10 rounded-xl text-rose-50 border-rose-400/30 bg-rose-500/10 hover:bg-rose-500/30 hover:text-white" onClick={handleDelete} disabled={loading}>
             <Trash2 className="w-4 h-4 mr-2" /> Delete
           </Button>
         </div>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -273,6 +273,7 @@ export default function EditSchoolPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

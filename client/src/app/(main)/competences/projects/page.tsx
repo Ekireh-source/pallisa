@@ -35,6 +35,9 @@ interface IProjectMatrixListResponse {
 }
 
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function ProjectsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +49,7 @@ export default function ProjectsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: string) => {
@@ -131,32 +134,34 @@ export default function ProjectsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_COMPETENCES}>
     <MainLayout
       title="Project Competency Matrices"
       description="List of all unique graded project competency matrices. Configure new matrices or update graded student marks."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-50 font-bold px-5 border border-gray-200 shadow-sm w-full sm:w-auto" asChild>
-          <Link href="/competences/projects/create">
-            <Plus className="w-4 h-4 mr-2" />
-            New Project Matrix
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New Project Matrix",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/competences/projects/create",
+          }}
+        />
       }
     >
-      <Card className="border-none shadow-none ring-0 bg-transparent">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <Card className="border-none shadow-none ring-0">
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search subjects or streams..." 
-              className="pl-11 h-11 rounded-xl border-gray-200 bg-white focus:ring-primary w-full shadow-sm"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
-        <Card className="p-4 border-none shadow-sm ring-1 ring-gray-100">
+        <div className="p-4">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
             fetchFromUrl={getPaginatedFromUrl}
@@ -182,8 +187,9 @@ export default function ProjectsListPage() {
               </div>
             }
           />
-        </Card>
+        </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

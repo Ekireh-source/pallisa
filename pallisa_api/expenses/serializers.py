@@ -21,16 +21,19 @@ class ExpenseCategorySerializer(serializers.ModelSerializer):
         """Return count of expenses in this category"""
         return obj.expenses.count()
 
+from schools.models import School
+
 
 class AcademicYearSerializer(serializers.ModelSerializer):
     """Serializer for AcademicYear model"""
+    school = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
     term_count = serializers.SerializerMethodField()
     duration_days = serializers.SerializerMethodField()
     
     class Meta:
         model = AcademicYear
         fields = [
-            'id', 'name', 'start_date', 'end_date', 'is_current',
+            'id', 'school', 'name', 'start_date', 'end_date', 'is_current',
             'is_active', 'created_at', 'updated_at', 'term_count', 'duration_days'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'term_count', 'duration_days']

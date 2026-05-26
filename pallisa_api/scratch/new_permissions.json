@@ -1,0 +1,662 @@
+{
+  "permission_categories": [
+    {
+      "name": "Administration Management",
+      "code": "admin",
+      "description": "System administration permissions",
+      "is_admin": true,
+      "permissions": [
+        {
+          "code": "admin.access_dashboard",
+          "name": "Access Administrative Dashboard",
+          "description": "Allow access to the main administrative dashboard"
+        },
+        {
+          "code": "admin.create_permissions",
+          "name": "Create Permissions",
+          "description": "Create new permissions"
+        },
+        {
+          "code": "admin.update_permissions",
+          "name": "Update Permissions",
+          "description": "Update existing permissions"
+        },
+        {
+          "code": "admin.delete_permissions",
+          "name": "Delete Permissions",
+          "description": "Delete permissions"
+        },
+        {
+          "code": "admin.create_users",
+          "name": "Create Users",
+          "description": "Create new users"
+        },
+        {
+          "code": "admin.update_users",
+          "name": "Update Users",
+          "description": "Update existing users"
+        },
+        {
+          "code": "admin.delete_users",
+          "name": "Delete Users",
+          "description": "Delete users"
+        },
+        {
+          "code": "admin.create_roles",
+          "name": "Create Roles",
+          "description": "Create new roles"
+        },
+        {
+          "code": "admin.update_roles",
+          "name": "Update Roles",
+          "description": "Update existing roles"
+        },
+        {
+          "code": "admin.delete_roles",
+          "name": "Delete Roles",
+          "description": "Delete roles"
+        },
+        {
+          "code": "admin.view_campuses",
+          "name": "View Campuses",
+          "description": "View campuses"
+        },
+        {
+          "code": "admin.create_campuses",
+          "name": "Create Campuses",
+          "description": "Create new campuses"
+        },
+        {
+          "code": "admin.update_campuses",
+          "name": "Update Campuses",
+          "description": "Update existing campuses"
+        },
+        {
+          "code": "admin.delete_campuses",
+          "name": "Delete Campuses",
+          "description": "Delete campuses"
+        }
+      ]
+    },
+    {
+      "name": "Members Management",
+      "code": "members",
+      "description": "Manage students, teachers, parents, and non-staff members",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "members.view_students",
+          "name": "View Students",
+          "description": "View student profiles and basic information"
+        },
+        {
+          "code": "members.create_students",
+          "name": "Create Students",
+          "description": "Create new students"
+        },
+        {
+          "code": "members.update_students",
+          "name": "Update Students",
+          "description": "Update existing students"
+        },
+        {
+          "code": "members.delete_students",
+          "name": "Delete Students",
+          "description": "Delete students"
+        },
+        {
+          "code": "members.view_teachers",
+          "name": "View Teachers",
+          "description": "View teacher profiles and information"
+        },
+        {
+          "code": "members.create_teachers",
+          "name": "Create Teachers",
+          "description": "Create new teachers"
+        },
+        {
+          "code": "members.update_teachers",
+          "name": "Update Teachers",
+          "description": "Update existing teachers"
+        },
+        {
+          "code": "members.delete_teachers",
+          "name": "Delete Teachers",
+          "description": "Delete teachers"
+        },
+        {
+          "code": "members.view_parents",
+          "name": "View Parents",
+          "description": "View parent profiles and information"
+        },
+        {
+          "code": "members.create_parents",
+          "name": "Create Parents",
+          "description": "Create new parents"
+        },
+        {
+          "code": "members.update_parents",
+          "name": "Update Parents",
+          "description": "Update existing parents"
+        },
+        {
+          "code": "members.delete_parents",
+          "name": "Delete Parents",
+          "description": "Delete parents"
+        },
+        {
+          "code": "members.view_non_staff",
+          "name": "View Non-Staff Members",
+          "description": "View non-staff member profiles and information"
+        },
+        {
+          "code": "members.create_non_staff",
+          "name": "Create Non-Staff Members",
+          "description": "Create new non-staff members"
+        },
+        {
+          "code": "members.update_non_staff",
+          "name": "Update Non-Staff Members",
+          "description": "Update existing non-staff members"
+        },
+        {
+          "code": "members.delete_non_staff",
+          "name": "Delete Non-Staff Members",
+          "description": "Delete non-staff members"
+        },
+        {
+          "code": "members.view_classes",
+          "name": "View Classes",
+          "description": "View class information and details"
+        },
+        {
+          "code": "members.create_classes",
+          "name": "Create Classes",
+          "description": "Create new classes"
+        },
+        {
+          "code": "members.update_classes",
+          "name": "Update Classes",
+          "description": "Update existing classes"
+        },
+        {
+          "code": "members.delete_classes",
+          "name": "Delete Classes",
+          "description": "Delete classes"
+        },
+        {
+          "code": "members.view_streams",
+          "name": "View Streams",
+          "description": "View stream information and details"
+        },
+        {
+          "code": "members.create_streams",
+          "name": "Create Streams",
+          "description": "Create new streams"
+        },
+        {
+          "code": "members.update_streams",
+          "name": "Update Streams",
+          "description": "Update existing streams"
+        },
+        {
+          "code": "members.delete_streams",
+          "name": "Delete Streams",
+          "description": "Delete streams"
+        },
+        {
+          "code": "members.view_subjects",
+          "name": "View Subjects",
+          "description": "View subject information and details"
+        },
+        {
+          "code": "members.create_subjects",
+          "name": "Create Subjects",
+          "description": "Create new subjects"
+        },
+        {
+          "code": "members.update_subjects",
+          "name": "Update Subjects",
+          "description": "Update existing subjects"
+        },
+        {
+          "code": "members.delete_subjects",
+          "name": "Delete Subjects",
+          "description": "Delete subjects"
+        },
+        {
+          "code": "members.assign_teachers",
+          "name": "Assign Teachers",
+          "description": "Assign teachers to subjects and streams"
+        },
+        {
+          "code": "members.assign_students",
+          "name": "Assign Students",
+          "description": "Assign students to streams and classes"
+        },
+        {
+          "code": "members.view_statistics",
+          "name": "View Member Statistics",
+          "description": "View member statistics and reports"
+        }
+      ]
+    },
+    {
+      "name": "Expense Management",
+      "code": "expenses",
+      "description": "Manage school expenses and financial records",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "expenses.view_expenses",
+          "name": "View Expenses",
+          "description": "View expense records and details"
+        },
+        {
+          "code": "expenses.create_expenses",
+          "name": "Create Expenses",
+          "description": "Create new expenses"
+        },
+        {
+          "code": "expenses.update_expenses",
+          "name": "Update Expenses",
+          "description": "Update existing expenses"
+        },
+        {
+          "code": "expenses.delete_expenses",
+          "name": "Delete Expenses",
+          "description": "Delete expenses"
+        },
+        {
+          "code": "expenses.approve_expenses",
+          "name": "Approve Expenses",
+          "description": "Approve or reject expense submissions"
+        },
+        {
+          "code": "expenses.view_categories",
+          "name": "View Expense Categories",
+          "description": "View expense categories"
+        },
+        {
+          "code": "expenses.create_categories",
+          "name": "Create Expense Categories",
+          "description": "Create new expense categories"
+        },
+        {
+          "code": "expenses.update_categories",
+          "name": "Update Expense Categories",
+          "description": "Update existing expense categories"
+        },
+        {
+          "code": "expenses.delete_categories",
+          "name": "Delete Expense Categories",
+          "description": "Delete expense categories"
+        },
+        {
+          "code": "expenses.view_departments",
+          "name": "View Departments",
+          "description": "View department information"
+        },
+        {
+          "code": "expenses.create_departments",
+          "name": "Create Departments",
+          "description": "Create new departments"
+        },
+        {
+          "code": "expenses.update_departments",
+          "name": "Update Departments",
+          "description": "Update existing departments"
+        },
+        {
+          "code": "expenses.delete_departments",
+          "name": "Delete Departments",
+          "description": "Delete departments"
+        },
+        {
+          "code": "expenses.view_vendors",
+          "name": "View Vendors",
+          "description": "View vendor information"
+        },
+        {
+          "code": "expenses.create_vendors",
+          "name": "Create Vendors",
+          "description": "Create new vendors"
+        },
+        {
+          "code": "expenses.update_vendors",
+          "name": "Update Vendors",
+          "description": "Update existing vendors"
+        },
+        {
+          "code": "expenses.delete_vendors",
+          "name": "Delete Vendors",
+          "description": "Delete vendors"
+        },
+        {
+          "code": "expenses.view_academic_years",
+          "name": "View Academic Years",
+          "description": "View academic year information"
+        },
+        {
+          "code": "expenses.create_academic_years",
+          "name": "Create Academic Years",
+          "description": "Create new academic years"
+        },
+        {
+          "code": "expenses.update_academic_years",
+          "name": "Update Academic Years",
+          "description": "Update existing academic years"
+        },
+        {
+          "code": "expenses.delete_academic_years",
+          "name": "Delete Academic Years",
+          "description": "Delete academic years"
+        },
+        {
+          "code": "expenses.view_terms",
+          "name": "View Terms",
+          "description": "View term information"
+        },
+        {
+          "code": "expenses.create_terms",
+          "name": "Create Terms",
+          "description": "Create new terms"
+        },
+        {
+          "code": "expenses.update_terms",
+          "name": "Update Terms",
+          "description": "Update existing terms"
+        },
+        {
+          "code": "expenses.delete_terms",
+          "name": "Delete Terms",
+          "description": "Delete terms"
+        },
+        {
+          "code": "expenses.view_expense_summary",
+          "name": "View Expense Summary",
+          "description": "View expense summaries and reports"
+        }
+      ]
+    },
+    {
+      "name": "Fees Management",
+      "code": "fees",
+      "description": "Manage student fees, payments, and financial records",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "fees.view_fee_categories",
+          "name": "View Fee Categories",
+          "description": "View fee categories"
+        },
+        {
+          "code": "fees.create_fee_categories",
+          "name": "Create Fee Categories",
+          "description": "Create new fee categories"
+        },
+        {
+          "code": "fees.update_fee_categories",
+          "name": "Update Fee Categories",
+          "description": "Update existing fee categories"
+        },
+        {
+          "code": "fees.delete_fee_categories",
+          "name": "Delete Fee Categories",
+          "description": "Delete fee categories"
+        },
+        {
+          "code": "fees.view_fee_structures",
+          "name": "View Fee Structures",
+          "description": "View fee structures and amounts"
+        },
+        {
+          "code": "fees.create_fee_structures",
+          "name": "Create Fee Structures",
+          "description": "Create new fee structures"
+        },
+        {
+          "code": "fees.update_fee_structures",
+          "name": "Update Fee Structures",
+          "description": "Update existing fee structures"
+        },
+        {
+          "code": "fees.delete_fee_structures",
+          "name": "Delete Fee Structures",
+          "description": "Delete fee structures"
+        },
+        {
+          "code": "fees.view_scholarships",
+          "name": "View Scholarships",
+          "description": "View scholarship information"
+        },
+        {
+          "code": "fees.create_scholarships",
+          "name": "Create Scholarships",
+          "description": "Create new scholarships"
+        },
+        {
+          "code": "fees.update_scholarships",
+          "name": "Update Scholarships",
+          "description": "Update existing scholarships"
+        },
+        {
+          "code": "fees.delete_scholarships",
+          "name": "Delete Scholarships",
+          "description": "Delete scholarships"
+        },
+        {
+          "code": "fees.view_fee_overrides",
+          "name": "View Fee Overrides",
+          "description": "View student-specific fee overrides"
+        },
+        {
+          "code": "fees.create_fee_overrides",
+          "name": "Create Fee Overrides",
+          "description": "Create new fee overrides"
+        },
+        {
+          "code": "fees.update_fee_overrides",
+          "name": "Update Fee Overrides",
+          "description": "Update existing fee overrides"
+        },
+        {
+          "code": "fees.delete_fee_overrides",
+          "name": "Delete Fee Overrides",
+          "description": "Delete fee overrides"
+        },
+        {
+          "code": "fees.view_payments",
+          "name": "View Payments",
+          "description": "View payment records and history"
+        },
+        {
+          "code": "fees.create_payments",
+          "name": "Create Payments",
+          "description": "Create new payments"
+        },
+        {
+          "code": "fees.update_payments",
+          "name": "Update Payments",
+          "description": "Update existing payments"
+        },
+        {
+          "code": "fees.delete_payments",
+          "name": "Delete Payments",
+          "description": "Delete payments"
+        },
+        {
+          "code": "fees.view_fee_balances",
+          "name": "View Fee Balances",
+          "description": "View student fee balances"
+        },
+        {
+          "code": "fees.view_collection_summaries",
+          "name": "View Collection Summaries",
+          "description": "View fee collection summaries and reports"
+        },
+        {
+          "code": "fees.create_collection_summaries",
+          "name": "Create Collection Summaries",
+          "description": "Create new collection summaries"
+        },
+        {
+          "code": "fees.update_collection_summaries",
+          "name": "Update Collection Summaries",
+          "description": "Update existing collection summaries"
+        },
+        {
+          "code": "fees.delete_collection_summaries",
+          "name": "Delete Collection Summaries",
+          "description": "Delete collection summaries"
+        },
+        {
+          "code": "fees.view_fee_statistics",
+          "name": "View Fee Statistics",
+          "description": "View fee statistics and reports"
+        }
+      ]
+    },
+    {
+      "name": "Salary Management",
+      "code": "salary",
+      "description": "Manage staff salaries, payments, and salary-related financial records",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "admin.create_salaries",
+          "name": "Create Salaries",
+          "description": "Create new salaries"
+        },
+        {
+          "code": "admin.update_salaries",
+          "name": "Update Salaries",
+          "description": "Update existing salaries"
+        },
+        {
+          "code": "admin.delete_salaries",
+          "name": "Delete Salaries",
+          "description": "Delete salaries"
+        },
+        {
+          "code": "salary.view_salary_periods",
+          "name": "View Salary Periods",
+          "description": "View salary periods and their details"
+        },
+        {
+          "code": "salary.create_salary_periods",
+          "name": "Create Salary Periods",
+          "description": "Create new salary periods"
+        },
+        {
+          "code": "salary.update_salary_periods",
+          "name": "Update Salary Periods",
+          "description": "Update existing salary periods"
+        },
+        {
+          "code": "salary.delete_salary_periods",
+          "name": "Delete Salary Periods",
+          "description": "Delete salary periods"
+        },
+        {
+          "code": "salary.view_allowances",
+          "name": "View Salary Allowances",
+          "description": "View salary allowance types and amounts"
+        },
+        {
+          "code": "salary.create_allowances",
+          "name": "Create Salary Allowances",
+          "description": "Create new salary allowances"
+        },
+        {
+          "code": "salary.update_allowances",
+          "name": "Update Salary Allowances",
+          "description": "Update existing salary allowances"
+        },
+        {
+          "code": "salary.delete_allowances",
+          "name": "Delete Salary Allowances",
+          "description": "Delete salary allowances"
+        },
+        {
+          "code": "salary.view_deductions",
+          "name": "View Salary Deductions",
+          "description": "View salary deduction types and amounts"
+        },
+        {
+          "code": "salary.create_deductions",
+          "name": "Create Salary Deductions",
+          "description": "Create new salary deductions"
+        },
+        {
+          "code": "salary.update_deductions",
+          "name": "Update Salary Deductions",
+          "description": "Update existing salary deductions"
+        },
+        {
+          "code": "salary.delete_deductions",
+          "name": "Delete Salary Deductions",
+          "description": "Delete salary deductions"
+        },
+        {
+          "code": "salary.view_payments",
+          "name": "View Salary Payments",
+          "description": "View salary payment records and details"
+        },
+        {
+          "code": "salary.create_payments",
+          "name": "Create Salary Payments",
+          "description": "Create new salary payments"
+        },
+        {
+          "code": "salary.update_payments",
+          "name": "Update Salary Payments",
+          "description": "Update existing salary payments"
+        },
+        {
+          "code": "salary.delete_payments",
+          "name": "Delete Salary Payments",
+          "description": "Delete salary payments"
+        },
+        {
+          "code": "salary.view_summaries",
+          "name": "View Salary Summaries",
+          "description": "View salary summaries and reports"
+        },
+        {
+          "code": "salary.view_staff_salaries",
+          "name": "View Staff Salaries",
+          "description": "View staff salary information and budgets"
+        },
+        {
+          "code": "salary.process_payments",
+          "name": "Process Salary Payments",
+          "description": "Process and approve salary payments"
+        }
+      ]
+    },
+    {
+      "name": "Reports and Analytics",
+      "code": "reports",
+      "description": "Access to reports and analytics features",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "reports.view_reports",
+          "name": "View Reports",
+          "description": "Access to view various system reports"
+        },
+        {
+          "code": "reports.generate_reports",
+          "name": "Generate Reports",
+          "description": "Generate and export reports"
+        },
+        {
+          "code": "reports.view_analytics",
+          "name": "View Analytics",
+          "description": "Access to analytics and dashboards"
+        }
+      ]
+    }
+  ]
+}

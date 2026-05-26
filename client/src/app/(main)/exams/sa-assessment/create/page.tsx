@@ -31,6 +31,9 @@ import { SaAssessmentSchema, ISaAssessmentInput } from '@/features/exam/exam.sch
 import { CreateSaAssessment } from '@/features/exam/exam.service';
 import { FetchAcademicYears, FetchTerms, FetchTeachers, FetchStreams, FetchSubjects } from '@/features/members/members.service';
 import { toast } from 'sonner';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateSaAssessmentPage() {
   const router = useRouter();
@@ -110,27 +113,25 @@ export default function CreateSaAssessmentPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Configure SA Assessment</h1>
-            <p className="text-gray-500 mt-1">Initialize a new Summative Assessment matrix configuration for grading class achievements.</p>
-          </div>
-        </div>
-      </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_GRADING}>
+    <MainLayout
+      title="Configure SA Assessment"
+      description="Initialize a new Summative Assessment matrix configuration for grading class achievements."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100 bg-white">
             <h3 className="font-bold text-gray-900 mb-6 flex items-center text-lg">
               <TrendingUp className="w-5 h-5 mr-2.5 text-primary" />
@@ -288,6 +289,8 @@ export default function CreateSaAssessmentPage() {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

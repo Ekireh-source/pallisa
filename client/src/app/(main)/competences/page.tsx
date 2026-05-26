@@ -30,10 +30,16 @@ import { getPaginatedFromUrl } from '@/lib/utils';
 import { Icon } from '@iconify/react';
 import { ICompetencyAreaListResponse } from '@/features/exam/exam.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function CompetencyAreasListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const { school } = useSelector((state: RootState) => state.auth);
   
   const tableRefreshRef = useRef<any>(null);
 
@@ -42,7 +48,7 @@ export default function CompetencyAreasListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -68,16 +74,29 @@ export default function CompetencyAreasListPage() {
           </div>
           <div>
             <p className="text-gray-900 font-semibold">{area.name}</p>
-            <p className="text-xs text-gray-400">Class: {area.class_name || 'N/A'}</p>
           </div>
         </div>
       ),
     },
     {
-      key: "subject_name",
-      header: "Subject",
+      key: "class_name",
+      header: "Class",
       cell: (area) => (
-        <span className="font-medium text-gray-600">{area.subject_name || 'N/A'}</span>
+        <span className="font-medium text-gray-600">{area.class_name || 'N/A'}</span>
+      ),
+    },
+    {
+      key: "term_name",
+      header: "Term",
+      cell: (area) => (
+        <span className="font-medium text-gray-600">{area.term_name || 'N/A'}</span>
+      ),
+    },
+    {
+      key: "topic_name",
+      header: "Topic / Competency",
+      cell: (area) => (
+        <span className="font-medium text-gray-600">{area.topic_name || 'N/A'}</span>
       ),
     },
     {
@@ -114,16 +133,18 @@ export default function CompetencyAreasListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_COMPETENCES}>
     <MainLayout
       title="Competency Areas"
       description="Broader categories for assessment topics."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/competences/create">
-            <Plus className="w-4 h-4 mr-2" />
-            New Area
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New Area",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/competences/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -148,8 +169,8 @@ export default function CompetencyAreasListPage() {
             skeletonRows={5}
             className="min-h-0!"
             tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
+            query={{ search: searchTerm, school: school?.id }}
+            deps={[searchTerm, school]}
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
@@ -162,5 +183,6 @@ export default function CompetencyAreasListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

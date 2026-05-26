@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.shortcuts import get_object_or_404
 from .models import Campus, School, SetupSteps, Document
+from accounts.permission import filter_by_school
 from .serializers import (
     CampusSerializer, 
     SchoolSerializer, 
@@ -38,6 +39,7 @@ class CampusListCreateView(APIView):
     def get(self, request):
         try:
             queryset = Campus.objects.all()
+            queryset = filter_by_school(queryset, request, school_field_path='schools')
             
             # Pagination
             page = int(request.query_params.get('page', 1))

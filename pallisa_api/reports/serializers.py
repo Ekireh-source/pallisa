@@ -6,14 +6,14 @@ from expenses.models import AcademicYear, Term
 class GradeBoundarySerializer(serializers.ModelSerializer):
     class Meta:
         model = GradeBoundary
-        fields = ['id', 'grading_system', 'grade', 'min_score', 'max_score', 'remarks', 'description', 'points']
+        fields = ['id', 'grading_system', 'grade', 'min_score', 'max_score', 'remarks', 'description']
 
 class GradingSystemSerializer(serializers.ModelSerializer):
     boundaries = GradeBoundarySerializer(many=True, read_only=True)
 
     class Meta:
         model = GradingSystem
-        fields = ['id', 'name', 'school', 'description', 'is_active', 'created_at', 'updated_at', 'boundaries']
+        fields = ['id', 'name', 'school', 'level', 'description', 'is_active', 'created_at', 'updated_at', 'boundaries']
 
 class SubjectCompetencyScoreSerializer(serializers.ModelSerializer):
     class Meta:

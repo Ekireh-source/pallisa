@@ -35,6 +35,8 @@ import {
 import { FetchProjectScoreMatrixById, SaveBulkProjectScoresById } from '@/features/exam/exam.service';
 import { toast } from 'sonner';
 import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 // Competency criteria mapping based on legacy timo specs
 const COMPETENCY_CRITERIA: { [key: number]: string[] } = {
@@ -242,6 +244,7 @@ export default function ProjectMatrixGradingPage() {
   );
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_COMPETENCES}>
     <MainLayout
       title={`Grade Project Competency Matrix (C${competencyNumber})`}
       description="Record project-based evaluation criteria scores. Value ranges between 0.00 and 3.00."
@@ -417,5 +420,6 @@ export default function ProjectMatrixGradingPage() {
         </div>
       </TooltipProvider>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

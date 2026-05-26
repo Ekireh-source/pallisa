@@ -30,6 +30,8 @@ import { FetchClassById, FetchStreams, DeleteStream } from '@/features/members/m
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { IStreamListResponse } from '@/features/members/members.schemas';
 import Link from 'next/link';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function ClassDetailPage() {
   const params = useParams();
@@ -109,7 +111,7 @@ export default function ClassDetailPage() {
       key: "active",
       header: "Status",
       cell: (stream) => (
-        stream.active || stream.is_active ? (
+        stream.is_active && stream.is_active ? (
           <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-3 py-1 rounded-full w-fit">
             Active
           </Badge>
@@ -155,11 +157,13 @@ export default function ClassDetailPage() {
 
   if (loading) {
     return (
-      <MainLayout title="Class Details" description="Loading...">
+      <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_CLASSES}>
+    <MainLayout title="Class Details" description="Loading...">
         <div className="flex justify-center items-center h-64">
           <Icon icon="hugeicons:loading-01" className="w-8 h-8 text-primary animate-spin" />
         </div>
       </MainLayout>
+    </ProtectedComponent>
     );
   }
 

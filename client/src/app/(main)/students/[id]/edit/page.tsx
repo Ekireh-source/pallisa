@@ -27,12 +27,19 @@ import {
   Label, 
   ErrorMessage,
   Skeleton,
- 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui';
 import { StudentSchema, IStudentInput } from '@/features/members/members.schemas';
 import { FetchStudentById, UpdateStudent, DeleteStudent, FetchStreams } from '@/features/members/members.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -93,7 +100,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
         FetchStreams()
       ]);
 
-      if (streamsRes.success) setStreams(streamsRes.data.results || streamsRes.data);
+      if (streamsRes && 'results' in streamsRes) setStreams(streamsRes.results);
 
       if (studentRes.success) {
         const student = studentRes.data;
@@ -101,6 +108,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
         reset({
           user_email: student.user_email,
           student_id: student.student_id,
+          lin: student.lin || '',
           user_first_name: student.user_profile_data?.first_name || student.student_name?.split(' ')[0] || '',
           user_last_name: student.user_profile_data?.last_name || student.student_name?.split(' ')[1] || '',
           user_gender: student.user_profile_data?.gender || 'M',
@@ -172,62 +180,72 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
 
   if (initialLoading) {
     return (
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-48" />
+      <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_STUDENTS}>
+        <MainLayout
+          title="Edit Student"
+          description="Update profile and enrollment details."
+          backButton={
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+              onClick={() => router.back()}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          }
+        >
+          <div className="w-full space-y-8 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="p-8"><Skeleton className="h-64 w-full" /></Card>
+                <Card className="p-8"><Skeleton className="h-64 w-full" /></Card>
+              </div>
+              <div className="space-y-6">
+                <Card className="p-6"><Skeleton className="h-48 w-full" /></Card>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="p-8"><Skeleton className="h-64 w-full" /></Card>
-            <Card className="p-8"><Skeleton className="h-64 w-full" /></Card>
-          </div>
-          <div className="space-y-6">
-            <Card className="p-6"><Skeleton className="h-48 w-full" /></Card>
-          </div>
-        </div>
-      </div>
+        </MainLayout>
+      </ProtectedComponent>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_STUDENTS}>
+      <MainLayout
+        title="Edit Student"
+        description="Update profile and enrollment details."
+        backButton={
           <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+            variant="ghost" 
+            size="icon" 
+            className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Student</h1>
-            <p className="text-gray-500 mt-1">Update profile and enrollment details.</p>
-          </div>
-        </div>
-        <Button 
-          variant="outline" 
-          className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl"
-          onClick={handleDelete}
-          disabled={loading}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete Record
-        </Button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        }
+        headerActions={
+          <Button 
+            variant="outline" 
+            className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl h-11"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Record
+          </Button>
+        }
+      >
+        <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
+            <Card className="p-8 border-none ring-1 ring-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <User className="w-5 h-5 mr-2 text-indigo-600" />
+                <User className="w-5 h-5 mr-2 text-primary" />
                 Personal Information
               </h3>
               
@@ -271,22 +289,26 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
 
                 <div className="space-y-2">
                   <Label htmlFor="user_gender">Gender</Label>
-                  <select
-                    id="user_gender"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    {...register('user_gender')}
+                  <Select 
+                    value={watch('user_gender')}
+                    onValueChange={(val) => setValue('user_gender', val as 'M' | 'F' | 'O', { shouldValidate: true, shouldDirty: true })}
                   >
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="O">Other</option>
-                  </select>
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select Gender" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-100">
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                      <SelectItem value="O">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
+            <Card className="p-8 border-none ring-1 ring-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <GraduationCap className="w-5 h-5 mr-2 text-indigo-600" />
+                <GraduationCap className="w-5 h-5 mr-2 text-primary" />
                 Academic Details
               </h3>
               
@@ -303,22 +325,36 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="current_stream">Assigned Stream</Label>
-                  <div className="relative">
-                    <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      id="current_stream"
-                      className="flex h-12 w-full pl-10 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      {...register('current_stream', { valueAsNumber: true })}
-                    >
-                      <option value="">Select a stream</option>
+                  <Label htmlFor="lin">Learner Identification Number (LIN)</Label>
+                  <Input 
+                    id="lin"
+                    placeholder="Enter LIN (e.g. LA12345678)" 
+                    className="h-12 rounded-xl border-gray-200"
+                    {...register('lin')}
+                  />
+                  {errors.lin && <ErrorMessage message={errors.lin.message} />}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="current_stream" className="text-sm font-semibold text-gray-700 flex items-center">
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
+                    Assigned Stream
+                  </Label>
+                  <Select 
+                    value={watch('current_stream')?.toString()}
+                    onValueChange={(val) => setValue('current_stream', val ? parseInt(val) : undefined, { shouldValidate: true, shouldDirty: true })}
+                  >
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select a stream" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-100">
                       {streams.map((stream) => (
-                        <option key={stream.id} value={stream.id}>
+                        <SelectItem key={stream.id} value={stream.id.toString()}>
                           {stream.class_obj_name} - {stream.name}
-                        </option>
+                        </SelectItem>
                       ))}
-                    </select>
-                  </div>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -335,17 +371,21 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="enrollment_status">Enrollment Status</Label>
-                  <select
-                    id="enrollment_status"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    {...register('enrollment_status')}
+                  <Label htmlFor="enrollment_status" className="text-sm font-semibold text-gray-700">Enrollment Status</Label>
+                  <Select 
+                    value={watch('enrollment_status')}
+                    onValueChange={(val) => setValue('enrollment_status', val as any, { shouldValidate: true, shouldDirty: true })}
                   >
-                    <option value="enrolled">Enrolled</option>
-                    <option value="transferred">Transferred</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="withdrawn">Withdrawn</option>
-                  </select>
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-100">
+                      <SelectItem value="enrolled">Enrolled</SelectItem>
+                      <SelectItem value="transferred">Transferred</SelectItem>
+                      <SelectItem value="suspended">Suspended</SelectItem>
+                      <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </Card>
@@ -353,14 +393,14 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
+            <Card className="p-6 border-none ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Camera className="w-5 h-5 mr-2 text-indigo-500" />
+                <Camera className="w-5 h-5 mr-2 text-primary" />
                 Profile Picture
               </h3>
               
               <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors relative overflow-hidden group">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary transition-colors relative overflow-hidden group">
                   {selectedImage ? (
                     <div className="relative w-32 h-32">
                       <img 
@@ -378,8 +418,8 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center cursor-pointer py-4 w-full">
-                      <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Upload className="w-8 h-8 text-indigo-500" />
+                      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-white" />
                       </div>
                       <p className="text-sm font-bold text-gray-700">Upload Photo</p>
                       <p className="text-[10px] text-gray-500 mt-1">JPG, PNG (Max 2MB)</p>
@@ -395,9 +435,9 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
               </div>
             </Card>
 
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
+            <Card className="p-6 border-none ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Info className="w-5 h-5 mr-2 text-indigo-500" />
+                <Info className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
               
@@ -441,5 +481,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
         </div>
       </form>
     </div>
+  </MainLayout>
+</ProtectedComponent>
   );
 }

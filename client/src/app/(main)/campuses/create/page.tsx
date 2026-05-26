@@ -25,6 +25,8 @@ import { Switch } from '@/components/ui/switch';
 import { CampusSchema, ICampusInput } from '@/features/school/school.schemas';
 import { CreateCampus } from '@/features/school/school.service';
 import { toast } from 'sonner';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateCampusPage() {
   const router = useRouter();
@@ -63,7 +65,8 @@ export default function CreateCampusPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CAMPUSES}>
+    <div className="w-full px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -198,5 +201,6 @@ export default function CreateCampusPage() {
         </div>
       </form>
     </div>
+  </ProtectedComponent>
   );
 }

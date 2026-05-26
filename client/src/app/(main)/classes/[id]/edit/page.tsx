@@ -33,6 +33,8 @@ import { FetchClassById, UpdateClass, DeleteClass } from '@/features/members/mem
 import { FetchCampuses } from '@/features/school/school.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function EditClassPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -121,18 +123,21 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
 
   if (fetchingData) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CLASSES}>
+      <div className="w-full space-y-8 animate-in fade-in duration-500">
         <Skeleton className="h-10 w-32" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2"><Skeleton className="h-64 w-full rounded-xl" /></div>
           <div><Skeleton className="h-48 w-full rounded-xl" /></div>
         </div>
       </div>
+    </ProtectedComponent>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CLASSES}>
+    <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -295,5 +300,6 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
         </div>
       </form>
     </div>
+  </ProtectedComponent>
   );
 }

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui';
 import { FetchTopicById } from '@/features/exam/exam.service';
 import { format } from 'date-fns';
+import { MainLayout } from '@/components/layout/main-layout';
 
 export default function TopicDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -43,7 +44,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="w-full space-y-8 animate-in fade-in duration-500">
         <Skeleton className="h-10 w-32" />
         <Card className="p-8"><Skeleton className="h-64 w-full" /></Card>
       </div>
@@ -51,38 +52,41 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.push('/topics')}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{topic.name}</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none px-3">
-                {topic.subject_name || `Subject ID: ${topic.subject}`}
-              </Badge>
-              <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-none px-3">
-                {topic.class_name || `Class ID: ${topic.class_obj}`}
-              </Badge>
-            </div>
+    <MainLayout
+      title={
+        <div className="flex flex-col">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">{topic?.name}</h1>
+          <div className="flex items-center gap-2 mt-2">
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/20 px-3 hover:bg-white/20">
+              {topic?.subject_name || `Subject ID: ${topic?.subject}`}
+            </Badge>
+            <Badge variant="secondary" className="bg-emerald-400/20 text-emerald-100 border-emerald-400/30 px-3 hover:bg-emerald-400/30">
+              {topic?.class_name || `Class ID: ${topic?.class_obj}`}
+            </Badge>
           </div>
         </div>
+      }
+      backButton={
         <Button 
-          className="h-11 rounded-xl shadow-lg shadow-primary/20 bg-primary text-white"
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.push('/topics')}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <Button 
+          className="h-11 rounded-xl bg-white text-primary hover:bg-gray-100 font-bold px-6 shadow-sm flex items-center gap-2 border border-transparent"
           onClick={() => router.push(`/topics/${id}/edit`)}
         >
           <Edit2 className="w-4 h-4 mr-2" />
           Edit Topic
         </Button>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
@@ -133,6 +137,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

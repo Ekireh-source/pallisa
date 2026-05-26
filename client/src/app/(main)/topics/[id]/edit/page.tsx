@@ -31,6 +31,7 @@ import { TopicSchema, ITopicInput } from '@/features/exam/exam.schemas';
 import { FetchTopicById, UpdateTopic, DeleteTopic } from '@/features/exam/exam.service';
 import { FetchClasses, FetchSubjects } from '@/features/members/members.service';
 import { toast } from 'sonner';
+import { MainLayout } from '@/components/layout/main-layout';
 
 export default function EditTopicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -117,7 +118,7 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
 
   if (fetchingData) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="w-full space-y-8 animate-in fade-in duration-500">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="space-y-2">
@@ -134,33 +135,31 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Topic</h1>
-            <p className="text-gray-500 mt-1">Update the details for this competency.</p>
-          </div>
-        </div>
+    <MainLayout
+      title="Edit Topic"
+      description="Update the details for this competency."
+      backButton={
         <Button 
-          variant="outline" 
-          className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100"
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <Button 
+          className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 bg-white font-bold border-transparent"
           onClick={handleDelete}
           disabled={loading}
         >
           <Trash2 className="w-4 h-4 mr-2" />
           Delete
         </Button>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -275,6 +274,7 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

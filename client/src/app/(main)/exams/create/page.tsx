@@ -31,6 +31,9 @@ import { CreateExam } from '@/features/exam/exam.service';
 import { FetchClasses, FetchTerms } from '@/features/members/members.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateExamPage() {
   const router = useRouter();
@@ -92,32 +95,29 @@ export default function CreateExamPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Schedule Exam</h1>
-            <p className="text-gray-500 mt-1">Create a new assessment period for your school.</p>
-          </div>
-        </div>
-        <div className="hidden md:flex items-center gap-3 bg-primary/5 px-4 py-2 rounded-2xl border border-primary/10">
-          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+    <MainLayout
+      title="Schedule Exam"
+      description="Create a new assessment period for your school."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 text-white hover:bg-white/20 rounded-full"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <div className="hidden md:flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/25">
+          <div className="w-8 h-8 bg-white/15 rounded-full flex items-center justify-center text-white">
             <ClipboardCheck className="w-4 h-4" />
           </div>
-          <span className="text-sm font-semibold text-primary font-medium">Bulk Creation Enabled</span>
+          <span className="text-sm font-semibold text-white font-medium">Bulk Creation Enabled</span>
         </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4 animate-in fade-in duration-500">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Form Area */}
           <div className="md:col-span-2 space-y-6">
@@ -260,6 +260,6 @@ export default function CreateExamPage() {
           </div>
         </div>
       </form>
-    </div>
+    </MainLayout>
   );
 }

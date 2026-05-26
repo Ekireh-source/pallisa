@@ -6,6 +6,7 @@ export const GradingSystemListSchema = z.object({
   description: z.string().optional().nullable(),
   boundaries: z.array(z.any()).optional().nullable(),
   is_active: z.boolean(),
+  level: z.string(),
 });
 
 export type IGradingSystemListResponse = z.infer<typeof GradingSystemListSchema>;

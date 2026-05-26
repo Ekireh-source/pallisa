@@ -34,11 +34,15 @@ import {
   SelectValue,
 } from '@/components/ui';
 import { FetchRoles } from '@/features/auth/auth.service';
+import { FetchCampuses } from '@/features/school/school.service';
 import { IRole } from '@/features/auth/auth.schemas';
 import { TeacherSchema, ITeacherInput } from '@/features/members/members.schemas';
 import { FetchTeacherById, UpdateTeacher, DeleteTeacher } from '@/features/members/members.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function EditTeacherPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -47,6 +51,8 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
   const [initialLoading, setInitialLoading] = useState(true);
   const [roles, setRoles] = useState<IRole[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
+  const [campuses, setCampuses] = useState<any[]>([]);
+  const [loadingCampuses, setLoadingCampuses] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(initialLoading ? null : null); // Dummy fix for TS
 
   const {
@@ -67,11 +73,12 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
       employment_type: 'full_time',
       is_active: true,
       user_role_id: undefined,
+      campus: undefined as any,
     }
   });
   
   const selectedRole = watch('user_role_id');
-
+  const selectedCampus = watch('campus');
   const isActive = watch('is_active');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,15 +104,23 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
   };
 
   useEffect(() => {
-    const loadRoles = async () => {
+    const loadRolesAndCampuses = async () => {
       setLoadingRoles(true);
-      const res = await FetchRoles();
-      if (res.success) {
-        setRoles(res.data.results || (Array.isArray(res.data) ? res.data : []));
+      setLoadingCampuses(true);
+      const [rolesRes, campusesRes] = await Promise.all([
+        FetchRoles(),
+        FetchCampuses()
+      ]);
+      if (rolesRes.success) {
+        setRoles(rolesRes.data.results || (Array.isArray(rolesRes.data) ? rolesRes.data : []));
+      }
+      if (campusesRes && 'results' in campusesRes) {
+        setCampuses(campusesRes.results);
       }
       setLoadingRoles(false);
+      setLoadingCampuses(false);
     };
-    loadRoles();
+    loadRolesAndCampuses();
   }, []);
 
   useEffect(() => {
@@ -128,6 +143,7 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
           hire_date: teacher.hire_date,
           is_active: teacher.is_active,
           user_role_id: teacher.user_profile_data?.role?.id,
+          campus: teacher.campus,
         });
       } else {
         toast.error("Failed to load teacher details");
@@ -192,7 +208,7 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
 
   if (initialLoading) {
     return (
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="w-full space-y-8">
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -208,32 +224,32 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Teacher</h1>
-            <p className="text-gray-500 mt-1">Update profile and professional details.</p>
-          </div>
-        </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_TEACHERS}>
+    <MainLayout
+      title="Edit Teacher"
+      description="Update teacher details and system preferences."
+      backButton={
         <Button 
-          variant="outline" 
-          className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl"
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <Button 
+          className="text-rose-600 border-transparent bg-white hover:bg-rose-50 rounded-xl font-bold h-11"
           onClick={handleDelete}
           disabled={loading}
         >
           <Trash2 className="w-4 h-4 mr-2" />
           Deactivate
         </Button>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -241,7 +257,7 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <User className="w-5 h-5 mr-2 text-indigo-600" />
+                <User className="w-5 h-5 mr-2 text-primary" />
                 Personal Information
               </h3>
               
@@ -285,15 +301,19 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
 
                 <div className="space-y-2">
                   <Label htmlFor="user_gender">Gender</Label>
-                  <select
-                    id="user_gender"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    {...register('user_gender')}
+                  <Select 
+                    value={watch('user_gender')}
+                    onValueChange={(val) => setValue('user_gender', val as any, { shouldValidate: true, shouldDirty: true })}
                   >
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="O">Other</option>
-                  </select>
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select Gender" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-100">
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                      <SelectItem value="O">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -302,10 +322,10 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
                     onValueChange={(val) => setValue('user_role_id', parseInt(val))}
                     value={selectedRole?.toString()}
                   >
-                    <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.user_role_id ? 'border-red-500' : ''}`}>
+                    <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.user_role_id ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select Role" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl border-gray-100">
                       {loadingRoles ? (
                         <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
                       ) : roles.length === 0 ? (
@@ -321,12 +341,40 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
                   </Select>
                   {errors.user_role_id && <ErrorMessage message={errors.user_role_id.message} />}
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="campus" className="text-sm font-semibold text-gray-700 flex items-center">
+                    Campus
+                  </Label>
+                  <Select 
+                    onValueChange={(val) => setValue('campus', parseInt(val))}
+                    value={selectedCampus?.toString()}
+                  >
+                    <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.campus ? 'border-red-500' : ''}`}>
+                      <SelectValue placeholder="Select Campus" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      {loadingCampuses ? (
+                        <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
+                      ) : campuses.length === 0 ? (
+                        <div className="p-2 text-center text-sm text-gray-500">No campuses found</div>
+                      ) : (
+                        campuses.map((campus) => (
+                          <SelectItem key={campus.id} value={campus.id.toString()}>
+                            {campus.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {errors.campus && <ErrorMessage message={errors.campus.message} />}
+                </div>
               </div>
             </Card>
 
             <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                <Briefcase className="w-5 h-5 mr-2 text-indigo-600" />
+                <Briefcase className="w-5 h-5 mr-2 text-primary" />
                 Professional Details
               </h3>
               
@@ -344,17 +392,21 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
 
                 <div className="space-y-2">
                   <Label htmlFor="employment_type">Employment Type</Label>
-                  <select
-                    id="employment_type"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    {...register('employment_type')}
+                  <Select 
+                    value={watch('employment_type')}
+                    onValueChange={(val) => setValue('employment_type', val as any, { shouldValidate: true, shouldDirty: true })}
                   >
-                    <option value="full_time">Full Time</option>
-                    <option value="part_time">Part Time</option>
-                    <option value="contract">Contract</option>
-                    <option value="substitute">Substitute</option>
-                    <option value="volunteer">Volunteer</option>
-                  </select>
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-100">
+                      <SelectItem value="full_time">Full Time</SelectItem>
+                      <SelectItem value="part_time">Part Time</SelectItem>
+                      <SelectItem value="contract">Contract</SelectItem>
+                      <SelectItem value="substitute">Substitute</SelectItem>
+                      <SelectItem value="volunteer">Volunteer</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -403,12 +455,12 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Camera className="w-5 h-5 mr-2 text-indigo-500" />
+                <Camera className="w-5 h-5 mr-2 text-primary" />
                 Profile Picture
               </h3>
               
               <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors relative overflow-hidden group">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary transition-colors relative overflow-hidden group">
                   {selectedImage ? (
                     <div className="relative w-32 h-32">
                       <img 
@@ -426,8 +478,8 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center cursor-pointer py-4 w-full">
-                      <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Upload className="w-8 h-8 text-indigo-500" />
+                      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-primary" />
                       </div>
                       <p className="text-sm font-bold text-gray-700">Upload Photo</p>
                       <p className="text-[10px] text-gray-500 mt-1">JPG, PNG (Max 2MB)</p>
@@ -445,7 +497,7 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
 
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Info className="w-5 h-5 mr-2 text-indigo-500" />
+                <Info className="w-5 h-5 mr-2 text-primary" />
                 Status
               </h3>
               
@@ -466,7 +518,7 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
             <div className="pt-2 space-y-3">
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary hover:bg-primary/90"
+                className="w-full h-12 rounded-xl bg-primary font-bold hover:bg-primary/90"
                 disabled={loading}
               >
                 {loading ? (
@@ -488,6 +540,8 @@ export default function EditTeacherPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

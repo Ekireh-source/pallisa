@@ -29,6 +29,7 @@ import { TopicSchema, ITopicInput } from '@/features/exam/exam.schemas';
 import { CreateTopic } from '@/features/exam/exam.service';
 import { toast } from 'sonner';
 import { FetchClasses, FetchSubjects } from '@/features/members/members.service';
+import { MainLayout } from '@/components/layout/main-layout';
 
 export default function CreateTopicPage() {
   const router = useRouter();
@@ -89,24 +90,21 @@ export default function CreateTopicPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">New Topic</h1>
-            <p className="text-gray-500 mt-1">Define a new competency for the curriculum.</p>
-          </div>
-        </div>
-      </div>
+    <MainLayout
+      title="New Topic"
+      description="Define a new competency for the curriculum."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -223,6 +221,7 @@ export default function CreateTopicPage() {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

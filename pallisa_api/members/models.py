@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.utils.crypto import get_random_string
-from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
 from accounts.models import CustomUser, UserProfile, Role
@@ -228,6 +227,7 @@ class Student(models.Model):
     """Model to represent student-specific information"""
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='student_profile')
     student_id = models.CharField(max_length=20, unique=True, db_index=True, null=True, blank=True)
+    lin = models.CharField(max_length=50, blank=True, null=True, verbose_name="Learner Identification Number (LIN)", help_text="Learners Identification Number")
     campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
     admission_number = models.CharField(max_length=50, blank=True, null=True)
     admission_date = models.DateField(default=get_current_date)
@@ -368,6 +368,7 @@ class Student(models.Model):
 class Teacher(models.Model):
     """Model to represent teacher-specific information"""
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='teacher_profile')
+    campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers')
     employee_id = models.CharField(max_length=20, unique=True, db_index=True)
     hire_date = models.DateField(default=get_current_date)
     

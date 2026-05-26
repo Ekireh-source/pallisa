@@ -8,6 +8,7 @@ import { logoutStart } from '@/store/auth/actions';
 
 import { SharedNavbar } from '@/components/layout/SharedNavbar';
 import DashboardSideBar from '@/components/navigation/dashboard-sidebar';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function MainLayout({
@@ -62,20 +63,21 @@ export default function MainLayout({
   return (
     <div className="min-h-screen flex bg-gray-50/50 w-full overflow-hidden">
       <DashboardSideBar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
-      
-      <div 
-        className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${
-          isMobile ? 'pl-0' : isSideBarOpen ? 'pl-64' : 'pl-20'
-        }`}
+
+      <div
+        className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${isMobile ? 'pl-0 pb-[72px]' : isSideBarOpen ? 'pl-64' : 'pl-20'
+          }`}
       >
         <SharedNavbar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
-        
+
         <main className="flex-1 overflow-auto bg-gray-50/50">
           <div className="w-full">
             {children}
           </div>
         </main>
       </div>
+      
+      <MobileBottomNav onMoreClick={() => setIsSideBarOpen(true)} />
     </div>
   );
 }

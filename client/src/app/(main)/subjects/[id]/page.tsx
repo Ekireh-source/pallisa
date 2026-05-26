@@ -54,6 +54,9 @@ import { Switch } from '@/components/ui/switch';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { IPaginatedResponse } from '@/types';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function SubjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -166,12 +169,12 @@ export default function SubjectDetailPage({ params }: { params: Promise<{ id: st
     if ('error' in res) {
       return { count: 0, next: null, previous: null, results: [] };
     }
-    return res;
+    return res as any;
   };
 
   const fetchFromUrlWrapper = async ({ url }: { url: string }): Promise<IPaginatedResponse<ISubjectPaperListResponse>> => {
     const res = await getPaginatedFromUrl<ISubjectPaperListResponse>({ url });
-    return res;
+    return res as any;
   };
 
   // Subject Papers Table Columns
@@ -248,7 +251,7 @@ export default function SubjectDetailPage({ params }: { params: Promise<{ id: st
 
   if (fetchingSubject) {
     return (
-      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="w-full space-y-8 animate-in fade-in duration-500">
         <Skeleton className="h-10 w-32" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1"><Skeleton className="h-64 w-full rounded-xl" /></div>
@@ -259,31 +262,31 @@ export default function SubjectDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.push('/subjects')}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{subject?.name}</h1>
-            <p className="text-gray-500 mt-1">Detailed information and paper curriculum management.</p>
-          </div>
-        </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_SUBJECTS}>
+    <MainLayout
+      title={subject?.name || "Subject Details"}
+      description="Detailed information and paper curriculum management."
+      backButton={
         <Button 
-          className="h-11 rounded-xl bg-primary text-white hover:bg-primary/90 font-bold px-6 shadow-sm flex items-center gap-2"
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.push('/subjects')}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <Button 
+          className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 font-bold px-6 border border-transparent shadow-sm flex items-center gap-2"
           onClick={() => router.push(`/subjects/${id}/edit`)}
         >
           <Edit2 className="w-4 h-4" />
           Edit Subject
         </Button>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Subject Overview Card */}
@@ -464,6 +467,8 @@ export default function SubjectDetailPage({ params }: { params: Promise<{ id: st
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

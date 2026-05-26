@@ -36,6 +36,7 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 
 import { ISchoolListResponse } from '@/features/school/school.schemas';
+import { MainLayout } from '@/components/layout/main-layout';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -202,21 +203,19 @@ export default function SchoolsListPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Schools</h1>
-          <p className="text-gray-500 mt-1">Manage registered schools and institutions.</p>
-        </div>
+    <MainLayout
+      title="Schools"
+      description="Manage registered schools and institutions."
+      headerActions={
         <Button className="shadow-lg shadow-primary/20 rounded-xl h-11" asChild>
           <Link href="/school/create">
             <Plus className="w-4 h-4 mr-2" />
             Add School
           </Link>
         </Button>
-      </div>
-
-      <Card className="border-none shadow-sm ring-1 ring-gray-100">
+      }
+    >
+      <Card className="border-none shadow-none ring-0 bg-transparent">
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -264,7 +263,7 @@ export default function SchoolsListPage() {
           />
         </div>
       </Card>
-    </div>
+    </MainLayout>
   );
 }
 

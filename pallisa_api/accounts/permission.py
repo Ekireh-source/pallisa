@@ -307,3 +307,65 @@ def get_user_permission_details(user_profile):
         } if user_profile.role else None,
         'is_superadmin': user_profile.role.is_superadmin if user_profile.role else False
     }
+
+
+def get_user_school(request):
+    """
+    Obtains the logged-in user's school from their profile.
+    Returns schools.models.School instance or None.
+    """
+    if not request or not request.user or not request.user.is_authenticated:
+        return None
+    
+    # 1. Try resolving via request.user.profile.school property
+    try:
+        profile = getattr(request.user, 'profile', None)
+        if profile:
+            school = getattr(profile, 'school', None)
+            if school:
+                return school
+    except Exception:
+        pass
+            
+    # 2. Fallback: Try looking up School owned by request.user
+    try:
+        from schools.models import School
+        return School.objects.filter(owner=request.user).first()
+    except Exception:
+        pass
+        
+    return None
+
+
+def filter_by_school(queryset, request, school_field_path='school'):
+    """
+    Filters a queryset by the school of the logged-in user.
+    
+    Args:
+        queryset: Django QuerySet
+        request: HTTP Request object
+        school_field_path: The lookup path to the school field or school relation in the model.
+                           e.g., 'school', 'campus__school', 'class_obj__campus__school'.
+                           If the model is School itself, set to 'self' or None.
+    """
+    school = get_user_school(request)
+    if not school:
+        return queryset
+        
+    if school_field_path == 'self' or school_field_path is None:
+        return queryset.filter(id=school.id)
+        
+    return queryset.filter(**{school_field_path: school})
+
+
+from rest_framework.filters import BaseFilterBackend
+
+class SchoolFilterBackend(BaseFilterBackend):
+    """
+    A filter backend that automatically filters querysets to only return items 
+    associated with the logged-in user's school.
+    """
+    def filter_queryset(self, request, queryset, view):
+        # Allow specifying a custom school field path in the view, e.g., school_field_path = 'campus__school'
+        school_field_path = getattr(view, 'school_field_path', 'school')
+        return filter_by_school(queryset, request, school_field_path=school_field_path)

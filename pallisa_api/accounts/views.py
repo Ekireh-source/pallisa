@@ -11,7 +11,8 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from django.db.models import Q
 from django.core.paginator import Paginator
 
-from .models import Campus, School, SetupSteps, Document, PasswordResetToken, Permission, Role, UserPermission, UserProfile, CustomUser, EmailVerificationToken
+from schools.models import Campus, School, SetupSteps
+from .models import Document, PasswordResetToken, Permission, Role, UserPermission, UserProfile, CustomUser, EmailVerificationToken
 from .serializers import (
     DocumentSerializer,
     ForgotPasswordSerializer,
@@ -88,12 +89,14 @@ class LoginView(APIView):
             email = serializer.validated_data.get('email')
             student_id = serializer.validated_data.get('student_id')
             password = serializer.validated_data['password']
+
             
             # Determine username for authentication
             username = email if email else student_id
             
             # Authenticate user
             user = authenticate(request, username=username, password=password)
+
             
             if user:
                 # Check if email is verified
@@ -680,8 +683,8 @@ class RoleListCreateView(APIView):
             school = role.school
             
             if school:
-                setup_steps,_= SetupSteps.objects.get_or_create(school=school)
-                setup_steps.create_roles_and_permissions = True
+                setup_steps, _ = SetupSteps.objects.get_or_create(school=school, setup_name="roles_and_permissions")
+                setup_steps.completed = True
                 setup_steps.save()
             return Response(RoleSerializer(role).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -714,6 +717,13 @@ class RoleDetailView(APIView):
         if serializer.is_valid():
             role = serializer.save()
             role.sync_users_permissions()
+            
+            school = role.school
+            if school:
+                setup_steps, _ = SetupSteps.objects.get_or_create(school=school, setup_name="roles_and_permissions")
+                setup_steps.completed = True
+                setup_steps.save()
+                
             return Response(RoleSerializer(role).data)
         return Response(serializer.errors, status=400)
 
@@ -1279,7 +1289,8 @@ class PasswordResetRequestView(APIView):
         """
         
         try:
-            send_mail(
+            from accounts.tasks.emails import send_plain_email_task
+            send_plain_email_task.delay(
                 subject,
                 message,
                 settings.DEFAULT_FROM_EMAIL,

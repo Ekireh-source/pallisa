@@ -31,7 +31,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
 } from '@/components/ui';
 import {
   FetchGradingSystemById,
@@ -43,6 +48,9 @@ import {
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { GradingSystem, GradeBoundary } from '@/types';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function EditGradingSystemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -65,6 +73,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
   } = useForm({
     defaultValues: {
       name: '',
+      level: 'O-Level',
       description: '',
       is_active: true,
     }
@@ -80,8 +89,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
       grade: '',
       min_score: '',
       max_score: '',
-      remarks: '',
-      points: ''
+      remarks: ''
     }
   });
 
@@ -94,6 +102,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
       const data = result.data;
       setSystem(data);
       setValue('name', data.name);
+      setValue('level', data.level || 'O-Level');
       setValue('description', data.description || '');
       setValue('is_active', data.is_active);
     } else {
@@ -127,8 +136,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
         grade: boundary.grade,
         min_score: boundary.min_score.toString(),
         max_score: boundary.max_score.toString(),
-        remarks: boundary.remarks || '',
-        points: boundary.points?.toString() || ''
+        remarks: boundary.remarks || ''
       });
     } else {
       setEditingBoundary(null);
@@ -136,8 +144,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
         grade: '',
         min_score: '',
         max_score: '',
-        remarks: '',
-        points: ''
+        remarks: ''
       });
     }
     setBoundaryModalOpen(true);
@@ -147,8 +154,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
     setBoundarySaving(true);
     const payload = {
       ...data,
-      grading_system: id,
-      points: data.points ? parseInt(data.points) : null
+      grading_system: id
     };
 
     let result;
@@ -181,28 +187,26 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
   };
 
   if (loading) {
-    return <div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" /></div>;
-  }
+    return <div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /></div>;
+  };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Grading System</h1>
-            <p className="text-gray-500 mt-1">Manage system details and grade boundaries.</p>
-          </div>
-        </div>
-      </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_GRADING}>
+    <MainLayout
+      title="Edit Grading System"
+      description="Update existing grading system and manage boundaries."
+      backButton={
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -212,27 +216,47 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Layers className="w-4 h-4 mr-2 text-indigo-500" />
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
                     System Name
                   </Label>
                   <Input
                     id="name"
                     placeholder="e.g., O Level Grades"
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name', { required: 'System name is required' })}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message as string} />}
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="level" className="text-sm font-semibold text-gray-700 flex items-center">
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
+                    Level
+                  </Label>
+                  <Select
+                    value={watch('level')}
+                    onValueChange={(val) => setValue('level', val)}
+                  >
+                    <SelectTrigger className={`h-12 w-full rounded-xl border-gray-200 focus:ring-primary bg-white ${errors.level ? 'border-red-500' : ''}`}>
+                      <SelectValue placeholder="Select Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="O-Level">O-Level</SelectItem>
+                      <SelectItem value="A-Level">A-Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.level && <ErrorMessage message={errors.level.message as string} />}
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Layers className="w-4 h-4 mr-2 text-indigo-500" />
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
                     Description (Optional)
                   </Label>
                   <Input
                     id="description"
                     placeholder="e.g., Used for S.1 to S.4"
-                    className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500"
+                    className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                     {...register('description')}
                   />
                 </div>
@@ -243,13 +267,13 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
             <Card className="border-none shadow-sm ring-1 ring-gray-100 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-900 flex items-center">
-                  <Layers className="w-5 h-5 mr-2 text-indigo-500" />
+                  <Layers className="w-5 h-5 mr-2 text-primary" />
                   Grade Boundaries
                 </h3>
                 <Button
                   type="button"
                   size="sm"
-                  className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-none shadow-none"
+                  className="bg-primary text-white hover:bg-primary/90 border-none shadow-none"
                   onClick={() => openBoundaryModal()}
                 >
                   <Plus className="w-4 h-4 mr-1" /> Add Grade
@@ -263,14 +287,13 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
                       <TableHead>Grade</TableHead>
                       <TableHead>Range</TableHead>
                       <TableHead>Remarks</TableHead>
-                      <TableHead>Points</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {system?.boundaries.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                           No grades defined yet. Add boundaries to complete this grading system.
                         </TableCell>
                       </TableRow>
@@ -280,7 +303,6 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
                           <TableCell className="font-bold text-gray-900">{boundary.grade}</TableCell>
                           <TableCell>{boundary.min_score} - {boundary.max_score}</TableCell>
                           <TableCell>{boundary.remarks || '--'}</TableCell>
-                          <TableCell>{boundary.points ?? '--'}</TableCell>
                           <TableCell className="text-right">
                             <Button
                               type="button"
@@ -313,7 +335,7 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <ToggleLeft className="w-5 h-5 mr-2 text-indigo-500" />
+                <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
 
@@ -392,15 +414,6 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
                 {...registerBoundary('remarks')}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Points</Label>
-              <Input
-                type="number"
-                className="col-span-3"
-                placeholder="e.g. 1"
-                {...registerBoundary('points')}
-              />
-            </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setBoundaryModalOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={boundarySaving}>
@@ -411,6 +424,8 @@ export default function EditGradingSystemPage({ params }: { params: Promise<{ id
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

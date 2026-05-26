@@ -30,6 +30,8 @@ from .serializers import (
     ExpenseSummarySerializer,
 )
 
+from accounts.permission import filter_by_school
+
 
 # ==================== EXPENSE CATEGORY VIEWS ====================
 
@@ -170,6 +172,7 @@ class AcademicYearListCreateView(APIView):
 
         # Build queryset
         queryset = AcademicYear.objects.order_by('-start_date')
+        queryset = filter_by_school(queryset, request)
         
         # Apply filters
         if is_active is not None:
@@ -213,8 +216,10 @@ class AcademicYearDetailView(APIView):
     """Retrieve, update or delete an academic year"""
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        return get_object_or_404(AcademicYear, pk=pk)
+    def get_object(self, pk, request):
+        queryset = AcademicYear.objects.all()
+        queryset = filter_by_school(queryset, request)
+        return get_object_or_404(queryset, pk=pk)
 
     @extend_schema(
         summary="Retrieve an academic year",
@@ -222,7 +227,7 @@ class AcademicYearDetailView(APIView):
         tags=["Academic Years"]
     )
     def get(self, request, pk):
-        academic_year = self.get_object(pk)
+        academic_year = self.get_object(pk, request)
         serializer = AcademicYearSerializer(academic_year)
         return Response(serializer.data)
 
@@ -233,7 +238,7 @@ class AcademicYearDetailView(APIView):
         tags=["Academic Years"]
     )
     def put(self, request, pk):
-        academic_year = self.get_object(pk)
+        academic_year = self.get_object(pk, request)
         serializer = AcademicYearSerializer(academic_year, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -246,7 +251,7 @@ class AcademicYearDetailView(APIView):
         tags=["Academic Years"]
     )
     def delete(self, request, pk):
-        academic_year = self.get_object(pk)
+        academic_year = self.get_object(pk, request)
         # Soft delete by setting is_active to False
         academic_year.is_active = False
         academic_year.save()
@@ -284,6 +289,7 @@ class TermListCreateView(APIView):
 
         # Build queryset with optimizations
         queryset = Term.objects.select_related('academic_year').order_by('-academic_year__start_date', 'name')
+        queryset = filter_by_school(queryset, request, school_field_path='academic_year__school')
         
         # Apply filters
         if academic_year:
@@ -335,8 +341,10 @@ class TermDetailView(APIView):
     """Retrieve, update or delete a term"""
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        return get_object_or_404(Term, pk=pk)
+    def get_object(self, pk, request):
+        queryset = Term.objects.all()
+        queryset = filter_by_school(queryset, request, school_field_path='academic_year__school')
+        return get_object_or_404(queryset, pk=pk)
 
     @extend_schema(
         summary="Retrieve a term",
@@ -344,7 +352,7 @@ class TermDetailView(APIView):
         tags=["Terms"]
     )
     def get(self, request, pk):
-        term = self.get_object(pk)
+        term = self.get_object(pk, request)
         serializer = TermDetailSerializer(term)
         return Response(serializer.data)
 
@@ -355,7 +363,7 @@ class TermDetailView(APIView):
         tags=["Terms"]
     )
     def put(self, request, pk):
-        term = self.get_object(pk)
+        term = self.get_object(pk, request)
         serializer = TermSerializer(term, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -370,7 +378,7 @@ class TermDetailView(APIView):
         tags=["Terms"]
     )
     def delete(self, request, pk):
-        term = self.get_object(pk)
+        term = self.get_object(pk, request)
         term.is_active = False
         term.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -30,6 +30,9 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function StreamsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +45,7 @@ export default function StreamsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -147,16 +150,18 @@ export default function StreamsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_STREAMS}>
     <MainLayout
       title="Streams"
       description="Manage class divisions and student distributions."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/streams/create">
-            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span>New Stream</span>
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New Stream",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/streams/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -195,5 +200,6 @@ export default function StreamsListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

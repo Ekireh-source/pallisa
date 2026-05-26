@@ -1,3 +1,4 @@
+from accounts.models import Role
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -140,14 +141,29 @@ class LoginView(APIView):
             profile_data = AuthenticationService.get_user_profile_data(user)
             
             logger.info(f"Successful login for: {user.email}")
+
+
+            profile = UserProfileSerializer(user.profile, context={'request': request}).data
+            school = None
+            if profile.get('role') and profile['role'].get('id'):
+                role_id = profile['role']['id']
+                role_data = Role.objects.filter(id=role_id).values().first()
+                if role_data and role_data.get('school_id'):
+                    school = School.objects.filter(id=role_data['school_id']).first()
+
+            # If not found from role, check profile_data
+            if not school:
+                school = profile_data.get('school')
             
-            # Get school information from the schools app
-            school = School.objects.filter(owner=user).first()
+            # If still not found, check if the user is the owner
+            if not school:
+                school = School.objects.filter(owner=user).first()
+            
             school_data = SchoolSerializer(school, context={'request': request}).data if school else None
             
             return Response({
                 **tokens,
-                'user_profile': UserProfileSerializer(user.profile, context={'request': request}).data,
+                'user_profile': profile,
                 'user_info': profile_data,
                 'school': school_data
             }, status=status.HTTP_200_OK)

@@ -4,22 +4,22 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  ChevronLeft, 
-  Save, 
-  Building2, 
-  Mail, 
+import {
+  ChevronLeft,
+  Save,
+  Building2,
+  Mail,
   Phone,
   MapPin,
   Loader2,
   ToggleLeft,
   Trash2
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Label, 
+import {
+  Button,
+  Card,
+  Input,
+  Label,
   ErrorMessage,
   Skeleton
 } from '@/components/ui';
@@ -28,6 +28,8 @@ import { CampusSchema, ICampusInput } from '@/features/school/school.schemas';
 import api from "@/lib/api";
 import { UpdateCampus, DeleteCampus } from '@/features/school/school.service';
 import { toast } from 'sonner';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function EditCampusPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -75,7 +77,7 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
   const onSubmit: SubmitHandler<ICampusInput> = async (data) => {
     setLoading(true);
     const result = await UpdateCampus({ id, data });
-    
+
     if (result.success) {
       toast.success("Campus updated successfully");
       router.push('/campuses');
@@ -101,30 +103,33 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
 
   if (fetchingData) {
     return (
-      <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-8 animate-in fade-in duration-500">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32" />
+      <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CAMPUSES}>
+        <div className="w-full px-4 md:px-0 space-y-8 animate-in fade-in duration-500">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
+            <div><Skeleton className="h-64 w-full rounded-xl" /></div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
-          <div><Skeleton className="h-64 w-full rounded-xl" /></div>
-        </div>
-      </div>
+      </ProtectedComponent>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CAMPUSES}>
+    <div className="w-full px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50 shrink-0"
             onClick={() => router.back()}
           >
@@ -135,8 +140,8 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
             <p className="text-gray-500 text-sm sm:text-base mt-1">Update registration details for this campus.</p>
           </div>
         </div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100 w-full sm:w-auto"
           onClick={handleDelete}
           disabled={loading}
@@ -157,9 +162,9 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
                     <Building2 className="w-4 h-4 mr-2 text-primary" />
                     Campus Name
                   </Label>
-                  <Input 
+                  <Input
                     id="name"
-                    placeholder="e.g., Main Campus" 
+                    placeholder="e.g., Main Campus"
                     className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
@@ -172,10 +177,10 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
                       <Mail className="w-4 h-4 mr-2 text-primary" />
                       Email Address
                     </Label>
-                    <Input 
+                    <Input
                       id="email"
                       type="email"
-                      placeholder="campus@example.com" 
+                      placeholder="campus@example.com"
                       className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('email')}
                     />
@@ -187,9 +192,9 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
                       <Phone className="w-4 h-4 mr-2 text-primary" />
                       Phone Number
                     </Label>
-                    <Input 
+                    <Input
                       id="phone_number"
-                      placeholder="+256 ..." 
+                      placeholder="+256 ..."
                       className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                       {...register('phone_number')}
                     />
@@ -202,9 +207,9 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
                     <MapPin className="w-4 h-4 mr-2 text-primary" />
                     Physical Address
                   </Label>
-                  <Input 
+                  <Input
                     id="address"
-                    placeholder="Plot 12, High Street" 
+                    placeholder="Plot 12, High Street"
                     className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                     {...register('address')}
                   />
@@ -221,14 +226,14 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
                 <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
-              
+
               <div className="space-y-6">
                 <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
                   <div className="space-y-0.5">
                     <Label className="text-sm font-semibold text-gray-900">Active Status</Label>
                     <p className="text-xs text-gray-500">Campus is active and selectable</p>
                   </div>
-                  <Switch 
+                  <Switch
                     checked={isActive}
                     onCheckedChange={(val) => setValue('active', val)}
                   />
@@ -237,8 +242,8 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
             </Card>
 
             <div className="pt-2">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary hover:bg-primary/90"
                 disabled={loading}
               >
@@ -249,9 +254,9 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
                 )}
                 Update Campus
               </Button>
-              <Button 
+              <Button
                 type="button"
-                variant="ghost" 
+                variant="ghost"
                 className="w-full mt-2 h-11 rounded-xl text-gray-500"
                 onClick={() => router.back()}
               >
@@ -262,5 +267,6 @@ export default function EditCampusPage({ params }: { params: Promise<{ id: strin
         </div>
       </form>
     </div>
+  </ProtectedComponent >
   );
 }

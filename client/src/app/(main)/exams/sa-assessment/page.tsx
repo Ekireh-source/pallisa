@@ -35,6 +35,9 @@ interface ISaAssessmentListResponse {
 }
 
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function SaAssessmentsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +49,7 @@ export default function SaAssessmentsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: string) => {
@@ -145,32 +148,34 @@ export default function SaAssessmentsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
     <MainLayout
       title="Summative Assessment configurations"
       description="Define exam milestones scaling configurations and assign student marks matrices."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-50 font-bold px-5 border border-gray-200 shadow-sm w-full sm:w-auto" asChild>
-          <Link href="/exams/sa-assessment/create">
-            <Plus className="w-4 h-4 mr-2" />
-            New SA Assessment
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New SA Assessment",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/exams/sa-assessment/create",
+          }}
+        />
       }
     >
-      <Card className="border-none shadow-none ring-0 bg-transparent">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <Card className="border-none shadow-none ring-0">
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
               placeholder="Search assessment subjects..." 
-              className="pl-11 h-11 rounded-xl border-gray-200 bg-white focus:ring-primary w-full shadow-sm"
+              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
-        <Card className="p-4 border-none shadow-sm ring-1 ring-gray-100">
+        <div className="p-4">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
             fetchFromUrl={getPaginatedFromUrl}
@@ -183,21 +188,16 @@ export default function SaAssessmentsListPage() {
             deps={[searchTerm]}
             refreshRef={tableRefreshRef}
             emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-16">
-                <TrendingUp className="w-14 h-14 text-gray-200 mb-4" />
-                <p className="text-lg font-bold text-gray-900">No SA configurations found</p>
-                <p className="text-sm mt-1 text-gray-400">Configure new Summative Assessments to start recording student grades.</p>
-                <Button className="rounded-xl mt-4 bg-primary hover:bg-primary/90 text-white font-semibold" asChild>
-                  <Link href="/exams/sa-assessment/create">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Configure SA Assessment
-                  </Link>
-                </Button>
+              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                <TrendingUp className="w-12 h-12 text-gray-200 mb-4" />
+                <p className="text-lg font-medium">No SA configurations found</p>
+                <p className="text-sm">Configure new Summative Assessments to start recording student grades.</p>
               </div>
             }
           />
-        </Card>
+        </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

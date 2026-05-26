@@ -33,6 +33,8 @@ import { FetchStreamById, FetchStudents, DeleteStudent } from '@/features/member
 import { getPaginatedFromUrl } from '@/lib/utils';
 
 import { IStudent } from '@/features/members/members.schemas';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function StreamDetailPage() {
   const params = useParams();
@@ -72,7 +74,7 @@ export default function StreamDetailPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDeleteStudent = async (studentId: number) => {
@@ -93,15 +95,15 @@ export default function StreamDetailPage() {
       key: "user_first_name",
       header: "Student Name",
       cell: (student) => {
-        const initials = `${student.user_first_name?.[0] || ''}${student.user_last_name?.[0] || ''}`.toUpperCase();
+        const initials = student.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'S';
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 border border-gray-100 shadow-sm">
-              <AvatarImage src={student.user_profile_data?.profile_picture} alt={initials} />
+              <AvatarImage src={student.user_profile_data?.profile_picture || undefined} alt={initials} />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold text-gray-900">{student.user_first_name} {student.user_last_name}</p>
+              <p className="font-semibold text-gray-900">{student.full_name}</p>
               <p className="text-xs text-gray-500">{student.student_id || 'No ID'}</p>
             </div>
           </div>
@@ -113,7 +115,7 @@ export default function StreamDetailPage() {
       header: "Gender",
       cell: (student) => (
         <span className="text-gray-600 font-medium">
-          {student.user_gender === 'M' ? 'Male' : student.user_gender === 'F' ? 'Female' : 'Other'}
+          {student.user_profile_data?.gender === 'M' ? 'Male' : student.user_profile_data?.gender === 'F' ? 'Female' : 'Other'}
         </span>
       ),
     },
@@ -128,11 +130,12 @@ export default function StreamDetailPage() {
           transferred: "bg-amber-50 text-amber-700",
           withdrawn: "bg-gray-100 text-gray-700",
         };
-        const colorClass = statusColors[student.enrollment_status] || statusColors.enrolled;
+        const status = student.enrollment_status || 'enrolled';
+        const colorClass = statusColors[status] || statusColors.enrolled;
         
         return (
           <Badge className={`border-none px-3 font-semibold rounded-full ${colorClass}`}>
-            {student.enrollment_status.charAt(0).toUpperCase() + student.enrollment_status.slice(1)}
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         );
       },
@@ -179,11 +182,13 @@ export default function StreamDetailPage() {
 
   if (loading) {
     return (
-      <MainLayout title="Stream Details" description="Loading...">
+      <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_STREAMS}>
+    <MainLayout title="Stream Details" description="Loading...">
         <div className="flex justify-center items-center h-64">
           <Icon icon="hugeicons:loading-01" className="w-8 h-8 text-primary animate-spin" />
         </div>
       </MainLayout>
+    </ProtectedComponent>
     );
   }
 

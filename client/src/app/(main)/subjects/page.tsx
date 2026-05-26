@@ -29,6 +29,9 @@ import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { ISubjectListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function SubjectsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +44,7 @@ export default function SubjectsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -140,16 +143,18 @@ export default function SubjectsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_SUBJECTS}>
     <MainLayout
       title="Subjects"
       description="Manage the school curriculum and course offerings."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/subjects/create">
-            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span>Add Subject</span>
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Subject",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/subjects/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -188,5 +193,6 @@ export default function SubjectsListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

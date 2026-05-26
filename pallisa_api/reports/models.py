@@ -185,8 +185,13 @@ class SubjectCompetencyScore(models.Model):
 
 
 class GradingSystem(models.Model):
+    LEVEL_CHOICES = [
+        ('O-Level', 'O-Level'),
+        ('A-Level', 'A-Level'),
+    ]
     name = models.CharField(max_length=255)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='O-Level')
     description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -205,7 +210,7 @@ class GradeBoundary(models.Model):
         blank=True, null=True,
         help_text="Full grade descriptor text shown in the grade key table, e.g. 'Exceptional – Demonstrates mastery...'"
     )
-    points = models.PositiveIntegerField(blank=True, null=True, help_text="Aggregate points (e.g., D1=1, F9=9)")
+
 
     class Meta:
         ordering = ['-min_score']

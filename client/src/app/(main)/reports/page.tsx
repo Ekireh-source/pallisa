@@ -50,9 +50,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function ReportsPage() {
   const router = useRouter();
+  const { school } = useSelector((state: RootState) => state.auth);
+
   // Data state
   const [reports, setReports] = useState<ReportCard[]>([]);
 
@@ -75,6 +81,7 @@ export default function ReportsPage() {
     if (selectedClass && selectedClass !== 'all') params.class_id = selectedClass;
     if (selectedStream && selectedStream !== 'all') params.stream_id = selectedStream;
     if (searchTerm) params.search = searchTerm;
+    if (school?.id) params.school = school.id;
 
     const res = await FetchReportCards(params);
     if (res.success) {
@@ -95,7 +102,7 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadReports();
-  }, [selectedYear, selectedTerm, selectedClass, selectedStream, searchTerm]);
+  }, [selectedYear, selectedTerm, selectedClass, selectedStream, searchTerm, school]);
 
   const stats = React.useMemo(() => {
     if (!reports.length) return { avg: '0%', top: 'N/A', ranked: 0 };
@@ -120,7 +127,7 @@ export default function ReportsPage() {
       term: parseInt(selectedTerm),
       class_obj: (selectedClass && selectedClass !== 'all') ? parseInt(selectedClass) : undefined,
       stream: (selectedStream && selectedStream !== 'all') ? parseInt(selectedStream) : undefined,
-      school: undefined, // Can be added if school context is available
+      school: school?.id ? Number(school.id) : undefined,
     });
 
     if (res.success) {
@@ -133,6 +140,7 @@ export default function ReportsPage() {
   };
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_REPORTS}>
     <MainLayout
       title="Student Reports"
       description="Calculations: AOIs (20%) + Final Exam (80%). Each activity is shown in detail."
@@ -255,5 +263,6 @@ export default function ReportsPage() {
         </Table>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

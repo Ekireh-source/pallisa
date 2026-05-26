@@ -34,6 +34,9 @@ import {
 } from '@/components/ui';
 import { FetchActivityById, FetchActivityStudentScores, SaveBulkActivityScores } from '@/features/exam/exam.service';
 import { toast } from 'sonner';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -164,45 +167,46 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 p-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200"
-            onClick={() => router.push('/activity-of-integration')}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">{activity?.topic_name}</h1>
-              <Badge className="rounded-full bg-primary text-white border-none">
-                Integration Activity
-              </Badge>
-            </div>
-            <div className="flex items-center gap-4 mt-1 text-gray-500 text-sm">
-              <span className="flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4" />
-                {activity?.subject_name}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Trophy className="w-4 h-4" />
-                Max Score: {activity?.max_score}
-              </span>
-            </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
+    <MainLayout
+      title={
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">{activity?.topic_name}</h1>
+            <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 rounded-full">
+              Integration Activity
+            </Badge>
+          </div>
+          <div className="flex items-center gap-4 mt-1.5 text-white/70 text-sm font-semibold">
+            <span className="flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4" />
+              {activity?.subject_name}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Trophy className="w-4 h-4" />
+              Max Score: {activity?.max_score}
+            </span>
           </div>
         </div>
-        
+      }
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.push('/activity-of-integration')}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl h-11" onClick={() => router.push(`/activity-of-integration/${id}/edit`)}>
+          <Button variant="outline" className="rounded-xl h-11 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => router.push(`/activity-of-integration/${id}/edit`)}>
             <Edit2 className="w-4 h-4 mr-2" />
             Edit Activity
           </Button>
           <Button 
-            className="rounded-xl h-11 bg-primary hover:bg-primary/90 text-white"
+            className="rounded-xl h-11 bg-white text-primary font-bold hover:bg-gray-100 px-5 shadow-sm border border-transparent"
             onClick={handleSaveAll}
             disabled={saving}
           >
@@ -210,7 +214,9 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
             Save All Scores
           </Button>
         </div>
-      </div>
+      }
+    >
+      <div className="space-y-8 animate-in fade-in duration-500 mt-[24px]">
 
       {/* Filters & Bulk Tools */}
       <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/30">
@@ -325,6 +331,8 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
           </Table>
         </div>
       </Card>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

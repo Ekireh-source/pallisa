@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const CompetencyAreaSchema = z.object({
   topic: z.number().optional().nullable(),
+  class_obj: z.number().optional().nullable(),
+  term: z.number().optional().nullable(),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().nullable(),
 });
@@ -52,6 +54,10 @@ export const CompetencyAreaListSchema = z.object({
   name: z.string(),
   topic: z.number().optional().nullable(),
   topic_name: z.string().optional().nullable(),
+  class_obj: z.number().optional().nullable(),
+  class_name: z.string().optional().nullable(),
+  term: z.number().optional().nullable(),
+  term_name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
 });
 

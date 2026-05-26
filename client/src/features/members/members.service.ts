@@ -336,6 +336,24 @@ export const BulkUploadStudents = async (data: { students: any[] }) => {
   }
 };
 
+export const ValidateBulkStudents = async (data: { students: any[] }) => {
+  try {
+    const res = await api.post(`/members/students/bulk-validate/`, data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const BulkUploadStudentsAsync = async (data: { students: any[] }) => {
+  try {
+    const res = await api.post(`/members/students/bulk-upload-async/`, data);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
 export const BulkUploadTeachers = async (data: { teachers: any[] }) => {
   try {
     const res = await api.post(`/members/teachers/bulk-upload/`, data);
@@ -376,6 +394,15 @@ export const UpdateSubjectPaper = async (id: number | string, data: any) => {
 export const DeleteSubjectPaper = async (id: number | string) => {
   try {
     const res = await api.delete(`/members/subject-papers/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const CreateTeacherSubjectAssignment = async (data: any) => {
+  try {
+    const res = await api.post(`/members/teacher-subject-assignments/`, data);
     return { success: true, data: res.data };
   } catch (error) {
     return { success: false, error };

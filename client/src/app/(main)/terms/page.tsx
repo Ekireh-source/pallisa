@@ -28,6 +28,9 @@ import { getPaginatedFromUrl } from '@/lib/utils';
 import { Icon } from '@iconify/react';
 import { ITermListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function TermsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,7 +43,7 @@ export default function TermsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -160,16 +163,18 @@ export default function TermsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_TERMS}>
     <MainLayout
       title="Academic Terms"
       description="Manage semesters and school terms within academic years."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/terms/create">
-            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span>Add Term</span>
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Term",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/terms/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -208,5 +213,6 @@ export default function TermsListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

@@ -31,6 +31,8 @@ class CompetencyArea(models.Model):
     Represents a broader area of competency within a subject.
     """
     topic = models.ForeignKey(Topics, on_delete=models.CASCADE, related_name='competency_areas', null=True, blank=True)
+    class_obj = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='competency_areas', null=True, blank=True)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='competency_areas', null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

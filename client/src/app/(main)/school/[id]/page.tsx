@@ -11,6 +11,7 @@ import { Button, Card, Badge, Skeleton } from '@/components/ui';
 import { FetchSchoolById } from '@/features/school/school.service';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { MainLayout } from '@/components/layout/main-layout';
 
 interface SchoolDetail {
   id: number;
@@ -73,7 +74,7 @@ export default function SchoolDetailPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="w-full space-y-8">
         <div className="flex items-center gap-4"><Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-8 w-64" /></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
@@ -91,22 +92,21 @@ export default function SchoolDetailPage({ params }: { params: Promise<{ id: str
   const primaryColor = school.report_primary_color || '#185FA5';
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" className="h-10 w-10 p-0 rounded-full border-gray-200" onClick={() => router.back()}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{school.name}</h1>
-            <p className="text-gray-400 text-sm mt-0.5 font-mono">ID: {school.public_id?.slice(0, 16)}…</p>
-          </div>
-        </div>
-        <Button asChild className="rounded-xl h-10 gap-2 shadow-sm">
+    <MainLayout
+      title={school.name}
+      description={`ID: ${school.public_id?.slice(0, 16)}…`}
+      backButton={
+        <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2" onClick={() => router.back()}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <Button asChild className="rounded-xl h-11 gap-2 shadow-sm border border-transparent bg-white text-primary hover:bg-gray-100 font-bold px-6">
           <Link href={`/school/${id}/edit`}><Edit2 className="w-4 h-4" /> Edit School</Link>
         </Button>
-      </div>
+      }
+    >
+      <div className="w-full p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-500 mt-[24px]">
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left — main info */}
@@ -269,6 +269,7 @@ export default function SchoolDetailPage({ params }: { params: Promise<{ id: str
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

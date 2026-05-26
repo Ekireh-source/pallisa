@@ -16,11 +16,19 @@ import {
   Input, 
   Label, 
   ErrorMessage,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from '@/components/ui';
 import { CreateGradingSystem } from '@/features/reports/reports.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { useAppSelector } from '@/store';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateGradingSystemPage() {
   const router = useRouter();
@@ -36,6 +44,7 @@ export default function CreateGradingSystemPage() {
   } = useForm({
     defaultValues: {
       name: '',
+      level: 'O-Level',
       description: '',
       is_active: true,
     }
@@ -57,24 +66,22 @@ export default function CreateGradingSystemPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">New Grading System</h1>
-            <p className="text-gray-500 mt-1">Initialize a new grading scale (e.g. O Level Grades).</p>
-          </div>
-        </div>
-      </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_GRADING}>
+    <MainLayout
+      title="Create Grading System"
+      description="Define a new grading scale for student assessments."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -84,27 +91,47 @@ export default function CreateGradingSystemPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Layers className="w-4 h-4 mr-2 text-indigo-500" />
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
                     System Name
                   </Label>
                   <Input 
                     id="name"
                     placeholder="e.g., O Level Grades" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-indigo-500 ${errors.name ? 'border-red-500' : ''}`}
+                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name', { required: 'System name is required' })}
                   />
                   {errors.name && <ErrorMessage message={errors.name.message as string} />}
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="level" className="text-sm font-semibold text-gray-700 flex items-center">
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
+                    Level
+                  </Label>
+                  <Select
+                    value={watch('level')}
+                    onValueChange={(val) => setValue('level', val)}
+                  >
+                    <SelectTrigger className={`h-12 w-full rounded-xl border-gray-200 focus:ring-primary bg-white ${errors.level ? 'border-red-500' : ''}`}>
+                      <SelectValue placeholder="Select Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="O-Level">O-Level</SelectItem>
+                      <SelectItem value="A-Level">A-Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.level && <ErrorMessage message={errors.level.message as string} />}
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <Layers className="w-4 h-4 mr-2 text-indigo-500" />
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
                     Description (Optional)
                   </Label>
                   <Input 
                     id="description"
                     placeholder="e.g., Used for S.1 to S.4" 
-                    className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500"
+                    className="h-12 rounded-xl border-gray-200 focus:ring-primary"
                     {...register('description')}
                   />
                 </div>
@@ -116,7 +143,7 @@ export default function CreateGradingSystemPage() {
           <div className="space-y-6">
             <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <ToggleLeft className="w-5 h-5 mr-2 text-indigo-500" />
+                <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                 Settings
               </h3>
               
@@ -159,6 +186,8 @@ export default function CreateGradingSystemPage() {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

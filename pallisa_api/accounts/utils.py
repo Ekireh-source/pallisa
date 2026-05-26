@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.crypto import get_random_string
 from accounts.models import CustomUser
+from accounts.tasks.emails import send_html_email_task
 
 def generate_password(length=8):
     """
@@ -12,7 +13,7 @@ def generate_password(length=8):
 
 def send_html_email(subject, template_name, context, recipient_list):
     """
-    Generic function to send HTML emails
+    Generic function to send HTML emails (Synchronous fallback)
     """
     try:
         html_message = render_to_string(template_name, context)
@@ -47,7 +48,8 @@ def send_verification_email(user: CustomUser, otp):
         'otp': otp,
     }
     
-    return send_html_email(subject, 'emails/otp_verification.html', context, [user.email])
+    send_html_email_task.delay(subject, 'emails/otp_verification.html', context, [user.email])
+    return True
 
 def send_login_credentials(user, password, role_name=None):
     """
@@ -75,4 +77,5 @@ def send_login_credentials(user, password, role_name=None):
         'login_url': getattr(settings, 'FRONTEND_URL', 'http://localhost:3000') + '/login'
     }
     
-    return send_html_email(subject, 'emails/login_credentials.html', context, [user.email])
+    send_html_email_task.delay(subject, 'emails/login_credentials.html', context, [user.email])
+    return True

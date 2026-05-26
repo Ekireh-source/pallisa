@@ -36,6 +36,9 @@ import {
 } from '@/components/ui';
 import { FetchSaAssessmentById, FetchSaAssessmentStudentScores, SaveBulkSaAssessmentScores } from '@/features/exam/exam.service';
 import { toast } from 'sonner';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function SaAssessmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -249,50 +252,50 @@ export default function SaAssessmentDetailPage({ params }: { params: Promise<{ i
 
   return (
     <TooltipProvider>
-      <div className="space-y-8 animate-in fade-in duration-500 p-8">
-        
-        {/* Top Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-10 w-10 p-0 rounded-full border-gray-200"
-              onClick={() => router.push('/exams/sa-assessment')}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{assessment?.subject_name}</h1>
-                <Badge className="bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-none font-bold rounded-full px-3 py-1 flex items-center gap-1">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>SA Assessment Detail</span>
-                </Badge>
-              </div>
-              <div className="flex items-center gap-4 mt-1.5 text-gray-500 text-sm font-semibold">
-                <span className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-indigo-500" />
-                  Stream: {assessment?.stream_name}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4 text-primary" />
-                  Term: {assessment?.term_name}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Percent className="w-4 h-4 text-emerald-500" />
-                  Total Box: {parseFloat(assessment?.total_box).toFixed(2)}
-                </span>
-              </div>
+      <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
+    <MainLayout
+        title={
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">{assessment?.subject_name}</h1>
+              <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 font-bold rounded-full px-3 py-1 flex items-center gap-1">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>SA Assessment Detail</span>
+              </Badge>
+            </div>
+            <div className="flex items-center gap-4 mt-1.5 text-white/70 text-sm font-semibold">
+              <span className="flex items-center gap-1.5">
+                <Users className="w-4 h-4" />
+                Stream: {assessment?.stream_name}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4" />
+                Term: {assessment?.term_name}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Percent className="w-4 h-4" />
+                Total Box: {parseFloat(assessment?.total_box).toFixed(2)}
+              </span>
             </div>
           </div>
-          
+        }
+        backButton={
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+            onClick={() => router.push('/exams/sa-assessment')}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+        }
+        headerActions={
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-xl h-11" onClick={() => router.push(`/exams/sa-assessment/${id}/edit`)}>
+            <Button variant="outline" className="rounded-xl h-11 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => router.push(`/exams/sa-assessment/${id}/edit`)}>
               Edit Settings
             </Button>
             <Button 
-              className="rounded-xl h-11 bg-primary font-semibold transition-all active:scale-95 px-5"
+              className="rounded-xl h-11 bg-white text-primary font-bold hover:bg-gray-100 px-5 shadow-sm border border-transparent"
               onClick={handleSaveAll}
               disabled={saving}
             >
@@ -300,7 +303,9 @@ export default function SaAssessmentDetailPage({ params }: { params: Promise<{ i
               Save SA Matrix
             </Button>
           </div>
-        </div>
+        }
+      >
+        <div className="space-y-8 animate-in fade-in duration-500 mt-[24px]">
 
         {/* Global Settings & Filter Configuration */}
         <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/40">
@@ -450,7 +455,9 @@ export default function SaAssessmentDetailPage({ params }: { params: Promise<{ i
             </Table>
           </div>
         </Card>
-      </div>
+        </div>
+      </MainLayout>
+    </ProtectedComponent>
     </TooltipProvider>
   );
 }

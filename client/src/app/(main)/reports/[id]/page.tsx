@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
-import { Printer, ArrowLeft, Settings2 } from 'lucide-react';
-import { Button, Skeleton } from '@/components/ui';
-import { FetchReportCardById, FetchReportCardSettings, FetchGradingSystems } from '@/features/reports/reports.service';
+import { Printer, ArrowLeft, Settings2, FileDown, MoreVertical } from 'lucide-react';
+import { Button, Skeleton, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui';
+import { FetchReportCardById, FetchReportCardSettings, FetchGradingSystems, DownloadReportCardPdf } from '@/features/reports/reports.service';
 import { ReportCard, ReportCardSettings } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -13,6 +13,9 @@ import { setSchool } from '@/store/auth/actions';
 import { ReportCardSettingsPanel } from '@/components/report-card/ReportCardSettingsPanel';
 import { OLevelReportCard } from '@/components/report-card/OLevelReportCard';
 import { ALevelReportCard } from '@/components/report-card/ALevelReportCard';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 // ─── types ────────────────────────────────────────────────────────────────────
 interface GradeBoundary {
@@ -70,6 +73,7 @@ export default function ReportCardDetailPage({ params }: PageProps) {
   const [cfg,           setCfg]           = useState<ReportCardSettings | null>(null);
   const [gradingSystem, setGradingSystem] = useState<GradingSystem | null>(null);
   const [saving,        setSaving]        = useState(false);
+  const [generating,    setGenerating]    = useState(false);
 
   const [primaryColor, setPrimaryColor] = useState(school?.report_primary_color || '#185FA5');
   const [accentColor,  setAccentColor]  = useState(school?.report_accent_color  || '#4f46e5');
@@ -124,7 +128,7 @@ export default function ReportCardDetailPage({ params }: PageProps) {
 
   // ── loading skeleton ─────────────────────────────────────────────────────────
   if (loading) return (
-    <div className="max-w-4xl mx-auto space-y-6 p-8">
+    <div className="w-full space-y-6 p-8">
       <Skeleton className="h-10 w-48 rounded-2xl" />
       <Skeleton className="h-[600px] w-full rounded-xl" />
     </div>
@@ -143,61 +147,88 @@ export default function ReportCardDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-12">
-
-      {/* ── Action Bar (screen only) ── */}
-      <div className="print:hidden flex items-center justify-between mb-6 flex-wrap gap-4">
-        <Button variant="ghost" className="gap-2 rounded-2xl" onClick={() => router.back()}>
-          <ArrowLeft className="w-4 h-4" /> Back
-        </Button>
-
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* colour pickers */}
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-2xl border border-gray-200 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-gray-400">Header</span>
-            <input
-              type="color"
-              value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              className="w-6 h-6 rounded-md cursor-pointer border-none p-0 bg-transparent"
-            />
-          </div>
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-2xl border border-gray-200 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-gray-400">Accent</span>
-            <input
-              type="color"
-              value={accentColor}
-              onChange={(e) => setAccentColor(e.target.value)}
-              className="w-6 h-6 rounded-md cursor-pointer border-none p-0 bg-transparent"
-            />
-          </div>
-
-          <Button
-            variant="outline" size="sm"
-            onClick={handleSaveColors} disabled={saving}
-            className="rounded-2xl h-8 text-[10px] font-black uppercase tracking-widest border-dashed"
-          >
-            {saving ? 'Saving…' : 'Save Colors'}
-          </Button>
-
-          <Button
-            variant="outline" size="sm"
-            onClick={() => setSettingsOpen(true)}
-            className="rounded-2xl h-8 gap-1.5"
-          >
-            <Settings2 className="w-3.5 h-3.5" /> Printout Settings
-          </Button>
-
-          {/* Level badge */}
-          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isALevel ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_REPORTS}>
+    <MainLayout
+      title={
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Report Card Printout</h1>
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isALevel ? 'bg-indigo-400/20 text-indigo-100 border border-indigo-400/30' : 'bg-emerald-400/20 text-emerald-100 border border-emerald-400/30'}`}>
             {isALevel ? 'A-Level' : 'O-Level'}
           </span>
-
-          <Button onClick={() => window.print()} className="gap-2 rounded-2xl shadow-lg shadow-primary/20">
-            <Printer className="w-4 h-4" /> Print
-          </Button>
         </div>
-      </div>
+      }
+      description="Adjust settings and colors before printing the student's report card."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/20">
+              <MoreVertical className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl">
+            <div className="flex items-center justify-between mb-2 px-2 py-1">
+               <span className="text-xs font-bold text-gray-500 uppercase">Primary Color</span>
+               <input 
+                 type="color" 
+                 value={primaryColor} 
+                 onChange={(e) => setPrimaryColor(e.target.value)} 
+                 className="w-6 h-6 rounded cursor-pointer border-none p-0 bg-transparent" 
+               />
+            </div>
+            <div className="flex items-center justify-between mb-2 px-2 py-1">
+               <span className="text-xs font-bold text-gray-500 uppercase">Accent Color</span>
+               <input 
+                 type="color" 
+                 value={accentColor} 
+                 onChange={(e) => setAccentColor(e.target.value)} 
+                 className="w-6 h-6 rounded cursor-pointer border-none p-0 bg-transparent" 
+               />
+            </div>
+            <div className="px-2 pb-2">
+              <Button onClick={handleSaveColors} disabled={saving} size="sm" className="w-full text-xs h-8 rounded-xl font-bold bg-primary/10 text-primary hover:bg-primary/20">
+                {saving ? 'Saving…' : 'Save Colors'}
+              </Button>
+            </div>
+            
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuItem asChild>
+              <Button variant="ghost" onClick={() => setSettingsOpen(true)} className="w-full justify-start h-9 rounded-xl cursor-pointer">
+                <Settings2 className="w-4 h-4 mr-2 text-gray-500" /> Printout Settings
+              </Button>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem asChild>
+              <Button 
+                variant="ghost"
+                onClick={async () => {
+                  setGenerating(true);
+                  const res = await DownloadReportCardPdf(id);
+                  if (!res.success) toast.error('Failed to generate PDF');
+                  setGenerating(false);
+                }} 
+                disabled={generating}
+                className="w-full justify-start h-9 rounded-xl mt-1 text-primary font-bold cursor-pointer"
+              >
+                <FileDown className={`w-4 h-4 mr-2 ${generating ? 'animate-bounce' : ''}`} /> 
+                {generating ? 'Generating...' : 'Generate PDF'}
+              </Button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      }
+    >
+      <div className="w-full pb-12 mt-[24px]">
 
       <ReportCardSettingsPanel
         open={settingsOpen}
@@ -210,6 +241,8 @@ export default function ReportCardDetailPage({ params }: PageProps) {
         ? <ALevelReportCard {...cardProps} />
         : <OLevelReportCard {...cardProps} />
       }
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

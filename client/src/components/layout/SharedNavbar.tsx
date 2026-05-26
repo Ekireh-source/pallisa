@@ -60,19 +60,26 @@ export function SharedNavbar({
   const displayEmail = user?.email || userEmail;
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-100 bg-white px-4">
+    <header className="sticky top-0 z-50 flex h-[52px] md:h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-gray-100 bg-white px-4">
       <div className="flex items-center gap-2">
-        {/* Sidebar toggle button (Mobile & Desktop) */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mobile-menu-button"
-          onClick={toggleSidebar}
-        >
-          <Menu className="h-5 w-5 text-gray-600" />
-          <span className="sr-only">Toggle sidebar</span>
-        </Button>
-        <h1 className="text-lg font-semibold text-gray-900 ml-2">Report Card System</h1>
+        {/* Mobile Logo */}
+        <div className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+          <span className="font-bold text-sm">P</span>
+        </div>
+        
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mobile-menu-button"
+            onClick={toggleSidebar}
+          >
+            <Menu className="h-5 w-5 text-gray-600" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
+        )}
+        
+        <h1 className="text-base md:text-lg font-semibold text-gray-900 ml-2">Caskool</h1>
       </div>
       
       <div className="flex items-center gap-4">

@@ -26,6 +26,8 @@ urlpatterns = [
     # Students URLs
     path('students/', views.StudentListCreateView.as_view(), name='student-list'),
     path('students/bulk-upload/', views.BulkStudentUploadView.as_view(), name='student-bulk-upload'),
+    path('students/bulk-validate/', views.BulkStudentValidateView.as_view(), name='student-bulk-validate'),
+    path('students/bulk-upload-async/', views.BulkStudentUploadAsyncView.as_view(), name='student-bulk-upload-async'),
     path('students/<int:pk>/', views.StudentDetailView.as_view(), name='student-detail'),
     path('students/<int:pk>/parents/', views.StudentParentsView.as_view(), name='student-parents'),
     path('students/<int:pk>/history/', views.StudentHistoryView.as_view(), name='student-history'),

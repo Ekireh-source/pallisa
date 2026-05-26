@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
+import Link from "next/link";
 
 
 import { Button } from "@/components/ui/button";
@@ -44,40 +45,59 @@ export const NavItemComponent = ({
     const [isTooltipVisible, setIsTooltipVisible] = useState(false);
     // const isSideBarOpen = useSelector(selectSideBarOpened);
     const isMobile = useIsMobile();
-    const router = useRouter();
 
     return (
         <div key={`${item.title}-${index}`} className="w-full py-1 relative">
-            <Button
-                disabled={!item.href || (item.href.startsWith("#") && !item.submenu?.length)}
-                variant="ghost"
-                className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-gray-600 hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
-                    } ${isSideBarOpen ? "justify-between " : "justify-center "}`}
-                onMouseEnter={() => {
-                    if (!isSideBarOpen && !isMobile) setIsTooltipVisible(true);
-                }}
-                onMouseLeave={() => setIsTooltipVisible(false)}
-                onClick={() => {
-                    if (!isSideBarOpen) onToggle();
-                    if (item.submenu) {
+            {item.submenu ? (
+                <Button
+                    disabled={!item.href || (item.href.startsWith("#") && !item.submenu?.length)}
+                    variant="ghost"
+                    className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-gray-600 hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
+                        } ${isSideBarOpen ? "justify-between " : "justify-center "}`}
+                    onMouseEnter={() => {
+                        if (!isSideBarOpen && !isMobile) setIsTooltipVisible(true);
+                    }}
+                    onMouseLeave={() => setIsTooltipVisible(false)}
+                    onClick={() => {
+                        if (!isSideBarOpen) onToggle();
                         onExpand(item.title);
-                    } else {
-                        router.push(item.href);
-                    }
-                }}
-            >
-                <div className="flex items-center space-x-2 relative line-clamp-1 max-w-full">
-                    {item.icon}
-                    {isSideBarOpen ? <span className="truncate">{item.title}</span> : null}
-                </div>
-                {isSideBarOpen && item.submenu ? (
-                    isExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
-                    ) : (
-                        <ChevronRight className="h-4 w-4" />
-                    )
-                ) : null}
-            </Button>
+                    }}
+                >
+                    <div className="flex items-center space-x-2 relative line-clamp-1 max-w-full">
+                        {item.icon}
+                        {isSideBarOpen ? <span className="truncate">{item.title}</span> : null}
+                    </div>
+                    {isSideBarOpen ? (
+                        isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                        ) : (
+                            <ChevronRight className="h-4 w-4" />
+                        )
+                    ) : null}
+                </Button>
+            ) : (
+                <Button
+                    asChild
+                    disabled={!item.href || (item.href.startsWith("#") && !item.submenu?.length)}
+                    variant="ghost"
+                    className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-gray-600 hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
+                        } ${isSideBarOpen ? "justify-between " : "justify-center "}`}
+                    onMouseEnter={() => {
+                        if (!isSideBarOpen && !isMobile) setIsTooltipVisible(true);
+                    }}
+                    onMouseLeave={() => setIsTooltipVisible(false)}
+                    onClick={() => {
+                        if (!isSideBarOpen && isMobile) setTimeout(() => onToggle(), 10);
+                    }}
+                >
+                    <Link href={item.href}>
+                        <div className="flex items-center space-x-2 relative line-clamp-1 max-w-full">
+                            {item.icon}
+                            {isSideBarOpen ? <span className="truncate">{item.title}</span> : null}
+                        </div>
+                    </Link>
+                </Button>
+            )}
 
             {/* Render Tooltip when collapsed */}
             {isTooltipVisible && !isSideBarOpen && !isMobileView && (
@@ -95,17 +115,19 @@ export const NavItemComponent = ({
                         const isSubActive = pathname === sub.href;
                         return (
                             <Button
+                                asChild
                                 key={`${sub.title}-${idx}`}
                                 variant="ghost"
                                 className={`w-full rounded-lg flex items-center justify-start px-3 py-2 text-xs text-gray-500 hover:bg-primary/5 hover:text-primary transition-all duration-200 ${
                                     isSubActive ? "bg-primary/5 text-primary font-bold" : ""
                                 }`}
                                 onClick={() => {
-                                    if (isMobile) onToggle();
-                                    router.push(sub.href);
+                                    if (isMobile) setTimeout(() => onToggle(), 10);
                                 }}
                             >
-                                <span className="truncate">{sub.title}</span>
+                                <Link href={sub.href}>
+                                    <span className="truncate">{sub.title}</span>
+                                </Link>
                             </Button>
                         );
                     })}

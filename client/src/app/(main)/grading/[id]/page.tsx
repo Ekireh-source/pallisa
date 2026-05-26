@@ -26,6 +26,9 @@ import { FetchGradingSystemById } from '@/features/reports/reports.service';
 import { toast } from 'sonner';
 import { GradingSystem } from '@/types';
 import Link from 'next/link';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function GradingSystemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -58,30 +61,30 @@ export default function GradingSystemDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{system.name}</h1>
-            <p className="text-gray-500 mt-1">Grading system details and boundaries.</p>
-          </div>
-        </div>
-        <Button className="shadow-lg shadow-primary/20 rounded-xl h-11 bg-primary hover:bg-primary/90" asChild>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
+    <MainLayout
+      title={system.name}
+      description="Grading system details and boundaries."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+      headerActions={
+        <Button className="shadow-sm border border-transparent rounded-xl h-11 bg-white text-primary hover:bg-gray-100 font-bold px-6" asChild>
           <Link href={`/grading/${system.id}/edit`}>
             <Edit2 className="w-4 h-4 mr-2" />
             Edit System
           </Link>
         </Button>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Main Details Area */}
@@ -105,13 +108,12 @@ export default function GradingSystemDetailPage({ params }: { params: Promise<{ 
                     <TableHead>Grade</TableHead>
                     <TableHead>Score Range</TableHead>
                     <TableHead>Remarks</TableHead>
-                    <TableHead>Points</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {system.boundaries?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={3} className="text-center py-8 text-gray-500">
                         No grades defined for this system.
                       </TableCell>
                     </TableRow>
@@ -128,11 +130,6 @@ export default function GradingSystemDetailPage({ params }: { params: Promise<{ 
                         </TableCell>
                         <TableCell className="text-gray-600">
                           {boundary.remarks || '--'}
-                        </TableCell>
-                        <TableCell>
-                          {boundary.points !== null ? (
-                            <span className="font-semibold text-gray-900">{boundary.points}</span>
-                          ) : '--'}
                         </TableCell>
                       </TableRow>
                     ))
@@ -159,6 +156,13 @@ export default function GradingSystemDetailPage({ params }: { params: Promise<{ 
                 </p>
               </div>
 
+              <div className="space-y-1">
+                <Label className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Level</Label>
+                <p className="text-sm text-gray-900">
+                  {system.level || 'O-Level'}
+                </p>
+              </div>
+
               <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
                 <div className="space-y-0.5">
                   <Label className="text-sm font-semibold text-gray-900">Active Status</Label>
@@ -174,6 +178,8 @@ export default function GradingSystemDetailPage({ params }: { params: Promise<{ 
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

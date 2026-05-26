@@ -29,7 +29,7 @@ from .serializers import (
     SalaryPeriodSerializer, SalaryAllowanceSerializer, SalaryDeductionSerializer,
     SalaryPaymentSerializer, SalaryPaymentCreateUpdateSerializer, SalarySummarySerializer
 )
-from accounts.permission import HasPermission
+from accounts.permission import HasPermission, filter_by_school
 from .utils import safe_delete_with_relations, create_error_response
 
 
@@ -178,6 +178,7 @@ class ClassListCreateView(APIView):
 
         # Build queryset with optimizations
         queryset = Class.objects.select_related('campus').order_by('name')
+        queryset = filter_by_school(queryset, request, school_field_path='campus__schools')
         
         # Apply filters
         if campus_id:
@@ -222,9 +223,11 @@ class ClassDetailView(APIView):
     """Retrieve, update or delete a class level"""
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
+    def get_object(self, pk, request):
         """Get class object or return 404"""
-        return get_object_or_404(Class, pk=pk)
+        queryset = Class.objects.all()
+        queryset = filter_by_school(queryset, request, school_field_path='campus__school')
+        return get_object_or_404(queryset, pk=pk)
 
     @extend_schema(
         summary="Retrieve a class level",
@@ -233,7 +236,7 @@ class ClassDetailView(APIView):
     )
     def get(self, request, pk):
         """Get details of a specific class level"""
-        class_obj = self.get_object(pk)
+        class_obj = self.get_object(pk, request)
         serializer = ClassSerializer(class_obj, context={'request': request})
         return Response(serializer.data)
 
@@ -245,7 +248,7 @@ class ClassDetailView(APIView):
     )
     def put(self, request, pk):
         """Update a class level"""
-        class_obj = self.get_object(pk)
+        class_obj = self.get_object(pk, request)
         serializer = ClassSerializer(class_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -259,7 +262,7 @@ class ClassDetailView(APIView):
     )
     def delete(self, request, pk):
         """Soft delete a class level by setting is_active to False"""
-        class_obj = self.get_object(pk)
+        class_obj = self.get_object(pk, request)
         class_obj.is_active = False
         class_obj.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -313,10 +316,7 @@ class SubjectListCreateView(APIView):
 
         # Build queryset with optimizations
         queryset = Subject.objects.select_related('school').order_by('code')
-        
-        # Apply filters
-        if school_id:
-            queryset = queryset.filter(school_id=school_id)
+        queryset = filter_by_school(queryset, request)
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search) | 
@@ -357,9 +357,11 @@ class SubjectDetailView(APIView):
     """Retrieve, update or delete a subject"""
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
+    def get_object(self, pk, request):
         """Get subject object or return 404"""
-        return get_object_or_404(Subject.objects.select_related('school'), pk=pk)
+        queryset = Subject.objects.select_related('school')
+        queryset = filter_by_school(queryset, request)
+        return get_object_or_404(queryset, pk=pk)
 
     @extend_schema(
         summary="Retrieve a subject",
@@ -368,7 +370,7 @@ class SubjectDetailView(APIView):
     )
     def get(self, request, pk):
         """Get details of a specific subject"""
-        subject = self.get_object(pk)
+        subject = self.get_object(pk, request)
         serializer = SubjectSerializer(subject, context={'request': request})
         return Response(serializer.data)
 
@@ -380,7 +382,7 @@ class SubjectDetailView(APIView):
     )
     def put(self, request, pk):
         """Update a subject"""
-        subject = self.get_object(pk)
+        subject = self.get_object(pk, request)
         serializer = SubjectSerializer(subject, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -541,7 +543,17 @@ class StreamListCreateView(APIView):
             'class_obj', 'class_teacher__user_profile'
         ).prefetch_related('students').order_by('class_obj__name', 'name')
         
-        # Apply filters
+        # Apply school filter
+        queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
+        
+        # Apply other filters
+        is_active = request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        else:
+            # Default to active streams if no filter specified
+            queryset = queryset.filter(is_active=True)
+
         if class_id:
             queryset = queryset.filter(class_obj_id=class_id)
         if search:
@@ -584,7 +596,7 @@ class StreamDetailView(APIView):
         """Get stream object or return 404"""
         return get_object_or_404(
             Stream.objects.select_related(
-                'class_obj', 'class_teacher__user_profile'
+            'class_obj', 'class_teacher__user_profile'
             ).prefetch_related('students', 'subject_assignments'),
             pk=pk
         )
@@ -715,6 +727,7 @@ class StudentListCreateView(APIView):
         ).prefetch_related('parent_student_relationships__parent__user_profile').order_by('student_id')
         
         # Apply filters
+        queryset = filter_by_school(queryset, request, school_field_path='campus__schools')
         if not include_inactive:
             queryset = queryset.filter(is_active=True)
         if campus_id:
@@ -728,6 +741,7 @@ class StudentListCreateView(APIView):
         if search:
             queryset = queryset.filter(
                 Q(student_id__icontains=search) |
+                Q(lin__icontains=search) |
                 Q(user_profile__first_name__icontains=search) |
                 Q(user_profile__last_name__icontains=search) |
                 Q(admission_number__icontains=search)
@@ -814,11 +828,11 @@ class StudentDetailView(APIView):
         """Get student object or return 404"""
         return get_object_or_404(
             Student.objects.select_related(
-                'user_profile__user', 'current_stream__class_obj'
-            ).prefetch_related(
-                'parent_student_relationships__parent__user_profile',
-                'stream_history__stream__class_obj',
-                'stream_history__academic_year'
+            'user_profile__user', 'current_stream__class_obj'
+        ).prefetch_related(
+            'parent_student_relationships__parent__user_profile',
+            'stream_history__stream__class_obj',
+            'stream_history__academic_year'
             ),
             pk=pk
         )
@@ -1144,6 +1158,126 @@ class BulkStudentUploadView(APIView):
                 'created_count': len(created_students),
                 'failed_count': len(errors)
             }, status=status.HTTP_400_BAD_REQUEST)
+            
+        return Response({
+            'message': f'Successfully created {len(created_students)} students',
+            'created_count': len(created_students),
+            'failed_count': len(errors)
+        }, status=status.HTTP_201_CREATED)
+
+class BulkStudentValidateView(APIView):
+    """Validate bulk student upload for duplicates"""
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        summary="Validate bulk students upload",
+        request={"type": "object", "properties": {"students": {"type": "array", "items": {"type": "object"}}}},
+        responses={200: {"type": "object"}},
+        tags=["Students"]
+    )
+    def post(self, request):
+        students_data = request.data.get('students', [])
+        if not students_data:
+            return Response({'error': 'students list is required'}, status=400)
+            
+        duplicates = []
+        field_errors = []
+        valid_students = []
+        
+        from accounts.models import CustomUser
+        from members.models import Student
+        from members.serializers import StudentSerializer
+        
+        for idx, student in enumerate(students_data):
+            email = student.get('user_email')
+            phone = student.get('user_phone')
+            first_name = student.get('user_first_name')
+            last_name = student.get('user_last_name')
+            
+            is_valid = True
+            
+            # 1. Check with Serializer
+            serializer = StudentSerializer(data=student)
+            if not serializer.is_valid():
+                is_valid = False
+                field_errors.append({
+                    'index': idx,
+                    'first_name': first_name or '',
+                    'last_name': last_name or '',
+                    'errors': serializer.errors
+                })
+            
+            # 2. Check for Duplicates
+            is_duplicate = False
+            reasons = []
+            
+            if email and CustomUser.objects.filter(email=email).exists():
+                is_duplicate = True
+                reasons.append(f"Email {email} already exists")
+                
+            if phone and CustomUser.objects.filter(profile__phone=phone).exists():
+                is_duplicate = True
+                reasons.append(f"Phone {phone} already exists")
+                
+            if first_name and last_name and Student.objects.filter(
+                user_profile__first_name__iexact=first_name, 
+                user_profile__last_name__iexact=last_name).exists():
+                is_duplicate = True
+                reasons.append(f"Student named {first_name} {last_name} already exists")
+                
+            if is_duplicate:
+                is_valid = False
+                duplicates.append({
+                    'index': idx,
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'reasons': reasons
+                })
+                
+            if is_valid:
+                valid_students.append(student)
+                
+        return Response({
+            'total': len(students_data),
+            'valid_count': len(valid_students),
+            'duplicate_count': len(duplicates),
+            'field_error_count': len(field_errors),
+            'duplicates': duplicates,
+            'field_errors': field_errors
+        })
+
+
+class BulkStudentUploadAsyncView(APIView):
+    """Bulk upload students asynchronously via Celery"""
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        summary="Bulk upload students asynchronously",
+        request={"type": "object", "properties": {"students": {"type": "array", "items": {"type": "object"}}}},
+        responses={202: {"type": "object"}},
+        tags=["Students"]
+    )
+    def post(self, request):
+        students_data = request.data.get('students', [])
+        if not students_data:
+            return Response({'error': 'students list is required'}, status=400)
+            
+        school_id = None
+        if students_data and 'user_role_id' in students_data[0]:
+            from accounts.models import Role
+            try:
+                role = Role.objects.get(id=students_data[0]['user_role_id'])
+                school_id = role.school_id
+            except Role.DoesNotExist:
+                pass
+                
+        from members.tasks.students import process_bulk_student_upload
+        task = process_bulk_student_upload.delay(students_data, school_id)
+        
+        return Response({
+            'message': 'Bulk upload started in the background',
+            'task_id': task.id
+        }, status=status.HTTP_202_ACCEPTED)
         
         response_serializer = StudentSerializer(created_students, many=True)
         return Response({
@@ -1176,6 +1310,7 @@ class TeacherListCreateView(APIView):
         """Get list of teachers with filtering and pagination"""
         # Get query parameters
         school_id = request.query_params.get('school_id')
+        campus_id = request.query_params.get('campus_id')
         employment_type = request.query_params.get('employment_type')
         specialization = request.query_params.get('specialization')
         search = request.query_params.get('search')
@@ -1184,12 +1319,14 @@ class TeacherListCreateView(APIView):
 
         # Build queryset with optimizations
         queryset = Teacher.objects.select_related(
-            'user_profile__user', 'user_profile__role__school'
+            'user_profile__user', 'user_profile__role__school', 'campus'
         ).prefetch_related('subject_assignments', 'primary_streams').order_by('employee_id')
         
         # Apply filters
         if school_id:
             queryset = queryset.filter(user_profile__role__school_id=school_id)
+        if campus_id:
+            queryset = queryset.filter(campus_id=campus_id)
         if employment_type:
             queryset = queryset.filter(employment_type=employment_type)
         if specialization:

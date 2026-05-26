@@ -41,6 +41,9 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { ITeacher } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function TeachersListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +58,7 @@ export default function TeachersListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const downloadTemplate = () => {
@@ -246,26 +249,25 @@ export default function TeachersListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_TEACHERS}>
     <MainLayout
       title="Teachers"
       description="Manage school faculty and academic staff."
       headerActions={
-        <div className="flex gap-2 justify-end">
-          <Button 
-            variant="outline" 
-            className="rounded-xl h-11 border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold" 
-            onClick={() => setIsUploadModalOpen(true)}
-          >
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Bulk Upload
-          </Button>
-          <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
-            <Link href="/teachers/create">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add Teacher
-            </Link>
-          </Button>
-        </div>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Teacher",
+            icon: <UserPlus className="w-4 h-4" />,
+            href: "/teachers/create",
+          }}
+          secondary={[
+            {
+              label: "Bulk Upload",
+              icon: <FileSpreadsheet className="w-4 h-4" />,
+              onClick: () => setIsUploadModalOpen(true),
+            },
+          ]}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -381,5 +383,6 @@ export default function TeachersListPage() {
         </DialogContent>
       </Dialog>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

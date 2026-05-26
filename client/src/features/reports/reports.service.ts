@@ -149,3 +149,23 @@ export const CreateOrEnsureReportCardSettings = async () => {
     return { success: false, error };
   }
 };
+
+export const DownloadReportCardPdf = async (id: number | string) => {
+  try {
+    const res = await api.get(`/reports/report-cards/${id}/generate_pdf/`, null, {}, {
+      responseType: 'blob',
+    });
+    
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `ReportCard_${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    
+    return { success: true };
+  } catch (error) {
+    return { success: false, error };
+  }
+};

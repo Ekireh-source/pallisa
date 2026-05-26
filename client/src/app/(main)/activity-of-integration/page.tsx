@@ -24,10 +24,16 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { IActivityListResponse } from '@/features/exam/exam.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function ActivitiesListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const { school } = useSelector((state: RootState) => state.auth);
   
   const tableRefreshRef = useRef<any>(null);
 
@@ -36,7 +42,7 @@ export default function ActivitiesListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: string) => {
@@ -61,8 +67,8 @@ export default function ActivitiesListPage() {
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">{act.name}</p>
-            <p className="text-xs text-gray-400">Class: {act.class_name || 'N/A'}</p>
+            <p className="text-gray-900 font-semibold">{act?.competency_area_name}</p>
+            
           </div>
         </div>
       ),
@@ -122,16 +128,18 @@ export default function ActivitiesListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
     <MainLayout
       title="Activities of Integration"
       description="Manage assessment tasks for the competency-based curriculum."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/activity-of-integration/create">
-            <Plus className="w-4 h-4 mr-2" />
-            New Activity
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New Activity",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/activity-of-integration/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -156,8 +164,8 @@ export default function ActivitiesListPage() {
             skeletonRows={5}
             className="min-h-0!"
             tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
+            query={{ search: searchTerm, school: school?.id }}
+            deps={[searchTerm, school]}
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
@@ -170,5 +178,6 @@ export default function ActivitiesListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

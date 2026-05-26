@@ -25,6 +25,8 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
@@ -33,6 +35,7 @@ import { IGradingSystemListResponse } from '@/features/reports/reports.schemas';
 
 import { Icon } from '@iconify/react';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
 
 export default function GradingSystemsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +49,7 @@ export default function GradingSystemsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -72,17 +75,17 @@ export default function GradingSystemsListPage() {
           </div>
           <div>
             <p className="text-gray-900 font-semibold">{system.name}</p>
-            <p className="text-xs text-gray-400">Class: {system.class_name || 'N/A'}</p>
+            <p className="text-xs text-gray-400">Level: {(system as any).level || 'O-Level'}</p>
           </div>
         </div>
       ),
     },
     {
-      key: "curriculum_type",
-      header: "Curriculum Type",
+      key: "level",
+      header: "Level",
       cell: (system) => (
         <Badge variant="outline" className="rounded-lg capitalize font-medium border-gray-200 bg-gray-50 text-gray-700 px-3 py-1">
-          {system.curriculum_type || 'General'}
+          {system.level}
         </Badge>
       ),
     },
@@ -142,16 +145,18 @@ export default function GradingSystemsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
     <MainLayout
       title="Grading Systems"
       description="Manage grading scales and boundaries for student report cards."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
-          <Link href="/grading/create">
-            <Plus className="w-4 h-4 mr-2" />
-            New Grading System
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New Grading System",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/grading/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -190,5 +195,6 @@ export default function GradingSystemsListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

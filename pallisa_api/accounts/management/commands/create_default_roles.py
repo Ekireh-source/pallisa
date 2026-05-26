@@ -147,6 +147,42 @@ class Command(BaseCommand):
                 'description': 'Can view system reports and analytics',
                 'category': admin_category
             },
+            {
+                'code': 'admin.view_campuses',
+                'name': 'View Campuses',
+                'description': 'Can view campuses',
+                'category': admin_category
+            },
+            {
+                'code': 'admin.manage_campuses',
+                'name': 'Manage Campuses',
+                'description': 'Can manage campuses',
+                'category': admin_category
+            },
+            {
+                'code': 'admin.view_competences',
+                'name': 'View Competences',
+                'description': 'Can view competences',
+                'category': admin_category
+            },
+            {
+                'code': 'admin.manage_competences',
+                'name': 'Manage Competences',
+                'description': 'Can manage competences',
+                'category': admin_category
+            },
+            {
+                'code': 'members.view_classes',
+                'name': 'View Classes',
+                'description': 'Can view classes',
+                'category': admin_category
+            },
+            {
+                'code': 'members.manage_classes',
+                'name': 'Manage Classes',
+                'description': 'Can manage classes',
+                'category': admin_category
+            },
             
             # Student permissions
             {

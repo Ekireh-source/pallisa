@@ -14,7 +14,10 @@ import {
 } from '@/components/ui';
 import { MainLayout } from '@/components/layout/main-layout';
 import { toast } from 'sonner';
+import { useAppSelector } from '@/store';
 import { IRole, IPermission, IPermissionCategory } from '@/features/roles/roles.schemas';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 import {
   FetchRoles,
   FetchPermissions,
@@ -117,19 +120,19 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
             </div>
           ) : assignedGrouped.map(({ cat, perms }) => (
             <div key={cat.code} className="border border-gray-100 rounded-xl overflow-hidden">
-              <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50/60">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-xs font-bold text-indigo-700">{cat.name}</span>
-                <span className="ml-auto text-[10px] text-indigo-400 font-medium">{perms.length}</span>
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary/10">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary/70" />
+                <span className="text-xs font-bold text-primary">{cat.name}</span>
+                <span className="ml-auto text-[10px] text-primary/70 font-medium">{perms.length}</span>
               </div>
               <div className="divide-y divide-gray-50">
                 {perms.map(p => (
                   <div key={p.id} className="flex items-start gap-3 px-4 py-2.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs font-semibold text-gray-800">{p.name}</p>
                       {p.description && <p className="text-[10px] text-gray-400 mt-0.5">{p.description}</p>}
-                      <p className="text-[10px] font-mono text-indigo-400 mt-0.5">{p.code}</p>
+                      <p className="text-[10px] font-mono text-gray-400 mt-0.5">{p.code}</p>
                     </div>
                   </div>
                 ))}
@@ -187,14 +190,14 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
                     <div className="divide-y divide-gray-50">
                       {perms.map(perm => (
                         <label key={perm.id}
-                          className="flex items-start gap-3 px-4 py-2.5 hover:bg-indigo-50/40 cursor-pointer transition-colors">
+                          className="flex items-start gap-3 px-4 py-2.5 hover:bg-primary/10 cursor-pointer transition-colors">
                           <input type="checkbox" checked={selected.has(perm.id!)}
                             onChange={() => toggle(perm.id!)}
                             className="mt-0.5 rounded border-gray-300 text-primary w-3.5 h-3.5 cursor-pointer" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-gray-800 leading-tight">{perm.name}</p>
                             {perm.description && <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{perm.description}</p>}
-                            <p className="text-[10px] font-mono text-indigo-400 mt-0.5">{perm.code}</p>
+                            <p className="text-[10px] font-mono text-gray-400 mt-0.5">{perm.code}</p>
                           </div>
                         </label>
                       ))}
@@ -218,6 +221,7 @@ function RoleFormDialog({ open, onClose, initial, onSaved }: {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const school = useAppSelector(state => state.auth.school);
 
   useEffect(() => {
     setName(initial?.name ?? '');
@@ -229,8 +233,8 @@ function RoleFormDialog({ open, onClose, initial, onSaved }: {
     if (!name.trim()) { setError('Role name is required'); return; }
     setLoading(true);
     const result = initial
-      ? await UpdateRole(initial.id, { name: name.trim(), description: description.trim() || undefined })
-      : await CreateRole({ name: name.trim(), description: description.trim() || undefined });
+      ? await UpdateRole(initial.id, { name: name.trim(), description: description.trim() || undefined, school: school?.id })
+      : await CreateRole({ name: name.trim(), description: description.trim() || undefined, school: school?.id });
 
     if (result.success) {
       toast.success(initial ? 'Role updated' : 'Role created');
@@ -340,6 +344,7 @@ export default function RolesPage() {
   };
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_ROLES}>
     <MainLayout
       title="Roles & Permissions"
       description="Manage roles and their access permissions."
@@ -375,19 +380,19 @@ export default function RolesPage() {
               </div>
             ) : filtered.map(role => (
               <button key={role.id} onClick={() => setSelectedRole(role)}
-                className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors hover:bg-indigo-50/40 ${selectedRole?.id === role.id ? 'bg-indigo-50 border-l-2 border-primary' : ''}`}>
-                <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${role.is_superadmin ? 'bg-amber-100 text-amber-600' : 'bg-indigo-50 text-indigo-500'}`}>
+                className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors hover:bg-primary/5 ${selectedRole?.id === role.id ? 'bg-primary/10 border-l-2 border-primary' : ''}`}>
+                <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${role.is_superadmin ? 'bg-gray-100 text-gray-600' : 'bg-primary/10 text-primary'}`}>
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="text-sm font-bold text-gray-900 truncate">{role.name}</p>
                     {role.is_superadmin && (
-                      <Badge className="text-[9px] px-1.5 py-0 bg-amber-100 text-amber-700 border-none rounded-full font-black">SUPER</Badge>
+                      <Badge className="text-[9px] px-1.5 py-0 bg-gray-100 text-gray-700 border-none rounded-full font-black">SUPER</Badge>
                     )}
                   </div>
                   <p className="text-[11px] text-gray-400 mt-0.5 truncate">{role.description || 'No description'}</p>
-                  <p className="text-[10px] font-bold text-indigo-400 mt-0.5">{role.permissions.length} permissions</p>
+                  <p className="text-[10px] font-bold text-primary/70 mt-0.5">{role.permissions.length} permissions</p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
@@ -422,15 +427,15 @@ export default function RolesPage() {
           {selectedRole ? (
             <>
               <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${selectedRole.is_superadmin ? 'bg-amber-100' : 'bg-indigo-50'}`}>
-                  <ShieldCheck className={`w-5 h-5 ${selectedRole.is_superadmin ? 'text-amber-600' : 'text-indigo-500'}`} />
+                <div className={`p-2 rounded-xl ${selectedRole.is_superadmin ? 'bg-gray-100' : 'bg-primary/10'}`}>
+                  <ShieldCheck className={`w-5 h-5 ${selectedRole.is_superadmin ? 'text-gray-600' : 'text-primary'}`} />
                 </div>
                 <div>
                   <h2 className="font-black text-gray-900 text-lg leading-none">{selectedRole.name}</h2>
                   <p className="text-xs text-gray-400 mt-0.5">{selectedRole.description || 'No description'}</p>
                 </div>
                 {selectedRole.is_superadmin && (
-                  <Badge className="ml-auto bg-amber-100 text-amber-700 border-none font-black text-xs rounded-full px-3">
+                  <Badge className="ml-auto bg-gray-100 text-gray-700 border-none font-black text-xs rounded-full px-3">
                     SuperAdmin · All permissions
                   </Badge>
                 )}
@@ -438,7 +443,7 @@ export default function RolesPage() {
               <div className="flex-1 overflow-hidden p-5">
                 {selectedRole.is_superadmin ? (
                   <div className="h-full flex flex-col items-center justify-center gap-4 text-center text-gray-400">
-                    <ShieldCheck className="w-16 h-16 text-amber-200" />
+                    <ShieldCheck className="w-16 h-16 text-gray-200" />
                     <div>
                       <p className="font-black text-gray-700 text-lg">Super Admin Role</p>
                       <p className="text-sm mt-1">This role automatically has <strong>all permissions</strong>.</p>
@@ -465,5 +470,6 @@ export default function RolesPage() {
       <RoleFormDialog open={formOpen} onClose={() => setFormOpen(false)}
         initial={editingRole} onSaved={handleRoleSaved} />
     </MainLayout>
+    </ProtectedComponent>
   );
 }

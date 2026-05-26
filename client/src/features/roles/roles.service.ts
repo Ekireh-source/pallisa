@@ -22,7 +22,7 @@ export const FetchRoleById = async (id: number | string) => {
   }
 };
 
-export const CreateRole = async (data: { name: string; description?: string }) => {
+export const CreateRole = async (data: { name: string; description?: string; school?: number }) => {
   try {
     const res = await api.post('/accounts/roles/', data);
     return { success: true, data: res.data as IRole };
@@ -31,7 +31,7 @@ export const CreateRole = async (data: { name: string; description?: string }) =
   }
 };
 
-export const UpdateRole = async (id: number | string, data: { name?: string; description?: string }) => {
+export const UpdateRole = async (id: number | string, data: { name?: string; description?: string; school?: number }) => {
   try {
     const res = await api.patch(`/accounts/roles/${id}/`, data);
     return { success: true, data: res.data as IRole };

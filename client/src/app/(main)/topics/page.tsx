@@ -30,10 +30,14 @@ import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { ITopicListResponse } from '@/features/exam/exam.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function TopicsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const { school } = useSelector((state: RootState) => state.auth);
   
   const tableRefreshRef = useRef<any>(null);
 
@@ -42,7 +46,7 @@ export default function TopicsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -84,7 +88,7 @@ export default function TopicsListPage() {
       key: "competence_name",
       header: "Competency Area",
       cell: (topic) => (
-        <span className="text-sm text-gray-500 font-medium">{topic.competence_name || 'N/A'}</span>
+        <span className="text-sm text-gray-500 font-medium">{topic.name || 'N/A'}</span>
       ),
     },
     {
@@ -132,12 +136,13 @@ export default function TopicsListPage() {
       title="Academic Topics"
       description="Manage competencies and learning outcomes across subjects."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
-          <Link href="/topics/create">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Topic
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Topic",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/topics/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -162,8 +167,8 @@ export default function TopicsListPage() {
             skeletonRows={5}
             className="min-h-0!"
             tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
+            query={{ search: searchTerm, school: school?.id }}
+            deps={[searchTerm, school]}
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">

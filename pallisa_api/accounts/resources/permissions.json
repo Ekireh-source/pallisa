@@ -12,19 +12,74 @@
           "description": "Allow access to the main administrative dashboard"
         },
         {
-          "code": "admin.manage_permissions",
-          "name": "Manage Permissions",
-          "description": "Add and remove permissions from a user"
+          "code": "admin.view_permissions",
+          "name": "View Permissions",
+          "description": "View permissions list"
         },
         {
-          "code": "admin.manage_users",
-          "name": "Manage Users",
-          "description": "Create, update, and delete user accounts"
+          "code": "admin.create_permissions",
+          "name": "Create Permissions",
+          "description": "Create new permissions"
+        },
+        {
+          "code": "admin.update_permissions",
+          "name": "Update Permissions",
+          "description": "Update existing permissions"
+        },
+        {
+          "code": "admin.delete_permissions",
+          "name": "Delete Permissions",
+          "description": "Delete permissions"
+        },
+        {
+          "code": "admin.manage_permissions",
+          "name": "Manage Permissions",
+          "description": "Full administrative control over permissions"
+        },
+        {
+          "code": "admin.view_users",
+          "name": "View Users",
+          "description": "View all users"
+        },
+        {
+          "code": "admin.create_users",
+          "name": "Create Users",
+          "description": "Create new users"
+        },
+        {
+          "code": "admin.update_users",
+          "name": "Update Users",
+          "description": "Update existing users"
+        },
+        {
+          "code": "admin.delete_users",
+          "name": "Delete Users",
+          "description": "Delete users"
+        },
+        {
+          "code": "admin.view_roles",
+          "name": "View Roles",
+          "description": "View roles and their permissions"
+        },
+        {
+          "code": "admin.create_roles",
+          "name": "Create Roles",
+          "description": "Create new roles"
+        },
+        {
+          "code": "admin.update_roles",
+          "name": "Update Roles",
+          "description": "Update existing roles"
+        },
+        {
+          "code": "admin.delete_roles",
+          "name": "Delete Roles",
+          "description": "Delete roles"
         },
         {
           "code": "admin.manage_roles",
           "name": "Manage Roles",
-          "description": "Create, update, and delete roles and assign permissions"
+          "description": "Full administrative control over roles"
         },
         {
           "code": "admin.view_campuses",
@@ -32,9 +87,49 @@
           "description": "View campuses"
         },
         {
+          "code": "admin.create_campuses",
+          "name": "Create Campuses",
+          "description": "Create new campuses"
+        },
+        {
+          "code": "admin.update_campuses",
+          "name": "Update Campuses",
+          "description": "Update existing campuses"
+        },
+        {
+          "code": "admin.delete_campuses",
+          "name": "Delete Campuses",
+          "description": "Delete campuses"
+        },
+        {
           "code": "admin.manage_campuses",
           "name": "Manage Campuses",
-          "description": "Create, update and delete campuses"
+          "description": "Full administrative control over campuses"
+        },
+        {
+          "code": "admin.view_competences",
+          "name": "View Competences",
+          "description": "View competences"
+        },
+        {
+          "code": "admin.create_competences",
+          "name": "Create Competences",
+          "description": "Create new competences"
+        },
+        {
+          "code": "admin.update_competences",
+          "name": "Update Competences",
+          "description": "Update existing competences"
+        },
+        {
+          "code": "admin.delete_competences",
+          "name": "Delete Competences",
+          "description": "Delete competences"
+        },
+        {
+          "code": "admin.manage_competences",
+          "name": "Manage Competences",
+          "description": "Full administrative control over competences"
         }
       ]
     },
@@ -50,9 +145,29 @@
           "description": "View student profiles and basic information"
         },
         {
+          "code": "members.create_students",
+          "name": "Create Students",
+          "description": "Create new students"
+        },
+        {
+          "code": "members.update_students",
+          "name": "Update Students",
+          "description": "Update existing students"
+        },
+        {
+          "code": "members.delete_students",
+          "name": "Delete Students",
+          "description": "Delete students"
+        },
+        {
           "code": "members.manage_students",
           "name": "Manage Students",
-          "description": "Create, update, and delete student records"
+          "description": "Full control over student records"
+        },
+        {
+          "code": "members.bulk_upload_students",
+          "name": "Bulk Upload Students",
+          "description": "Upload multiple students at once via CSV/Excel"
         },
         {
           "code": "members.view_teachers",
@@ -60,9 +175,29 @@
           "description": "View teacher profiles and information"
         },
         {
+          "code": "members.create_teachers",
+          "name": "Create Teachers",
+          "description": "Create new teachers"
+        },
+        {
+          "code": "members.update_teachers",
+          "name": "Update Teachers",
+          "description": "Update existing teachers"
+        },
+        {
+          "code": "members.delete_teachers",
+          "name": "Delete Teachers",
+          "description": "Delete teachers"
+        },
+        {
           "code": "members.manage_teachers",
           "name": "Manage Teachers",
-          "description": "Create, update, and delete teacher records"
+          "description": "Full control over teacher records"
+        },
+        {
+          "code": "members.bulk_upload_teachers",
+          "name": "Bulk Upload Teachers",
+          "description": "Upload multiple teachers at once via CSV/Excel"
         },
         {
           "code": "members.view_parents",
@@ -70,9 +205,24 @@
           "description": "View parent profiles and information"
         },
         {
+          "code": "members.create_parents",
+          "name": "Create Parents",
+          "description": "Create new parents"
+        },
+        {
+          "code": "members.update_parents",
+          "name": "Update Parents",
+          "description": "Update existing parents"
+        },
+        {
+          "code": "members.delete_parents",
+          "name": "Delete Parents",
+          "description": "Delete parents"
+        },
+        {
           "code": "members.manage_parents",
           "name": "Manage Parents",
-          "description": "Create, update, and delete parent records"
+          "description": "Full control over parent records"
         },
         {
           "code": "members.view_non_staff",
@@ -80,9 +230,29 @@
           "description": "View non-staff member profiles and information"
         },
         {
+          "code": "members.create_non_staff",
+          "name": "Create Non-Staff Members",
+          "description": "Create new non-staff members"
+        },
+        {
+          "code": "members.update_non_staff",
+          "name": "Update Non-Staff Members",
+          "description": "Update existing non-staff members"
+        },
+        {
+          "code": "members.delete_non_staff",
+          "name": "Delete Non-Staff Members",
+          "description": "Delete non-staff members"
+        },
+        {
           "code": "members.manage_non_staff",
           "name": "Manage Non-Staff Members",
-          "description": "Create, update, and delete non-staff member records"
+          "description": "Full control over non-staff records"
+        },
+        {
+          "code": "members.bulk_upload_non_staff",
+          "name": "Bulk Upload Non-Staff",
+          "description": "Upload multiple non-staff members at once via CSV/Excel"
         },
         {
           "code": "members.view_classes",
@@ -90,9 +260,24 @@
           "description": "View class information and details"
         },
         {
+          "code": "members.create_classes",
+          "name": "Create Classes",
+          "description": "Create new classes"
+        },
+        {
+          "code": "members.update_classes",
+          "name": "Update Classes",
+          "description": "Update existing classes"
+        },
+        {
+          "code": "members.delete_classes",
+          "name": "Delete Classes",
+          "description": "Delete classes"
+        },
+        {
           "code": "members.manage_classes",
           "name": "Manage Classes",
-          "description": "Create, update, and delete classes"
+          "description": "Full control over class management"
         },
         {
           "code": "members.view_streams",
@@ -100,9 +285,24 @@
           "description": "View stream information and details"
         },
         {
+          "code": "members.create_streams",
+          "name": "Create Streams",
+          "description": "Create new streams"
+        },
+        {
+          "code": "members.update_streams",
+          "name": "Update Streams",
+          "description": "Update existing streams"
+        },
+        {
+          "code": "members.delete_streams",
+          "name": "Delete Streams",
+          "description": "Delete streams"
+        },
+        {
           "code": "members.manage_streams",
           "name": "Manage Streams",
-          "description": "Create, update, and delete streams"
+          "description": "Full control over stream management"
         },
         {
           "code": "members.view_subjects",
@@ -110,9 +310,24 @@
           "description": "View subject information and details"
         },
         {
+          "code": "members.create_subjects",
+          "name": "Create Subjects",
+          "description": "Create new subjects"
+        },
+        {
+          "code": "members.update_subjects",
+          "name": "Update Subjects",
+          "description": "Update existing subjects"
+        },
+        {
+          "code": "members.delete_subjects",
+          "name": "Delete Subjects",
+          "description": "Delete subjects"
+        },
+        {
           "code": "members.manage_subjects",
           "name": "Manage Subjects",
-          "description": "Create, update, and delete subjects"
+          "description": "Full control over subject management"
         },
         {
           "code": "members.assign_teachers",
@@ -143,9 +358,24 @@
           "description": "View expense records and details"
         },
         {
+          "code": "expenses.create_expenses",
+          "name": "Create Expenses",
+          "description": "Create new expenses"
+        },
+        {
+          "code": "expenses.update_expenses",
+          "name": "Update Expenses",
+          "description": "Update existing expenses"
+        },
+        {
+          "code": "expenses.delete_expenses",
+          "name": "Delete Expenses",
+          "description": "Delete expenses"
+        },
+        {
           "code": "expenses.manage_expenses",
           "name": "Manage Expenses",
-          "description": "Create, update, and delete expense records"
+          "description": "Full control over expense records"
         },
         {
           "code": "expenses.approve_expenses",
@@ -158,9 +388,24 @@
           "description": "View expense categories"
         },
         {
+          "code": "expenses.create_categories",
+          "name": "Create Expense Categories",
+          "description": "Create new expense categories"
+        },
+        {
+          "code": "expenses.update_categories",
+          "name": "Update Expense Categories",
+          "description": "Update existing expense categories"
+        },
+        {
+          "code": "expenses.delete_categories",
+          "name": "Delete Expense Categories",
+          "description": "Delete expense categories"
+        },
+        {
           "code": "expenses.manage_categories",
           "name": "Manage Expense Categories",
-          "description": "Create, update, and delete expense categories"
+          "description": "Full control over expense categories"
         },
         {
           "code": "expenses.view_departments",
@@ -168,9 +413,24 @@
           "description": "View department information"
         },
         {
+          "code": "expenses.create_departments",
+          "name": "Create Departments",
+          "description": "Create new departments"
+        },
+        {
+          "code": "expenses.update_departments",
+          "name": "Update Departments",
+          "description": "Update existing departments"
+        },
+        {
+          "code": "expenses.delete_departments",
+          "name": "Delete Departments",
+          "description": "Delete departments"
+        },
+        {
           "code": "expenses.manage_departments",
           "name": "Manage Departments",
-          "description": "Create, update, and delete departments"
+          "description": "Full control over departments"
         },
         {
           "code": "expenses.view_vendors",
@@ -178,9 +438,24 @@
           "description": "View vendor information"
         },
         {
+          "code": "expenses.create_vendors",
+          "name": "Create Vendors",
+          "description": "Create new vendors"
+        },
+        {
+          "code": "expenses.update_vendors",
+          "name": "Update Vendors",
+          "description": "Update existing vendors"
+        },
+        {
+          "code": "expenses.delete_vendors",
+          "name": "Delete Vendors",
+          "description": "Delete vendors"
+        },
+        {
           "code": "expenses.manage_vendors",
           "name": "Manage Vendors",
-          "description": "Create, update, and delete vendors"
+          "description": "Full control over vendors"
         },
         {
           "code": "expenses.view_academic_years",
@@ -188,9 +463,24 @@
           "description": "View academic year information"
         },
         {
+          "code": "expenses.create_academic_years",
+          "name": "Create Academic Years",
+          "description": "Create new academic years"
+        },
+        {
+          "code": "expenses.update_academic_years",
+          "name": "Update Academic Years",
+          "description": "Update existing academic years"
+        },
+        {
+          "code": "expenses.delete_academic_years",
+          "name": "Delete Academic Years",
+          "description": "Delete academic years"
+        },
+        {
           "code": "expenses.manage_academic_years",
           "name": "Manage Academic Years",
-          "description": "Create, update, and delete academic years"
+          "description": "Full control over academic years"
         },
         {
           "code": "expenses.view_terms",
@@ -198,9 +488,24 @@
           "description": "View term information"
         },
         {
+          "code": "expenses.create_terms",
+          "name": "Create Terms",
+          "description": "Create new terms"
+        },
+        {
+          "code": "expenses.update_terms",
+          "name": "Update Terms",
+          "description": "Update existing terms"
+        },
+        {
+          "code": "expenses.delete_terms",
+          "name": "Delete Terms",
+          "description": "Delete terms"
+        },
+        {
           "code": "expenses.manage_terms",
           "name": "Manage Terms",
-          "description": "Create, update, and delete terms"
+          "description": "Full control over terms"
         },
         {
           "code": "expenses.view_expense_summary",
@@ -221,9 +526,24 @@
           "description": "View fee categories"
         },
         {
+          "code": "fees.create_fee_categories",
+          "name": "Create Fee Categories",
+          "description": "Create new fee categories"
+        },
+        {
+          "code": "fees.update_fee_categories",
+          "name": "Update Fee Categories",
+          "description": "Update existing fee categories"
+        },
+        {
+          "code": "fees.delete_fee_categories",
+          "name": "Delete Fee Categories",
+          "description": "Delete fee categories"
+        },
+        {
           "code": "fees.manage_fee_categories",
           "name": "Manage Fee Categories",
-          "description": "Create, update, and delete fee categories"
+          "description": "Full control over fee categories"
         },
         {
           "code": "fees.view_fee_structures",
@@ -231,9 +551,24 @@
           "description": "View fee structures and amounts"
         },
         {
+          "code": "fees.create_fee_structures",
+          "name": "Create Fee Structures",
+          "description": "Create new fee structures"
+        },
+        {
+          "code": "fees.update_fee_structures",
+          "name": "Update Fee Structures",
+          "description": "Update existing fee structures"
+        },
+        {
+          "code": "fees.delete_fee_structures",
+          "name": "Delete Fee Structures",
+          "description": "Delete fee structures"
+        },
+        {
           "code": "fees.manage_fee_structures",
           "name": "Manage Fee Structures",
-          "description": "Create, update, and delete fee structures"
+          "description": "Full control over fee structures"
         },
         {
           "code": "fees.view_scholarships",
@@ -241,9 +576,24 @@
           "description": "View scholarship information"
         },
         {
+          "code": "fees.create_scholarships",
+          "name": "Create Scholarships",
+          "description": "Create new scholarships"
+        },
+        {
+          "code": "fees.update_scholarships",
+          "name": "Update Scholarships",
+          "description": "Update existing scholarships"
+        },
+        {
+          "code": "fees.delete_scholarships",
+          "name": "Delete Scholarships",
+          "description": "Delete scholarships"
+        },
+        {
           "code": "fees.manage_scholarships",
           "name": "Manage Scholarships",
-          "description": "Create, update, and delete scholarships"
+          "description": "Full control over scholarships"
         },
         {
           "code": "fees.view_fee_overrides",
@@ -251,9 +601,24 @@
           "description": "View student-specific fee overrides"
         },
         {
+          "code": "fees.create_fee_overrides",
+          "name": "Create Fee Overrides",
+          "description": "Create new fee overrides"
+        },
+        {
+          "code": "fees.update_fee_overrides",
+          "name": "Update Fee Overrides",
+          "description": "Update existing fee overrides"
+        },
+        {
+          "code": "fees.delete_fee_overrides",
+          "name": "Delete Fee Overrides",
+          "description": "Delete fee overrides"
+        },
+        {
           "code": "fees.manage_fee_overrides",
           "name": "Manage Fee Overrides",
-          "description": "Create, update, and delete fee overrides"
+          "description": "Full control over fee overrides"
         },
         {
           "code": "fees.view_payments",
@@ -261,9 +626,24 @@
           "description": "View payment records and history"
         },
         {
+          "code": "fees.create_payments",
+          "name": "Create Payments",
+          "description": "Create new payments"
+        },
+        {
+          "code": "fees.update_payments",
+          "name": "Update Payments",
+          "description": "Update existing payments"
+        },
+        {
+          "code": "fees.delete_payments",
+          "name": "Delete Payments",
+          "description": "Delete payments"
+        },
+        {
           "code": "fees.manage_payments",
           "name": "Manage Payments",
-          "description": "Create, update, and delete payment records"
+          "description": "Full control over fee payments"
         },
         {
           "code": "fees.view_fee_balances",
@@ -276,9 +656,24 @@
           "description": "View fee collection summaries and reports"
         },
         {
+          "code": "fees.create_collection_summaries",
+          "name": "Create Collection Summaries",
+          "description": "Create new collection summaries"
+        },
+        {
+          "code": "fees.update_collection_summaries",
+          "name": "Update Collection Summaries",
+          "description": "Update existing collection summaries"
+        },
+        {
+          "code": "fees.delete_collection_summaries",
+          "name": "Delete Collection Summaries",
+          "description": "Delete collection summaries"
+        },
+        {
           "code": "fees.manage_collection_summaries",
           "name": "Manage Collection Summaries",
-          "description": "Create and update collection summaries"
+          "description": "Full control over collection summaries"
         },
         {
           "code": "fees.view_fee_statistics",
@@ -294,9 +689,24 @@
       "is_admin": false,
       "permissions": [
         {
+          "code": "admin.create_salaries",
+          "name": "Create Salaries",
+          "description": "Create new salaries"
+        },
+        {
+          "code": "admin.update_salaries",
+          "name": "Update Salaries",
+          "description": "Update existing salaries"
+        },
+        {
+          "code": "admin.delete_salaries",
+          "name": "Delete Salaries",
+          "description": "Delete salaries"
+        },
+        {
           "code": "admin.manage_salaries",
           "name": "Manage Salaries",
-          "description": "Full access to salary management including periods, payments, and summaries"
+          "description": "Full administrative control over salaries"
         },
         {
           "code": "salary.view_salary_periods",
@@ -304,9 +714,24 @@
           "description": "View salary periods and their details"
         },
         {
+          "code": "salary.create_salary_periods",
+          "name": "Create Salary Periods",
+          "description": "Create new salary periods"
+        },
+        {
+          "code": "salary.update_salary_periods",
+          "name": "Update Salary Periods",
+          "description": "Update existing salary periods"
+        },
+        {
+          "code": "salary.delete_salary_periods",
+          "name": "Delete Salary Periods",
+          "description": "Delete salary periods"
+        },
+        {
           "code": "salary.manage_salary_periods",
           "name": "Manage Salary Periods",
-          "description": "Create, update, and delete salary periods"
+          "description": "Full control over salary periods"
         },
         {
           "code": "salary.view_allowances",
@@ -314,9 +739,24 @@
           "description": "View salary allowance types and amounts"
         },
         {
+          "code": "salary.create_allowances",
+          "name": "Create Salary Allowances",
+          "description": "Create new salary allowances"
+        },
+        {
+          "code": "salary.update_allowances",
+          "name": "Update Salary Allowances",
+          "description": "Update existing salary allowances"
+        },
+        {
+          "code": "salary.delete_allowances",
+          "name": "Delete Salary Allowances",
+          "description": "Delete salary allowances"
+        },
+        {
           "code": "salary.manage_allowances",
           "name": "Manage Salary Allowances",
-          "description": "Create, update, and delete salary allowances"
+          "description": "Full control over allowances"
         },
         {
           "code": "salary.view_deductions",
@@ -324,9 +764,24 @@
           "description": "View salary deduction types and amounts"
         },
         {
+          "code": "salary.create_deductions",
+          "name": "Create Salary Deductions",
+          "description": "Create new salary deductions"
+        },
+        {
+          "code": "salary.update_deductions",
+          "name": "Update Salary Deductions",
+          "description": "Update existing salary deductions"
+        },
+        {
+          "code": "salary.delete_deductions",
+          "name": "Delete Salary Deductions",
+          "description": "Delete salary deductions"
+        },
+        {
           "code": "salary.manage_deductions",
           "name": "Manage Salary Deductions",
-          "description": "Create, update, and delete salary deductions"
+          "description": "Full control over deductions"
         },
         {
           "code": "salary.view_payments",
@@ -334,9 +789,24 @@
           "description": "View salary payment records and details"
         },
         {
+          "code": "salary.create_payments",
+          "name": "Create Salary Payments",
+          "description": "Create new salary payments"
+        },
+        {
+          "code": "salary.update_payments",
+          "name": "Update Salary Payments",
+          "description": "Update existing salary payments"
+        },
+        {
+          "code": "salary.delete_payments",
+          "name": "Delete Salary Payments",
+          "description": "Delete salary payments"
+        },
+        {
           "code": "salary.manage_payments",
           "name": "Manage Salary Payments",
-          "description": "Create, update, and delete salary payments"
+          "description": "Full control over payments"
         },
         {
           "code": "salary.view_summaries",
@@ -372,9 +842,47 @@
           "description": "Generate and export reports"
         },
         {
+          "code": "reports.export_reports",
+          "name": "Export Reports",
+          "description": "Export reports in various formats"
+        },
+        {
           "code": "reports.view_analytics",
           "name": "View Analytics",
           "description": "Access to analytics and dashboards"
+        }
+      ]
+    },
+    {
+      "name": "Exams and Grading Management",
+      "code": "exams",
+      "description": "Manage student exams, marks, grading scales, and report cards",
+      "is_admin": false,
+      "permissions": [
+        {
+          "code": "exams.view_exams",
+          "name": "View Exams",
+          "description": "Access to view exams, marks, and grade summaries"
+        },
+        {
+          "code": "exams.create_exams",
+          "name": "Create Exams",
+          "description": "Create new exams and assessment structures"
+        },
+        {
+          "code": "exams.update_exams",
+          "name": "Update Exams",
+          "description": "Update existing exams, marks, and assessment details"
+        },
+        {
+          "code": "exams.delete_exams",
+          "name": "Delete Exams",
+          "description": "Delete exams and assessment structures"
+        },
+        {
+          "code": "exams.manage_exams",
+          "name": "Manage Exams",
+          "description": "Full administrative control over exams and grading"
         }
       ]
     }

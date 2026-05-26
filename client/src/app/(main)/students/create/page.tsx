@@ -41,6 +41,9 @@ import { Switch } from '@/components/ui/switch';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { selectSchool } from '@/store/auth/selectors';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateStudentPage() {
   const router = useRouter();
@@ -151,7 +154,7 @@ export default function CreateStudentPage() {
         toast.success("Student created successfully");
         router.push('/students');
       } else {
-        toast.error(result.error?.message || "Failed to create student");
+        toast.error("Failed to create student");
       }
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -167,25 +170,23 @@ export default function CreateStudentPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_STUDENTS}>
+      <MainLayout
+        title="New Student"
+        description="Enroll a new student into the school system."
+        backButton={
           <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+            variant="ghost" 
+            size="icon" 
+            className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">New Student</h1>
-            <p className="text-gray-500 mt-1">Enroll a new student into the school system.</p>
-          </div>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
+        }
+      >
+        <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-6">
+          <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
@@ -235,15 +236,19 @@ export default function CreateStudentPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="user_gender">Gender</Label>
-                  <select
-                    id="user_gender"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary"
-                    {...register('user_gender')}
+                  <Select 
+                    value={watch('user_gender')}
+                    onValueChange={(val) => setValue('user_gender', val as 'M' | 'F' | 'O', { shouldValidate: true, shouldDirty: true })}
                   >
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="O">Other</option>
-                  </select>
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select Gender" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                      <SelectItem value="O">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </Card>
@@ -287,22 +292,36 @@ export default function CreateStudentPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="current_stream">Assigned Stream</Label>
-                  <div className="relative">
-                    <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      id="current_stream"
-                      className="flex h-12 w-full pl-10 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary"
-                      {...register('current_stream', { valueAsNumber: true })}
-                    >
-                      <option value="">Select a stream</option>
+                  <Label htmlFor="current_stream" className="text-sm font-semibold text-gray-700 flex items-center">
+                    <Layers className="w-4 h-4 mr-2 text-primary" />
+                    Assigned Stream
+                  </Label>
+                  <Select 
+                    value={watch('current_stream')?.toString()}
+                    onValueChange={(val) => setValue('current_stream', val ? parseInt(val) : undefined, { shouldValidate: true, shouldDirty: true })}
+                  >
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select a stream" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
                       {streams.map((stream) => (
-                        <option key={stream.id} value={stream.id}>
+                        <SelectItem key={stream.id} value={stream.id.toString()}>
                           {stream.class_obj_name} - {stream.name}
-                        </option>
+                        </SelectItem>
                       ))}
-                    </select>
-                  </div>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lin">Learner Identification Number (LIN)</Label>
+                  <Input 
+                    id="lin"
+                    placeholder="Enter LIN (e.g. LA12345678)" 
+                    className="h-12 rounded-xl border-gray-200"
+                    {...register('lin')}
+                  />
+                  {errors.lin && <ErrorMessage message={errors.lin.message} />}
                 </div>
 
                 <div className="space-y-2">
@@ -319,17 +338,21 @@ export default function CreateStudentPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="enrollment_status">Enrollment Status</Label>
-                  <select
-                    id="enrollment_status"
-                    className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary"
-                    {...register('enrollment_status')}
+                  <Label htmlFor="enrollment_status" className="text-sm font-semibold text-gray-700">Enrollment Status</Label>
+                  <Select 
+                    value={watch('enrollment_status')}
+                    onValueChange={(val) => setValue('enrollment_status', val as any, { shouldValidate: true, shouldDirty: true })}
                   >
-                    <option value="enrolled">Enrolled</option>
-                    <option value="transferred">Transferred</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="withdrawn">Withdrawn</option>
-                  </select>
+                    <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-primary">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectItem value="enrolled">Enrolled</SelectItem>
+                      <SelectItem value="transferred">Transferred</SelectItem>
+                      <SelectItem value="suspended">Suspended</SelectItem>
+                      <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </Card>
@@ -431,5 +454,7 @@ export default function CreateStudentPage() {
         </div>
       </form>
     </div>
+  </MainLayout>
+</ProtectedComponent>
   );
 }

@@ -16,7 +16,9 @@ import {
   FileSpreadsheet,
   Download,
   Upload,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  MoreVertical
 } from 'lucide-react';
 import {
   Button,
@@ -44,6 +46,7 @@ import {
 } from '@/components/ui';
 import { FetchStudents, DeleteStudent, BulkUploadStudents, FetchStreams } from '@/features/members/members.service';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
 import { FetchCampuses } from '@/features/school/school.service';
 import StreamSearchableSelect from '@/components/selects/streamsearchableselect';
 import { toast } from 'sonner';
@@ -56,6 +59,9 @@ import * as XLSX from 'xlsx';
 import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
+import { BulkStudentUpload } from '@/components/forms/BulkStudentUpload';
 
 export default function StudentsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +80,8 @@ export default function StudentsListPage() {
   const fetchFirstPage = async (query?: any) => {
     const params: any = { 
       search: query?.search || undefined,
-      campus_id: school?.campus || undefined
+      campus_id: school?.campus || undefined,
+      school: query?.school || undefined
     };
 
     if (query?.stream && query.stream !== 'all') {
@@ -93,8 +100,8 @@ export default function StudentsListPage() {
       FetchCampuses(),
       FetchStreams()
     ]);
-    if (campusesRes.success) setCampuses(campusesRes.data.results || campusesRes.data);
-    if (streamsRes.success) setStreams(streamsRes.data.results || streamsRes.data);
+    if (campusesRes && 'results' in campusesRes) setCampuses(campusesRes.results);
+    if (streamsRes && 'results' in streamsRes) setStreams(streamsRes.results);
   };
 
   useEffect(() => {
@@ -166,7 +173,7 @@ export default function StudentsListPage() {
           setIsUploadModalOpen(false);
           tableRefreshRef.current?.();
         } else {
-          const errorMessage = result.error?.response?.data?.error || "Failed to upload students";
+          const errorMessage = "Failed to upload students";
           toast.error(errorMessage);
           console.error("Bulk upload error:", result.error);
         }
@@ -212,7 +219,7 @@ export default function StudentsListPage() {
       cell: (student) => (
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={student.user_profile_data?.profile_picture} />
+            <AvatarImage src={student.user_profile_data?.profile_picture || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary font-bold">
               {student.full_name?.[0] || 'S'}
             </AvatarFallback>
@@ -233,11 +240,12 @@ export default function StudentsListPage() {
     },
     {
       key: "student_id",
-      header: "ID / Admission",
+      header: "ID / Admission / LIN",
       cell: (student) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium text-gray-900">{student.student_id}</span>
-          <span className="text-xs text-gray-500">{student.admission_number || 'N/A'}</span>
+          <span className="text-xs text-gray-500">Adm: {student.admission_number || 'N/A'}</span>
+          {student.lin && <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded mt-0.5 w-fit">LIN: {student.lin}</span>}
         </div>
       ),
     },
@@ -259,7 +267,7 @@ export default function StudentsListPage() {
       key: "status",
       header: "Status",
       cell: (student) => (
-        <Badge className={`rounded-full px-3 py-0.5 border-none capitalize ${getStatusColor(student.enrollment_status)}`}>
+        <Badge className={`rounded-full px-3 py-0.5 border-none capitalize ${getStatusColor(student.enrollment_status || '')}`}>
           {student.enrollment_status}
         </Badge>
       ),
@@ -312,26 +320,25 @@ export default function StudentsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_STUDENTS}>
     <MainLayout
       title="Students"
       description="Manage student enrollment and profiles."
       headerActions={
-        <div className="flex gap-2 justify-end">
-          <Button 
-            variant="outline" 
-            className="rounded-xl h-11 border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold" 
-            onClick={() => setIsUploadModalOpen(true)}
-          >
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Bulk Upload
-          </Button>
-          <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
-            <Link href="/students/create">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add Student
-            </Link>
-          </Button>
-        </div>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Student",
+            icon: <UserPlus className="w-4 h-4" />,
+            href: "/students/create",
+          }}
+          secondary={[
+            {
+              label: "Bulk Upload",
+              icon: <FileSpreadsheet className="w-4 h-4" />,
+              onClick: () => setIsUploadModalOpen(true),
+            },
+          ]}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -352,6 +359,7 @@ export default function StudentsListPage() {
                 onValueChange={setStreamFilter}
                 placeholder="All Streams"
                 triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+                hideLabel
               />
             </div>
           </div>
@@ -374,8 +382,8 @@ export default function StudentsListPage() {
             skeletonRows={5}
             className="min-h-0!"
             tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm, stream: streamFilter }}
-            deps={[searchTerm, streamFilter, school?.campus]}
+            query={{ search: searchTerm, stream: streamFilter, school: school?.id }}
+            deps={[searchTerm, streamFilter, school]}
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
@@ -389,82 +397,25 @@ export default function StudentsListPage() {
       </Card>
 
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-          <div className="bg-gradient-to-br from-primary to-primary/90 p-8 text-white">
-            <DialogHeader>
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
-                <Upload className="w-6 h-6 text-white" />
-              </div>
-              <DialogTitle className="text-2xl font-bold text-white">Bulk Student Upload</DialogTitle>
-              <DialogDescription className="text-primary-foreground/90 mt-2">
-                Upload multiple students at once using an Excel template.
-              </DialogDescription>
-            </DialogHeader>
+        <DialogContent className="sm:max-w-[800px] rounded-3xl p-6 overflow-y-auto max-h-[90vh] border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Bulk Student Upload</DialogTitle>
+            <DialogDescription>
+              Upload multiple students at once using an Excel template. Complete validation before committing the upload.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <BulkStudentUpload 
+              onSuccess={() => {
+                setIsUploadModalOpen(false);
+                tableRefreshRef.current?.();
+              }} 
+            />
           </div>
-
-          <div className="p-8 space-y-6">
-            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3 text-amber-800 text-sm">
-              <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-              <p>
-                Ensure your Excel file follows the template structure. Campus and Stream must use their numeric IDs.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <Button 
-                variant="outline" 
-                className="h-16 rounded-2xl border-dashed border-2 hover:bg-primary/10 hover:border-primary/20 flex flex-col items-center justify-center gap-1 group transition-all"
-                onClick={downloadTemplate}
-              >
-                <div className="flex items-center text-primary font-semibold">
-                  <Download className="w-4 h-4 mr-2 group-hover:bounce" />
-                  Download Template
-                </div>
-                <span className="text-[10px] text-gray-500 font-normal">Excel file with sample data and reference IDs</span>
-              </Button>
-
-              <div className="relative group">
-                <input
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  disabled={isUploading}
-                />
-                <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-primary/20 bg-primary/5 group-hover:bg-primary/10 group-hover:border-primary/30'}`}>
-                  {isUploading ? (
-                    <>
-                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm font-medium text-primary">Processing File...</span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                        <Upload className="w-5 h-5" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-semibold text-primary">Click to upload Excel file</p>
-                        <p className="text-xs text-gray-500">Max size 5MB (.xlsx, .xls)</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="p-6 bg-gray-50/50 border-t border-gray-100 flex sm:justify-center">
-            <Button 
-              variant="ghost" 
-              onClick={() => setIsUploadModalOpen(false)}
-              className="rounded-xl hover:bg-white"
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </MainLayout>
+    </ProtectedComponent>
   );
 }
 

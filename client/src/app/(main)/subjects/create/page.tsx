@@ -25,9 +25,12 @@ import { SubjectSchema, ISubjectInput } from '@/features/members/members.schemas
 import { CreateSubject } from '@/features/members/members.service';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { MainLayout } from '@/components/layout/main-layout';
 
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateSubjectPage() {
   const router = useRouter();
@@ -74,24 +77,22 @@ export default function CreateSubjectPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50 shrink-0"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add Subject</h1>
-            <p className="text-gray-500 text-sm sm:text-base mt-1">Define a new course for the school curriculum.</p>
-          </div>
-        </div>
-      </div>
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_SUBJECTS}>
+    <MainLayout
+      title="Add Subject"
+      description="Define a new course for the school curriculum."
+      backButton={
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      }
+    >
+      <div className="w-full px-4 md:px-0 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -192,6 +193,8 @@ export default function CreateSubjectPage() {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

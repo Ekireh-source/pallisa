@@ -60,7 +60,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-white ">
         <div className="flex flex-col items-start gap-2">
           <h2 className="text-2xl font-bold text-gray-900">Log Into your account</h2>
           <p className="text-muted-foreground text-base">

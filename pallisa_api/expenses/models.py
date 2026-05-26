@@ -22,7 +22,14 @@ class ExpenseCategory(models.Model):
 
 class AcademicYear(models.Model):
     """Model for academic years like 2024/2025, 2025/2026, etc."""
-    name = models.CharField(max_length=9, unique=True)  # e.g. "2024/2025"
+    school = models.ForeignKey(
+        'schools.School',
+        on_delete=models.CASCADE,
+        related_name='academic_years',
+        null=True,
+        blank=True
+    )
+    name = models.CharField(max_length=9)  # e.g. "2024/2025"
     start_date = models.DateField()
     end_date = models.DateField()
     is_current = models.BooleanField(default=False)
@@ -33,15 +40,17 @@ class AcademicYear(models.Model):
     class Meta:
         ordering = ['-start_date']
         verbose_name_plural = "Academic Years"
+        unique_together = ('name', 'school')
 
     def __str__(self):
-        return self.name
+        school_name = self.school.name if self.school else "No School"
+        return f"{self.name} - {school_name}"
 
     def save(self, *args, **kwargs):
-        """Ensure only one academic year is marked as current"""
+        """Ensure only one academic year is marked as current for this school"""
         if self.is_current:
-            # Set all other academic years as not current
-            AcademicYear.objects.filter(is_current=True).update(is_current=False)
+            # Set all other academic years of this school as not current
+            AcademicYear.objects.filter(school=self.school, is_current=True).update(is_current=False)
         super().save(*args, **kwargs)
 
 

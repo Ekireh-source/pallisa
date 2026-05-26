@@ -20,6 +20,7 @@ export interface StreamSearchableSelectProps {
   multiple?: boolean;
   initialItems?: Array<PaginatedSelectItemWithIdValueLabel>;
   classId?: string | number;
+  hideLabel?: boolean;
 }
 
 export const StreamSearchableSelect = memo(
@@ -34,6 +35,7 @@ export const StreamSearchableSelect = memo(
     multiple = false,
     initialItems,
     classId,
+    hideLabel = false,
   }: StreamSearchableSelectProps) => {
     const [selectedItems, setSelectedItems] = useState<Array<string | number>>([]);
 
@@ -136,7 +138,7 @@ export const StreamSearchableSelect = memo(
           placeholder={placeholder}
           emptyMessage="No streams found."
           initialItems={initialItems}
-          label="Stream"
+          label={hideLabel ? undefined : "Stream"}
         />
       </div>
     );

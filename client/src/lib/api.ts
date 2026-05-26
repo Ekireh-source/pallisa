@@ -52,6 +52,17 @@ axiosJsonInstance.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  const schoolId = (store.getState() as any).auth?.school?.id;
+  if (schoolId) {
+    if (!config.params) {
+      config.params = {};
+    }
+    if (config.params.school_id === undefined && config.params.school === undefined) {
+      config.params.school_id = schoolId;
+      config.params.school = schoolId;
+    }
+  }
+
   return config;
 });
 
@@ -178,6 +189,10 @@ axiosJsonInstance.interceptors.response.use(
         )
       );
     } else {
+      if (isAuthEndpoint && error.response?.data) {
+        return Promise.reject(error.response.data);
+      }
+      
       const errorMessage =
         error.response?.data?.detail ||
         error.response?.data?.error ||
@@ -217,7 +232,7 @@ export const apiRequest = async (
 
     return response;
   } else {
-    let err: any = {
+    const err: any = {
       message: Array.isArray(response?.data?.error)
         ? response.data.error[0]?.message
         : typeof response?.data?.error === "string"

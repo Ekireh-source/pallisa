@@ -32,10 +32,16 @@ import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { ICampusListResponse } from '@/features/school/school.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function CampusesListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const { school } = useSelector((state: RootState) => state.auth);
   
   const tableRefreshRef = useRef<any>(null);
 
@@ -44,7 +50,7 @@ export default function CampusesListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: string) => {
@@ -178,16 +184,18 @@ export default function CampusesListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_CAMPUSES}>
     <MainLayout
       title="School Campuses"
       description="Manage school campuses and branches."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/campuses/create">
-            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span>Add Campus</span>
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "Add Campus",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/campuses/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -212,8 +220,8 @@ export default function CampusesListPage() {
             skeletonRows={5}
             className="min-h-0!"
             tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
+            query={{ search: searchTerm, school: school?.id }}
+            deps={[searchTerm, school]}
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
@@ -226,5 +234,6 @@ export default function CampusesListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

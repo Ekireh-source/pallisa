@@ -432,7 +432,8 @@ function PaginatedTableInner<T, Q = unknown>({
 
 	return (
 		<div className={cn("space-y-4 h-full !min-h-[30svh]", className)}>
-			<div className="w-full overflow-x-auto max-w-full">
+			{/* Desktop View */}
+			<div className="hidden md:block w-full overflow-x-auto max-w-full">
 				<Table className={cn(tableClassName, "mb-auto min-w-full")}>
 					<TableHeader>
 						<TableRow className="border-b border-gray-200">
@@ -582,6 +583,144 @@ function PaginatedTableInner<T, Q = unknown>({
 						)}
 					</TableBody>
 				</Table>
+			</div>
+
+			{/* Mobile View */}
+			<div className="md:hidden flex flex-col gap-4">
+				{loading ? (
+					Array.from({ length: skeletonRows }).map((_, index) => (
+						<div key={index} className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-[14px] flex items-center justify-between gap-4">
+							<div className="flex-1 space-y-2">
+								<Skeleton className="h-4 w-3/4" />
+								<Skeleton className="h-4 w-1/2" />
+							</div>
+							<Skeleton className="h-8 w-8 rounded-full" />
+						</div>
+					))
+				) : (!loading && data && (data.results?.length ?? 0) === 0) ? (
+					<div className="py-8 text-center bg-white rounded-[12px] border-[0.5px] border-gray-200">
+						{emptyState ?? <EmptyState />}
+					</div>
+				) : groupBy ? (
+					(() => {
+						let lastItem: T | null = null;
+						const ungroupedItems = groupedData.ungrouped.map((item, index) => {
+							const prevItem = lastItem;
+							lastItem = item;
+							const separator = renderRowSeparator?.(item, prevItem);
+							return (
+								<Fragment key={(item as any)?.id || `ungrouped-mob-${index}`}>
+									{separator && <div className="py-2">{separator}</div>}
+									<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4 shadow-sm flex flex-col">
+										<div className="flex items-start justify-between gap-4">
+											<div className="flex-1 min-w-0 overflow-hidden">
+												{columns[0]?.cell?.(item)}
+											</div>
+											{columns.length > 1 && (
+												<div className="shrink-0 flex items-center justify-end">
+													{columns[columns.length - 1]?.cell?.(item)}
+												</div>
+											)}
+										</div>
+										{columns.length > 2 && (
+											<div className="flex flex-wrap items-center gap-x-4 gap-y-3 mt-4 pt-3 border-t border-gray-100">
+												{columns.slice(1, columns.length - 1).map((col) => (
+													<div key={col.key} className={cn("flex items-center", col.cellClassName)}>
+														{col?.cell?.(item)}
+													</div>
+												))}
+											</div>
+										)}
+									</div>
+								</Fragment>
+							);
+						});
+
+						const groupedItems = groupedData.groups.map(({ key, items }) => (
+							<Fragment key={key}>
+								<div
+									onClick={() => toggleGroup(key)}
+									className="bg-[#F7F7FB] rounded-lg p-3 flex items-center gap-2 w-full text-left font-semibold text-gray-900 cursor-pointer"
+								>
+									<Icon
+										icon={expandedGroups.has(key) ? "hugeicons:arrow-down-01" : "hugeicons:arrow-right-01"}
+										className="w-4 h-4 text-gray-600 transition-transform"
+									/>
+									<span>{groupLabel ? groupLabel(key) : key}</span>
+									<span className="text-sm text-gray-500">({items.length})</span>
+								</div>
+								{expandedGroups.has(key) && (
+									<div className="flex flex-col gap-3 pl-4">
+										{items.map((item, itemIndex) => {
+											const prevItem = lastItem;
+											lastItem = item;
+											const separator = renderRowSeparator?.(item, prevItem);
+											return (
+												<Fragment key={(item as any)?.id || `${key}-mob-${itemIndex}`}>
+													{separator && <div className="py-2">{separator}</div>}
+													<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4 shadow-sm flex flex-col">
+														<div className="flex items-start justify-between gap-4">
+															<div className="flex-1 min-w-0 overflow-hidden">
+																{columns[0]?.cell?.(item)}
+															</div>
+															{columns.length > 1 && (
+																<div className="shrink-0 flex items-center justify-end">
+																	{columns[columns.length - 1]?.cell?.(item)}
+																</div>
+															)}
+														</div>
+														{columns.length > 2 && (
+															<div className="flex flex-wrap items-center gap-x-4 gap-y-3 mt-4 pt-3 border-t border-gray-100">
+																{columns.slice(1, columns.length - 1).map((col) => (
+																	<div key={col.key} className={cn("flex items-center", col.cellClassName)}>
+																		{col?.cell?.(item)}
+																	</div>
+																))}
+															</div>
+														)}
+													</div>
+												</Fragment>
+											);
+										})}
+									</div>
+								)}
+							</Fragment>
+						));
+
+						return <>{ungroupedItems}{groupedItems}</>;
+					})()
+				) : (
+					data?.results?.map((item: any, index: number) => {
+						const prevItem = index > 0 ? data.results![index - 1] : null;
+						const separator = renderRowSeparator?.(item, prevItem);
+						return (
+							<Fragment key={(item as any)?.id || `mob-${index}`}>
+								{separator && <div className="py-2">{separator}</div>}
+								<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4 shadow-sm flex flex-col">
+									<div className="flex items-start justify-between gap-4">
+										<div className="flex-1 min-w-0 overflow-hidden">
+											{columns[0]?.cell?.(item)}
+										</div>
+										{columns.length > 1 && (
+											<div className="shrink-0 flex items-center justify-end">
+												{columns[columns.length - 1]?.cell?.(item)}
+											</div>
+										)}
+									</div>
+									{columns.length > 2 && (
+										<div className="flex flex-wrap items-center gap-x-4 gap-y-3 mt-4 pt-3 border-t border-gray-100">
+											{columns.slice(1, columns.length - 1).map((col) => (
+												<div key={col.key} className={cn("flex items-center", col.cellClassName)}>
+													{col?.cell?.(item)}
+												</div>
+											))}
+										</div>
+									)}
+								</div>
+							</Fragment>
+						);
+					})
+				)}
 			</div>
 
 			{showFooter && data && (data.next || data.previous) && paginated && (

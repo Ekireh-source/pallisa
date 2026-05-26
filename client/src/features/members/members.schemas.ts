@@ -31,6 +31,7 @@ export const SubjectSchema = z.object({
 });
 
 export const AcademicYearSchema = z.object({
+  school: z.number().min(1, "School is required"),
   name: z.string().min(1, "Name is required"),
   start_date: z.string().min(1, "Start date is required"),
   end_date: z.string().min(1, "End date is required"),
@@ -60,6 +61,7 @@ export const StudentSchema = z.object({
     .transform(val => val === "" ? null : val),
   student_id: z.string().optional().nullable().or(z.literal(""))
     .transform(val => val === "" ? null : val),
+  lin: z.string().optional().nullable().or(z.literal("")),
   campus: z.coerce.number().min(1, "Campus is required"),
   user_first_name: z.string().min(1, "First name is required"),
   user_last_name: z.string().min(1, "Last name is required"),
@@ -95,6 +97,7 @@ export const TeacherSchema = z.object({
     .transform(val => val === "" ? undefined : val).optional(),
   user_profile_picture: z.any().optional(),
   user_role_id: z.number().optional().nullable(),
+  campus: z.number().min(1, "Campus is required"),
   is_active: z.boolean(),
 });
 
@@ -116,6 +119,7 @@ export const StudentListSchema = z.object({
   id: z.number(),
   full_name: z.string(),
   student_id: z.string().optional().nullable(),
+  lin: z.string().optional().nullable(),
   email: z.string().email().optional().nullable(),
   current_class_name: z.string().optional().nullable(),
   current_stream_name: z.string().optional().nullable(),
@@ -151,11 +155,14 @@ export const StreamListSchema = z.object({
 
 export const AcademicYearListSchema = z.object({
   id: z.number(),
+  school: z.number(),
   name: z.string(),
   start_date: z.string(),
   end_date: z.string(),
   is_current: z.boolean(),
   is_active: z.boolean(),
+  created_at: z.string(),
+  updated_at: z.string()
 });
 
 export const TermListSchema = z.object({
@@ -174,8 +181,8 @@ export type ISubjectInput = z.infer<typeof SubjectSchema>;
 export type IAcademicYearInput = z.infer<typeof AcademicYearSchema>;
 export type ITermInput = z.infer<typeof TermSchema>;
 export type IStreamInput = z.infer<typeof StreamSchema>;
-export type IStudentInput = z.infer<typeof StudentSchema>;
-export type ITeacherInput = z.infer<typeof TeacherSchema>;
+export type IStudentInput = z.input<typeof StudentSchema>;
+export type ITeacherInput = z.input<typeof TeacherSchema>;
 export type ITeacher = z.infer<typeof TeacherListSchema>;
 export type IStudent = z.infer<typeof StudentListSchema>;
 export type IClassListResponse = z.infer<typeof ClassListSchema>;

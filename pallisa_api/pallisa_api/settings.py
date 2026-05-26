@@ -263,3 +263,13 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API for Pallisa platform',
     'VERSION': '1.0.0',
 }
+
+# Celery Configuration Options
+CELERY_BROKER_URL = get_env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = get_env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60

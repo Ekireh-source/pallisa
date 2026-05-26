@@ -53,22 +53,18 @@ export function MainLayout({
     };
     return (
         <div className={`flex flex-col min-h-screen ${getBgClass()}`}>  {/* Blue Header Section */}
-            <div className="w-full bg-primary py-6 sm:py-8">
-                <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between lg:grid lg:grid-cols-4 gap-4">
-                    <div className={cn("flex items-start gap-4 w-full", actionCols === 1 ? "lg:col-span-3" : actionCols === 2 ? "lg:col-span-2" : "lg:col-span-1")}>
+            <div className="w-full bg-primary py-6 sm:py-8 print:hidden">
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 flex flex-row items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
                         {backButton && (
                             <div className="mt-1 shrink-0">
                                 {backButton}
                             </div>
                         )}
-                        <div className="flex flex-col min-w-0">
-                            <div className="flex items-center gap-3">
-                                {typeof title === 'string' ? (
-                                    <h1 className="text-[20px] sm:text-[28px] font-bold text-white tracking-tight truncate">{title}</h1>
-                                ) : (
-                                    title
-                                )}
-                            </div>
+                        <div className="flex flex-col min-w-0 w-full">
+                            <h1 className="text-[20px] sm:text-[28px] font-bold text-white tracking-tight truncate">
+                                {title}
+                            </h1>
                             {description && (
                                 <p className="text-xs sm:text-[14px] text-blue-100/80 font-medium mb-4 sm:mb-8 mt-1">
                                     {description}
@@ -83,25 +79,17 @@ export function MainLayout({
                         </div>
                     </div>
                     {headerActions && (
-                        <div className={cn("flex justify-end items-center w-full sm:w-auto", actionCols === 1 ? "lg:col-span-1" : actionCols === 2 ? "lg:col-span-2" : "lg:col-span-3")}>
-                            {/* Desktop View */}
-                            <div className="hidden sm:flex sm:justify-end w-full">
-                                {headerActions}
-                            </div>
-
-                            {/* Mobile View */}
-                            <div className="sm:hidden w-full">
-                                {headerActions}
-                            </div>
+                        <div className="flex justify-end shrink-0">
+                            {headerActions}
                         </div>
                     )}
                 </div>
             </div>
 
             {/* Content Container with Negative Margin overlap */}
-            <div className={`max-w-7xl mx-auto w-full px-4 md:px-8 ${stats ? "-mt-12 " : ""}`}>
+            <div className={`max-w-7xl mx-auto w-full px-4 md:px-8 ${stats ? "-mt-12 " : ""}print:max-w-none print:px-0 print:mx-0 print:mt-0`}>
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 print:hidden">
                     {stats?.map((stat, index) => (
                         <StatCard
                             key={index}
@@ -116,10 +104,8 @@ export function MainLayout({
                 </div>
 
                 {/* Main Content Area */}
-                <div className="min-h-[600px] flex flex-col pt-4 w-full min-w-0">
-                    <div className="py-2 w-full min-w-0">
-                        {children}
-                    </div>
+                <div className="min-h-[600px] flex flex-col pt-4 w-full min-w-0 print:min-h-0 print:pt-0">
+                    {children}
                 </div>
             </div>
         </div>

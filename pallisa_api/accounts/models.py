@@ -208,7 +208,7 @@ class Role(models.Model):
     permissions = models.ManyToManyField(Permission, related_name="role_perms")
     is_superadmin = models.BooleanField(default=False)
     school = models.ForeignKey(
-        'School', 
+        'schools.School', 
         on_delete=models.CASCADE, 
         related_name='roles',
         blank=True,
@@ -307,6 +307,50 @@ class UserProfile(models.Model):
     emergency_contact_email = models.EmailField(blank=True, null=True)
     role = models.ForeignKey(Role, blank=True, null=True, on_delete=models.SET_NULL)
     
+    @property
+    def school(self):
+        """
+        Get the school associated with this user profile.
+        - If school_owner, they own the school.
+        - If role is assigned with a school, return the corresponding schools.models.School.
+        - If student, get school via campus.
+        - If teacher, get school via role or teacher profile.
+        - If parent, get school of their first child.
+        """
+        from schools.models import School as SchoolsSchool
+
+        # 1. School Owners / Superadmins owning the school
+        if self.user_type == 'school_owner' and self.user:
+            school = SchoolsSchool.objects.filter(owner=self.user).first()
+            if school:
+                return school
+
+        # 2. Staff / Teachers assigned via roles
+        if self.role and self.role.school:
+            # Resolve accounts.models.School to schools.models.School via the school owner's CustomUser
+            if self.role.school.owner and self.role.school.owner.user:
+                school = SchoolsSchool.objects.filter(owner=self.role.school.owner.user).first()
+                if school:
+                    return school
+
+        # 3. Students assigned to a campus
+        if hasattr(self, 'student_profile') and self.student_profile and self.student_profile.campus:
+            return self.student_profile.campus.school
+
+        # 4. Teachers/Staff check
+        if hasattr(self, 'teacher_profile') and self.teacher_profile:
+            if self.role and self.role.school and self.role.school.owner and self.role.school.owner.user:
+                school = SchoolsSchool.objects.filter(owner=self.role.school.owner.user).first()
+                if school:
+                    return school
+
+        # 5. Parents linked to a child student
+        if hasattr(self, 'parent_profile') and self.parent_profile:
+            relationship = self.parent_profile.parent_student_relationships.first()
+            if relationship and relationship.student and relationship.student.campus:
+                return relationship.student.campus.school
+
+        return None
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

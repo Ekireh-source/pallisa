@@ -47,7 +47,10 @@ import SubjectSearchableSelect from '@/components/selects/subjectsearchableselec
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
 import Link from 'next/link';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 const formatDateSafe = (dateString?: string, formatStr: string = 'MMM d, yyyy') => {
   if (!dateString) return 'Date not set';
@@ -260,7 +263,8 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
 
   if (loading) {
     return (
-      <MainLayout
+      <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
+    <MainLayout
         title={<Skeleton className="h-8 w-48 bg-white/20" />}
         description="Loading exam details..."
         backButton={
@@ -279,6 +283,7 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
           <Skeleton className="h-96 w-full rounded-xl" />
         </div>
       </MainLayout>
+    </ProtectedComponent>
     );
   }
 
@@ -307,22 +312,20 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       }
       actionCols={2}
       headerActions={
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <Button variant="outline" className="rounded-xl h-11 bg-white/10 text-white hover:bg-white/20 border-white/20 font-medium w-full sm:w-auto" asChild>
-            <Link href={`/exams/${id}/edit`}>
-              <Edit2 className="w-4 h-4 mr-2" />
-              Edit Settings
-            </Link>
-          </Button>
-          <Button 
-            className="rounded-xl h-11 shadow-sm bg-white text-primary hover:bg-gray-100 font-bold px-6 w-full sm:w-auto"
-            onClick={handleSaveAll}
-            disabled={saving || !selectedSubject}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-            Save All Marks
-          </Button>
-        </div>
+        <ResponsiveHeaderActions
+          primary={{
+            label: saving ? "Saving..." : "Save All Marks",
+            icon: saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />,
+            onClick: handleSaveAll,
+          }}
+          secondary={[
+            {
+              label: "Edit Settings",
+              icon: <Edit2 className="w-4 h-4" />,
+              href: `/exams/${id}/edit`,
+            }
+          ]}
+        />
       }
     >
       <div className="space-y-8 animate-in fade-in duration-500 pt-4">

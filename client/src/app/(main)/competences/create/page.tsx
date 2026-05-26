@@ -10,7 +10,9 @@ import {
   LayoutGrid,
   Loader2,
   FileText,
-  BookOpen
+  BookOpen,
+  Calendar,
+  Layers
 } from 'lucide-react';
 import { 
   Button, 
@@ -27,37 +29,69 @@ import {
 } from '@/components/ui';
 import { CompetencyAreaSchema, ICompetencyAreaInput } from '@/features/exam/exam.schemas';
 import { CreateCompetencyArea, FetchTopics } from '@/features/exam/exam.service';
+import { FetchClasses, FetchTerms } from '@/features/members/members.service';
 import { toast } from 'sonner';
+import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function CreateCompetencyAreaPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(true);
   const [topics, setTopics] = useState<any[]>([]);
-
-  useEffect(() => {
-    const loadTopics = async () => {
-      const res = await FetchTopics();
-      if (res && 'results' in res) {
-        setTopics(res.results);
-      } else {
-        toast.error("Failed to load topics");
-      }
-    };
-    loadTopics();
-  }, []);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [terms, setTerms] = useState<any[]>([]);
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ICompetencyAreaInput>({
     resolver: zodResolver(CompetencyAreaSchema),
     defaultValues: {
       topic: undefined,
+      class_obj: undefined,
+      term: undefined,
       name: '',
       description: '',
     }
   });
+
+  const selectedTopic = watch('topic');
+  const selectedClass = watch('class_obj');
+  const selectedTerm = watch('term');
+
+  useEffect(() => {
+    const loadFormData = async () => {
+      setFetchingData(true);
+      const [topicsRes, classRes, termRes] = await Promise.all([
+        FetchTopics(),
+        FetchClasses(),
+        FetchTerms()
+      ]);
+
+      if (topicsRes && 'results' in topicsRes) {
+        setTopics(topicsRes.results);
+      } else {
+        toast.error("Failed to load topics");
+      }
+
+      if (classRes && 'results' in classRes) {
+        setClasses(classRes.results);
+      }
+
+      if (termRes && 'results' in termRes) {
+        setTerms(termRes.results);
+      }
+      
+      setFetchingData(false);
+    };
+
+    loadFormData();
+  }, []);
 
   const onSubmit = async (data: ICompetencyAreaInput) => {
     setLoading(true);
@@ -73,31 +107,86 @@ export default function CreateCompetencyAreaPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center gap-4">
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_COMPETENCES}>
+    <MainLayout
+      title="New Competency Area"
+      description="Define a broad category for assessment activities."
+      backButton={
         <Button 
-          variant="outline" 
-          size="sm" 
-          className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+          variant="ghost" 
+          size="icon" 
+          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
           onClick={() => router.back()}
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">New Competency Area</h1>
-          <p className="text-gray-500 mt-1">Define a broad category for assessment activities.</p>
-        </div>
-      </div>
+      }
+    >
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
           <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700 flex items-center">
+                  <Layers className="w-4 h-4 mr-2 text-primary" />
+                  Target Class
+                </Label>
+                <Select 
+                  disabled={fetchingData}
+                  value={selectedClass?.toString()}
+                  onValueChange={(val) => setValue('class_obj', parseInt(val), { shouldValidate: true, shouldDirty: true })}
+                >
+                  <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.class_obj ? 'border-red-500' : ''}`}>
+                    <SelectValue placeholder="Select Class..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((c) => (
+                      <SelectItem key={c.id} value={c.id.toString()}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.class_obj && <ErrorMessage message="Class is required" />}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700 flex items-center">
+                  <Calendar className="w-4 h-4 mr-2 text-primary" />
+                  Term
+                </Label>
+                <Select 
+                  disabled={fetchingData}
+                  value={selectedTerm?.toString()}
+                  onValueChange={(val) => setValue('term', parseInt(val), { shouldValidate: true, shouldDirty: true })}
+                >
+                  <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.term ? 'border-red-500' : ''}`}>
+                    <SelectValue placeholder="Select Term..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {terms.map((t) => (
+                      <SelectItem key={t.id} value={t.id.toString()}>
+                        {t.name} ({t.academic_year_name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.term && <ErrorMessage message="Term is required" />}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="topic" className="text-sm font-semibold text-gray-700 flex items-center">
                 <BookOpen className="w-4 h-4 mr-2 text-primary" />
                 Linked Topic (Optional)
               </Label>
-              <Select onValueChange={(val) => register('topic').onChange({ target: { value: parseInt(val), name: 'topic' } })}>
+              <Select 
+                disabled={fetchingData}
+                value={selectedTopic?.toString()}
+                onValueChange={(val) => setValue('topic', parseInt(val), { shouldValidate: true, shouldDirty: true })}
+              >
                 <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.topic ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Select a topic to link..." />
                 </SelectTrigger>
@@ -165,6 +254,8 @@ export default function CreateCompetencyAreaPage() {
           </Button>
         </div>
       </form>
-    </div>
+      </div>
+    </MainLayout>
+    </ProtectedComponent>
   );
 }

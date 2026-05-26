@@ -7,6 +7,8 @@ from .models import (
 
 class CompetencyAreaSerializer(serializers.ModelSerializer):
     topic_name = serializers.ReadOnlyField(source='topic.name')
+    class_name = serializers.ReadOnlyField(source='class_obj.name')
+    term_name = serializers.ReadOnlyField(source='term.name')
 
     class Meta:
         model = CompetencyArea

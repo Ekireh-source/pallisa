@@ -1,3 +1,4 @@
+from django.db.models import Q
 from expenses.models import AcademicYear
 from expenses.models import Term
 from members.models import Subject, Student, SubjectPaper, Stream, TeacherSubjectAssignment, Teacher
@@ -8,6 +9,7 @@ from rest_framework import status, permissions
 from django.core.paginator import Paginator
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.shortcuts import get_object_or_404
+from accounts.permission import filter_by_school, get_user_school
 from .models import (
     Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, 
     CompetencyArea, ExamPaperScore, ProjectScore, SaAssessment, SaScore
@@ -45,6 +47,7 @@ class TopicsListCreateView(APIView):
     def get(self, request):
         try:
             queryset = Topics.objects.all()
+            queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -135,12 +138,26 @@ class CompetencyAreaListCreateView(APIView):
         parameters=[
             OpenApiParameter(name='page', type=int, description='Page number'),
             OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
+            OpenApiParameter(name='class_id', type=int, description='Filter by class ID'),
+            OpenApiParameter(name='term_id', type=int, description='Filter by term ID'),
         ],
         responses={200: CompetencyAreaSerializer(many=True)}
     )
     def get(self, request):
         try:
-            queryset = CompetencyArea.objects.all()
+            queryset = CompetencyArea.objects.all().order_by('-created_at')
+            
+            # Filter by class_id and term_id
+            class_id = request.query_params.get('class_id')
+            if class_id:
+                queryset = queryset.filter(class_obj_id=class_id)
+                
+            term_id = request.query_params.get('term_id')
+            if term_id:
+                queryset = queryset.filter(term_id=term_id)
+                
+            # School scoping
+            queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -237,6 +254,7 @@ class ActivityOfIntegrationListCreateView(APIView):
     def get(self, request):
         try:
             queryset = ActivityOfIntegration.objects.all()
+            queryset = filter_by_school(queryset, request, school_field_path='topic__class_obj__campus__schools')
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -430,6 +448,7 @@ class ExamListCreateView(APIView):
     def get(self, request):
         try:
             queryset = Exam.objects.all()
+            queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
             
             # Pagination
             page = int(request.query_params.get('page', 1))

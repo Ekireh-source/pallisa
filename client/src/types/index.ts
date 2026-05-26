@@ -126,6 +126,7 @@ export interface ReportCardSettings {
 
 export interface School {
   id: number;
+  public_id?: string;
   name: string;
   address?: string;
   phone?: string;
@@ -135,13 +136,15 @@ export interface School {
   owner?: number;
   created_at: string;
   updated_at: string;
-  is_active: boolean;
+  is_active?: boolean;
+  active?: boolean;
   campus?: number;
+  campus_name?: string;
   level?: string;
   report_primary_color?: string;
   report_accent_color?: string;
   motto?: string;
-  logo?: string;
+  logo?: string | null;
   report_card_settings?: ReportCardSettings;
 }
 
@@ -449,12 +452,12 @@ export interface GradeBoundary {
   max_score: number;
   remarks?: string;
   description?: string;
-  points?: number;
 }
 
 export interface GradingSystem {
   id: number;
   name: string;
+  level: 'O-Level' | 'A-Level' | string;
   description?: string;
   is_active: boolean;
   boundaries: GradeBoundary[];
@@ -626,6 +629,7 @@ export interface MemberStudent {
   id: number;
   user_profile: number;
   student_id: string;
+  lin?: string;
   current_stream?: number;
   enrollment_status: 'enrolled' | 'transferred' | 'graduated' | 'suspended' | 'withdrawn';
   admission_number?: string;
@@ -655,6 +659,7 @@ export interface StudentDetail {
   user_profile: UserProfile;
   user_profile_data: UserProfile;
   student_id: string;
+  lin?: string;
   current_stream?: StreamDetail;
   enrollment_status: 'enrolled' | 'transferred' | 'graduated' | 'suspended' | 'withdrawn';
   admission_number?: string;

@@ -27,6 +27,8 @@ import StreamSearchableSelect from '@/components/selects/streamsearchableselect'
 import SubjectSearchableSelect from '@/components/selects/subjectsearchableselect';
 import { toast } from 'sonner';
 import { MainLayout } from '@/components/layout/main-layout';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 const ProjectInitSchema = z.object({
   stream_id: z.string().min(1, "Stream is required"),
@@ -64,11 +66,12 @@ export default function CreateProjectMatrixPage() {
   };
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_COMPETENCES}>
     <MainLayout
       title="Configure Project Matrix"
       description="Initialize student competency evaluations by configuring the class stream, subject, and active competency."
     >
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="w-full space-y-6">
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
@@ -167,5 +170,6 @@ export default function CreateProjectMatrixPage() {
         </Card>
       </div>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

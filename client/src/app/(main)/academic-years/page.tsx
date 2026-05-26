@@ -32,6 +32,9 @@ import api from '@/lib/api';
 import { getPaginatedFromUrl } from '@/lib/utils';
 import { IAcademicYearListResponse } from '@/features/members/members.schemas';
 import { MainLayout } from '@/components/layout/main-layout';
+import { ResponsiveHeaderActions } from '@/components/layout/ResponsiveHeaderActions';
+import ProtectedComponent from '@/components/permissions/protectedcomponent';
+import { PERMISSION_CODES } from '@/codes';
 
 export default function AcademicYearsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,7 +47,7 @@ export default function AcademicYearsListPage() {
     if (res && 'error' in res) {
       throw res.error;
     }
-    return res;
+    return res as any;
   };
 
   const handleDelete = async (id: number) => {
@@ -97,7 +100,7 @@ export default function AcademicYearsListPage() {
       key: "active",
       header: "Status",
       cell: (year) => (
-        year.active ? (
+        year.is_active ? (
           <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-2 sm:px-3 py-0.5 sm:py-1 flex items-center gap-1 w-fit rounded-full text-[10px] sm:text-xs">
             <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-pulse" />
             <span>Active</span>
@@ -143,17 +146,18 @@ export default function AcademicYearsListPage() {
   ];
 
   return (
+    <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_ACADEMIC_YEARS}>
     <MainLayout
       title="Academic Years"
       description="Manage the school's academic calendar and cycles."
       headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-4 sm:px-6 shadow-sm border border-transparent w-full sm:w-auto" asChild>
-          <Link href="/academic-years/create">
-            <Plus className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span className="hidden sm:inline">New Academic Year</span>
-            <span className="sm:hidden">New Year</span>
-          </Link>
-        </Button>
+        <ResponsiveHeaderActions
+          primary={{
+            label: "New Academic Year",
+            icon: <Plus className="w-4 h-4" />,
+            href: "/academic-years/create",
+          }}
+        />
       }
     >
       <Card className="border-none shadow-none ring-0">
@@ -192,5 +196,6 @@ export default function AcademicYearsListPage() {
         </div>
       </Card>
     </MainLayout>
+    </ProtectedComponent>
   );
 }

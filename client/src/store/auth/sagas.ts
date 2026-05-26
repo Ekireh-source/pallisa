@@ -44,7 +44,15 @@ function* login({
 		const result: { success: boolean; data?: any; error?: any } = yield call(UserLogin as any, { data: payload });
 
 		if (!result.success) {
-			yield put(loginFailure(result.error.message || result.error));
+			const err = result.error;
+			if (err && err.email_verification_required && err.email) {
+				if (typeof window !== "undefined") {
+					window.location.href = `/verify-email?email=${encodeURIComponent(err.email)}`;
+				}
+				yield put(loginFailure(err.error || "Email not verified"));
+				return;
+			}
+			yield put(loginFailure(err.message || err.error || err));
 			return;
 		}
 
