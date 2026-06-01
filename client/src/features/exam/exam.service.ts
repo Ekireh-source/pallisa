@@ -389,6 +389,15 @@ export const FetchProjectsList = async (params?: any) => {
   }
 };
 
+export const CreateNewProject = async (payload: { name: string; stream_id: string; subject_id: string; description?: string }) => {
+  try {
+    const res = await api.post(`/exams/projects/matrix/`, { ...payload, action: 'create' });
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
 export const DeleteProject = async (id: string) => {
   try {
     const res = await api.delete(`/exams/projects/matrix/${id}/`);
@@ -401,6 +410,7 @@ export const DeleteProject = async (id: string) => {
 export const SaveBulkProjectScoresById = async (id: string, payload: IProjectBulkSaveInput) => {
   const validatedPayload = ProjectBulkSaveSchema.safeParse(payload);
   if (!validatedPayload.success) {
+    console.error("Zod Validation Error inside SaveBulkProjectScoresById:", validatedPayload.error.flatten());
     return handleValidationError(validatedPayload.error);
   }
   try {

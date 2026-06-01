@@ -121,12 +121,10 @@ export const ProjectScoreSchema = z.object({
 });
 
 export const ProjectBulkSaveSchema = z.object({
-  subject_id: z.number(),
   competency_number: z.number(),
   records: z.array(z.object({
     student_id: z.number(),
-    sub_criteria: z.string(),
-    score: z.number()
+    scores: z.record(z.string(), z.number().nullable())
   }))
 });
 

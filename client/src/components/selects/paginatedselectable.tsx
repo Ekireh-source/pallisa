@@ -124,7 +124,7 @@ export function PaginatedSearchableSelect<T, Q = unknown>({
     // Get selected item for single-select mode
     const selectedItem = React.useMemo(() => {
         if (multiple || !selectedItems.length) return null;
-        return standardDataItems.find(item => item.id === selectedItems[0]) || null;
+        return standardDataItems.find(item => item.id === selectedItems[0] || String(item.id) === String(selectedItems[0])) || null;
     }, [multiple, selectedItems, standardDataItems]);
 
     // Filter and order items based on search and selection

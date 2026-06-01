@@ -9,6 +9,8 @@ from rest_framework_simplejwt.views import TokenRefreshView as JWTTokenRefreshVi
 from drf_spectacular.utils import extend_schema
 from django.utils.decorators import method_decorator
 from django.views.decorators.vary import vary_on_headers
+from django.conf import settings
+from datetime import datetime, timezone
 import logging
 
 from .models import CustomUser, UserProfile, EmailVerificationToken
@@ -27,6 +29,33 @@ from .serializers import (
 from .services import AuthenticationService, SchoolService
 
 logger = logging.getLogger(__name__)
+
+
+def set_auth_cookies(response, access_token, refresh_token):
+    access_expiry = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+    refresh_expiry = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+    
+    # Set Access Token Cookie
+    response.set_cookie(
+        key=settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access_token'),
+        value=access_token,
+        expires=access_expiry,
+        secure=settings.SIMPLE_JWT.get('AUTH_COOKIE_SECURE', False),
+        httponly=settings.SIMPLE_JWT.get('AUTH_COOKIE_HTTP_ONLY', True),
+        path=settings.SIMPLE_JWT.get('AUTH_COOKIE_PATH', '/'),
+        samesite=settings.SIMPLE_JWT.get('AUTH_COOKIE_SAMESITE', 'Lax'),
+    )
+    
+    # Set Refresh Token Cookie
+    response.set_cookie(
+        key=settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh_token'),
+        value=refresh_token,
+        expires=refresh_expiry,
+        secure=settings.SIMPLE_JWT.get('AUTH_COOKIE_SECURE', False),
+        httponly=settings.SIMPLE_JWT.get('AUTH_COOKIE_HTTP_ONLY', True),
+        path=settings.SIMPLE_JWT.get('AUTH_COOKIE_PATH', '/'),
+        samesite=settings.SIMPLE_JWT.get('AUTH_COOKIE_SAMESITE', 'Lax'),
+    )
 
 
 class UserRegistrationView(APIView):
@@ -161,12 +190,13 @@ class LoginView(APIView):
             
             school_data = SchoolSerializer(school, context={'request': request}).data if school else None
             
-            return Response({
-                **tokens,
+            response = Response({
                 'user_profile': profile,
                 'user_info': profile_data,
                 'school': school_data
             }, status=status.HTTP_200_OK)
+            set_auth_cookies(response, tokens['access'], tokens['refresh'])
+            return response
             
         except Exception as e:
             logger.error(f"Login error for {identifier}: {str(e)}")
@@ -192,27 +222,25 @@ class LogoutView(APIView):
         }
     )
     def post(self, request):
-        refresh_token = request.data.get("refresh")
-
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh_token'))
         if not refresh_token:
-            return Response(
-                {"error": "Refresh token is required."}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            refresh_token = request.data.get("refresh")
 
-        try:
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            logger.info(f"User logged out: {request.user.email}")
-            return Response(
-                {"message": "Successfully logged out."}, 
-                status=status.HTTP_205_RESET_CONTENT
-            )
-        except TokenError:
-            return Response(
-                {"warning": "Token was already invalid or blacklisted."}, 
-                status=status.HTTP_205_RESET_CONTENT
-            )
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                logger.info(f"User logged out and token blacklisted: {request.user.email}")
+            except Exception:
+                pass
+
+        response = Response(
+            {"message": "Successfully logged out."}, 
+            status=status.HTTP_200_OK
+        )
+        response.delete_cookie(settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access_token'))
+        response.delete_cookie(settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh_token'))
+        return response
 
 
 class VerifyEmailView(APIView):
@@ -256,11 +284,12 @@ class VerifyEmailView(APIView):
             
             logger.info(f"Email verified successfully for: {email}")
             
-            return Response({
+            response = Response({
                 "message": "Email verified successfully. You are now logged in.",
-                **tokens,
                 "user_profile": UserProfileSerializer(user.profile, context={'request': request}).data
             }, status=status.HTTP_200_OK)
+            set_auth_cookies(response, tokens['access'], tokens['refresh'])
+            return response
             
         except EmailVerificationToken.DoesNotExist:
             logger.warning(f"Invalid OTP attempt for: {email}")
@@ -356,4 +385,38 @@ class TokenRefreshView(JWTTokenRefreshView):
         },
     )
     def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs) 
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh_token'))
+        if not refresh_token:
+            refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {"error": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            data = {"access": str(refresh.access_token)}
+
+            if settings.SIMPLE_JWT.get('ROTATE_REFRESH_TOKENS', False):
+                if settings.SIMPLE_JWT.get('BLACKLIST_AFTER_ROTATION', False):
+                    try:
+                        refresh.blacklist()
+                    except AttributeError:
+                        pass
+                new_refresh = refresh.copy()
+                data['refresh'] = str(new_refresh)
+
+            response = Response({"success": True}, status=status.HTTP_200_OK)
+            set_auth_cookies(
+                response, 
+                data['access'], 
+                data.get('refresh', refresh_token)
+            )
+            return response
+        except TokenError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_401_UNAUTHORIZED
+            ) 

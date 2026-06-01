@@ -13,6 +13,7 @@ export interface User {
   // Role and permissions from UserProfile
   role?: Role;
   user_permissions?: UserPermission[];
+  is_teacher?: boolean;
   // Nested user field from UserProfileSerializer
   user?: {
     id: number;
@@ -20,6 +21,7 @@ export interface User {
     email_verified: boolean;
     is_active: boolean;
     date_joined: string;
+    is_teacher?: boolean;
   };
 }
 

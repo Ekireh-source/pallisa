@@ -31,11 +31,32 @@ class ActivityOfIntegrationSerializer(serializers.ModelSerializer):
     competency_area_name = serializers.ReadOnlyField(source='competency_area.name')
     subject_name = serializers.ReadOnlyField(source='topic.subject.name')
     teacher_name = serializers.ReadOnlyField(source='teacher.user_profile.get_full_name')
+    created_by_name = serializers.SerializerMethodField()
+    grading_progress = serializers.SerializerMethodField()
 
     class Meta:
         model = ActivityOfIntegration
         fields = '__all__'
         read_only_fields = ['public_id', 'created_at', 'updated_at']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by and hasattr(obj.created_by, 'profile'):
+            return obj.created_by.profile.get_full_name()
+        return obj.created_by.email if obj.created_by else None
+
+    def get_grading_progress(self, obj):
+        try:
+            from members.models import Student
+            total_students = Student.objects.filter(
+                current_stream__class_obj=obj.topic.class_obj,
+                is_active=True
+            ).count()
+            if total_students == 0:
+                return 0
+            filled_scores = obj.scores.count()
+            return min(100, int((filled_scores / total_students) * 100))
+        except Exception:
+            return 0
 
 
 class IntegrationScoreSerializer(serializers.ModelSerializer):
@@ -97,11 +118,32 @@ class SaAssessmentSerializer(serializers.ModelSerializer):
     subject_name = serializers.ReadOnlyField(source='subject.name')
     teacher_name = serializers.ReadOnlyField(source='teacher.user_profile.get_full_name')
     term_name = serializers.ReadOnlyField(source='term.name')
+    created_by_name = serializers.SerializerMethodField()
+    grading_progress = serializers.SerializerMethodField()
 
     class Meta:
         model = SaAssessment
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by and hasattr(obj.created_by, 'profile'):
+            return obj.created_by.profile.get_full_name()
+        return obj.created_by.email if obj.created_by else None
+
+    def get_grading_progress(self, obj):
+        try:
+            from members.models import Student
+            total_students = Student.objects.filter(
+                current_stream=obj.stream,
+                is_active=True
+            ).count()
+            if total_students == 0:
+                return 0
+            filled_scores = obj.student_scores.count()
+            return min(100, int((filled_scores / total_students) * 100))
+        except Exception:
+            return 0
 
 
 class SaScoreSerializer(serializers.ModelSerializer):

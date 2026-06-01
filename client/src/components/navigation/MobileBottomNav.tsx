@@ -3,6 +3,10 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import { MobileNavItem } from "./MobileNavItem";
+import { useAppSelector } from "@/store";
+import { useDispatch } from "react-redux";
+import { logoutStart } from "@/store/auth/actions";
+import { cn } from "@/lib/utils";
 
 interface MobileBottomNavProps {
   onMoreClick?: () => void; // Keeping it optional if we don't need it outside anymore
@@ -10,8 +14,47 @@ interface MobileBottomNavProps {
 
 export function MobileBottomNav({ onMoreClick }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const dispatch = useDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const isTeacher = user?.value?.user?.is_teacher;
 
-  const navItems = [
+  const handleLogout = () => {
+    dispatch(logoutStart());
+  };
+
+  const teacherNavItems = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: "hugeicons:dashboard-browsing",
+    },
+    {
+      title: "Students",
+      href: "/students",
+      icon: "hugeicons:student",
+    },
+    {
+      title: "AOI Marks",
+      href: "/activity-of-integration",
+      icon: "hugeicons:puzzle",
+    },
+    {
+      title: "SA Marks",
+      href: "/exams/sa-assessment",
+      icon: "hugeicons:grid-view",
+    },
+    {
+      title: "More",
+      icon: "hugeicons:more-horizontal",
+      subItems: [
+        { title: "Projects", href: "/competences/projects", icon: "hugeicons:matrix" },
+        { title: "Exams", href: "/exams", icon: "hugeicons:test-tube-01" },
+        { title: "Logout", href: "#", onClick: handleLogout, icon: "hugeicons:logout-03" },
+      ],
+    },
+  ];
+
+  const adminNavItems = [
     {
       title: "Dashboard",
       href: "/dashboard",
@@ -69,8 +112,18 @@ export function MobileBottomNav({ onMoreClick }: MobileBottomNavProps) {
     },
   ];
 
+  const navItems = isTeacher ? teacherNavItems : adminNavItems;
+
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div 
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 transition-all duration-300",
+        isTeacher 
+          ? "md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:rounded-2xl md:border md:shadow-xl md:w-[600px] md:bg-white/90 md:backdrop-blur-md md:px-4"
+          : "md:hidden"
+      )} 
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       <div className="flex items-center justify-between h-16 px-2">
         {navItems.map((item) => {
           let isActive = false;

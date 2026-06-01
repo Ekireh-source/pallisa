@@ -52,6 +52,7 @@ urlpatterns = [
     
     # Teacher Subject Assignments URLs
     path('teacher-subject-assignments/', views.TeacherSubjectAssignmentListCreateView.as_view(), name='teacher-subject-assignment-list'),
+    path('teacher-subject-assignments/<int:pk>/', views.TeacherSubjectAssignmentDetailView.as_view(), name='teacher-subject-assignment-detail'),
     path('teacher-subject-assignments/bulk-assign/', views.BulkAssignTeacherSubjectsView.as_view(), name='bulk-assign-teacher-subjects'),
     
     # Non-Staff Members URLs

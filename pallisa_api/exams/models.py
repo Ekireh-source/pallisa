@@ -4,6 +4,7 @@ from members.models import Student, Subject, Teacher, Class, Stream, SubjectPape
 from schools.models import School, Campus
 from expenses.models import AcademicYear, Term
 import uuid
+from django.conf import settings
 
 
 class Topics(models.Model):
@@ -51,6 +52,12 @@ class ActivityOfIntegration(models.Model):
     topic = models.ForeignKey(Topics, on_delete=models.CASCADE, related_name='activities')
     competency_area = models.ForeignKey(CompetencyArea, on_delete=models.SET_NULL, null=True, blank=True, related_name='activities')
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, related_name='integration_activities')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='created_aois'
+    )
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
     max_score = models.PositiveIntegerField(default=10, help_text="Usually out of 10 marks for AoI")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -218,30 +225,58 @@ def update_overall_exam_score(sender, instance, **kwargs):
         )
 
 
-class ProjectScore(models.Model):
+class Project(models.Model):
     """
-    Stores individual criteria-level scores for a student's projects.
-    Maps back to legacy 'project_scores' table.
+    Represents a specific project created by a teacher for a class stream.
+    Analogous to the 'Exam' model.
     """
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='project_scores')
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='project_scores')
+    public_id = models.CharField(max_length=50, unique=True, db_index=True, default=uuid.uuid4)
+    name = models.CharField(max_length=255, help_text="e.g., 'Soap Making Project', 'Design a basic website'")
+    
+    stream = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name='projects')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='projects')
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
-    competency_number = models.PositiveIntegerField(help_text="Competency index, e.g., 1, 2, 3, or 4")
-    sub_criteria = models.CharField(max_length=10, help_text="Specific criteria code, e.g., '1.8'")
-    score = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0.0)])
+    
+    description = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_projects')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['student', 'subject', 'term', 'academic_year', 'sub_criteria']
+        ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['subject', 'term', 'academic_year']),
+            models.Index(fields=['stream', 'subject']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} - {self.stream.name} ({self.subject.name})"
+
+
+class ProjectScore(models.Model):
+    """
+    Stores a student's graded competency score boxes for a specific project.
+    Contains scores represented as a dictionary.
+    """
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='scores')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='project_scores_new')
+    competency_number = models.PositiveIntegerField(help_text="1 (C1), 2 (C2), 3 (C3), or 4 (C4)")
+
+    # Dictionary of scores where key is the criteria name (e.g. "4.1") and value is the score
+    scores = models.JSONField(default=dict)
+
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['project', 'student', 'competency_number']
+        indexes = [
+            models.Index(fields=['project', 'competency_number']),
             models.Index(fields=['student', 'competency_number']),
         ]
 
     def __str__(self):
-        return f"{self.student.admission_number} - {self.sub_criteria}: {self.score}"
+        return f"{self.student.admission_number} - {self.project.name} (C{self.competency_number})"
 
 
 class SaAssessment(models.Model):
@@ -253,6 +288,12 @@ class SaAssessment(models.Model):
     stream = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name='sa_assessments')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='sa_assessments')
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, related_name='sa_assessments')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='created_sas'
+    )
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
     total_box = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, help_text="Scaling divisor factor")

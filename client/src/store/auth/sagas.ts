@@ -13,8 +13,6 @@ import { AUTH_ACTION_TYPES } from "./types";
 import {
 	logoutFailure,
 	logoutSuccess,
-	setAccessToken,
-	setRefreshToken,
 	setCurrentUser,
 	setInactivityTimeout,
 	userActivityDetected,
@@ -25,7 +23,7 @@ import {
 } from "./actions";
 
 import { LoginResponse as IAuthResponse } from "@/types";
-import { UserLogin, VerifyEmail, ResendOTP } from "@/features/auth/auth.service";
+import { UserLogin, VerifyEmail, ResendOTP, UserLogout } from "@/features/auth/auth.service";
 import { ILoginInput } from "@/features/auth/auth.schemas";
 
 
@@ -57,10 +55,6 @@ function* login({
 		}
 
 		const authResponse = result.data as IAuthResponse;
-
-		// Set tokens immediately (needed for subsequent API calls)
-		yield put(setAccessToken(authResponse.access));
-		yield put(setRefreshToken(authResponse.refresh));
 
 		// // Use access token to calculate lifetime if helper exists
 		// let lifetime = 3600; // Default 1 hour
@@ -95,15 +89,16 @@ function* login({
 
 function* logout() {
 	try {
+		// Call backend to delete HttpOnly cookies and blacklist token
+		yield call(UserLogout, "");
+	} catch (error) {
+		// Catch error to guarantee the client logout always completes
+	} finally {
 		yield put(logoutSuccess());
-
 		if (typeof window !== "undefined") {
 			sendBroadcastMessage({ type: "LOGOUT_SUCCESS" });
+			window.location.href = "/login";
 		}
-
-
-	} catch (error) {
-		yield put(logoutFailure("Something went wrong, could not logout !"));
 	}
 }
 

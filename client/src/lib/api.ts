@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig } from "axios";
 
 // import { CustomApiRequestError } from "@/constants";
 import { store } from "@/store";
-import { setAccessToken, setRefreshToken, logoutStart } from "@/store/auth/actions";
+import { logoutStart } from "@/store/auth/actions";
 
 // import { LoginResponse } from "@/utils/auth-utils";
 const removeTrailingSlash = (url: string): string => {
@@ -14,6 +14,7 @@ const removeTrailingSlash = (url: string): string => {
 const axiosJsonInstance = axios.create({
   baseURL: removeTrailingSlash(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"),
   timeout: 40000,
+  withCredentials: true,
   validateStatus: (status) => status !== 401 && status !== 403,
 });
 
@@ -30,28 +31,6 @@ const normalizePathname = (url?: string) => {
 };
 
 axiosJsonInstance.interceptors.request.use((config) => {
-  const pathname = normalizePathname(config.url);
-  const isLoginRequest = pathname === "user/login";
-  const isResetPasswordRequest = pathname === "user/reset-password";
-
-  // (config.headers as any).AgentType = "web";
-
-  // Forcibly remove Authorization header for login and reset-password endpoints
-  if (isLoginRequest || isResetPasswordRequest) {
-    if (config.headers) {
-      delete config.headers.Authorization;
-      if (config.headers.common) {
-        delete (config.headers.common as any).Authorization;
-      }
-    }
-    return config;
-  }
-  const token = (store.getState() as any).auth?.accessToken;
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
   const schoolId = (store.getState() as any).auth?.school?.id;
   if (schoolId) {
     if (!config.params) {
@@ -65,21 +44,6 @@ axiosJsonInstance.interceptors.request.use((config) => {
 
   return config;
 });
-
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-type Subscriber = (token: string) => void;
-let subscribers: Subscriber[] = [];
-
-function onRefreshed(token: string) {
-  subscribers.forEach((callback) => callback(token));
-  subscribers = [];
-}
-
-function addSubscriber(callback: Subscriber) {
-  subscribers.push(callback);
-}
 
 axiosJsonInstance.interceptors.response.use(
   (response) => response,
@@ -97,86 +61,21 @@ axiosJsonInstance.interceptors.response.use(
       !isAuthEndpoint
     ) {
       originalRequest._retry = true;
-
-      // const refreshToken = store.getState().auth?.refreshToken;
-      // if (error.response?.data.code === "invalid_session") {
-      //   store.dispatch(
-      //     logoutFailure(
-      //       error.response?.data?.error ||
-      //       "Your session has been revoked due to a login from another device. If you did not log in from another device, please reset your password."
-      //     )
-      //   );
-      //   store.dispatch(logoutStart());
-      //   return Promise.reject(
-      //     "Your session has been revoked due to a login from another device"
-      //   );
-      // }
-
-      // if (!refreshToken || originalRequest.url?.endsWith("/auth/refresh/")) {
-      //   if (typeof window !== "undefined") {
-      //     if (originalRequest.url?.endsWith("/auth/refresh/")) {
-      //       store.dispatch(
-      //         logoutFailure(
-      //           error.response?.data?.error ||
-      //           "Your session has expired. Please log in again."
-      //         )
-      //       );
-      //       store.dispatch(logoutStart());
-      //       return Promise.reject("Your session has expired. Please log in again.");
-      //     }
-      //     store.dispatch(logoutStart());
-      //   }
-
-      //   return Promise.reject(error);
-      // }
-
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          addSubscriber((token: string) => {
-            if (!originalRequest.headers) {
-              originalRequest.headers = new axios.AxiosHeaders();
-            }
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(axiosJsonInstance(originalRequest));
-          });
-        });
-      }
-      isRefreshing = true;
       try {
-        const response = await axios.post(
+        await axios.post(
           `${removeTrailingSlash(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api")}/accounts/auth/token/refresh/`,
           {},
           {
+            withCredentials: true,
             headers: {
               "Content-Type": "application/json",
             },
           }
         );
-
-
-        const access = response.data?.access;
-        const refresh = response.data?.refresh;
-
-
-
-
-        if (access) store.dispatch(setAccessToken(access));
-        if (refresh) store.dispatch(setRefreshToken(refresh));
-
-        if (access) {
-          axiosJsonInstance.defaults.headers.common["Authorization"] = `Bearer ${access}`;
-          if (originalRequest.headers) {
-            originalRequest.headers["Authorization"] = `Bearer ${access}`;
-          }
-          onRefreshed(access);
-        }
-
         return axiosJsonInstance(originalRequest);
       } catch (err) {
         store.dispatch(logoutStart());
         return Promise.reject("Your session has expired. Please log in again.");
-      } finally {
-        isRefreshing = false;
       }
     }
 

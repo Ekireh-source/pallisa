@@ -27,9 +27,9 @@ import { PaginatedTable, ColumnDef } from '@/components/tables/paginated-table';
 import { getPaginatedFromUrl } from '@/lib/utils';
 interface IProjectMatrixListResponse {
   public_id: string;
+  name: string;
   subject_name: string;
   stream_name: string;
-  competency_number: number;
   term_name: string;
   academic_year_name: string;
 }
@@ -53,10 +53,10 @@ export default function ProjectsListPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this project competency matrix scores? This will remove all graded marks for this stream and subject.")) {
+    if (confirm("Are you sure you want to delete this project and all its graded competency scores? This action cannot be undone.")) {
       const res = await DeleteProject(id);
       if (res.success) {
-        toast.success("Project Matrix deleted successfully");
+        toast.success("Project evaluation matrix deleted successfully");
         tableRefreshRef.current?.refresh();
       } else {
         toast.error("Failed to delete project matrix");
@@ -66,39 +66,61 @@ export default function ProjectsListPage() {
 
   const columns: ColumnDef<IProjectMatrixListResponse>[] = [
     {
-      key: "subject_name",
-      header: "Subject & Stream",
+      key: "name",
+      header: "Project Details",
       cell: (project) => (
-        <div className="font-bold flex items-center gap-3">
-          <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
-            <BookOpen className="w-4.5 h-4.5" />
+        <div className="font-bold flex items-center gap-3.5">
+          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shadow-sm border border-indigo-100/50">
+            <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-gray-900 font-bold">{project.subject_name || 'N/A'}</p>
-            <p className="text-xs text-gray-400 font-medium">Stream: {project.stream_name || 'N/A'}</p>
+            <p className="text-gray-900 font-extrabold text-base leading-tight">{project.name || 'Untitled Project'}</p>
+            <p className="text-xs text-gray-500 font-semibold mt-1">
+              Subject: <span className="text-gray-800 font-bold">{project.subject_name || 'N/A'}</span> | Stream: <span className="text-gray-800 font-bold">{project.stream_name || 'N/A'}</span>
+            </p>
           </div>
         </div>
-      ),
-    },
-    {
-      key: "competency_number",
-      header: "Competency Area",
-      cell: (project) => (
-        <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-50 border-none font-bold rounded-full px-3 py-1 flex items-center gap-1 w-fit">
-          <Award className="w-3.5 h-3.5" />
-          <span>Competency {project.competency_number} (C{project.competency_number})</span>
-        </Badge>
       ),
     },
     {
       key: "term_name",
       header: "Academic Period",
       cell: (project) => (
-        <div className="flex items-center gap-2 text-gray-500 font-medium text-sm">
+        <div className="flex items-center gap-2 text-gray-600 font-bold text-sm">
           <Calendar className="w-4 h-4 text-gray-400" />
           <span>{project.term_name || 'N/A'} ({project.academic_year_name || 'Active Year'})</span>
         </div>
       ),
+    },
+    {
+      key: "grading_progress",
+      header: "Grading Progress",
+      cell: (project) => {
+        const progress = (project as any).grading_progress ?? 0;
+        const isComplete = progress === 100;
+        return (
+          <div className="w-44">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-gray-400'
+              }`}>
+                {isComplete ? 'Fully Graded' : 'Grading...'}
+              </span>
+              <span className={`text-xs font-extrabold ${
+                isComplete ? 'text-emerald-600' : 'text-gray-600'
+              }`}>{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner border border-gray-200/50">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${
+                  isComplete ? 'bg-emerald-500' : 'bg-primary'
+                }`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        );
+      }
     },
     {
       key: "actions",

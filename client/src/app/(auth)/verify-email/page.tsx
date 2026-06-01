@@ -3,10 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { VerifyEmail, ResendOTP } from "@/features/auth/auth.service";
+import { FetchSchoolById } from "@/features/school/school.service";
 import { useAppDispatch } from "@/store";
 import {
-  setAccessToken,
-  setRefreshToken,
   setCurrentUser,
   setTemporaryPermissions,
   setSchool,
@@ -96,17 +95,31 @@ export default function VerifyEmailPage() {
         setIsVerified(true);
         toast.success("Email verified successfully!");
 
-        // Auto-login: set tokens and user data from the response
-        const { access, refresh, user_profile, school } = result.data;
-        if (access) dispatch(setAccessToken(access));
-        if (refresh) dispatch(setRefreshToken(refresh));
+        // Auto-login: set user data from the response (tokens are automatically set in cookies)
+        const successResult = result as { success: true; data: any };
+        const { user_profile, school } = successResult.data;
         if (user_profile) {
           dispatch(setCurrentUser(user_profile));
           if (user_profile.user_permissions) {
             dispatch(setTemporaryPermissions(user_profile.user_permissions as any));
           }
         }
-        if (school) dispatch(setSchool(school));
+        
+        if (school) {
+          dispatch(setSchool(school));
+        } else {
+          const schoolId = user_profile?.role?.school;
+          if (schoolId) {
+            try {
+              const schoolRes = await FetchSchoolById(schoolId);
+              if (schoolRes.success && schoolRes.data) {
+                dispatch(setSchool(schoolRes.data));
+              }
+            } catch (schoolErr) {
+              console.error("Failed to fetch school details:", schoolErr);
+            }
+          }
+        }
         dispatch(userActivityDetected());
 
         // Redirect after a short delay
@@ -114,9 +127,10 @@ export default function VerifyEmailPage() {
           router.replace("/dashboard");
         }, 1500);
       } else {
+        const errorResult = result as { success: false; error: any };
         const errorMsg =
-          result.error?.error ||
-          result.error?.message ||
+          errorResult.error?.error ||
+          errorResult.error?.message ||
           "Verification failed. Please try again.";
         toast.error(errorMsg);
       }

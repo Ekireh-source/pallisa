@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Topics, CompetencyArea, ActivityOfIntegration, IntegrationScore,
-    Exam, ExamScore, ExamPaperScore, ProjectScore, SaAssessment, SaScore
+    Exam, ExamScore, ExamPaperScore, Project, ProjectScore, SaAssessment, SaScore
 )
 
 @admin.register(Topics)
@@ -46,11 +46,17 @@ class ExamPaperScoreAdmin(admin.ModelAdmin):
     search_fields = ('exam__name', 'student__user_profile__first_name', 'student__user_profile__last_name', 'paper__name')
     list_filter = ('exam', 'paper')
 
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'stream', 'subject', 'term', 'created_by')
+    search_fields = ('name', 'stream__name', 'subject__name')
+    list_filter = ('term', 'subject')
+
 @admin.register(ProjectScore)
 class ProjectScoreAdmin(admin.ModelAdmin):
-    list_display = ('student', 'subject', 'term', 'academic_year', 'competency_number', 'sub_criteria', 'score')
-    search_fields = ('student__user_profile__first_name', 'student__user_profile__last_name', 'subject__name')
-    list_filter = ('term', 'academic_year', 'competency_number')
+    list_display = ('project', 'student', 'competency_number')
+    search_fields = ('student__user_profile__first_name', 'student__user_profile__last_name', 'project__name')
+    list_filter = ('competency_number',)
 
 @admin.register(SaAssessment)
 class SaAssessmentAdmin(admin.ModelAdmin):

@@ -39,7 +39,7 @@ import {
   DropdownMenuSeparator,
   Label
 } from '@/components/ui';
-import { FetchTeacherById } from '@/features/members/members.service';
+import { FetchTeacherById, DeleteTeacherSubjectAssignment } from '@/features/members/members.service';
 import { TeacherDetail } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -72,6 +72,22 @@ export default function TeacherDetailPage({ params }: PageProps) {
       router.push('/teachers');
     }
     setLoading(false);
+  };
+
+  const handleDeleteAssignment = async (assignmentId: number) => {
+    if (confirm("Are you sure you want to remove this teaching assignment?")) {
+      try {
+        const res = await DeleteTeacherSubjectAssignment(assignmentId);
+        if (res.success) {
+          toast.success("Teaching assignment removed successfully");
+          loadTeacher();
+        } else {
+          toast.error("Failed to remove teaching assignment");
+        }
+      } catch (error) {
+        toast.error("An error occurred while removing the assignment");
+      }
+    }
   };
 
   useEffect(() => {
@@ -326,10 +342,23 @@ export default function TeacherDetailPage({ params }: PageProps) {
                               </div>
                               <div>
                                 <p className="text-sm font-bold text-gray-900">{assign.subject_name}</p>
-                                <p className="text-xs font-semibold text-gray-500 mt-0.5">{assign.stream_name}</p>
+                                <p className="text-xs font-semibold text-gray-500 mt-0.5">
+                                  {assign.class_name ? `${assign.class_name} - ` : ''}{assign.stream_name}
+                                </p>
                               </div>
                             </div>
-                            <Badge variant="outline" className="rounded-full bg-white px-3 py-1 font-bold text-[10px] uppercase tracking-wider text-indigo-600 ring-1 ring-indigo-50 border-none">Primary</Badge>
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline" className="rounded-full bg-white px-3 py-1 font-bold text-[10px] uppercase tracking-wider text-indigo-600 ring-1 ring-indigo-50 border-none">Primary</Badge>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-xl h-9 w-9 text-red-500 hover:text-red-700 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                onClick={() => handleDeleteAssignment(assign.id)}
+                                title="Delete load"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         ))
                       ) : (

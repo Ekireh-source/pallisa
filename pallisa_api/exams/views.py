@@ -1,3 +1,4 @@
+from exams.models import Project
 from django.db.models import Q
 from expenses.models import AcademicYear
 from expenses.models import Term
@@ -9,7 +10,7 @@ from rest_framework import status, permissions
 from django.core.paginator import Paginator
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.shortcuts import get_object_or_404
-from accounts.permission import filter_by_school, get_user_school
+from accounts.permission import filter_by_school, get_user_school, get_teacher_scope
 from .models import (
     Topics, ActivityOfIntegration, IntegrationScore, Exam, ExamScore, 
     CompetencyArea, ExamPaperScore, ProjectScore, SaAssessment, SaScore
@@ -48,6 +49,13 @@ class TopicsListCreateView(APIView):
         try:
             queryset = Topics.objects.all()
             queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                scope = get_teacher_scope(request.user)
+                if scope:
+                    queryset = queryset.filter(class_obj_id__in=scope['class_ids'])
+                else:
+                    queryset = queryset.none()
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -140,6 +148,7 @@ class CompetencyAreaListCreateView(APIView):
             OpenApiParameter(name='page_size', type=int, description='Number of items per page'),
             OpenApiParameter(name='class_id', type=int, description='Filter by class ID'),
             OpenApiParameter(name='term_id', type=int, description='Filter by term ID'),
+            OpenApiParameter(name='topic_id', type=int, description='Filter by topic ID'),
         ],
         responses={200: CompetencyAreaSerializer(many=True)}
     )
@@ -147,7 +156,7 @@ class CompetencyAreaListCreateView(APIView):
         try:
             queryset = CompetencyArea.objects.all().order_by('-created_at')
             
-            # Filter by class_id and term_id
+            # Filter by class_id, term_id, and topic_id
             class_id = request.query_params.get('class_id')
             if class_id:
                 queryset = queryset.filter(class_obj_id=class_id)
@@ -155,9 +164,20 @@ class CompetencyAreaListCreateView(APIView):
             term_id = request.query_params.get('term_id')
             if term_id:
                 queryset = queryset.filter(term_id=term_id)
+
+            topic_id = request.query_params.get('topic_id') or request.query_params.get('topic')
+            if topic_id:
+                queryset = queryset.filter(topic_id=topic_id)
                 
             # School scoping
             queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                scope = get_teacher_scope(request.user)
+                if scope:
+                    queryset = queryset.filter(class_obj_id__in=scope['class_ids'])
+                else:
+                    queryset = queryset.none()
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -256,6 +276,9 @@ class ActivityOfIntegrationListCreateView(APIView):
             queryset = ActivityOfIntegration.objects.all()
             queryset = filter_by_school(queryset, request, school_field_path='topic__class_obj__campus__schools')
             
+            if getattr(request.user, 'is_teacher', False):
+                queryset = queryset.filter(created_by=request.user)
+            
             # Pagination
             page = int(request.query_params.get('page', 1))
             page_size = int(request.query_params.get('page_size', 10))
@@ -287,7 +310,10 @@ class ActivityOfIntegrationListCreateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            serializer.save(teacher=request.user.profile.teacher_profile if hasattr(request.user.profile, 'teacher_profile') else None)
+            serializer.save(
+                teacher=request.user.profile.teacher_profile if hasattr(request.user.profile, 'teacher_profile') else None,
+                created_by=request.user
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error creating activity: {str(e)}")
@@ -351,6 +377,14 @@ class IntegrationScoreListCreateView(APIView):
     def get(self, request):
         try:
             queryset = IntegrationScore.objects.all()
+            queryset = filter_by_school(queryset, request, school_field_path='student__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                scope = get_teacher_scope(request.user)
+                if scope:
+                    queryset = queryset.filter(student__current_stream_id__in=scope['stream_ids'], aoi__topic__subject_id__in=scope['subject_ids'])
+                else:
+                    queryset = queryset.none()
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -449,6 +483,13 @@ class ExamListCreateView(APIView):
         try:
             queryset = Exam.objects.all()
             queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                scope = get_teacher_scope(request.user)
+                if scope:
+                    queryset = queryset.filter(class_obj_id__in=scope['class_ids'])
+                else:
+                    queryset = queryset.none()
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -578,6 +619,14 @@ class ExamScoreListCreateView(APIView):
     def get(self, request):
         try:
             queryset = ExamScore.objects.all()
+            queryset = filter_by_school(queryset, request, school_field_path='student__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                scope = get_teacher_scope(request.user)
+                if scope:
+                    queryset = queryset.filter(student__current_stream_id__in=scope['stream_ids'])
+                else:
+                    queryset = queryset.none()
             
             # Pagination
             page = int(request.query_params.get('page', 1))
@@ -912,6 +961,14 @@ class ExamPaperScoreListCreateView(APIView):
     def get(self, request):
         try:
             queryset = ExamPaperScore.objects.all().select_related('exam', 'student__user_profile', 'paper__subject')
+            queryset = filter_by_school(queryset, request, school_field_path='student__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                scope = get_teacher_scope(request.user)
+                if scope:
+                    queryset = queryset.filter(student__current_stream_id__in=scope['stream_ids'], paper__subject_id__in=scope['subject_ids'])
+                else:
+                    queryset = queryset.none()
             
             exam_id = request.query_params.get('exam_id')
             student_id = request.query_params.get('student_id')
@@ -1133,35 +1190,52 @@ class ProjectMatrixView(APIView):
         if not active_year or not active_term:
             return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Handle detail lookup by virtual public_id (e.g. "2-5-1")
+        # Handle detail lookup by project public_id
         if public_id:
-            try:
-                stream_id, subject_id, competency_number_str = public_id.split('-')
-                stream_id = int(stream_id)
-                subject_id = int(subject_id)
-                competency_number = int(competency_number_str)
-            except ValueError:
-                return Response({"error": "Invalid project ID format"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            competency_number = int(competency_number_param) if competency_number_param else 1
-
-        # If we have stream and subject, return the matrix scores
-        if stream_id and subject_id:
-            students = Student.objects.filter(current_stream_id=stream_id, is_active=True).select_related('user_profile')
+            project = Project.objects.filter(public_id=public_id).first()
             
-            project_scores = ProjectScore.objects.filter(
-                subject_id=subject_id,
-                term=active_term,
-                academic_year=active_year,
-                competency_number=competency_number
-            )
+            competency_number = 1
+            # Fallback: if public_id is legacy format "stream_id-subject_id-competency_number"
+            if not project:
+                parts = public_id.split('-')
+                if len(parts) == 3:
+                    try:
+                        stream_id, subject_id, competency_number = map(int, parts)
+                        project = Project.objects.filter(
+                            stream_id=stream_id,
+                            subject_id=subject_id,
+                            term=active_term
+                        ).first()
+                        if not project:
+                            # Create a default project for compatibility
+                            stream = Stream.objects.filter(id=stream_id).first()
+                            subject = Subject.objects.filter(id=subject_id).first()
+                            name = f"{subject.name if subject else 'Subject'} Project"
+                            project = Project.objects.create(
+                                name=name,
+                                stream_id=stream_id,
+                                subject_id=subject_id,
+                                term=active_term,
+                                created_by=request.user
+                            )
+                    except ValueError:
+                        pass
+            else:
+                comp_param = request.query_params.get('competency_number')
+                competency_number = 1
+                if comp_param:
+                    try:
+                        competency_number = int(str(comp_param).strip().rstrip('/'))
+                    except ValueError:
+                        competency_number = 1
 
-            scores_map = {}
-            for ps in project_scores:
-                s_id = ps.student_id
-                if s_id not in scores_map:
-                    scores_map[s_id] = {}
-                scores_map[s_id][ps.sub_criteria] = float(ps.score)
+            if not project:
+                return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            students = Student.objects.filter(current_stream=project.stream, is_active=True).select_related('user_profile')
+
+            scores = ProjectScore.objects.filter(project=project, competency_number=competency_number)
+            scores_map = {s.student_id: s.scores for s in scores}
 
             result_learners = []
             for student in students:
@@ -1173,42 +1247,57 @@ class ProjectMatrixView(APIView):
                 })
 
             return Response({
-                "public_id": public_id or f"{stream_id}-{subject_id}-{competency_number}",
-                "stream_id": stream_id,
-                "subject_id": subject_id,
+                "public_id": project.public_id,
+                "project_name": project.name,
+                "stream_id": project.stream_id,
+                "stream_name": project.stream.name if project.stream else "N/A",
+                "subject_id": project.subject_id,
+                "subject_name": project.subject.name if project.subject else "N/A",
                 "competency_number": competency_number,
                 "active_competencies": [1, 2, 3, 4],
                 "learners": result_learners
             })
 
-        # Otherwise, return list of unique active/graded projects
-        distinct_scores = ProjectScore.objects.filter(
-            term=active_term,
-            academic_year=active_year
-        ).values(
-            'student__current_stream',
-            'student__current_stream__name',
-            'subject',
-            'subject__name',
-            'competency_number'
-        ).distinct()
+        # List all projects
+        projects_query = Project.objects.filter(term=active_term)
+        
+        # Apply teacher stream assignments filtering
+        if getattr(request.user, 'is_teacher', False):
+            teacher = None
+            profile = getattr(request.user, 'profile', None)
+            if profile and hasattr(profile, 'teacher_profile'):
+                teacher = profile.teacher_profile
+            
+            if teacher:
+                assigned_stream_ids = TeacherSubjectAssignment.objects.filter(
+                    teacher=teacher,
+                    academic_year=active_year,
+                    is_active=True
+                ).values_list('stream_id', flat=True).distinct()
+                
+                projects_query = projects_query.filter(
+                    Q(created_by=request.user) | Q(stream_id__in=assigned_stream_ids)
+                )
+            else:
+                projects_query = projects_query.filter(created_by=request.user)
 
         projects_list = []
-        for ds in distinct_scores:
-            s_id = ds['student__current_stream']
-            sub_id = ds['subject']
-            if not s_id or not sub_id:
-                continue
-            virtual_id = f"{s_id}-{sub_id}-{ds['competency_number']}"
+        for p in projects_query.select_related('stream', 'subject', 'term', 'term__academic_year'):
+            total_students = Student.objects.filter(current_stream=p.stream, is_active=True).count()
+            scores_count = ProjectScore.objects.filter(project=p).count()
+            total_potential = total_students * 4
+            progress = min(100, int((scores_count / total_potential) * 100)) if total_potential > 0 else 0
+
             projects_list.append({
-                "public_id": virtual_id,
-                "stream_id": s_id,
-                "stream_name": ds['student__current_stream__name'],
-                "subject_id": sub_id,
-                "subject_name": ds['subject__name'],
-                "competency_number": ds['competency_number'],
-                "term_name": active_term.name,
-                "academic_year_name": active_year.name,
+                "public_id": p.public_id,
+                "name": p.name,
+                "stream_id": p.stream_id,
+                "stream_name": p.stream.name if p.stream else "N/A",
+                "subject_id": p.subject_id,
+                "subject_name": p.subject.name if p.subject else "N/A",
+                "term_name": p.term.name if p.term else "N/A",
+                "academic_year_name": p.term.academic_year.name if (p.term and p.term.academic_year) else "N/A",
+                "grading_progress": progress
             })
 
         return Response({
@@ -1222,57 +1311,100 @@ class ProjectMatrixView(APIView):
         summary="Batch updates student project competency scores"
     )
     def post(self, request, public_id=None):
-        subject_id = request.data.get('subject_id')
-        competency_number = request.data.get('competency_number')
-        records = request.data.get('records', [])
+        action = request.data.get('action')
+        
+        # 1. Project Creation
+        if action == 'create' or (not public_id and 'name' in request.data):
+            name = request.data.get('name')
+            stream_id = request.data.get('stream_id')
+            subject_id = request.data.get('subject_id')
+            description = request.data.get('description', '')
 
-        if public_id and (not subject_id or competency_number is None):
+            active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+
+            if not name or not stream_id or not subject_id:
+                return Response({"error": "name, stream_id, and subject_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            project = Project.objects.create(
+                name=name,
+                stream_id=stream_id,
+                subject_id=subject_id,
+                term=active_term,
+                description=description,
+                created_by=request.user
+            )
+
+            return Response({
+                "message": "Project created successfully",
+                "public_id": project.public_id,
+                "name": project.name
+            }, status=status.HTTP_201_CREATED)
+
+        # 2. Score Matrix Upserting
+        project_id = public_id
+        competency_number = request.data.get('competency_number')
+        if competency_number is not None:
             try:
-                _, parsed_sub, parsed_comp = public_id.split('-')
-                subject_id = int(parsed_sub) if not subject_id else subject_id
-                competency_number = int(parsed_comp) if competency_number is None else competency_number
+                competency_number = int(str(competency_number).strip().rstrip('/'))
             except ValueError:
                 pass
+        records = request.data.get('records', [])
 
-        if not subject_id or competency_number is None:
-            return Response({"error": "subject_id and competency_number are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not project_id:
+            project_id = request.data.get('project_id')
 
-        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
-        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+        project = Project.objects.filter(public_id=project_id).first()
+        # Fallback legacy parsing support
+        if not project and project_id:
+            parts = project_id.split('-')
+            if len(parts) == 3:
+                try:
+                    stream_id, subject_id, competency_number_fallback = map(int, parts)
+                    competency_number = competency_number_fallback if competency_number is None else competency_number
+                    active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+                    project = Project.objects.filter(
+                        stream_id=stream_id,
+                        subject_id=subject_id,
+                        term=active_term
+                    ).first()
+                except ValueError:
+                    pass
 
-        if not active_year or not active_term:
-            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+        if not project:
+            return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if competency_number is None:
+            return Response({"error": "competency_number is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.db import transaction
         try:
             with transaction.atomic():
-                ProjectScore.objects.filter(
-                    subject_id=subject_id,
-                    term=active_term,
-                    academic_year=active_year,
-                    competency_number=competency_number
-                ).delete()
-
-                project_scores_to_create = []
                 for r in records:
-                    val = r.get('score')
-                    if val is None or val == '':
-                        continue
-                    project_scores_to_create.append(ProjectScore(
-                        student_id=r['student_id'],
-                        subject_id=subject_id,
-                        term=active_term,
-                        academic_year=active_year,
+                    student_id = r.get('student_id')
+                    student_scores = r.get('scores', {})
+                    
+                    cleaned_scores = {}
+                    for k, v in student_scores.items():
+                        if v is not None and v != '':
+                            try:
+                                cleaned_scores[k] = float(v)
+                            except ValueError:
+                                pass
+
+                    ProjectScore.objects.update_or_create(
+                        project=project,
+                        student_id=student_id,
                         competency_number=competency_number,
-                        sub_criteria=r['sub_criteria'],
-                        score=val
-                    ))
-                ProjectScore.objects.bulk_create(project_scores_to_create)
+                        defaults={
+                            'scores': cleaned_scores,
+                            'created_by': request.user
+                        }
+                    )
 
             return Response({"message": "Project evaluation scores updated successfully"})
         except Exception as e:
             logger.error(f"Error in ProjectMatrix post view: {str(e)}")
-            return Response({"error": "Failed to update project scores matrix"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Failed to update project scores matrix: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @extend_schema(
         summary="Delete student project scores configuration matrix"
@@ -1281,26 +1413,32 @@ class ProjectMatrixView(APIView):
         if not public_id:
             return Response({"error": "public_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            stream_id, subject_id, competency_number = map(int, public_id.split('-'))
-        except ValueError:
-            return Response({"error": "Invalid public_id format"}, status=status.HTTP_400_BAD_REQUEST)
+        project = Project.objects.filter(public_id=public_id).first()
+        
+        # Fallback legacy parsing support
+        if not project:
+            parts = public_id.split('-')
+            if len(parts) == 3:
+                try:
+                    stream_id, subject_id, _ = map(int, parts)
+                    active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+                    project = Project.objects.filter(
+                        stream_id=stream_id,
+                        subject_id=subject_id,
+                        term=active_term
+                    ).first()
+                except ValueError:
+                    pass
 
-        active_year = AcademicYear.objects.filter(is_current=True).first() or AcademicYear.objects.first()
-        active_term = Term.objects.filter(is_current=True).first() or Term.objects.first()
+        if not project:
+            return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if not active_year or not active_term:
-            return Response({"error": "No active academic year or term configured in system settings"}, status=status.HTTP_400_BAD_REQUEST)
+        if getattr(request.user, 'is_teacher', False):
+            if project.created_by != request.user:
+                return Response({"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
-        ProjectScore.objects.filter(
-            student__current_stream_id=stream_id,
-            subject_id=subject_id,
-            competency_number=competency_number,
-            term=active_term,
-            academic_year=active_year
-        ).delete()
-
-        return Response({"message": "Project competency scores configuration deleted successfully"})
+        project.delete()
+        return Response({"message": "Project deleted successfully"})
 
 
 class SaMatrixView(APIView):
@@ -1450,6 +1588,10 @@ class SaAssessmentListCreateView(APIView):
     def get(self, request):
         try:
             queryset = SaAssessment.objects.all().order_by('-created_at')
+            queryset = filter_by_school(queryset, request, school_field_path='stream__class_obj__campus__schools')
+            
+            if getattr(request.user, 'is_teacher', False):
+                queryset = queryset.filter(created_by=request.user)
             stream_id = request.query_params.get('stream_id')
             subject_id = request.query_params.get('subject_id')
             if stream_id:
@@ -1498,7 +1640,10 @@ class SaAssessmentListCreateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            serializer.save(teacher=request.user.profile.teacher_profile if hasattr(request.user.profile, 'teacher_profile') else None)
+            serializer.save(
+                teacher=request.user.profile.teacher_profile if hasattr(request.user.profile, 'teacher_profile') else None,
+                created_by=request.user
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error creating sa assessment: {str(e)}")

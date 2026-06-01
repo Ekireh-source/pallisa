@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { 
-  Users, 
-  UserCheck, 
-  DollarSign, 
-  CreditCard, 
-  ArrowUpRight, 
+import {
+  Users,
+  UserCheck,
+  DollarSign,
+  CreditCard,
+  ArrowUpRight,
   ArrowDownRight,
   Plus,
   Calendar,
@@ -15,9 +15,9 @@ import {
   Clock,
   Settings
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Badge,
   Table,
   TableHeader,
@@ -35,20 +35,40 @@ import Link from 'next/link';
 import { FetchDashboardAnalytics } from '@/features/school/school.service';
 import { useEffect, useState } from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
+import TeachersDashboard from '@/components/dashboard/TeachersDashboard';
 
 export default function DashboardPage() {
   const { user, school } = useAppSelector((state) => state.auth);
   const [analytics, setAnalytics] = useState<any>(null);
 
+
+
+  // Determine if user is a teacher
+  const isTeacher = user?.value?.user?.is_teacher;
+
+  // Let admins who are also teachers toggle between dashboards if needed
+  const isAdmin = user?.value?.role?.name === 'SuperAdmin' || user?.value?.role?.is_superadmin;
+  const [viewMode, setViewMode] = useState<'teacher' | 'admin'>(isTeacher ? 'teacher' : 'admin');
+
+  useEffect(() => {
+    if (isTeacher) {
+      setViewMode('teacher');
+    } else {
+      setViewMode('admin');
+    }
+  }, [isTeacher]);
+
   useEffect(() => {
     const loadAnalytics = async () => {
-      const res = await FetchDashboardAnalytics({school_id: Number(school?.id)});
-      if (res.success) {
-        setAnalytics(res.data);
+      if (viewMode === 'admin' && school?.id) {
+        const res = await FetchDashboardAnalytics({ school_id: Number(school.id) });
+        if (res.success) {
+          setAnalytics(res.data);
+        }
       }
     };
     loadAnalytics();
-  }, [school]);
+  }, [school, viewMode]);
 
   const layoutStats = [
     {
@@ -88,6 +108,17 @@ export default function DashboardPage() {
     { title: "Record Expense", icon: CreditCard, href: "/expenses", color: "bg-primary" },
     { title: "Collect Payment", icon: DollarSign, href: "/fees/payments", color: "bg-primary" },
   ];
+
+  if (viewMode === 'teacher') {
+    return (
+      <TeachersDashboard 
+        user={user?.value} 
+        school={school} 
+        onSwitchView={isAdmin ? () => setViewMode('admin') : undefined}
+        showAdminToggle={isAdmin}
+      />
+    );
+  }
 
   return (
     <MainLayout
@@ -151,12 +182,11 @@ export default function DashboardPage() {
                           <TableCell className="text-gray-500 text-sm">{tx.date}</TableCell>
                           <TableCell className="font-bold text-gray-900">{tx.amount}</TableCell>
                           <TableCell>
-                            <Badge 
+                            <Badge
                               variant={tx.status === 'completed' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'}
-                              className={`rounded-full capitalize ${
-                                tx.status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
-                                tx.status === 'pending' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''
-                              }`}
+                              className={`rounded-full capitalize ${tx.status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
+                                  tx.status === 'pending' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''
+                                }`}
                             >
                               {tx.status}
                             </Badge>
@@ -181,14 +211,14 @@ export default function DashboardPage() {
               <div className="h-[200px] w-full flex items-end justify-between gap-2 px-2">
                 {[65, 45, 75, 55, 90, 70, 85].map((h, i) => (
                   <div key={i} className="flex-1 group relative">
-                    <div 
+                    <div
                       className="w-full bg-primary/20 rounded-t-lg group-hover:bg-primary transition-all duration-300"
                       style={{ height: `${h}%` }}
                     />
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                       {h}%
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2 text-center font-medium">Day {i+1}</p>
+                    <p className="text-[10px] text-gray-400 mt-2 text-center font-medium">Day {i + 1}</p>
                   </div>
                 ))}
               </div>
@@ -202,9 +232,9 @@ export default function DashboardPage() {
               <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
               <div className="grid grid-cols-1 gap-3">
                 {quickActions.map((action, i) => (
-                  <Button 
-                    key={i} 
-                    variant="outline" 
+                  <Button
+                    key={i}
+                    variant="outline"
                     className="h-14 justify-start px-4 hover:bg-gray-50 border-gray-100 rounded-2xl group transition-all"
                     asChild
                   >

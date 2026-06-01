@@ -372,6 +372,64 @@ class StudentSerializer(serializers.ModelSerializer):
             validated_data['student_id'] = student_id
         return super().create(validated_data)
 
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        # Extract user profile fields
+        user_email = validated_data.pop('user_email', None)
+        user_first_name = validated_data.pop('user_first_name', None)
+        user_last_name = validated_data.pop('user_last_name', None)
+        user_other_name = validated_data.pop('user_other_name', None)
+        user_gender = validated_data.pop('user_gender', None)
+        user_dob = validated_data.pop('user_dob', None)
+        user_phone = validated_data.pop('user_phone', None)
+        user_emergency_contact = validated_data.pop('user_emergency_contact', None)
+        user_emergency_phone = validated_data.pop('user_emergency_phone', None)
+        user_emergency_contact_address = validated_data.pop('user_emergency_contact_address', None)
+        user_emergency_contact_email = validated_data.pop('user_emergency_contact_email', None)
+        user_profile_picture = validated_data.pop('user_profile_picture', None)
+
+        # Update student fields
+        instance = super().update(instance, validated_data)
+
+        # Update UserProfile and User if they exist
+        profile = instance.user_profile
+        if profile:
+            # Update profile basic fields
+            if user_first_name is not None:
+                profile.first_name = user_first_name
+            if user_last_name is not None:
+                profile.last_name = user_last_name
+            if user_other_name is not None:
+                profile.other_name = user_other_name
+            if user_gender is not None:
+                profile.gender = user_gender
+            if user_dob is not None:
+                profile.dob = user_dob
+            if user_phone is not None:
+                profile.phone = user_phone
+            if user_emergency_contact is not None:
+                profile.emergency_contact = user_emergency_contact
+            if user_emergency_phone is not None:
+                profile.emergency_phone = user_emergency_phone
+            if user_emergency_contact_address is not None:
+                profile.emergency_contact_address = user_emergency_contact_address
+            if user_emergency_contact_email is not None:
+                profile.emergency_contact_email = user_emergency_contact_email
+            if user_profile_picture is not None:
+                profile.profile_picture = user_profile_picture
+            profile.save()
+
+            # Update User email if provided
+            user = profile.user
+            if user:
+                if user_email is not None:
+                    user.email = user_email
+                if instance.student_id:
+                    user.student_id = instance.student_id
+                user.save()
+
+        return instance
+
 
 class TeacherSerializer(serializers.ModelSerializer):
     """Serializer for Teacher with complete user creation flow"""
@@ -565,6 +623,62 @@ class TeacherSerializer(serializers.ModelSerializer):
         
         # If user_profile is provided, create teacher directly
         return super().create(validated_data)
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        # Extract user profile fields
+        user_email = validated_data.pop('user_email', None)
+        user_first_name = validated_data.pop('user_first_name', None)
+        user_last_name = validated_data.pop('user_last_name', None)
+        user_other_name = validated_data.pop('user_other_name', None)
+        user_gender = validated_data.pop('user_gender', None)
+        user_dob = validated_data.pop('user_dob', None)
+        user_phone = validated_data.pop('user_phone', None)
+        user_emergency_contact = validated_data.pop('user_emergency_contact', None)
+        user_emergency_phone = validated_data.pop('user_emergency_phone', None)
+        user_emergency_contact_address = validated_data.pop('user_emergency_contact_address', None)
+        user_emergency_contact_email = validated_data.pop('user_emergency_contact_email', None)
+        user_profile_picture = validated_data.pop('user_profile_picture', None)
+
+        # Update teacher fields
+        instance = super().update(instance, validated_data)
+
+        # Update UserProfile and User if they exist
+        profile = instance.user_profile
+        if profile:
+            # Update profile basic fields
+            if user_first_name is not None:
+                profile.first_name = user_first_name
+            if user_last_name is not None:
+                profile.last_name = user_last_name
+            if user_other_name is not None:
+                profile.other_name = user_other_name
+            if user_gender is not None:
+                profile.gender = user_gender
+            if user_dob is not None:
+                profile.dob = user_dob
+            if user_phone is not None:
+                profile.phone = user_phone
+            if user_emergency_contact is not None:
+                profile.emergency_contact = user_emergency_contact
+            if user_emergency_phone is not None:
+                profile.emergency_phone = user_emergency_phone
+            if user_emergency_contact_address is not None:
+                profile.emergency_contact_address = user_emergency_contact_address
+            if user_emergency_contact_email is not None:
+                profile.emergency_contact_email = user_emergency_contact_email
+            if user_profile_picture is not None:
+                profile.profile_picture = user_profile_picture
+            profile.save()
+
+            # Update User email if provided
+            user = profile.user
+            if user:
+                if user_email is not None:
+                    user.email = user_email
+                user.save()
+
+        return instance
 
 
 class ParentSerializer(serializers.ModelSerializer):
@@ -795,13 +909,14 @@ class TeacherSubjectAssignmentSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     subject_code = serializers.CharField(source='subject.code', read_only=True)
     stream_name = serializers.CharField(source='stream.name', read_only=True)
+    class_name = serializers.CharField(source='stream.class_obj.name', read_only=True)
     academic_year_name = serializers.CharField(source='academic_year.name', read_only=True)
     
     class Meta:
         model = TeacherSubjectAssignment
         fields = [
             'id', 'teacher', 'teacher_name', 'teacher_employee_id', 'subject',
-            'subject_name', 'subject_code', 'stream', 'stream_name',
+            'subject_name', 'subject_code', 'stream', 'stream_name', 'class_name',
             'academic_year', 'academic_year_name', 'is_active',
             'created_at', 'updated_at'
         ]

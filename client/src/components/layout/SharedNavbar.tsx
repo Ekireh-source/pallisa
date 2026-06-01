@@ -1,6 +1,7 @@
 'use client';
 
 import { Bell, User, LogOut, Settings, Menu } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -79,7 +80,11 @@ export function SharedNavbar({
           </Button>
         )}
         
-        <h1 className="text-base md:text-lg font-semibold text-gray-900 ml-2">Caskool</h1>
+        <h1 className="text-base md:text-lg font-semibold text-gray-900 ml-2">
+          <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+            Caskool
+          </Link>
+        </h1>
       </div>
       
       <div className="flex items-center gap-4">

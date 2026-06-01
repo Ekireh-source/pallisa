@@ -107,19 +107,21 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
       {/* ── School Header ── */}
       {s.show_header && (
         <div className="flex flex-col md:flex-row items-center md:items-start justify-between border-b-2 pb-6 mb-6" style={{ borderColor: `${primaryColor}15` }}>
-          <div className="flex items-center gap-4">
-            <div className="flex-shrink-0 w-20 h-20 rounded-[12px] overflow-hidden bg-gray-50 flex items-center justify-center p-1 border border-gray-150">
-              {s.show_school_logo && school?.logo ? (
-                <img src={formatImgUrl(school.logo) || ''} alt="School Logo" className="w-full h-full object-contain" />
-              ) : (
-                <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" width={50} height={50}>
-                  <circle cx="15" cy="8" r="4" fill={primaryColor} />
-                  <path d="M15 13 L6 18 L15 23 L24 18 Z" fill={primaryColor} />
-                  <rect x="12" y="23" width="6" height="4" rx="1" fill={primaryColor} />
-                </svg>
-              )}
+          {s.show_school_logo && (
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 w-20 h-20 rounded-[12px] overflow-hidden bg-gray-50 flex items-center justify-center p-1 border border-gray-150">
+                {school?.logo ? (
+                  <img src={formatImgUrl(school.logo) || ''} alt="School Logo" className="w-full h-full object-contain" />
+                ) : (
+                  <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" width={50} height={50}>
+                    <circle cx="15" cy="8" r="4" fill={primaryColor} />
+                    <path d="M15 13 L6 18 L15 23 L24 18 Z" fill={primaryColor} />
+                    <rect x="12" y="23" width="6" height="4" rx="1" fill={primaryColor} />
+                  </svg>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           <div className="text-center md:text-right mt-4 md:mt-0 flex-1 md:pl-8">
             <h1 className="text-xl md:text-2xl font-black uppercase tracking-wider text-[var(--My-Black)]">
               {school?.name || 'MAYANGA PROGRESSIVE SEED SECONDARY SCHOOL'}

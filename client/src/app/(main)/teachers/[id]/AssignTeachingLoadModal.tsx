@@ -129,7 +129,7 @@ export function AssignTeachingLoadModal({ isOpen, onClose, teacherId, onSuccess 
                 <SelectContent>
                   {streams.map((stream) => (
                     <SelectItem key={stream.id} value={stream.id.toString()}>
-                      {stream.name}
+                      {stream.class_obj_name ? `${stream.class_obj_name} - ` : ''}{stream.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

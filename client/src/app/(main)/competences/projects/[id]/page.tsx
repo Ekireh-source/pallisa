@@ -54,10 +54,38 @@ export default function ProjectMatrixGradingPage() {
   const [streamId, setStreamId] = useState<number | null>(null);
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [competencyNumber, setCompetencyNumber] = useState<number>(1);
+  const [activeCompetencies, setActiveCompetencies] = useState<number[]>([1, 2, 3, 4]);
+  const [streamName, setStreamName] = useState<string>('');
+  const [subjectName, setSubjectName] = useState<string>('');
+  const [projectName, setProjectName] = useState<string>('');
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Function to load the project matrix scores
+  const loadMatrix = async (targetId: string) => {
+    setLoading(true);
+    const res = await FetchProjectScoreMatrixById(targetId);
+    if (res.success && res.data) {
+      setStudents(res.data.learners || []);
+      if (res.data.active_competencies) {
+        setActiveCompetencies(res.data.active_competencies);
+      }
+      if (res.data.stream_name) {
+        setStreamName(res.data.stream_name);
+      }
+      if (res.data.subject_name) {
+        setSubjectName(res.data.subject_name);
+      }
+      if (res.data.project_name) {
+        setProjectName(res.data.project_name);
+      }
+    } else {
+      toast.error("Failed to load project matrix data");
+    }
+    setLoading(false);
+  };
 
   // Parse ID and Fetch scores matrix
   useEffect(() => {
@@ -68,34 +96,27 @@ export default function ProjectMatrixGradingPage() {
       setStreamId(parseInt(parts[0]));
       setSubjectId(parseInt(parts[1]));
       setCompetencyNumber(parseInt(parts[2]));
+      loadMatrix(id);
+    } else {
+      loadMatrix(`${id}?competency_number=${competencyNumber}`);
     }
+  }, [id, competencyNumber]);
 
-    const loadMatrix = async () => {
-      setLoading(true);
-      const res = await FetchProjectScoreMatrixById(id);
-      if (res.success && res.data) {
-        setStudents(res.data.learners || []);
-      } else {
-        toast.error("Failed to load project matrix data");
-      }
-      setLoading(false);
-    };
-
-    loadMatrix();
-  }, [id]);
+  const handleSwitchCompetency = (num: number) => {
+    setCompetencyNumber(num);
+    if (id && !id.includes('-')) {
+      // Custom Project ID loads dynamically through useEffect dependency
+    } else {
+      if (!streamId || !subjectId) return;
+      const newId = `${streamId}-${subjectId}-${num}`;
+      router.push(`/competences/projects/${newId}`, { scroll: false });
+    }
+  };
 
   const activeCriteria = COMPETENCY_CRITERIA[competencyNumber] || [];
 
   // Update cell score in state
   const handleScoreChange = (studentId: number, criterion: string, value: string) => {
-    if (value !== '') {
-      const numVal = parseFloat(value);
-      if (isNaN(numVal) || numVal < 0 || numVal > 3) {
-        toast.error("Project competency scores must be between 0 and 3");
-        return;
-      }
-    }
-
     setStudents(prev => prev.map(student => {
       if (student.student_id === studentId) {
         return {
@@ -112,31 +133,33 @@ export default function ProjectMatrixGradingPage() {
 
   // Bulk save to backend
   const handleSaveMatrix = async () => {
-    if (!subjectId || !competencyNumber) return;
+    if (!competencyNumber) return;
     setSaving(true);
 
-    // Format scores into records payload
-    const records: any[] = [];
-    students.forEach(student => {
+    // Format scores into records payload matching JSON Document schema
+    const records = students.map(student => {
+      const studentScores: { [key: string]: number | null } = {};
       activeCriteria.forEach(crit => {
-        const score = student.scores?.[crit];
-        if (score !== undefined && score !== null && score !== '') {
-          records.push({
-            student_id: student.student_id,
-            sub_criteria: crit,
-            score: parseFloat(score)
-          });
+        const val = student.scores?.[crit];
+        if (val !== undefined && val !== null && val !== '') {
+          const parsed = parseFloat(String(val));
+          if (!isNaN(parsed)) {
+            studentScores[crit] = parsed;
+          }
         }
       });
+      return {
+        student_id: Number(student.student_id),
+        scores: studentScores
+      };
     });
 
     const payload = {
-      subject_id: subjectId,
-      competency_number: competencyNumber,
+      competency_number: Number(competencyNumber),
       records
     };
 
-    const res = await SaveBulkProjectScoresById(id, payload);
+    const res = await SaveBulkProjectScoresById(id, payload as any);
     if (res.success) {
       toast.success("Project Matrix scores saved successfully!");
     } else {
@@ -270,18 +293,18 @@ export default function ProjectMatrixGradingPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
               <Button 
                 variant="outline" 
-                className="rounded-xl border-gray-200 shadow-sm h-11 px-4 text-gray-700 font-bold hover:bg-gray-50 flex items-center gap-2"
+                className="w-full sm:w-auto rounded-xl border-gray-200 shadow-sm h-11 px-4 text-gray-700 font-bold hover:bg-gray-50 flex items-center justify-center gap-2"
                 onClick={handleExportTemplate}
               >
                 <Download className="w-4.5 h-4.5" />
                 <span>Export Template</span>
               </Button>
 
-              <label className="cursor-pointer">
-                <div className="rounded-xl border border-gray-200 shadow-sm h-11 px-4 text-gray-700 font-bold hover:bg-gray-50 flex items-center gap-2">
+              <label className="w-full sm:w-auto cursor-pointer">
+                <div className="w-full sm:w-auto rounded-xl border border-gray-200 shadow-sm h-11 px-4 text-gray-700 font-bold hover:bg-gray-50 flex items-center justify-center gap-2">
                   <Upload className="w-4.5 h-4.5 text-primary" />
                   <span>Import CSV</span>
                 </div>
@@ -292,7 +315,60 @@ export default function ProjectMatrixGradingPage() {
                   onChange={handleImportCSV}
                 />
               </label>
+
+              <Button 
+                onClick={handleSaveMatrix}
+                className="w-full sm:w-auto bg-primary hover:bg-primary/95 text-white font-bold rounded-xl h-11 px-5 shadow-md shadow-primary/20 flex items-center justify-center gap-2 min-w-32"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4.5 h-4.5" />
+                    <span>Save Scores</span>
+                  </>
+                )}
+              </Button>
             </div>
+          </div>
+
+          {/* Stream, Subject & Project Info Card */}
+          {(streamName || subjectName || projectName) && (
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">{subjectName || 'Subject'}</span>
+                <h2 className="font-extrabold text-gray-900 text-2xl mt-2">{projectName || 'Project Evaluation Workspace'}</h2>
+                <p className="text-sm text-gray-500 font-semibold mt-1">Class Stream: <span className="text-gray-900 font-bold">{streamName || 'N/A'}</span></p>
+              </div>
+              <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-4 md:min-w-64 max-w-sm">
+                <span className="text-xs text-amber-800 font-bold uppercase tracking-wider block">Lower Secondary Standards</span>
+                <p className="text-xs font-medium text-amber-900 mt-1">Record criteria-level marks. Enter decimals or integers directly inside the matrix.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Competency Tabs */}
+          <div className="bg-gray-100/80 p-1.5 rounded-2xl flex gap-1 border border-gray-200/50 shadow-inner w-full md:w-fit overflow-x-auto">
+            {activeCompetencies.map((num) => {
+              const isActive = num === competencyNumber;
+              return (
+                <button
+                  key={num}
+                  onClick={() => handleSwitchCompetency(num)}
+                  className={`flex-1 md:flex-initial text-center px-6 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-w-20 ${
+                    isActive
+                      ? "bg-white text-primary shadow-sm border border-gray-100/50"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  C{num} Area
+                </button>
+              );
+            })}
           </div>
 
           <Card className="p-4 border-none shadow-sm ring-1 ring-gray-100 bg-white">
@@ -327,96 +403,121 @@ export default function ProjectMatrixGradingPage() {
                 <p className="text-lg font-bold text-gray-900">No student scores found</p>
                 <p className="text-sm mt-1 text-gray-400">Ensure the stream has active students registered.</p>
               </div>
-            ) : (
-              <div className="overflow-x-auto border border-gray-100 rounded-xl max-h-[500px]">
-                <Table className="min-w-max">
-                  <TableHeader className="bg-gray-50/55 sticky top-0 z-20 backdrop-blur-md">
-                    <TableRow className="border-b border-gray-100">
-                      <TableHead className="w-24 text-left font-bold text-gray-700 py-4.5 px-4 sticky left-0 bg-gray-50/95 z-20 border-r border-gray-100">Admission No</TableHead>
-                      <TableHead className="w-64 text-left font-bold text-gray-700 py-4.5 px-4 sticky left-24 bg-gray-50/95 z-20 border-r border-gray-100 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">Student Name</TableHead>
-                      
-                      {activeCriteria.map((crit) => (
-                        <TableHead key={crit} className="text-center font-extrabold text-gray-700 w-24">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help underline decoration-dashed decoration-gray-300 decoration-1">
-                                {crit}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="rounded-xl border border-gray-100 shadow-xl p-3 max-w-xs font-semibold text-gray-700">
-                              <p className="text-xs">Competency Criteria {crit}</p>
-                              <p className="text-[10px] text-gray-400 mt-1">Uganda Lower Secondary Curriculum Assessment Matrix</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredStudents.map((student) => (
-                      <TableRow key={student.student_id} className="border-b border-gray-100 hover:bg-gray-50/30">
-                        <TableCell className="font-semibold text-gray-500 py-3.5 px-4 sticky left-0 bg-white z-10 border-r border-gray-100 text-xs">
-                          {student.admission_number || 'N/A'}
-                        </TableCell>
-                        <TableCell className="font-bold text-gray-900 py-3.5 px-4 sticky left-24 bg-white z-10 border-r border-gray-100 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
-                          {student.student_name}
-                        </TableCell>
+             ) : (
+              <>
+                {/* Desktop view: Spreadsheet Grid */}
+                <div className="hidden md:block overflow-x-auto border border-gray-100 rounded-xl max-h-[500px]">
+                  <Table className="min-w-max">
+                    <TableHeader className="bg-gray-50/55 sticky top-0 z-20 backdrop-blur-md">
+                      <TableRow className="border-b border-gray-100">
+                        <TableHead className="w-24 text-left font-bold text-gray-700 py-4.5 px-4 sticky left-0 bg-gray-50/95 z-20 border-r border-gray-100">Admission No</TableHead>
+                        <TableHead className="w-64 text-left font-bold text-gray-700 py-4.5 px-4 sticky left-24 bg-gray-50/95 z-20 border-r border-gray-100 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">Student Name</TableHead>
+                        
+                        {activeCriteria.map((crit) => (
+                          <TableHead key={crit} className="text-center font-extrabold text-gray-700 w-24">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-help underline decoration-dashed decoration-gray-300 decoration-1">
+                                  {crit}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="rounded-xl border border-gray-100 shadow-xl p-3 max-w-xs font-semibold text-gray-700">
+                                <p className="text-xs">Competency Criteria {crit}</p>
+                                <p className="text-[10px] text-gray-400 mt-1">Uganda Lower Secondary Curriculum Assessment Matrix</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredStudents.map((student) => (
+                        <TableRow key={student.student_id} className="border-b border-gray-100 hover:bg-gray-50/30">
+                          <TableCell className="font-semibold text-gray-500 py-3.5 px-4 sticky left-0 bg-white z-10 border-r border-gray-100 text-xs">
+                            {student.admission_number || 'N/A'}
+                          </TableCell>
+                          <TableCell className="font-bold text-gray-900 py-3.5 px-4 sticky left-24 bg-white z-10 border-r border-gray-100 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
+                            {student.student_name}
+                          </TableCell>
 
+                          {activeCriteria.map((crit) => {
+                            const val = student.scores?.[crit] ?? '';
+                            return (
+                              <TableCell key={crit} className="py-2 px-2 text-center w-24">
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  max="3"
+                                  className="w-16 h-9 rounded-lg text-center font-bold border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary p-1 mx-auto bg-gray-50/50 hover:bg-white"
+                                  value={val}
+                                  onChange={(e) => handleScoreChange(student.student_id, crit, e.target.value)}
+                                />
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile view: Roster Card List */}
+                <div className="block md:hidden space-y-4">
+                  {filteredStudents.map((student) => (
+                    <div 
+                      key={student.student_id} 
+                      className="bg-white p-4.5 rounded-2xl border border-gray-100 shadow-sm space-y-3.5"
+                    >
+                      <div className="flex items-center justify-between border-b border-gray-50 pb-2.5">
+                        <div>
+                          <h4 className="font-extrabold text-gray-950 text-base leading-tight">{student.student_name}</h4>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded mt-1.5 inline-block">
+                            ADM: {student.admission_number || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {activeCriteria.map((crit) => {
                           const val = student.scores?.[crit] ?? '';
                           return (
-                            <TableCell key={crit} className="py-2 px-2 text-center w-24">
+                            <div 
+                              key={crit} 
+                              className="flex flex-col gap-1.5 p-2 bg-gray-50/50 hover:bg-gray-50 rounded-xl border border-gray-100/50 transition-all"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-gray-400">Criteria {crit}</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="w-3 h-3 text-gray-300 cursor-pointer" />
+                                  </TooltipTrigger>
+                                  <TooltipContent className="rounded-xl border border-gray-100 shadow-xl p-3 max-w-xs font-semibold text-gray-700">
+                                    <p className="text-xs">Criteria {crit}</p>
+                                    <p className="text-[10px] text-gray-400 mt-1">Uganda Lower Secondary Curriculum Standard</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
                               <Input
                                 type="number"
-                                step="1"
+                                step="0.1"
                                 min="0"
                                 max="3"
-                                className="w-16 h-9 rounded-lg text-center font-bold border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary p-1 mx-auto bg-gray-50/50 hover:bg-white"
+                                className="w-full h-9 rounded-lg text-center font-bold border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary p-1 bg-white"
                                 value={val}
                                 onChange={(e) => handleScoreChange(student.student_id, crit, e.target.value)}
                               />
-                            </TableCell>
+                            </div>
                           );
                         })}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </Card>
 
-          {/* Sticky grading footer */}
-          {!loading && students.length > 0 && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md rounded-2xl shadow-[0_15px_30px_-5px_rgba(0,0,0,0.1)] border border-gray-100 px-6 py-4 flex items-center justify-between gap-12 z-40 max-w-xl w-11/12 animate-in fade-in slide-in-from-bottom-5 duration-350">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900">Grading In Progress</h3>
-                  <p className="text-[11px] text-gray-400 font-semibold">Changes are saved locally. Click save to upload.</p>
-                </div>
-              </div>
-              <Button 
-                onClick={handleSaveMatrix}
-                className="bg-primary hover:bg-primary/95 text-white font-bold rounded-xl h-11 px-5 shadow-md shadow-primary/20 flex items-center gap-2 min-w-32"
-                disabled={saving}
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4.5 h-4.5" />
-                    <span>Save Matrix</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
         </div>
       </TooltipProvider>
     </MainLayout>

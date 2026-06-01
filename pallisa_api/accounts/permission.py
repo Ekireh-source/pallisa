@@ -369,3 +369,37 @@ class SchoolFilterBackend(BaseFilterBackend):
         # Allow specifying a custom school field path in the view, e.g., school_field_path = 'campus__school'
         school_field_path = getattr(view, 'school_field_path', 'school')
         return filter_by_school(queryset, request, school_field_path=school_field_path)
+
+def get_teacher_scope(user):
+    """
+    Returns the IDs of streams, classes, and subjects a teacher has access to.
+    Returns None if the user is not a teacher or has no profile.
+    """
+    if not getattr(user, 'is_teacher', False) or not hasattr(user, 'profile'):
+        return None
+        
+    try:
+        from members.models import Teacher, Stream
+        teacher = Teacher.objects.get(user_profile=user.profile)
+        
+        # Streams where they are the Class Teacher
+        primary_stream_ids = list(teacher.primary_streams.values_list('id', flat=True))
+        
+        # Streams and Subjects where they have an assignment
+        assignments = teacher.subject_assignments.filter(is_active=True)
+        assigned_stream_ids = list(assignments.values_list('stream_id', flat=True))
+        assigned_subject_ids = list(assignments.values_list('subject_id', flat=True))
+        
+        # Combine all accessible streams
+        all_stream_ids = list(set(primary_stream_ids + assigned_stream_ids))
+        
+        # Resolve accessible classes based on accessible streams
+        class_ids = list(Stream.objects.filter(id__in=all_stream_ids).values_list('class_obj_id', flat=True).distinct())
+        
+        return {
+            'stream_ids': all_stream_ids,
+            'class_ids': class_ids,
+            'subject_ids': list(set(assigned_subject_ids)),
+        }
+    except Exception:
+        return None

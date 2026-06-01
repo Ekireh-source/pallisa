@@ -21,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
   SelectContent,
-  SelectItem
+  SelectItem,
+  Input
 } from '@/components/ui';
 import StreamSearchableSelect from '@/components/selects/streamsearchableselect';
 import SubjectSearchableSelect from '@/components/selects/subjectsearchableselect';
@@ -29,11 +30,13 @@ import { toast } from 'sonner';
 import { MainLayout } from '@/components/layout/main-layout';
 import ProtectedComponent from '@/components/permissions/protectedcomponent';
 import { PERMISSION_CODES } from '@/codes';
+import { CreateNewProject } from '@/features/exam/exam.service';
 
 const ProjectInitSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
   stream_id: z.string().min(1, "Stream is required"),
   subject_id: z.string().min(1, "Subject is required"),
-  competency_number: z.string().min(1, "Competency is required"),
+  description: z.string().optional(),
 });
 
 type IProjectInitInput = z.infer<typeof ProjectInitSchema>;
@@ -42,22 +45,32 @@ export default function CreateProjectMatrixPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<IProjectInitInput>({
-    resolver: zodResolver ? zodResolver(ProjectInitSchema) : undefined, // fallback protection
+  const { control, handleSubmit, register, formState: { errors } } = useForm<IProjectInitInput>({
+    resolver: zodResolver ? zodResolver(ProjectInitSchema) : undefined,
     defaultValues: {
+      name: '',
       stream_id: '',
       subject_id: '',
-      competency_number: '1',
+      description: '',
     }
   });
 
   const onSubmit = async (data: IProjectInitInput) => {
     setSubmitting(true);
     try {
-      // Build our virtual public ID: streamId-subjectId-competencyNumber
-      const virtualId = `${data.stream_id}-${data.subject_id}-${data.competency_number}`;
-      toast.success("Initializing grading sheet matrix...");
-      router.push(`/competences/projects/${virtualId}`);
+      const res = await CreateNewProject({
+        name: data.name,
+        stream_id: data.stream_id,
+        subject_id: data.subject_id,
+        description: data.description,
+      });
+
+      if (res.success && res.data) {
+        toast.success("Project created and initialized successfully!");
+        router.push(`/competences/projects/${res.data.public_id}`);
+      } else {
+        toast.error("Failed to initialize project competency matrix");
+      }
     } catch (error) {
       toast.error("Failed to initialize project matrix");
     } finally {
@@ -68,8 +81,8 @@ export default function CreateProjectMatrixPage() {
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_COMPETENCES}>
     <MainLayout
-      title="Configure Project Matrix"
-      description="Initialize student competency evaluations by configuring the class stream, subject, and active competency."
+      title="Create New Project Matrix"
+      description="Initialize a new production-ready project evaluation workspace by defining its name, class stream, and subject."
     >
       <div className="w-full space-y-6">
         <div className="flex items-center gap-4">
@@ -89,7 +102,22 @@ export default function CreateProjectMatrixPage() {
 
             <div className="space-y-2">
               <Label className="text-sm font-bold text-gray-700 flex items-center">
-                <Users className="w-4 h-4 mr-2 text-indigo-500" />
+                <Award className="w-4 h-4 mr-2 text-indigo-500" />
+                Project Name
+              </Label>
+              <Input
+                {...register("name")}
+                placeholder="e.g. Making Liquid Soap, Crafting Local Baskets"
+                className="h-12 rounded-xl border-gray-200 bg-white shadow-sm w-full text-base font-semibold"
+              />
+              {errors.name && (
+                <p className="text-xs text-rose-500 font-semibold">{errors.name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-gray-700 flex items-center">
+                <Users className="w-4 h-4 mr-2 text-sky-500" />
                 Class Stream
               </Label>
               <Controller
@@ -100,7 +128,7 @@ export default function CreateProjectMatrixPage() {
                     value={field.value}
                     onValueChange={field.onChange}
                     placeholder="Choose class stream"
-                    triggerClassName="h-12 rounded-xl bg-white border-gray-200 shadow-sm w-full"
+                    triggerClassName="h-12 rounded-xl bg-white border-gray-200 shadow-sm w-full font-semibold text-base"
                   />
                 )}
               />
@@ -122,7 +150,7 @@ export default function CreateProjectMatrixPage() {
                     value={field.value}
                     onValueChange={field.onChange}
                     placeholder="Choose subject"
-                    triggerClassName="h-12 rounded-xl bg-white border-gray-200 shadow-sm w-full"
+                    triggerClassName="h-12 rounded-xl bg-white border-gray-200 shadow-sm w-full font-semibold text-base"
                   />
                 )}
               />
@@ -133,38 +161,23 @@ export default function CreateProjectMatrixPage() {
 
             <div className="space-y-2">
               <Label className="text-sm font-bold text-gray-700 flex items-center">
-                <Award className="w-4 h-4 mr-2 text-emerald-500" />
-                Active Competency Index
+                <Grid className="w-4 h-4 mr-2 text-emerald-500" />
+                Project Description (Optional)
               </Label>
-              <Controller
-                name="competency_number"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-12 rounded-xl border-gray-200 bg-white shadow-sm w-full text-left font-semibold">
-                      <SelectValue placeholder="Select Competency" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-gray-100 shadow-xl p-1">
-                      <SelectItem value="1" className="rounded-lg py-2.5 font-semibold">Competency 1 (C1 - 14 criteria)</SelectItem>
-                      <SelectItem value="2" className="rounded-lg py-2.5 font-semibold">Competency 2 (C2 - 3 criteria)</SelectItem>
-                      <SelectItem value="3" className="rounded-lg py-2.5 font-semibold">Competency 3 (C3 - 6 criteria)</SelectItem>
-                      <SelectItem value="4" className="rounded-lg py-2.5 font-semibold">Competency 4 (C4 - 2 criteria)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
+              <textarea
+                {...register("description")}
+                placeholder="Brief guidelines or project details..."
+                className="w-full rounded-xl border border-gray-200 p-3 h-24 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium transition-all"
               />
-              {errors.competency_number && (
-                <p className="text-xs text-rose-500 font-semibold">{errors.competency_number.message}</p>
-              )}
             </div>
 
             <Button
               type="submit"
-              className="w-full rounded-xl h-12 shadow-lg shadow-indigo-100 bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all"
+              className="w-full rounded-xl h-12 shadow-md shadow-primary/20 bg-primary hover:bg-primary/95 text-white font-bold transition-all text-base"
               disabled={submitting}
             >
-              <Grid className="w-4 h-4 mr-2" />
-              Initialize Grading Sheet
+              <Save className="w-4 h-4 mr-2" />
+              Create Project & Start Grading
             </Button>
           </form>
         </Card>

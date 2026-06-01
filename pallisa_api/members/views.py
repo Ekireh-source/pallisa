@@ -29,7 +29,7 @@ from .serializers import (
     SalaryPeriodSerializer, SalaryAllowanceSerializer, SalaryDeductionSerializer,
     SalaryPaymentSerializer, SalaryPaymentCreateUpdateSerializer, SalarySummarySerializer
 )
-from accounts.permission import HasPermission, filter_by_school
+from accounts.permission import HasPermission, filter_by_school, get_teacher_scope
 from .utils import safe_delete_with_relations, create_error_response
 
 
@@ -180,6 +180,14 @@ class ClassListCreateView(APIView):
         queryset = Class.objects.select_related('campus').order_by('name')
         queryset = filter_by_school(queryset, request, school_field_path='campus__schools')
         
+        # Teacher-level Scope Filter
+        if getattr(request.user, 'is_teacher', False):
+            scope = get_teacher_scope(request.user)
+            if scope:
+                queryset = queryset.filter(id__in=scope['class_ids'])
+            else:
+                queryset = queryset.none()
+        
         # Apply filters
         if campus_id:
             queryset = queryset.filter(campus_id=campus_id)
@@ -317,6 +325,14 @@ class SubjectListCreateView(APIView):
         # Build queryset with optimizations
         queryset = Subject.objects.select_related('school').order_by('code')
         queryset = filter_by_school(queryset, request)
+        
+        # Teacher-level Scope Filter
+        if getattr(request.user, 'is_teacher', False):
+            scope = get_teacher_scope(request.user)
+            if scope:
+                queryset = queryset.filter(id__in=scope['subject_ids'])
+            else:
+                queryset = queryset.none()
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search) | 
@@ -546,6 +562,14 @@ class StreamListCreateView(APIView):
         # Apply school filter
         queryset = filter_by_school(queryset, request, school_field_path='class_obj__campus__schools')
         
+        # Teacher-level Scope Filter
+        if getattr(request.user, 'is_teacher', False):
+            scope = get_teacher_scope(request.user)
+            if scope:
+                queryset = queryset.filter(id__in=scope['stream_ids'])
+            else:
+                queryset = queryset.none()
+        
         # Apply other filters
         is_active = request.query_params.get('is_active')
         if is_active is not None:
@@ -728,6 +752,15 @@ class StudentListCreateView(APIView):
         
         # Apply filters
         queryset = filter_by_school(queryset, request, school_field_path='campus__schools')
+        
+        # Teacher-level Scope Filter
+        if getattr(request.user, 'is_teacher', False):
+            scope = get_teacher_scope(request.user)
+            if scope:
+                queryset = queryset.filter(current_stream_id__in=scope['stream_ids'])
+            else:
+                queryset = queryset.none()
+
         if not include_inactive:
             queryset = queryset.filter(is_active=True)
         if campus_id:
@@ -1878,6 +1911,58 @@ class TeacherSubjectAssignmentListCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TeacherSubjectAssignmentDetailView(APIView):
+    """Retrieve, update or delete a teacher subject assignment"""
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        """Get teacher subject assignment object or return 404"""
+        return get_object_or_404(
+            TeacherSubjectAssignment.objects.select_related(
+                'teacher__user_profile', 'subject', 'stream__class_obj', 'academic_year'
+            ),
+            pk=pk
+        )
+
+    @extend_schema(
+        summary="Retrieve a teacher subject assignment",
+        responses={200: TeacherSubjectAssignmentSerializer},
+        tags=["Teacher Assignments"]
+    )
+    def get(self, request, pk):
+        """Get details of a specific teacher subject assignment"""
+        assignment = self.get_object(pk)
+        serializer = TeacherSubjectAssignmentSerializer(assignment)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Update a teacher subject assignment",
+        request=TeacherSubjectAssignmentSerializer,
+        responses={200: TeacherSubjectAssignmentSerializer},
+        tags=["Teacher Assignments"]
+    )
+    def put(self, request, pk):
+        """Update a teacher subject assignment"""
+        assignment = self.get_object(pk)
+        serializer = TeacherSubjectAssignmentSerializer(assignment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="Delete a teacher subject assignment",
+        responses={204: None},
+        tags=["Teacher Assignments"]
+    )
+    def delete(self, request, pk):
+        """Delete a teacher subject assignment"""
+        assignment = self.get_object(pk)
+        assignment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class BulkAssignTeacherSubjectsView(APIView):

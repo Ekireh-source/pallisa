@@ -12,20 +12,24 @@ class CampusSerializer(serializers.ModelSerializer):
 class SchoolSerializer(serializers.ModelSerializer):
     owner_name = serializers.ReadOnlyField(source='owner.username')
     campus_name = serializers.ReadOnlyField(source='campus.name')
-    logo = serializers.SerializerMethodField()
+    logo = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = School
         fields = '__all__'
         read_only_fields = ['public_id', 'owner', 'created_at', 'updated_at']
 
-    def get_logo(self, obj):
-        if obj.logo:
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if instance.logo:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.logo.url)
-            return obj.logo.url
-        return None
+                ret['logo'] = request.build_absolute_uri(instance.logo.url)
+            else:
+                ret['logo'] = instance.logo.url
+        else:
+            ret['logo'] = None
+        return ret
 
 
 class SetupStepsSerializer(serializers.ModelSerializer):

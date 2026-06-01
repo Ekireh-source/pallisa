@@ -206,22 +206,166 @@ class ReportCardViewSet(viewsets.ModelViewSet):
             school = student.campus.schools.first()
             
         settings = getattr(school, 'reportcardsettings', None) if school else None
+        if not settings:
+            settings = ReportCardSettings()
         
         serializer = self.get_serializer(report_card)
         data = serializer.data
         
         class_level = (class_obj.level or '0level').lower()
-        if 'alevel' in class_level:
+        is_alevel = 'alevel' in class_level
+        
+        if is_alevel:
             template_name = 'reports/alevel_report.html'
         else:
             template_name = 'reports/olevel_report.html'
+
+        # Helper to map grades to CSS color classes
+        def get_grade_class(grade):
+            if not grade:
+                return 'grade-default'
+            g = grade.strip().upper()
+            if g == 'A': return 'grade-a'
+            if g == 'B': return 'grade-b'
+            if g == 'C': return 'grade-c'
+            if g == 'D': return 'grade-d'
+            if g == 'E': return 'grade-e'
+            if g == 'O': return 'grade-o'
+            if g == 'F': return 'grade-f'
+            if g.startswith('D'): return 'grade-sub-d'
+            if g.startswith('C'): return 'grade-sub-c'
+            if g.startswith('P'): return 'grade-sub-p'
+            if g.startswith('F'): return 'grade-sub-f'
+            return 'grade-default'
+
+        # Helper to generate A-Level paper comments based on scores
+        def get_paper_comment(paper):
+            if paper.get('remarks'):
+                return paper['remarks']
+            if paper.get('comment'):
+                return paper['comment']
+            if paper.get('description'):
+                return paper['description']
+                
+            score_val = float(paper.get('score') or 0.0)
+            max_score = float(paper.get('max_score') or 100.0)
+            pct = (score_val / max_score) * 100.0 if max_score > 0.0 else 0.0
             
+            if pct >= 80.0:
+                return 'Excellent performance — keep it up!'
+            if pct >= 75.0:
+                return 'Very good performance, maintain the effort.'
+            if pct >= 70.0:
+                return 'Good performance, maintain the effort.'
+            if pct >= 65.0:
+                return 'There is room for improvement.'
+            if pct >= 52.0:
+                return 'Average — revise organic reactions.'
+            if pct >= 45.0:
+                return 'Below average performance, aim higher.'
+            if pct >= 40.0:
+                return 'Weak pass, double your effort.'
+            return 'Below average, work extra hard.'
+
+        # Helper for teacher display name/initials
+        def get_teacher_display(teacher_name, show_initials):
+            if not teacher_name:
+                return '—'
+            if show_initials:
+                parts = [p[0] for p in teacher_name.split() if p]
+                return '.'.join(parts) + '.' if parts else '—'
+            return teacher_name
+
+        # Calculate custom context attributes for A-Level structure
+        principal_passes = 0
+        subsidiary_passes = 0
+        
+        show_initials = settings.show_subject_teacher_initials if settings else True
+        
+        # O-Level dynamic AOI computation
+        max_aois = 1
+        if not is_alevel:
+            for sr in data.get('subject_reports', []):
+                aois = [c for c in sr.get('competency_scores', []) if c.get('assessment_type') == 'aoi']
+                if len(aois) > max_aois:
+                    max_aois = len(aois)
+
+        total_aoi = 0.0
+        total_exam = 0.0
+        
+        for sr in data.get('subject_reports', []):
+            grade = (sr.get('grade') or '').upper()
+            sr['grade_class'] = get_grade_class(grade)
+            sr['teacher_display'] = get_teacher_display(sr.get('teacher_name'), show_initials)
+            
+            sub_total = float(sr.get('aoi_score') or 0.0) + float(sr.get('exam_score') or 0.0)
+            sr['sub_total'] = round(sub_total, 1)
+            
+            total_aoi += float(sr.get('aoi_score') or 0.0)
+            total_exam += float(sr.get('exam_score') or 0.0)
+            
+            if is_alevel:
+                if grade in ['A', 'B', 'C', 'D', 'E']:
+                    principal_passes += 1
+                elif grade == 'O':
+                    subsidiary_passes += 1
+                    
+                for paper in sr.get('competency_scores', []):
+                    paper['comment'] = get_paper_comment(paper)
+                    title = paper.get('competency_name') or ''
+                    paper['display_title'] = title.split(' (')[0] if ' (' in title else title
+            else:
+                # Pad AOIs to match max_aois length exactly for table rendering
+                aois = [c for c in sr.get('competency_scores', []) if c.get('assessment_type') == 'aoi']
+                padded_aois = []
+                for idx in range(max_aois):
+                    if idx < len(aois):
+                        padded_aois.append(aois[idx].get('score') or '—')
+                    else:
+                        padded_aois.append('—')
+                sr['aoi_list'] = padded_aois
+
+        total_cum = total_aoi + total_exam
+
+        # Resolve active grading system for key legend
+        active_grading_system = None
+        if school:
+            level_str = 'A-Level' if is_alevel else 'O-Level'
+            active_grading_system = GradingSystem.objects.filter(
+                school=school,
+                level=level_str,
+                is_active=True
+            ).first()
+            if not active_grading_system:
+                active_grading_system = GradingSystem.objects.filter(
+                    school=school,
+                    is_active=True
+                ).first()
+                
+        if active_grading_system:
+            # Decorate boundaries with CSS grade class
+            for b in active_grading_system.boundaries.all():
+                b.grade_class = get_grade_class(b.grade)
+
+        attendance_total_days = data.get('attendance_total_days') or 0
+        attendance_days_present = data.get('attendance_days_present') or 0
+        days_absent = max(0, attendance_total_days - attendance_days_present)
+
         context = {
             'report': data,
             'settings': settings,
             'school': school,
             'primary_color': school.report_primary_color if school and hasattr(school, 'report_primary_color') else '#0fa88a',
             'accent_color': school.report_accent_color if school and hasattr(school, 'report_accent_color') else '#162032',
+            'principal_passes': principal_passes,
+            'subsidiary_passes': subsidiary_passes,
+            'days_absent': days_absent,
+            'grading_system': active_grading_system,
+            'max_aois': max_aois,
+            'aoi_range': list(range(max_aois)),
+            'total_aoi': f"{total_aoi:.1f}",
+            'total_exam': f"{total_exam:.1f}",
+            'total_cum': f"{total_cum:.1f}",
         }
         
         html_string = render_to_string(template_name, context)

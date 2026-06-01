@@ -66,21 +66,63 @@ export default function CreateActivityPage() {
   const selectedTeacher = watch('teacher');
   const selectedTerm = watch('term');
 
+  // Filtered competency areas are now managed directly by the backend!
+  const displayedCompetencyAreas = competencyAreas;
+
+  // Fetch competency areas from the backend whenever the selected topic changes
+  useEffect(() => {
+    const loadCompetencyAreas = async () => {
+      setFetchingData(true);
+      try {
+        const queryParams = selectedTopic ? { topic_id: selectedTopic } : undefined;
+        const res = await FetchCompetencyAreas(queryParams);
+        if (res && 'results' in res) {
+          setCompetencyAreas(res.results);
+          
+          if (selectedTopic) {
+            // Automatically select competency area when topic is selected, if there's only one matching
+            if (res.results.length === 1) {
+              setValue('competency_area', res.results[0].id);
+            } else {
+              // Clear current selection if it doesn't match the new list
+              const currentArea = res.results.find(a => a.id === selectedCompetencyArea);
+              if (!currentArea) {
+                setValue('competency_area', undefined);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load competency areas:", err);
+      } finally {
+        setFetchingData(false);
+      }
+    };
+
+    loadCompetencyAreas();
+  }, [selectedTopic, setValue]);
+
+  // Automatically fill topic when competency area is selected
+  useEffect(() => {
+    if (selectedCompetencyArea && selectedCompetencyArea.toString() !== 'none') {
+      const area = competencyAreas.find(a => a.id === parseInt(selectedCompetencyArea.toString()));
+      if (area && area.topic && selectedTopic !== area.topic) {
+        setValue('topic', area.topic, { shouldValidate: true });
+      }
+    }
+  }, [selectedCompetencyArea, competencyAreas, selectedTopic, setValue]);
+
   useEffect(() => {
     const loadFormData = async () => {
       setFetchingData(true);
-      const [topicsRes, areasRes, teachersRes, termsRes] = await Promise.all([
+      const [topicsRes, teachersRes, termsRes] = await Promise.all([
         FetchTopics(),
-        FetchCompetencyAreas(),
         FetchTeachers(),
         FetchTerms()
       ]);
 
       if (topicsRes && 'results' in topicsRes) {
         setTopics(topicsRes.results);
-      }
-      if (areasRes && 'results' in areasRes) {
-        setCompetencyAreas(areasRes.results);
       }
       if (teachersRes && 'results' in teachersRes) {
         setTeachers(teachersRes.results);
@@ -190,7 +232,7 @@ export default function CreateActivityPage() {
                   </SelectTrigger>
                   <SelectContent className="rounded-xl shadow-xl border-gray-100">
                     <SelectItem value="none">None</SelectItem>
-                    {competencyAreas.map((a) => (
+                    {displayedCompetencyAreas.map((a) => (
                       <SelectItem key={a.id} value={a.id.toString()}>
                         {a.name}
                       </SelectItem>

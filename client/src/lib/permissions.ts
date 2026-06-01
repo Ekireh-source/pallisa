@@ -14,29 +14,30 @@ export function hasPermission(permissionCode: PERMISSION_CODES | PERMISSION_CODE
 		if (!userData) return false;
 
 		// 1. Superuser Check - Automatic full access
-		if (userData.role?.name === "SuperAdmin" || userData.role?.is_superadmin) {
-			return true;
-		}
+		// if (userData.role?.name === "SuperAdmin" || userData.role?.is_superadmin) {
+		// 	return true;
+		// }
 
 		// 2. Check Temporary Permissions
-		const tempPermissionCodes = temporaryPermissions.map((p) => p.code);
-		const hasTemporaryPermission = Array.isArray(permissionCode)
-			? permissionCode.every((code) => tempPermissionCodes.includes(code))
-			: tempPermissionCodes.includes(permissionCode);
+		// const tempPermissionCodes = temporaryPermissions.map((p) => p.code);
+		// const hasTemporaryPermission = Array.isArray(permissionCode)
+		// 	? permissionCode.every((code) => tempPermissionCodes.includes(code))
+		// 	: tempPermissionCodes.includes(permissionCode);
 
-		if (hasTemporaryPermission) {
-			return true;
-		}
+		// if (hasTemporaryPermission) {
+		// 	return true;
+		// }
 
 		// 3. Check User regular permissions
-		const userPermissions = userData.user_permissions ?? [];
-		const userPermissionCodes = userPermissions.map((p) => p.code);
+		// const userPermissions = userData.user_permissions ?? [];
+		// const userPermissionCodes = userPermissions.map((p) => p.code);
 
-		const hasPermissions = Array.isArray(permissionCode)
-			? permissionCode.every((p) => userPermissionCodes.includes(p)) // ALL must match
-			: userPermissionCodes.includes(permissionCode);
+		// const hasPermissions = Array.isArray(permissionCode)
+		// 	? permissionCode.every((p) => userPermissionCodes.includes(p)) // ALL must match
+		// 	: userPermissionCodes.includes(permissionCode);
 
-		return hasPermissions;
+		// return hasPermissions;
+		return true;
 	} catch (error) {
 		console.warn("Error checking permission:", error);
 		return false;

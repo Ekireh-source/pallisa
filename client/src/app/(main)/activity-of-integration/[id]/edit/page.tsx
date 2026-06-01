@@ -64,31 +64,82 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
   const selectedTerm = watch('term');
   const selectedCompetencyArea = watch('competency_area');
 
+  // Filtered competency areas are now managed directly by the backend!
+  const displayedCompetencyAreas = competencyAreas;
+
+  // Fetch competency areas from the backend whenever the selected topic changes
+  useEffect(() => {
+    // Only fetch if fetchingData is false to prevent double-fetching on initial mount
+    if (fetchingData) return;
+
+    const loadCompetencyAreas = async () => {
+      setFetchingData(true);
+      try {
+        const queryParams = selectedTopic ? { topic_id: selectedTopic } : undefined;
+        const res = await FetchCompetencyAreas(queryParams);
+        if (res && 'results' in res) {
+          setCompetencyAreas(res.results);
+          
+          if (selectedTopic) {
+            // Automatically select competency area when topic is selected, if there's only one matching
+            if (res.results.length === 1) {
+              setValue('competency_area', res.results[0].id);
+            } else {
+              // Clear current selection if it doesn't match the new list
+              const currentArea = res.results.find(a => a.id === selectedCompetencyArea);
+              if (!currentArea) {
+                setValue('competency_area', undefined);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load competency areas:", err);
+      } finally {
+        setFetchingData(false);
+      }
+    };
+
+    loadCompetencyAreas();
+  }, [selectedTopic, setValue]);
+
+  // Automatically fill topic when competency area is selected
+  useEffect(() => {
+    if (selectedCompetencyArea && selectedCompetencyArea.toString() !== 'none') {
+      const area = competencyAreas.find(a => a.id === parseInt(selectedCompetencyArea.toString()));
+      if (area && area.topic && selectedTopic !== area.topic) {
+        setValue('topic', area.topic, { shouldValidate: true });
+      }
+    }
+  }, [selectedCompetencyArea, competencyAreas, selectedTopic, setValue]);
+
   useEffect(() => {
     const loadData = async () => {
       setFetchingData(true);
-      const [topicsRes, teachersRes, termsRes, activityRes, areasRes] = await Promise.all([
-        FetchTopics(),
-        FetchTeachers(),
-        FetchTerms(),
-        FetchActivityById(id),
-        FetchCompetencyAreas()
-      ]);
-
-      if (topicsRes && 'results' in topicsRes) {
-        setTopics(topicsRes.results);
-      }
-      if (teachersRes && 'results' in teachersRes) {
-        setTeachers(teachersRes.results);
-      }
-      if (termsRes && 'results' in termsRes) {
-        setTerms(termsRes.results);
-      }
-      if (areasRes && 'results' in areasRes) {
-        setCompetencyAreas(areasRes.results);
-      }
+      const activityRes = await FetchActivityById(id);
       
       if (activityRes.success) {
+        const topicId = activityRes.data.topic;
+        const [topicsRes, teachersRes, termsRes, areasRes] = await Promise.all([
+          FetchTopics(),
+          FetchTeachers(),
+          FetchTerms(),
+          topicId ? FetchCompetencyAreas({ topic_id: topicId }) : FetchCompetencyAreas()
+        ]);
+
+        if (topicsRes && 'results' in topicsRes) {
+          setTopics(topicsRes.results);
+        }
+        if (teachersRes && 'results' in teachersRes) {
+          setTeachers(teachersRes.results);
+        }
+        if (termsRes && 'results' in termsRes) {
+          setTerms(termsRes.results);
+        }
+        if (areasRes && 'results' in areasRes) {
+          setCompetencyAreas(areasRes.results);
+        }
+
         reset({
           topic: activityRes.data.topic,
           teacher: activityRes.data.teacher,
@@ -230,7 +281,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                 </SelectTrigger>
                 <SelectContent className="rounded-xl shadow-xl border-gray-100">
                   <SelectItem value="none">None</SelectItem>
-                  {competencyAreas.map((a) => (
+                  {displayedCompetencyAreas.map((a) => (
                     <SelectItem key={a.id} value={a.id.toString()}>
                       {a.name}
                     </SelectItem>

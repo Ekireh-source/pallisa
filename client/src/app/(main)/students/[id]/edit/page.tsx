@@ -63,6 +63,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
       user_last_name: '',
       user_gender: 'M',
       student_id: '',
+      campus: undefined as any,
       enrollment_status: 'enrolled',
       is_active: true,
     }
@@ -106,9 +107,10 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
         const student = studentRes.data;
         setSelectedImage(student.user_profile_data?.profile_picture || null);
         reset({
-          user_email: student.user_email,
+          user_email: student.email || '',
           student_id: student.student_id,
           lin: student.lin || '',
+          campus: student.campus,
           user_first_name: student.user_profile_data?.first_name || student.student_name?.split(' ')[0] || '',
           user_last_name: student.user_profile_data?.last_name || student.student_name?.split(' ')[1] || '',
           user_gender: student.user_profile_data?.gender || 'M',
@@ -239,7 +241,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
         }
       >
         <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit, (errors) => console.error("Validation Errors:", errors))} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
@@ -250,6 +252,7 @@ export default function EditStudentPage({ params }: { params: Promise<{ id: stri
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="hidden" {...register('campus')} />
                 <div className="space-y-2">
                   <Label htmlFor="user_first_name">First Name</Label>
                   <Input 

@@ -67,6 +67,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     last_login = models.DateTimeField(blank=True, null=True)
     email_verified = models.BooleanField(default=False)
+    is_teacher = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
@@ -96,6 +97,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             models.Index(fields=['student_id']),
             models.Index(fields=['employee_id']),
             models.Index(fields=['email_verified']),
+            models.Index(fields=['is_teacher']),
         ]
 
     @property

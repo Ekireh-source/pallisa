@@ -88,3 +88,7 @@ for (const file of files) {
 }
 
 console.log('Done part 3!');
+
+
+
+// celery -A pallisa_api worker --loglevel=info

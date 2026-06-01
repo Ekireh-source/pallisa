@@ -19,7 +19,7 @@ export default function MainLayout({
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
-  const { accessToken, school, user } = useSelector((state: RootState) => state.auth);
+  const { school, user } = useSelector((state: RootState) => state.auth);
 
   const [mounted, setMounted] = React.useState(false);
   const [isSideBarOpen, setIsSideBarOpen] = React.useState(true);
@@ -34,8 +34,8 @@ export default function MainLayout({
   useEffect(() => {
     if (!mounted) return;
 
-    // 1. If no access token, redirect to login
-    if (!accessToken) {
+    // 1. If no authenticated user, redirect to login
+    if (!user.value) {
       router.push('/login');
       return;
     }
@@ -44,7 +44,10 @@ export default function MainLayout({
     if (!school && !isAllowedPath) {
       router.push('/school/create');
     }
-  }, [accessToken, school, isAllowedPath, router, mounted]);
+  }, [user.value, school, isAllowedPath, router, mounted]);
+
+  const isTeacherUser = !!(user?.value?.user?.is_teacher || user?.value?.is_teacher);
+  const isDashboardPage = pathname === '/dashboard' || pathname === '/';
 
   // Prevent hydration mismatch by not rendering anything until mounted on the client
   if (!mounted) {
@@ -52,7 +55,7 @@ export default function MainLayout({
   }
 
   // Don't render layout if not authenticated (after mounting)
-  if (!accessToken) {
+  if (!user.value) {
     return null;
   }
 
@@ -60,15 +63,21 @@ export default function MainLayout({
   if (!school && !isAllowedPath) {
     return null;
   }
+
   return (
     <div className="min-h-screen flex bg-gray-50/50 w-full overflow-hidden">
-      <DashboardSideBar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
+      {!isTeacherUser && (
+        <DashboardSideBar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
+      )}
 
       <div
-        className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${isMobile ? 'pl-0 pb-[72px]' : isSideBarOpen ? 'pl-64' : 'pl-20'
-          }`}
+        className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${
+          isMobile || isTeacherUser ? 'pl-0 pb-[72px]' : isSideBarOpen ? 'pl-64' : 'pl-20'
+        }`}
       >
-        <SharedNavbar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
+        {(!isTeacherUser || !isDashboardPage) && (
+          <SharedNavbar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
+        )}
 
         <main className="flex-1 overflow-auto bg-gray-50/50">
           <div className="w-full">

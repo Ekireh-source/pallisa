@@ -58,8 +58,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "http://127.0.0.1:3001",
 ]
+_frontend_url = get_env('FRONTEND_URL', default='')
+if _frontend_url:
+    for url in [x.strip() for x in _frontend_url.split(',')]:
+        if url and url not in CORS_ALLOWED_ORIGINS:
+            CORS_ALLOWED_ORIGINS.append(url)
+
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True  # More permissive for development
+CORS_ALLOW_ALL_ORIGINS = False  # Enforce CORS origin whitelist for cookie auth
 
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -80,6 +86,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3001",
     "http://127.0.0.1:3001",
 ]
+if _frontend_url:
+    for url in [x.strip() for x in _frontend_url.split(',')]:
+        if url and url not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(url)
 
 # Application definition
 
@@ -243,7 +253,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Django REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'accounts.authentication.JWTCookieAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
@@ -255,6 +265,12 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_COOKIE': 'access_token',
+    'AUTH_COOKIE_REFRESH': 'refresh_token',
+    'AUTH_COOKIE_SECURE': False,  # False for local dev, True in prod
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_PATH': '/',
+    'AUTH_COOKIE_SAMESITE': 'Lax',
 }
 
 # API Documentation settings

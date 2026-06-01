@@ -409,5 +409,14 @@ export const CreateTeacherSubjectAssignment = async (data: any) => {
   }
 };
 
+export const DeleteTeacherSubjectAssignment = async (id: number | string) => {
+  try {
+    const res = await api.delete(`/members/teacher-subject-assignments/${id}/`);
+    return { success: true, data: res.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
 
 

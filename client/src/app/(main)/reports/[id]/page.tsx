@@ -8,7 +8,7 @@ import { ReportCard, ReportCardSettings } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAppSelector, useAppDispatch } from '@/store';
-import { UpdateSchool } from '@/features/school/school.service';
+import { UpdateSchool, FetchSchoolById } from '@/features/school/school.service';
 import { setSchool } from '@/store/auth/actions';
 import { ReportCardSettingsPanel } from '@/components/report-card/ReportCardSettingsPanel';
 import { OLevelReportCard } from '@/components/report-card/OLevelReportCard';
@@ -112,15 +112,23 @@ export default function ReportCardDetailPage({ params }: PageProps) {
       } else {
         toast.error('Failed to load report card');
         router.back();
+        return;
       }
 
       if (settingsRes.success && settingsRes.data) {
         setCfg(settingsRes.data as ReportCardSettings);
       }
+
+      if (school?.id) {
+        const schoolRes = await FetchSchoolById(school.id);
+        if (schoolRes.success) {
+          dispatch(setSchool(schoolRes.data));
+        }
+      }
       setLoading(false);
     };
     load();
-  }, [id, router]);
+  }, [id, router, school?.id, dispatch]);
 
   // ── derived ─────────────────────────────────────────────────────────────────
   const s = cfg ?? ({ ...DEFAULT_SETTINGS, id: 0, school: 0, updated_at: '' } as ReportCardSettings);

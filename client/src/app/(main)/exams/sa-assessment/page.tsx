@@ -108,6 +108,36 @@ export default function SaAssessmentsListPage() {
       ),
     },
     {
+      key: "grading_progress",
+      header: "Grading Progress",
+      cell: (sa) => {
+        const progress = (sa as any).grading_progress ?? 0;
+        const isComplete = progress === 100;
+        return (
+          <div className="w-44">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-gray-400'
+              }`}>
+                {isComplete ? 'Fully Graded' : 'Grading...'}
+              </span>
+              <span className={`text-xs font-extrabold ${
+                isComplete ? 'text-emerald-600' : 'text-gray-600'
+              }`}>{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner border border-gray-200/50">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${
+                  isComplete ? 'bg-emerald-500' : 'bg-primary'
+                }`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        );
+      }
+    },
+    {
       key: "actions",
       header: <div className="text-right">Actions</div>,
       cell: (sa) => (

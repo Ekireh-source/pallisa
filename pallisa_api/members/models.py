@@ -426,6 +426,11 @@ class Teacher(models.Model):
         if self.user_profile and self.user_profile.user_type not in ['staff', 'admin']:
             self.user_profile.user_type = 'staff'
             self.user_profile.save()
+
+        # Automatically mark the underlying CustomUser as a teacher
+        if self.user_profile and self.user_profile.user and not self.user_profile.user.is_teacher:
+            self.user_profile.user.is_teacher = True
+            self.user_profile.user.save(update_fields=['is_teacher'])
         
         super().save(*args, **kwargs)
 

@@ -125,7 +125,7 @@ export default function ClassesListPage() {
       key: "active",
       header: "Status",
       cell: (cls) => (
-        cls.active ? (
+        cls.is_active ? (
           <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full w-fit text-[10px] sm:text-xs">
             Active
           </Badge>
