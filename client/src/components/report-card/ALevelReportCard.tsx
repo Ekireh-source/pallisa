@@ -113,7 +113,7 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
 
   return (
     <div className="relative bg-white border border-gray-200 rounded-2xl p-8 md:p-12 print:border-none print:p-0 overflow-hidden pl-12">
-      
+
       {/* Watermark */}
       {s.show_watermark && school?.logo && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.03] print:opacity-[0.03]">
@@ -165,7 +165,7 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
             {reportCard.student_picture ? (
               <img src={formatImgUrl(reportCard.student_picture) || ''} alt={reportCard.student_name} className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center justify-center text-gray-300">
+              <div className="flex flex-col items-center justify-center text-My-Black">
                 <User size={48} className="stroke-[1.5]" />
               </div>
             )}
@@ -198,8 +198,8 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
         <div className="mb-6 grid grid-cols-3 gap-4">
           {[
             { label: 'Total School Days', value: reportCard.attendance_total_days },
-            { label: 'Days Present',      value: reportCard.attendance_days_present },
-            { label: 'Days Absent',       value: daysAbsent },
+            { label: 'Days Present', value: reportCard.attendance_days_present },
+            { label: 'Days Absent', value: daysAbsent },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-xl border border-gray-200 p-3 text-center bg-gray-50/40">
               <p className="text-[9px] font-black uppercase tracking-widest text-[var(--My-Gray)] mb-1">{label}</p>
@@ -241,7 +241,7 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
                       <td className="px-4 py-3 font-bold text-[var(--My-Black)] border-r border-b border-gray-200 text-xs align-middle">
                         {sr.subject_name}
                       </td>
-                      <td className="px-3 py-3 text-center text-gray-400 border-r border-b border-gray-200 font-bold">—</td>
+                      <td className="px-3 py-3 text-center text-My-Black border-r border-b border-gray-200 font-bold">—</td>
                       <td className="px-3 py-3 text-center text-gray-450 border-r border-b border-gray-200 font-black">—</td>
                       <td className="px-3 py-3 text-center border-r border-b border-gray-200 align-middle">
                         <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold ${aLevelGradeColor(sr.grade)}`}>
@@ -274,7 +274,7 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
                             </td>
                           )}
 
-                          <td className="px-3 py-3 text-center text-gray-700 border-r border-b border-gray-200 font-bold text-xs align-middle">
+                          <td className="px-3 py-3 text-center text-My-Black border-r border-b border-gray-200 font-bold text-xs align-middle">
                             {paper.competency_name ? paper.competency_name.split(' (')[0] : `Paper ${pIdx + 1}`}
                           </td>
 
@@ -334,7 +334,7 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
             {/* House Teacher Remarks */}
             <div>
               <p className="text-[10px] font-bold text-[var(--My-Gray)] uppercase tracking-wider mb-1">House Teacher</p>
-              <div className="text-xs text-gray-300 tracking-widest font-mono select-none">....................................................................................</div>
+              <div className="text-xs text-My-Black tracking-widest font-mono select-none">....................................................................................</div>
             </div>
 
             {s.show_head_teacher_remarks && (
@@ -398,11 +398,11 @@ export function ALevelReportCard({ reportCard, s, primaryColor, accentColor, gra
                       <span className={`inline-block px-2 py-0.5 rounded font-black ${aLevelGradeColor(b.grade)}`}>{b.grade}</span>
                     </td>
                     {s.show_grade_descriptor_score_range && (
-                      <td className="px-3 py-2 text-center border-r border-gray-200 font-bold text-gray-600">
+                      <td className="px-3 py-2 text-center border-r border-gray-200 font-bold text-My-Black">
                         {Math.round(b.min_score)} – {Math.round(b.max_score)}
                       </td>
                     )}
-                    <td className="px-3 py-2 text-gray-600 leading-relaxed italic">{b.description || b.remarks || '—'}</td>
+                    <td className="px-3 py-2 text-My-Black leading-relaxed italic">{b.description || b.remarks || '—'}</td>
                   </tr>
                 ))}
               </tbody>

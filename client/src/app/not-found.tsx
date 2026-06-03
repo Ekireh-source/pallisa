@@ -17,9 +17,9 @@ export default function NotFound() {
                 <div className="w-full flex flex-col items-center justify-center h-full lg:w-1/2 border-none flex items-center justify-center overflow-y-auto">
                     <div className="w-full flex flex-col gap-y-6 items-center text-center px-4 lg:items-start lg:text-left lg:px-0">
                         {/* Error Message */}
-                        <h1 className="text-6xl font-bold text-gray-700">404 </h1>
-                        <h1 className="text-4xl font-bold text-gray-900">Page Not Found </h1>
-                        <p className="text-lg text-gray-600 mb-8">
+                        <h1 className="text-6xl font-bold text-My-Black">404 </h1>
+                        <h1 className="text-4xl font-bold text-My-Black">Page Not Found </h1>
+                        <p className="text-lg text-My-Black mb-8">
                             Page you are trying to open does not exist.
                             <br /> You may have mistyped the address, or the page has been moved to another URL.
                         </p>

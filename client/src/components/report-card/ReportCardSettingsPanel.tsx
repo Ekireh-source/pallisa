@@ -31,7 +31,7 @@ function CheckboxRow({ label, checked, onChange, disabled }: CheckboxRowProps) {
         onClick={() => onChange(!checked)}
         className={`w-5 h-5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-all duration-150
           ${checked
-            ? 'bg-emerald-500 border-emerald-500 shadow-sm'
+            ? 'bg-emerald-500 border-emerald-500 '
             : 'border-gray-300 bg-white group-hover:border-emerald-400'
           }`}
       >
@@ -41,14 +41,14 @@ function CheckboxRow({ label, checked, onChange, disabled }: CheckboxRowProps) {
           </svg>
         )}
       </span>
-      <span className="text-sm text-gray-700 select-none leading-tight">{label}</span>
+      <span className="text-sm text-My-Black select-none leading-tight">{label}</span>
     </label>
   );
 }
 
 function SectionHeading({ label }: { label: string }) {
   return (
-    <p className="text-xs font-black uppercase tracking-widest text-gray-400 pt-4 pb-1 border-t border-gray-100 first:border-t-0 first:pt-0">
+    <p className="text-xs font-black uppercase tracking-widest text-My-Black pt-4 pb-1 border-t border-gray-100 first:border-t-0 first:pt-0">
       {label}
     </p>
   );
@@ -139,7 +139,7 @@ export function ReportCardSettingsPanel({ open, onClose, onSettingsChange }: Pro
       {/* Panel */}
       <div
         ref={panelRef}
-        className="relative z-10 w-80 h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+        className="relative z-10 w-80 h-full bg-white -2xl flex flex-col animate-in slide-in-from-right duration-300"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -148,7 +148,7 @@ export function ReportCardSettingsPanel({ open, onClose, onSettingsChange }: Pro
               <Settings className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm font-black text-gray-900">Printout Settings</p>
+              <p className="text-sm font-black text-My-Black">Printout Settings</p>
               {saving && (
                 <p className="text-[10px] text-emerald-500 flex items-center gap-1">
                   <Loader2 className="w-2.5 h-2.5 animate-spin" /> Saving…
@@ -170,7 +170,7 @@ export function ReportCardSettingsPanel({ open, onClose, onSettingsChange }: Pro
               ))}
             </div>
           ) : !settings ? (
-            <p className="text-sm text-gray-400 text-center py-8">Could not load settings.</p>
+            <p className="text-sm text-My-Black text-center py-8">Could not load settings.</p>
           ) : (
             <div className="space-y-0.5">
 

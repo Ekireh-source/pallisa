@@ -82,13 +82,13 @@ export default function ClassesListPage() {
             <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-gray-900 font-bold text-sm sm:text-base truncate">{cls.name}</p>
-            <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 space-y-0.5">
-              <p className="sm:hidden font-semibold text-gray-600 truncate flex items-center gap-1">
+            <p className="text-My-Black font-bold text-sm sm:text-base truncate">{cls.name}</p>
+            <div className="text-[11px] sm:text-xs text-My-Black mt-0.5 space-y-0.5">
+              <p className="sm:hidden font-semibold text-My-Black truncate flex items-center gap-1">
                 <Building2 className="w-3 h-3 text-primary shrink-0" />
                 <span>{cls.campus_name || 'Main Campus'}</span>
               </p>
-              <p className="sm:hidden font-semibold text-gray-600 flex items-center gap-1">
+              <p className="sm:hidden font-semibold text-My-Black flex items-center gap-1">
                 <Layers className="w-3 h-3 text-primary shrink-0" />
                 <span>{cls.sections_count || 0} Streams</span>
               </p>
@@ -104,8 +104,8 @@ export default function ClassesListPage() {
       className: "hidden sm:table-cell",
       cellClassName: "hidden sm:table-cell",
       cell: (cls) => (
-        <div className="flex items-center text-sm text-gray-600 gap-1.5 font-semibold">
-          <Building2 className="w-3.5 h-3.5 text-gray-400" />
+        <div className="flex items-center text-sm text-My-Black gap-1.5 font-semibold">
+          <Building2 className="w-3.5 h-3.5 text-My-Black" />
           <span>{cls.campus_name || 'Main Campus'}</span>
         </div>
       ),
@@ -116,7 +116,7 @@ export default function ClassesListPage() {
       className: "hidden sm:table-cell",
       cellClassName: "hidden sm:table-cell",
       cell: (cls) => (
-        <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-none px-3 font-bold rounded-full text-xs">
+        <Badge variant="secondary" className="bg-gray-100 text-My-Black border-none px-3 font-bold rounded-full text-xs">
           {cls.sections_count || 0} Streams
         </Badge>
       ),
@@ -144,10 +144,10 @@ export default function ClassesListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-50 rounded-xl">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
               <DropdownMenuItem
                 className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/classes/${cls.id}`)}
@@ -178,77 +178,77 @@ export default function ClassesListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_CLASSES}>
-    <MainLayout
-      title="Classes"
-      description="Manage grade levels and student groups."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "Add Class",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/classes/create",
-          }}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search classes..."
-                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="w-full md:w-48">
-              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-white">
-                  <SelectValue placeholder="All Levels" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="0level">O-Level</SelectItem>
-                  <SelectItem value="Alevel">A-Level</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-full md:w-48">
-              <CampusSearchableSelect
-                value={selectedCampus}
-                onValueChange={setSelectedCampus}
-                placeholder="All Campuses"
-                triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
-              />
+      <MainLayout
+        title="Classes"
+        description="Manage grade levels and student groups."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "Add Class",
+              icon: <Plus className="w-4 h-4" />,
+              href: "/classes/create",
+            }}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+                <Input
+                  placeholder="Search classes..."
+                  className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="w-full md:w-48">
+                <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                  <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-white">
+                    <SelectValue placeholder="All Levels" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="0level">O-Level</SelectItem>
+                    <SelectItem value="Alevel">A-Level</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full md:w-48">
+                <CampusSearchableSelect
+                  value={selectedCampus}
+                  onValueChange={setSelectedCampus}
+                  placeholder="All Campuses"
+                  triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm, level: selectedLevel, campus: selectedCampus }}
-            deps={[searchTerm, selectedLevel, selectedCampus]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <Layers className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No classes defined</p>
-                <p className="text-sm">Start by adding grade levels (e.g., Primary 1, Senior 1).</p>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-    </MainLayout>
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm, level: selectedLevel, campus: selectedCampus }}
+              deps={[searchTerm, selectedLevel, selectedCampus]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <Layers className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No classes defined</p>
+                  <p className="text-sm">Start by adding grade levels (e.g., Primary 1, Senior 1).</p>
+                </div>
+              }
+            />
+          </div>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

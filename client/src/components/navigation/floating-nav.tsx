@@ -97,7 +97,7 @@ export default function FloatingNavbar() {
         className={cn(
           "flex items-center justify-between rounded-[14px] px-6 h-[68px] transition-all duration-300",
           "bg-white border-[2px] border-[#E2E8F0]",
-          (pathname === "/dashboard" && !scrolled) ? "" : "shadow-lg"
+          (pathname === "/dashboard" && !scrolled) ? "" : ""
         )}
       >
         {/* Left Side: Logo + Nav Links */}
@@ -193,7 +193,7 @@ export default function FloatingNavbar() {
                       <span className="text-[16px] text-My-Black group-hover:text-primary">
                         {item.label}
                       </span>
-                    
+
                     </DropdownMenuItem>
                   ))}
                 </div>
@@ -206,7 +206,7 @@ export default function FloatingNavbar() {
         <div className="flex items-center gap-2 sm:gap-2">
           {/* Admin Shield Link synchronized with layout.tsx */}
           <div className="hidden sm:flex items-center gap-4">
-         
+
             <Link
               href={"/merchant-settings"}
               className="text-[#94A3B8] hover:text-[#1E293B] rounded-xl transition-all p-1 relative"
@@ -244,7 +244,7 @@ export default function FloatingNavbar() {
                   <Avatar className="size-full">
                     <AvatarImage src="/images/profile-placeholder.jpg" />
                     <AvatarFallback className="text-myBlack text-[16px]">
-                    
+
                     </AvatarFallback>
                   </Avatar>
                 </div>
@@ -260,21 +260,21 @@ export default function FloatingNavbar() {
                 )}
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[220px] mt-2 rounded-[12px] p-1 shadow-xl border-slate-100">
+            <DropdownMenuContent align="end" className="w-[220px] mt-2 rounded-[12px] p-1 -xl border-slate-100">
               <DropdownMenuItem className="!items-start rounded-lg hover:bg-slate-50 cursor-pointer transition-all my-1 px-3 py-2.5">
                 <div className="flex items-center justify-start gap-2.5">
                   <Avatar className="size-7">
                     <AvatarImage src="/images/profile-placeholder.jpg" />
                     <AvatarFallback className="bg-[#f0f9ff] text-[#0369A1] text-[10px] font-bold">
-                    
+
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[16px] font-medium text-myBlack truncate leading-tight">
-                      
+
                     </span>
                     <span className="text-[13px] font-medium text-myBlack truncate">
-                    
+
                     </span>
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export default function FloatingNavbar() {
       >
         <div className="p-3 space-y-1">
           <div className="px-1 pb-3 sm:hidden">
-          
+
           </div>
           {NAV_LINKS.map((link) => (
             <div
@@ -343,7 +343,7 @@ export default function FloatingNavbar() {
           ))}
           <div className="h-[1px] bg-slate-50 my-2 mx-2" />
           <div className="pt-1">
-            <p className="px-4 text-[16px] font-bold text-gray-400 uppercase tracking-widest mb-2">More</p>
+            <p className="px-4 text-[16px] font-bold text-My-Black uppercase tracking-widest mb-2">More</p>
             <div className="max-h-[320px] overflow-y-auto custom-scrollbar flex flex-col gap-1">
               {MORE_LINKS.map((link) => (
                 <div
@@ -373,7 +373,7 @@ export default function FloatingNavbar() {
 
             </Link>
           </div>
-         
+
 
           <div className="h-[1px] bg-slate-50 my-2 mx-2" />
 

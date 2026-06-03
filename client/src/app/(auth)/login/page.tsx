@@ -62,7 +62,7 @@ export default function Page() {
     <>
       <div className="space-y-6 bg-white ">
         <div className="flex flex-col items-start gap-2">
-          <h2 className="text-2xl font-bold text-gray-900">Log Into your account</h2>
+          <h2 className="text-2xl font-bold text-My-Black">Log Into your account</h2>
           <p className="text-muted-foreground text-base">
             Enter your email and Password to access your Account
           </p>
@@ -130,7 +130,7 @@ export default function Page() {
           <Button
             type="submit"
             className="w-full h-12 rounded-full"
-            
+
           >
             {loading ? "Signing In..." : "Sign In"}
           </Button>

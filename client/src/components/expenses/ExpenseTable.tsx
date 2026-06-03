@@ -72,7 +72,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white  overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:p-6">
           <div className="animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -89,13 +89,13 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
 
   // Mobile Card View
   const MobileExpenseCard = ({ expense }: { expense: Expense }) => (
-    <Card className="mb-4 shadow-sm border border-gray-200">
+    <Card className="mb-4  border border-gray-200">
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 truncate">
+              <h3 className="text-sm font-semibold text-My-Black truncate">
                 {expense.title}
               </h3>
               {expense.description && (
@@ -104,7 +104,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
                 </p>
               )}
               {expense.invoice_number && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-My-Black mt-1">
                   Invoice: {expense.invoice_number}
                 </p>
               )}
@@ -117,7 +117,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
           {/* Amount */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">Amount:</span>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-My-Black">
               {formatCurrency(expense.amount)}
             </span>
           </div>
@@ -126,13 +126,13 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className="text-xs text-gray-500">Category:</span>
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-My-Black">
                 {expense.category_name || 'Unknown'}
               </p>
             </div>
             <div>
               <span className="text-xs text-gray-500">Department:</span>
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-My-Black">
                 {expense.department_name || 'N/A'}
               </p>
             </div>
@@ -142,7 +142,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className="text-xs text-gray-500">Date:</span>
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-My-Black">
                 {formatDate(expense.incurred_on)}
               </p>
             </div>
@@ -210,15 +210,15 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
   );
 
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div className="bg-white  overflow-hidden sm:rounded-lg">
       {/* Mobile View */}
       <div className="block sm:hidden">
         <div className="p-4">
           {expenses.length === 0 ? (
             <div className="text-center py-8">
-              <div className="text-gray-400 text-4xl mb-4">📊</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
-              <p className="text-sm text-gray-600">No expenses match your current filters.</p>
+              <div className="text-My-Black text-4xl mb-4">📊</div>
+              <h3 className="text-lg font-medium text-My-Black mb-2">No expenses found</h3>
+              <p className="text-sm text-My-Black">No expenses match your current filters.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -266,7 +266,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
               <tr key={expense.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-My-Black">
                       {expense.title}
                     </div>
                     {expense.description && (
@@ -275,29 +275,29 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({
                       </div>
                     )}
                     {expense.invoice_number && (
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-My-Black">
                         Invoice: {expense.invoice_number}
                       </div>
                     )}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm font-semibold text-gray-900">
+                  <div className="text-sm font-semibold text-My-Black">
                     {formatCurrency(expense.amount)}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">
+                  <div className="text-sm text-My-Black">
                     {expense.category_name || 'Unknown'}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">
+                  <div className="text-sm text-My-Black">
                     {expense.department_name || 'N/A'}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">
+                  <div className="text-sm text-My-Black">
                     {formatDate(expense.incurred_on)}
                   </div>
                 </td>

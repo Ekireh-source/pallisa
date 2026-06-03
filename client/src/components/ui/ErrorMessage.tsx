@@ -9,26 +9,26 @@ interface ErrorMessageProps {
   variant?: 'default' | 'inline' | 'toast';
 }
 
-export const ErrorMessage: React.FC<ErrorMessageProps> = ({ 
-  message, 
-  errors, 
-  className = '', 
-  variant = 'default' 
+export const ErrorMessage: React.FC<ErrorMessageProps> = ({
+  message,
+  errors,
+  className = '',
+  variant = 'default'
 }) => {
   const hasErrors = message || (errors && Object.keys(errors).length > 0);
-  
+
   if (!hasErrors) return null;
 
   const baseClasses = "rounded-md p-3";
   const variantClasses = {
     default: "bg-red-50 border border-red-200",
     inline: "bg-red-50 border-l-4 border-red-400",
-    toast: "bg-red-500 text-white shadow-lg"
+    toast: "bg-red-500 text-white "
   };
 
   const textClasses = {
     default: "text-red-800",
-    inline: "text-red-700", 
+    inline: "text-red-700",
     toast: "text-white"
   };
 
@@ -52,7 +52,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
               {message}
             </p>
           )}
-          
+
           {errors && Object.keys(errors).length > 0 && (
             <div className="mt-2">
               <ul className={`text-sm ${textClasses[variant]} space-y-1`}>

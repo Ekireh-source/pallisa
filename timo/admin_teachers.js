@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const delInput = document.getElementById('inpDeleteConfirm');
     if (delInput) {
-        delInput.addEventListener('input', function(e) {
+        delInput.addEventListener('input', function (e) {
             document.getElementById('btnConfirmDelete').disabled = e.target.value.toLowerCase().trim() !== 'delete';
         });
     }
@@ -62,8 +62,8 @@ function renderTeachers(dataArray) {
 
     dataArray.forEach(teacher => {
         const card = document.createElement('div');
-        card.className = "bg-white p-3.5 border border-slate-200 rounded-xl shadow-sm flex items-center justify-between elevate-card";
-        
+        card.className = "bg-white p-3.5 border border-slate-200 rounded-xl  flex items-center justify-between elevate-card";
+
         card.innerHTML = `
             <div class="flex items-center gap-3 overflow-hidden pr-2">
                 <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex flex-shrink-0 items-center justify-center font-extrabold text-sm border border-slate-200">
@@ -75,10 +75,10 @@ function renderTeachers(dataArray) {
                 </div>
             </div>
             <div class="flex items-center gap-1.5 flex-shrink-0">
-                <button onclick="promptEdit(${teacher.user_id}, '${teacher.full_name.replace(/'/g, "\\'")}', '${teacher.email}')" class="w-8 h-8 rounded bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-brand hover:text-white transition-colors border border-slate-200 hover:border-brand shadow-sm" title="Edit Profile">
+                <button onclick="promptEdit(${teacher.user_id}, '${teacher.full_name.replace(/'/g, "\\'")}', '${teacher.email}')" class="w-8 h-8 rounded bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-brand hover:text-white transition-colors border border-slate-200 hover:border-brand " title="Edit Profile">
                     <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="promptDelete(${teacher.user_id}, '${teacher.full_name.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded bg-slate-50 text-rose-400 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors border border-slate-200 hover:border-rose-500 shadow-sm" title="Revoke Access">
+                <button onclick="promptDelete(${teacher.user_id}, '${teacher.full_name.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded bg-slate-50 text-rose-400 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors border border-slate-200 hover:border-rose-500 " title="Revoke Access">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
             </div>
@@ -94,8 +94,8 @@ function filterTeachers() {
         renderTeachers(teachersCache);
         return;
     }
-    const filtered = teachersCache.filter(t => 
-        t.full_name.toLowerCase().includes(query) || 
+    const filtered = teachersCache.filter(t =>
+        t.full_name.toLowerCase().includes(query) ||
         t.email.toLowerCase().includes(query)
     );
     renderTeachers(filtered);
@@ -109,31 +109,31 @@ async function handleTeacherSubmission(e) {
     const btn = document.getElementById('btnSaveTeacher');
     const inpName = document.getElementById('inpTeacherName');
     const inpEmail = document.getElementById('inpTeacherEmail');
-    
-    btn.disabled = true; 
+
+    btn.disabled = true;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Registering...`;
 
     try {
-        const response = await fetch('api/admin_teachers.php', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ action: 'add_teacher', full_name: inpName.value, email: inpEmail.value }) 
+        const response = await fetch('api/admin_teachers.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_teacher', full_name: inpName.value, email: inpEmail.value })
         });
         const result = await response.json();
-        
-        if (result.success) { 
-            showNotification(result.message); 
-            inpName.value = ''; inpEmail.value = ''; 
-            loadTeachersData(); 
-        } else { 
-            showNotification(result.message, 'error'); 
+
+        if (result.success) {
+            showNotification(result.message);
+            inpName.value = ''; inpEmail.value = '';
+            loadTeachersData();
+        } else {
+            showNotification(result.message, 'error');
         }
-    } catch (err) { 
-        showNotification('Failed to register teacher.', 'error'); 
-    } finally { 
-        btn.disabled = false; 
-        btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Register Teacher`; 
-        if (typeof lucide !== 'undefined') lucide.createIcons(); 
+    } catch (err) {
+        showNotification('Failed to register teacher.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Register Teacher`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 }
 
@@ -162,7 +162,7 @@ async function executeEdit() {
     const newName = document.getElementById('inpEditName').value.trim();
     const newEmail = document.getElementById('inpEditEmail').value.trim();
     if (!newName || !newEmail) return;
-    
+
     const btn = document.getElementById('btnConfirmEdit');
     const origHtml = btn.innerHTML;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Saving...`;
@@ -170,14 +170,14 @@ async function executeEdit() {
 
     try {
         const response = await fetch('api/admin_teachers.php', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'edit_teacher', user_id: targetTeacherId, full_name: newName, email: newEmail })
         });
         const result = await response.json();
 
-        if (result.success) { showNotification(result.message); closeEditModal(); loadTeachersData(); } 
+        if (result.success) { showNotification(result.message); closeEditModal(); loadTeachersData(); }
         else { showNotification(result.message, 'error'); }
-    } catch (err) { showNotification('Update failed.', 'error'); } 
+    } catch (err) { showNotification('Update failed.', 'error'); }
     finally { btn.innerHTML = origHtml; btn.disabled = false; if (typeof lucide !== 'undefined') lucide.createIcons(); }
 }
 
@@ -217,9 +217,9 @@ async function executeDelete() {
         });
         const result = await response.json();
 
-        if (result.success) { showNotification(result.message); closeDeleteModal(); loadTeachersData(); } 
+        if (result.success) { showNotification(result.message); closeDeleteModal(); loadTeachersData(); }
         else { showNotification(result.message, 'error'); btn.innerHTML = origHtml; btn.disabled = false; }
     } catch (err) { showNotification('Failed to execute delete.', 'error'); btn.innerHTML = origHtml; btn.disabled = false; }
 }
 
-function confirmLogout() { if(confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }
+function confirmLogout() { if (confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }

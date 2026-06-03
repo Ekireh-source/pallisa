@@ -47,4 +47,4 @@ export const selectLastRefreshTimeInMilliseconds = createSelector(
 
 export const selectSchool = createSelector([authSlice], (slice) => slice.school);
 
-
+export const selectTeacher = createSelector([selectUser], (user) => user?.teacher);

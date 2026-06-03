@@ -133,146 +133,146 @@ export default function EditSchoolPage({ params }: { params: Promise<{ id: strin
     >
       <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Main form */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Basic Info */}
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-indigo-500" /> Basic Information
-              </h3>
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-semibold text-gray-700">School Name <span className="text-red-500">*</span></Label>
-                  <Input id="name" placeholder="e.g., Pallisa High School" className={`h-12 rounded-xl ${errors.name ? 'border-red-500' : 'border-gray-200'}`} {...register('name')} />
-                  {errors.name && <ErrorMessage message={errors.name.message} />}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Main form */}
+            <div className="md:col-span-2 space-y-6">
+              {/* Basic Info */}
+              <Card className="p-8 border-none  ring-1 ring-gray-100">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-indigo-500" /> Basic Information
+                </h3>
+                <div className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-semibold text-gray-700 flex items-center gap-2"><Mail className="w-4 h-4 text-indigo-500" /> Email</Label>
-                    <Input id="email" type="email" placeholder="school@example.com" className="h-12 rounded-xl border-gray-200" {...register('email')} />
-                    {errors.email && <ErrorMessage message={errors.email.message} />}
+                    <Label htmlFor="name" className="text-sm font-semibold text-My-Black">School Name <span className="text-red-500">*</span></Label>
+                    <Input id="name" placeholder="e.g., Pallisa High School" className={`h-12 rounded-xl ${errors.name ? 'border-red-500' : 'border-gray-200'}`} {...register('name')} />
+                    {errors.name && <ErrorMessage message={errors.name.message} />}
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-semibold text-My-Black flex items-center gap-2"><Mail className="w-4 h-4 text-indigo-500" /> Email</Label>
+                      <Input id="email" type="email" placeholder="school@example.com" className="h-12 rounded-xl border-gray-200" {...register('email')} />
+                      {errors.email && <ErrorMessage message={errors.email.message} />}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone_number" className="text-sm font-semibold text-My-Black flex items-center gap-2"><Phone className="w-4 h-4 text-indigo-500" /> Phone</Label>
+                      <Input id="phone_number" placeholder="+256 ..." className="h-12 rounded-xl border-gray-200" {...register('phone_number')} />
+                      {errors.phone_number && <ErrorMessage message={errors.phone_number.message} />}
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="phone_number" className="text-sm font-semibold text-gray-700 flex items-center gap-2"><Phone className="w-4 h-4 text-indigo-500" /> Phone</Label>
-                    <Input id="phone_number" placeholder="+256 ..." className="h-12 rounded-xl border-gray-200" {...register('phone_number')} />
-                    {errors.phone_number && <ErrorMessage message={errors.phone_number.message} />}
+                    <Label htmlFor="address" className="text-sm font-semibold text-My-Black flex items-center gap-2"><MapPin className="w-4 h-4 text-indigo-500" /> Address</Label>
+                    <Input id="address" placeholder="Plot 45, Main Street, Pallisa" className="h-12 rounded-xl border-gray-200" {...register('address')} />
+                    {errors.address && <ErrorMessage message={errors.address.message} />}
                   </div>
                 </div>
+              </Card>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="text-sm font-semibold text-gray-700 flex items-center gap-2"><MapPin className="w-4 h-4 text-indigo-500" /> Address</Label>
-                  <Input id="address" placeholder="Plot 45, Main Street, Pallisa" className="h-12 rounded-xl border-gray-200" {...register('address')} />
-                  {errors.address && <ErrorMessage message={errors.address.message} />}
-                </div>
-              </div>
-            </Card>
+              {/* Branding */}
+              <Card className="p-8 border-none  ring-1 ring-gray-100">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center gap-2">
+                  <Quote className="w-5 h-5 text-indigo-500" /> Branding & Identity
+                </h3>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="motto" className="text-sm font-semibold text-My-Black">School Motto</Label>
+                    <Input id="motto" placeholder="e.g., Excellence Through Knowledge" className="h-12 rounded-xl border-gray-200" {...register('motto')} />
+                    {errors.motto && <ErrorMessage message={errors.motto.message} />}
+                    <p className="text-xs text-My-Black">Displayed on report cards below the school name.</p>
+                  </div>
 
-            {/* Branding */}
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Quote className="w-5 h-5 text-indigo-500" /> Branding & Identity
-              </h3>
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="motto" className="text-sm font-semibold text-gray-700">School Motto</Label>
-                  <Input id="motto" placeholder="e.g., Excellence Through Knowledge" className="h-12 rounded-xl border-gray-200" {...register('motto')} />
-                  {errors.motto && <ErrorMessage message={errors.motto.message} />}
-                  <p className="text-xs text-gray-400">Displayed on report cards below the school name.</p>
-                </div>
-
-                {/* Logo upload */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">School Logo</Label>
-                  <div
-                    onClick={() => fileRef.current?.click()}
-                    className="relative flex items-center gap-4 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all"
-                  >
-                    {displayLogo ? (
-                      <>
-                        <img src={displayLogo} alt="Logo" className="w-16 h-16 object-contain rounded-lg border border-gray-100 bg-gray-50" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-700">
-                            {logoFile ? logoFile.name : 'Current logo'}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {logoFile ? `${((logoFile.size) / 1024).toFixed(1)} KB · ` : ''}Click to replace
-                          </p>
+                  {/* Logo upload */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-My-Black">School Logo</Label>
+                    <div
+                      onClick={() => fileRef.current?.click()}
+                      className="relative flex items-center gap-4 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all"
+                    >
+                      {displayLogo ? (
+                        <>
+                          <img src={displayLogo} alt="Logo" className="w-16 h-16 object-contain rounded-lg border border-gray-100 bg-gray-50" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-My-Black">
+                              {logoFile ? logoFile.name : 'Current logo'}
+                            </p>
+                            <p className="text-xs text-My-Black">
+                              {logoFile ? `${((logoFile.size) / 1024).toFixed(1)} KB · ` : ''}Click to replace
+                            </p>
+                          </div>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); clearLogo(); setExistingLogo(null); }} className="p-1.5 rounded-lg hover:bg-gray-100 flex-shrink-0">
+                            <X className="w-4 h-4 text-My-Black" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-3 text-My-Black w-full">
+                          <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                            <ImagePlus className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-My-Black">Click to upload logo</p>
+                            <p className="text-xs text-My-Black">PNG, JPG, SVG · Recommended 256×256px</p>
+                          </div>
                         </div>
-                        <button type="button" onClick={(e) => { e.stopPropagation(); clearLogo(); setExistingLogo(null); }} className="p-1.5 rounded-lg hover:bg-gray-100 flex-shrink-0">
-                          <X className="w-4 h-4 text-gray-400" />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-3 text-gray-400 w-full">
-                        <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
-                          <ImagePlus className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Click to upload logo</p>
-                          <p className="text-xs text-gray-400">PNG, JPG, SVG · Recommended 256×256px</p>
-                        </div>
-                      </div>
-                    )}
-                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                      )}
+                      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          </div>
+              </Card>
+            </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <ToggleLeft className="w-5 h-5 text-indigo-500" /> Settings
-              </h3>
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Academic Level</Label>
-                  <Select onValueChange={(val) => setValue('level', val)} value={selectedLevel}>
-                    <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200"><SelectValue placeholder="Select Level" /></SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                      <SelectItem value="primary">Primary</SelectItem>
-                      <SelectItem value="secondary">Secondary</SelectItem>
-                      <SelectItem value="tertiary">Tertiary</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Campus (Optional)</Label>
-                  <Select onValueChange={(val) => setValue('campus', val === 'none' ? null : parseInt(val))} value={selectedCampus?.toString() || 'none'}>
-                    <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200"><SelectValue placeholder="Select Campus" /></SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                      <SelectItem value="none">No Campus</SelectItem>
-                      {campuses.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-900">Active Status</Label>
-                    <p className="text-xs text-gray-500">School is visible in the system</p>
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center gap-2">
+                  <ToggleLeft className="w-5 h-5 text-indigo-500" /> Settings
+                </h3>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-My-Black">Academic Level</Label>
+                    <Select onValueChange={(val) => setValue('level', val)} value={selectedLevel}>
+                      <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200"><SelectValue placeholder="Select Level" /></SelectTrigger>
+                      <SelectContent className="rounded-xl -xl border-gray-100">
+                        <SelectItem value="primary">Primary</SelectItem>
+                        <SelectItem value="secondary">Secondary</SelectItem>
+                        <SelectItem value="tertiary">Tertiary</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Switch checked={isActive} onCheckedChange={(val) => setValue('active', val)} />
-                </div>
-              </div>
-            </Card>
 
-            <div className="pt-2 space-y-2">
-              <Button type="submit" className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold" disabled={loading}>
-                {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
-                Update School
-              </Button>
-              <Button type="button" variant="ghost" className="w-full h-11 rounded-xl text-gray-500" onClick={() => router.back()}>Cancel</Button>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-My-Black">Campus (Optional)</Label>
+                    <Select onValueChange={(val) => setValue('campus', val === 'none' ? null : parseInt(val))} value={selectedCampus?.toString() || 'none'}>
+                      <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200"><SelectValue placeholder="Select Campus" /></SelectTrigger>
+                      <SelectContent className="rounded-xl -xl border-gray-100">
+                        <SelectItem value="none">No Campus</SelectItem>
+                        {campuses.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 ">
+                    <div>
+                      <Label className="text-sm font-semibold text-My-Black">Active Status</Label>
+                      <p className="text-xs text-gray-500">School is visible in the system</p>
+                    </div>
+                    <Switch checked={isActive} onCheckedChange={(val) => setValue('active', val)} />
+                  </div>
+                </div>
+              </Card>
+
+              <div className="pt-2 space-y-2">
+                <Button type="submit" className="w-full h-12 rounded-xl  -primary/20 font-bold" disabled={loading}>
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
+                  Update School
+                </Button>
+                <Button type="button" variant="ghost" className="w-full h-11 rounded-xl text-gray-500" onClick={() => router.back()}>Cancel</Button>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
       </div>
     </MainLayout>
   );

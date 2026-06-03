@@ -87,7 +87,7 @@ const RegisterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -107,16 +107,16 @@ const RegisterForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-My-Black">
           Create your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-My-Black">
           Join Pallisa High School Management System
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <Card className="bg-white py-8 px-4  sm:rounded-lg sm:px-10">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && <ErrorMessage message={error} />}
 
@@ -215,8 +215,8 @@ const RegisterForm: React.FC = () => {
             {/* School Information (only for school owners) */}
             {showSchoolFields && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">School Information</h3>
-                
+                <h3 className="text-lg font-medium text-My-Black">School Information</h3>
+
                 <div className="space-y-2">
                   <Label htmlFor="school_name">School Name</Label>
                   <Input

@@ -2,16 +2,16 @@
 
 import React, { useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Award,
   BookOpen,
   Calendar
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -70,11 +70,11 @@ export default function ProjectsListPage() {
       header: "Project Details",
       cell: (project) => (
         <div className="font-bold flex items-center gap-3.5">
-          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shadow-sm border border-indigo-100/50">
+          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600  border border-indigo-100/50">
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-gray-900 font-extrabold text-base leading-tight">{project.name || 'Untitled Project'}</p>
+            <p className="text-My-Black font-extrabold text-base leading-tight">{project.name || 'Untitled Project'}</p>
             <p className="text-xs text-gray-500 font-semibold mt-1">
               Subject: <span className="text-gray-800 font-bold">{project.subject_name || 'N/A'}</span> | Stream: <span className="text-gray-800 font-bold">{project.stream_name || 'N/A'}</span>
             </p>
@@ -86,8 +86,8 @@ export default function ProjectsListPage() {
       key: "term_name",
       header: "Academic Period",
       cell: (project) => (
-        <div className="flex items-center gap-2 text-gray-600 font-bold text-sm">
-          <Calendar className="w-4 h-4 text-gray-400" />
+        <div className="flex items-center gap-2 text-My-Black font-bold text-sm">
+          <Calendar className="w-4 h-4 text-My-Black" />
           <span>{project.term_name || 'N/A'} ({project.academic_year_name || 'Active Year'})</span>
         </div>
       ),
@@ -101,20 +101,17 @@ export default function ProjectsListPage() {
         return (
           <div className="w-44">
             <div className="flex items-center justify-between mb-1.5">
-              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-gray-400'
-              }`}>
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-My-Black'
+                }`}>
                 {isComplete ? 'Fully Graded' : 'Grading...'}
               </span>
-              <span className={`text-xs font-extrabold ${
-                isComplete ? 'text-emerald-600' : 'text-gray-600'
-              }`}>{progress}%</span>
+              <span className={`text-xs font-extrabold ${isComplete ? 'text-emerald-600' : 'text-My-Black'
+                }`}>{progress}%</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner border border-gray-200/50">
-              <div 
-                className={`h-full rounded-full transition-all duration-500 ${
-                  isComplete ? 'bg-emerald-500' : 'bg-primary'
-                }`}
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden -inner border border-gray-200/50">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-emerald-500' : 'bg-primary'
+                  }`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -133,15 +130,15 @@ export default function ProjectsListPage() {
                 <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 rounded-xl border border-gray-100 shadow-xl p-1.5">
-              <DropdownMenuItem 
-                className="cursor-pointer py-2.5 rounded-lg font-semibold text-gray-700"
+            <DropdownMenuContent align="end" className="w-52 rounded-xl border border-gray-100 -xl p-1.5">
+              <DropdownMenuItem
+                className="cursor-pointer py-2.5 rounded-lg font-semibold text-My-Black"
                 onClick={() => router.push(`/competences/projects/${project.public_id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2 text-primary" />
                 View & Grade Marks
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2.5 rounded-lg font-semibold text-rose-600 focus:text-rose-600 focus:bg-rose-50"
                 onClick={() => handleDelete(project.public_id)}
               >
@@ -157,61 +154,61 @@ export default function ProjectsListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_COMPETENCES}>
-    <MainLayout
-      title="Project Competency Matrices"
-      description="List of all unique graded project competency matrices. Configure new matrices or update graded student marks."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "New Project Matrix",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/competences/projects/create",
-          }}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search subjects or streams..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <MainLayout
+        title="Project Competency Matrices"
+        description="List of all unique graded project competency matrices. Configure new matrices or update graded student marks."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "New Project Matrix",
+              icon: <Plus className="w-4 h-4" />,
+              href: "/competences/projects/create",
+            }}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search subjects or streams..."
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm }}
+              deps={[searchTerm]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-16">
+                  <Award className="w-14 h-14 text-My-Black mb-4" />
+                  <p className="text-lg font-bold text-My-Black">No project matrices found</p>
+                  <p className="text-sm mt-1 text-My-Black">Initialize a new project matrix to start grading student competency criteria.</p>
+                  <Button className="rounded-xl mt-4 bg-primary hover:bg-primary/90 text-white font-semibold" asChild>
+                    <Link href="/competences/projects/create">
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Project Matrix
+                    </Link>
+                  </Button>
+                </div>
+              }
             />
           </div>
-        </div>
-
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-16">
-                <Award className="w-14 h-14 text-gray-200 mb-4" />
-                <p className="text-lg font-bold text-gray-900">No project matrices found</p>
-                <p className="text-sm mt-1 text-gray-400">Initialize a new project matrix to start grading student competency criteria.</p>
-                <Button className="rounded-xl mt-4 bg-primary hover:bg-primary/90 text-white font-semibold" asChild>
-                  <Link href="/competences/projects/create">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Project Matrix
-                  </Link>
-                </Button>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-    </MainLayout>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

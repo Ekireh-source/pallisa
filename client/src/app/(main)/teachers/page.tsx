@@ -2,8 +2,8 @@
 
 import React, { useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Search, 
+import {
+  Search,
   Mail,
   UserPlus,
   Briefcase,
@@ -13,9 +13,9 @@ import {
   Upload,
   AlertCircle
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -50,7 +50,7 @@ export default function TeachersListPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   const fetchFirstPage = async (query?: any) => {
@@ -79,7 +79,7 @@ export default function TeachersListPage() {
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Teachers Template");
-    
+
     // Add info about types
     const info = [
       ["Employment Types: full_time, part_time, contract, substitute, volunteer"],
@@ -161,8 +161,8 @@ export default function TeachersListPage() {
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-gray-900 font-bold">{teacher.full_name}</p>
-            <p className="text-xs text-gray-400 font-normal">License: {teacher.license_number || 'N/A'}</p>
+            <p className="text-My-Black font-bold">{teacher.full_name}</p>
+            <p className="text-xs text-My-Black font-normal">License: {teacher.license_number || 'N/A'}</p>
           </div>
         </div>
       ),
@@ -171,7 +171,7 @@ export default function TeachersListPage() {
       key: "specialization",
       header: "Specialization",
       cell: (teacher) => (
-        <span className="font-medium text-gray-600">{teacher.specialization || 'N/A'}</span>
+        <span className="font-medium text-My-Black">{teacher.specialization || 'N/A'}</span>
       ),
     },
     {
@@ -180,8 +180,8 @@ export default function TeachersListPage() {
       cell: (teacher) => (
         <div className="text-xs text-gray-500 space-y-0.5">
           <div className="flex items-center gap-1">
-            <Mail className="w-3.5 h-3.5 text-gray-400" />
-            <span className="text-gray-700 font-medium">{teacher.email || 'N/A'}</span>
+            <Mail className="w-3.5 h-3.5 text-My-Black" />
+            <span className="text-My-Black font-medium">{teacher.email || 'N/A'}</span>
           </div>
         </div>
       ),
@@ -209,32 +209,32 @@ export default function TeachersListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
-              <DropdownMenuItem 
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
+              <DropdownMenuItem
                 className="cursor-pointer py-2 font-medium"
                 onClick={() => router.push(`/teachers/${teacher.id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/teachers/${teacher.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit Info
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/teachers/${teacher.id}/assignments`)}
               >
                 <Icon icon="hugeicons:calendar-03" className="w-4 h-4 mr-2" />
                 View Assignments
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(teacher.id)}
               >
@@ -250,139 +250,139 @@ export default function TeachersListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_TEACHERS}>
-    <MainLayout
-      title="Teachers"
-      description="Manage school faculty and academic staff."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "Add Teacher",
-            icon: <UserPlus className="w-4 h-4" />,
-            href: "/teachers/create",
-          }}
-          secondary={[
-            {
-              label: "Bulk Upload",
-              icon: <FileSpreadsheet className="w-4 h-4" />,
-              onClick: () => setIsUploadModalOpen(true),
-            },
-          ]}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search by name, ID or specialization..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <MainLayout
+        title="Teachers"
+        description="Manage school faculty and academic staff."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "Add Teacher",
+              icon: <UserPlus className="w-4 h-4" />,
+              href: "/teachers/create",
+            }}
+            secondary={[
+              {
+                label: "Bulk Upload",
+                icon: <FileSpreadsheet className="w-4 h-4" />,
+                onClick: () => setIsUploadModalOpen(true),
+              },
+            ]}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search by name, ID or specialization..."
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm }}
+              deps={[searchTerm]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <Briefcase className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No teachers found</p>
+                  <p className="text-sm">Register teachers to assign them to classes and subjects.</p>
+                </div>
+              }
             />
           </div>
-        </div>
+        </Card>
 
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <Briefcase className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No teachers found</p>
-                <p className="text-sm">Register teachers to assign them to classes and subjects.</p>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-
-      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-          <div className="bg-gradient-to-br from-primary to-primary/90 p-8 text-white">
-            <DialogHeader>
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
-                <Upload className="w-6 h-6 text-white" />
-              </div>
-              <DialogTitle className="text-2xl font-bold text-white">Bulk Teacher Upload</DialogTitle>
-              <DialogDescription className="text-primary-foreground/90 mt-2">
-                Register multiple teachers at once using an Excel template.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex gap-3 text-primary text-sm">
-              <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <p>
-                Download the template, fill in the details, and upload it back. Login credentials will be sent to the teachers' emails.
-              </p>
+        <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+          <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none -2xl">
+            <div className="bg-gradient-to-br from-primary to-primary/90 p-8 text-white">
+              <DialogHeader>
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                  <Upload className="w-6 h-6 text-white" />
+                </div>
+                <DialogTitle className="text-2xl font-bold text-white">Bulk Teacher Upload</DialogTitle>
+                <DialogDescription className="text-primary-foreground/90 mt-2">
+                  Register multiple teachers at once using an Excel template.
+                </DialogDescription>
+              </DialogHeader>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              <Button 
-                variant="outline" 
-                className="h-16 rounded-2xl border-dashed border-2 hover:bg-primary/10 hover:border-primary/20 flex flex-col items-center justify-center gap-1 group transition-all"
-                onClick={downloadTemplate}
+            <div className="p-8 space-y-6">
+              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex gap-3 text-primary text-sm">
+                <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <p>
+                  Download the template, fill in the details, and upload it back. Login credentials will be sent to the teachers' emails.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-16 rounded-2xl border-dashed border-2 hover:bg-primary/10 hover:border-primary/20 flex flex-col items-center justify-center gap-1 group transition-all"
+                  onClick={downloadTemplate}
+                >
+                  <div className="flex items-center text-primary font-semibold">
+                    <Download className="w-4 h-4 mr-2 group-hover:bounce" />
+                    Download Template
+                  </div>
+                  <span className="text-[10px] text-gray-500 font-normal">Excel file with sample teacher data</span>
+                </Button>
+
+                <div className="relative group">
+                  <input
+                    type="file"
+                    accept=".xlsx, .xls"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    disabled={isUploading}
+                  />
+                  <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-primary/20 bg-primary/5 group-hover:bg-primary/10 group-hover:border-primary/30'}`}>
+                    {isUploading ? (
+                      <>
+                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm font-medium text-primary">Processing File...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                          <Upload className="w-5 h-5" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-semibold text-primary">Click to upload Excel file</p>
+                          <p className="text-xs text-gray-500">Max size 5MB (.xlsx, .xls)</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="p-6 bg-gray-50/50 border-t border-gray-100 flex sm:justify-center">
+              <Button
+                variant="ghost"
+                onClick={() => setIsUploadModalOpen(false)}
+                className="rounded-xl hover:bg-white"
               >
-                <div className="flex items-center text-primary font-semibold">
-                  <Download className="w-4 h-4 mr-2 group-hover:bounce" />
-                  Download Template
-                </div>
-                <span className="text-[10px] text-gray-500 font-normal">Excel file with sample teacher data</span>
+                Cancel
               </Button>
-
-              <div className="relative group">
-                <input
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  disabled={isUploading}
-                />
-                <div className={`h-32 rounded-2xl border-dashed border-2 flex flex-col items-center justify-center gap-3 transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-primary/20 bg-primary/5 group-hover:bg-primary/10 group-hover:border-primary/30'}`}>
-                  {isUploading ? (
-                    <>
-                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm font-medium text-primary">Processing File...</span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                        <Upload className="w-5 h-5" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-semibold text-primary">Click to upload Excel file</p>
-                        <p className="text-xs text-gray-500">Max size 5MB (.xlsx, .xls)</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="p-6 bg-gray-50/50 border-t border-gray-100 flex sm:justify-center">
-            <Button 
-              variant="ghost" 
-              onClick={() => setIsUploadModalOpen(false)}
-              className="rounded-xl hover:bg-white"
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </MainLayout>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

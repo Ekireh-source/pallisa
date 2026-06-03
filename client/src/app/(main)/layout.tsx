@@ -10,6 +10,7 @@ import { SharedNavbar } from '@/components/layout/SharedNavbar';
 import DashboardSideBar from '@/components/navigation/dashboard-sidebar';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { AiAssistantWidget } from '@/components/ui/ai-assistant-widget';
 
 export default function MainLayout({
   children,
@@ -75,7 +76,7 @@ export default function MainLayout({
           isMobile || isTeacherUser ? 'pl-0 pb-[72px]' : isSideBarOpen ? 'pl-64' : 'pl-20'
         }`}
       >
-        {(!isTeacherUser || !isDashboardPage) && (
+        {!isTeacherUser && (
           <SharedNavbar isSideBarOpen={isSideBarOpen} setIsSideBarOpen={setIsSideBarOpen} />
         )}
 
@@ -87,6 +88,9 @@ export default function MainLayout({
       </div>
       
       <MobileBottomNav onMoreClick={() => setIsSideBarOpen(true)} />
+      
+      {/* AI Assistant Floating Widget */}
+      <AiAssistantWidget />
     </div>
   );
 }

@@ -35,7 +35,7 @@ const LoginForm: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field errors when user starts typing
     if (fieldErrors[name]) {
       dispatch(clearFieldError(name));
@@ -83,7 +83,7 @@ const LoginForm: React.FC = () => {
 
     try {
       const result = await dispatch(loginUser(credentials));
-      
+
       if (loginUser.fulfilled.match(result)) {
         // Check if email verification is required
         const user = result.payload.user_profile;
@@ -108,10 +108,10 @@ const LoginForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-bold text-My-Black">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-My-Black">
           Or{' '}
           <button
             onClick={() => router.push('/register')}
@@ -127,8 +127,8 @@ const LoginForm: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Display general error and field errors */}
             {(error || Object.keys(fieldErrors).length > 0) && (
-              <ErrorMessage 
-                message={error || undefined} 
+              <ErrorMessage
+                message={error || undefined}
                 errors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
               />
             )}
@@ -139,22 +139,20 @@ const LoginForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleMethodToggle}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    loginMethod === 'email'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${loginMethod === 'email'
+                    ? 'bg-white text-My-Black '
+                    : 'text-gray-500 hover:text-My-Black'
+                    }`}
                 >
                   Email
                 </button>
                 <button
                   type="button"
                   onClick={handleMethodToggle}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    loginMethod === 'student_id'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${loginMethod === 'student_id'
+                    ? 'bg-white text-My-Black '
+                    : 'text-gray-500 hover:text-My-Black'
+                    }`}
                 >
                   Student ID
                 </button>
@@ -217,7 +215,7 @@ const LoginForm: React.FC = () => {
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-My-Black">
                   Remember me
                 </label>
               </div>

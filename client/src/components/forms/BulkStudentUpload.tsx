@@ -58,33 +58,33 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
 
   const validateData = useCallback((data: StudentData[]): ValidationError[] => {
     const errors: ValidationError[] = [];
-    
+
     data.forEach((student, index) => {
       const row = index + 2; // +2 because Excel is 1-indexed and we skip header
-      
+
       if (!student.email?.trim()) {
         errors.push({ row, field: 'Email', message: 'Email is required' });
       } else if (!isValidEmail(student.email)) {
         errors.push({ row, field: 'Email', message: 'Invalid email format' });
       }
-      
+
       if (!student.first_name?.trim()) {
         errors.push({ row, field: 'First Name', message: 'First name is required' });
       }
-      
+
       if (!student.last_name?.trim()) {
         errors.push({ row, field: 'Last Name', message: 'Last name is required' });
       }
-      
+
       if (student.phone_number && !isValidPhone(student.phone_number)) {
         errors.push({ row, field: 'Phone Number', message: 'Invalid phone number format' });
       }
-      
+
       if (student.date_of_birth && !isValidDate(student.date_of_birth)) {
         errors.push({ row, field: 'Date of Birth', message: 'Invalid date format' });
       }
     });
-    
+
     return errors;
   }, []);
 
@@ -98,19 +98,19 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
-          
+
           if (jsonData.length < 2) {
             reject(new Error('Excel file must have at least a header row and one data row'));
             return;
           }
-          
+
           const students: StudentData[] = [];
           const headers = jsonData[0] as string[];
-          
+
           for (let i = 1; i < jsonData.length; i++) {
             const row = jsonData[i] as unknown[];
             if (row.length === 0 || row.every(cell => !cell)) continue;
-            
+
             const student: StudentData = {
               first_name: '',
               last_name: '',
@@ -128,7 +128,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
               medical_conditions: '',
               allergies: ''
             };
-            
+
             headers.forEach((header, index) => {
               const value = row[index];
               if (value !== undefined && value !== null && value !== '') {
@@ -187,20 +187,20 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
                 }
               }
             });
-            
+
             students.push(student);
           }
-          
+
           setPreviewData(students);
           const errors = validateData(students);
           setValidationErrors(errors);
-          
+
           if (errors.length > 0) {
             toast.error(`Found ${errors.length} validation errors. Please fix them before uploading.`);
           } else {
             toast.success(`Successfully parsed ${students.length} students from file.`);
           }
-          
+
           resolve(students);
         } catch (error) {
           reject(error);
@@ -274,13 +274,13 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
     try {
       const studentsData = getApiData();
       const res = await ValidateBulkStudents({ students: studentsData });
-      
+
       if (!res.success) {
         throw res.error;
       }
-      
+
       const { duplicate_count, duplicates: dups, field_error_count, field_errors } = res.data;
-      
+
       let hasIssues = false;
 
       if (duplicate_count > 0) {
@@ -350,7 +350,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
     }
 
     setIsUploading(true);
-    
+
     if (!background) {
       setUploadProgress({
         total: previewData.length,
@@ -363,7 +363,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
 
     try {
       const studentsData = getApiData();
-      
+
       if (background) {
         const res = await BulkUploadStudentsAsync({ students: studentsData });
         if (!res.success) throw res.error;
@@ -372,10 +372,10 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
         clearFile();
         return;
       }
-      
+
       const result = await BulkUploadStudents({ students: studentsData });
       if (!result.success) throw result.error;
-      
+
       const data = result.data;
 
       setUploadProgress(prev => prev ? {
@@ -384,18 +384,18 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
         success: data.created_count || prev.total,
         failed: 0
       } : null);
-      
+
       toast.success(`Successfully uploaded ${data.created_count} students!`);
       onSuccess?.();
       clearFile();
     } catch (error: any) {
       console.error('Upload error:', error);
-      
+
       if (error?.response?.data) {
         const errorData = error.response.data;
         const createdCount = errorData.created_count || 0;
         const failedCount = errorData.failed_count || 0;
-        
+
         setUploadProgress(prev => prev ? {
           ...prev,
           processed: prev.total,
@@ -407,7 +407,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
             message: JSON.stringify(err)
           })) : []
         } : null);
-        
+
         if (createdCount > 0) {
           toast.warning(`Uploaded ${createdCount} students, ${failedCount} failed`);
         } else {
@@ -467,7 +467,7 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Students Template');
-    
+
     XLSX.writeFile(wb, 'students_upload_template.xlsx');
   };
 
@@ -528,8 +528,8 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
                   className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
                 >
                   <div className="text-center">
-                    <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600">
+                    <Upload className="h-8 w-8 mx-auto text-My-Black mb-2" />
+                    <p className="text-sm text-My-Black">
                       {file ? file.name : 'Click to upload Excel file'}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
@@ -661,9 +661,9 @@ export function BulkStudentUpload({ onSuccess }: BulkStudentUploadProps) {
                   ))}
                 </div>
                 {apiErrors.length === 0 && (
-                  <Button 
+                  <Button
                     onClick={() => setIsValidated(true)}
-                    variant="outline" 
+                    variant="outline"
                     className="border-orange-300 text-orange-700 hover:bg-orange-100"
                     size="sm"
                   >

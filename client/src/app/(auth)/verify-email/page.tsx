@@ -104,7 +104,7 @@ export default function VerifyEmailPage() {
             dispatch(setTemporaryPermissions(user_profile.user_permissions as any));
           }
         }
-        
+
         if (school) {
           dispatch(setSchool(school));
         } else {
@@ -179,7 +179,7 @@ export default function VerifyEmailPage() {
             <ShieldCheck className="w-8 h-8 text-green-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Email Verified!</h2>
+            <h2 className="text-2xl font-bold text-My-Black">Email Verified!</h2>
             <p className="text-muted-foreground text-base mt-2">
               Your email has been successfully verified. Redirecting you to the dashboard...
             </p>
@@ -200,10 +200,10 @@ export default function VerifyEmailPage() {
         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-2">
           <MailCheck className="w-7 h-7 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Verify your email</h2>
+        <h2 className="text-2xl font-bold text-My-Black">Verify your email</h2>
         <p className="text-muted-foreground text-base">
           We sent a 6-digit verification code to{" "}
-          <span className="font-medium text-gray-900">{email || "your email"}</span>.
+          <span className="font-medium text-My-Black">{email || "your email"}</span>.
           Enter the code below to verify your account.
         </p>
       </div>
@@ -226,7 +226,7 @@ export default function VerifyEmailPage() {
                 w-12 h-14 text-center text-xl font-semibold rounded-xl border-2
                 outline-none transition-all duration-200
                 ${digit
-                  ? "border-primary bg-primary/5 text-gray-900"
+                  ? "border-primary bg-primary/5 text-My-Black"
                   : "border-gray-200 bg-white text-gray-500"
                 }
                 focus:border-primary focus:ring-2 focus:ring-primary/20
@@ -265,7 +265,7 @@ export default function VerifyEmailPage() {
             className={`
               inline-flex items-center gap-2 text-sm font-medium transition-colors
               ${resendCooldown > 0 || isResending
-                ? "text-gray-400 cursor-not-allowed"
+                ? "text-My-Black cursor-not-allowed"
                 : "text-primary hover:text-primary/80 cursor-pointer"
               }
             `}
@@ -284,7 +284,7 @@ export default function VerifyEmailPage() {
         <div className="pt-2">
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gray-900 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-My-Black transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Login

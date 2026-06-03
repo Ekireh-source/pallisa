@@ -512,9 +512,9 @@ function PaginatedTableInner<T, Q = unknown>({
 												>
 													<Icon
 														icon={expandedGroups.has(key) ? "hugeicons:arrow-down-01" : "hugeicons:arrow-right-01"}
-														className="w-4 h-4 text-gray-600 transition-transform"
+														className="w-4 h-4 text-My-Black transition-transform"
 													/>
-													<span className="font-semibold text-gray-900">
+													<span className="font-semibold text-My-Black">
 														{groupLabel ? groupLabel(key) : key}
 													</span>
 													<span className="text-sm text-gray-500">({items.length})</span>
@@ -611,7 +611,7 @@ function PaginatedTableInner<T, Q = unknown>({
 							return (
 								<Fragment key={(item as any)?.id || `ungrouped-mob-${index}`}>
 									{separator && <div className="py-2">{separator}</div>}
-									<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4 shadow-sm flex flex-col">
+									<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4  flex flex-col">
 										<div className="flex items-start justify-between gap-4">
 											<div className="flex-1 min-w-0 overflow-hidden">
 												{columns[0]?.cell?.(item)}
@@ -640,11 +640,11 @@ function PaginatedTableInner<T, Q = unknown>({
 							<Fragment key={key}>
 								<div
 									onClick={() => toggleGroup(key)}
-									className="bg-[#F7F7FB] rounded-lg p-3 flex items-center gap-2 w-full text-left font-semibold text-gray-900 cursor-pointer"
+									className="bg-[#F7F7FB] rounded-lg p-3 flex items-center gap-2 w-full text-left font-semibold text-My-Black cursor-pointer"
 								>
 									<Icon
 										icon={expandedGroups.has(key) ? "hugeicons:arrow-down-01" : "hugeicons:arrow-right-01"}
-										className="w-4 h-4 text-gray-600 transition-transform"
+										className="w-4 h-4 text-My-Black transition-transform"
 									/>
 									<span>{groupLabel ? groupLabel(key) : key}</span>
 									<span className="text-sm text-gray-500">({items.length})</span>
@@ -658,7 +658,7 @@ function PaginatedTableInner<T, Q = unknown>({
 											return (
 												<Fragment key={(item as any)?.id || `${key}-mob-${itemIndex}`}>
 													{separator && <div className="py-2">{separator}</div>}
-													<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4 shadow-sm flex flex-col">
+													<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4  flex flex-col">
 														<div className="flex items-start justify-between gap-4">
 															<div className="flex-1 min-w-0 overflow-hidden">
 																{columns[0]?.cell?.(item)}
@@ -696,7 +696,7 @@ function PaginatedTableInner<T, Q = unknown>({
 						return (
 							<Fragment key={(item as any)?.id || `mob-${index}`}>
 								{separator && <div className="py-2">{separator}</div>}
-								<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4 shadow-sm flex flex-col">
+								<div className="bg-white rounded-[12px] border-[0.5px] border-gray-200 p-4  flex flex-col">
 									<div className="flex items-start justify-between gap-4">
 										<div className="flex-1 min-w-0 overflow-hidden">
 											{columns[0]?.cell?.(item)}

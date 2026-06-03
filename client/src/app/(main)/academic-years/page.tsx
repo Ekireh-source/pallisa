@@ -2,19 +2,19 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Edit2, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit2,
+  Trash2,
   CalendarDays,
   Clock,
   CheckCircle2
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -39,7 +39,7 @@ import { PERMISSION_CODES } from '@/codes';
 export default function AcademicYearsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   const fetchFirstPage = async (query?: any) => {
@@ -72,10 +72,10 @@ export default function AcademicYearsListPage() {
             <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-gray-900 font-bold text-sm sm:text-base truncate">{year.name}</p>
-            <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 space-y-0.5">
-              <p className="sm:hidden text-gray-600 font-semibold flex items-center gap-1">
-                <Clock className="w-3 h-3 text-gray-400 shrink-0" />
+            <p className="text-My-Black font-bold text-sm sm:text-base truncate">{year.name}</p>
+            <div className="text-[11px] sm:text-xs text-My-Black mt-0.5 space-y-0.5">
+              <p className="sm:hidden text-My-Black font-semibold flex items-center gap-1">
+                <Clock className="w-3 h-3 text-My-Black shrink-0" />
                 <span className="truncate">{format(new Date(year.start_date), 'MMM yy')} - {format(new Date(year.end_date), 'MMM yy')}</span>
               </p>
               <p className="font-medium">Created: {format(new Date(year.created_at), 'MMM dd, yyyy')}</p>
@@ -90,8 +90,8 @@ export default function AcademicYearsListPage() {
       className: "hidden sm:table-cell",
       cellClassName: "hidden sm:table-cell",
       cell: (year) => (
-        <div className="text-gray-600 flex items-center gap-2 text-sm font-semibold">
-          <Clock className="w-4 h-4 text-gray-400" />
+        <div className="text-My-Black flex items-center gap-2 text-sm font-semibold">
+          <Clock className="w-4 h-4 text-My-Black" />
           <span>{format(new Date(year.start_date), 'MMM yyyy')} - {format(new Date(year.end_date), 'MMM yyyy')}</span>
         </div>
       ),
@@ -120,18 +120,18 @@ export default function AcademicYearsListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-50 rounded-xl">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-xl border-gray-100">
-              <DropdownMenuItem 
+            <DropdownMenuContent align="end" className="w-44 rounded-xl -xl border-gray-100">
+              <DropdownMenuItem
                 className="cursor-pointer py-2 text-sm"
                 onClick={() => router.push(`/academic-years/${year.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2 text-sm text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(year.id)}
               >
@@ -147,55 +147,55 @@ export default function AcademicYearsListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_ACADEMIC_YEARS}>
-    <MainLayout
-      title="Academic Years"
-      description="Manage the school's academic calendar and cycles."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "New Academic Year",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/academic-years/create",
-          }}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-3 sm:p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search years..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <MainLayout
+        title="Academic Years"
+        description="Manage the school's academic calendar and cycles."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "New Academic Year",
+              icon: <Plus className="w-4 h-4" />,
+              href: "/academic-years/create",
+            }}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-3 sm:p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search years..."
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="p-2 sm:p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-3 [&_td]:px-2 [&_th]:px-2"
+              query={{ search: searchTerm }}
+              deps={[searchTerm]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <CalendarDays className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No academic years found</p>
+                  <p className="text-sm">Create an academic year to start your calendar.</p>
+                </div>
+              }
             />
           </div>
-        </div>
-
-        <div className="p-2 sm:p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-3 [&_td]:px-2 [&_th]:px-2"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <CalendarDays className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No academic years found</p>
-                <p className="text-sm">Create an academic year to start your calendar.</p>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-    </MainLayout>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

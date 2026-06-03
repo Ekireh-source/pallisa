@@ -49,14 +49,14 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
   const canDelete = currentUserId === expense.recorded_by;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-lg  border border-gray-200 p-6 hover: transition- duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <Link href={`/expenses/${expense.id}`} className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+          <Link href={`/expenses/${expense.id}`} className="text-lg font-semibold text-My-Black hover:text-blue-600 transition-colors">
             {expense.title}
           </Link>
-          <p className="text-sm text-gray-600 mt-1">{expense.description}</p>
+          <p className="text-sm text-My-Black mt-1">{expense.description}</p>
         </div>
         <span className={getStatusBadge(expense.status)}>
           {expense.status}
@@ -65,7 +65,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
 
       {/* Amount */}
       <div className="mb-4">
-        <span className="text-2xl font-bold text-gray-900">
+        <span className="text-2xl font-bold text-My-Black">
           {formatCurrency(expense.amount)}
         </span>
       </div>
@@ -74,24 +74,24 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <p className="text-sm text-gray-500">Category</p>
-          <p className="text-sm font-medium text-gray-900">{expense.category_name || 'N/A'}</p>
+          <p className="text-sm font-medium text-My-Black">{expense.category_name || 'N/A'}</p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Department</p>
-          <p className="text-sm font-medium text-gray-900">{expense.department_name || 'N/A'}</p>
+          <p className="text-sm font-medium text-My-Black">{expense.department_name || 'N/A'}</p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Vendor</p>
-          <p className="text-sm font-medium text-gray-900">{expense.vendor_name || 'N/A'}</p>
+          <p className="text-sm font-medium text-My-Black">{expense.vendor_name || 'N/A'}</p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Date</p>
-          <p className="text-sm font-medium text-gray-900">{formatDate(expense.incurred_on)}</p>
+          <p className="text-sm font-medium text-My-Black">{formatDate(expense.incurred_on)}</p>
         </div>
       </div>
 
       {/* Payment Method & Invoice */}
-      <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+      <div className="flex items-center justify-between text-sm text-My-Black mb-4">
         <span>Payment: {expense.payment_method.replace('_', ' ')}</span>
         {expense.invoice_number && (
           <span>Invoice: {expense.invoice_number}</span>
@@ -108,15 +108,15 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
         <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
           <Link
             href={`/expenses/${expense.id}`}
-            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-My-Black bg-white hover:bg-gray-50 transition-colors"
           >
             View Details
           </Link>
-          
+
           {canEdit && onEdit && (
             <button
               onClick={() => onEdit(expense.id)}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-My-Black bg-white hover:bg-gray-50 transition-colors"
             >
               Edit
             </button>

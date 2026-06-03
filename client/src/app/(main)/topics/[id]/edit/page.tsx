@@ -4,20 +4,20 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  ChevronLeft, 
-  Save, 
-  BookOpen, 
-  Layers, 
+import {
+  ChevronLeft,
+  Save,
+  BookOpen,
+  Layers,
   FileText,
   Loader2,
   Trash2
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Label, 
+import {
+  Button,
+  Card,
+  Input,
+  Label,
   Textarea,
   Select,
   SelectTrigger,
@@ -70,7 +70,7 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
       if (subjectRes && 'results' in subjectRes) {
         setSubjects(subjectRes.results);
       }
-      
+
       if (topicRes.success) {
         reset({
           name: topicRes.data.name,
@@ -82,7 +82,7 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
         toast.error("Failed to load topic details");
         router.push('/topics');
       }
-      
+
       setFetchingData(false);
     };
 
@@ -92,7 +92,7 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
   const onSubmit = async (data: ITopicInput) => {
     setLoading(true);
     const result = await UpdateTopic({ id: parseInt(id), data });
-    
+
     if (result.success) {
       toast.success("Topic updated successfully");
       router.push('/topics');
@@ -139,9 +139,9 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
       title="Edit Topic"
       description="Update the details for this competency."
       backButton={
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
           onClick={() => router.back()}
         >
@@ -149,7 +149,7 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
         </Button>
       }
       headerActions={
-        <Button 
+        <Button
           className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 bg-white font-bold border-transparent"
           onClick={handleDelete}
           disabled={loading}
@@ -161,119 +161,119 @@ export default function EditTopicPage({ params }: { params: Promise<{ id: string
     >
       <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Main Form Area */}
-          <div className="md:col-span-2 space-y-6">
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <BookOpen className="w-4 h-4 mr-2 text-primary" />
-                    Topic Name
-                  </Label>
-                  <Input 
-                    id="name"
-                    placeholder="e.g., Understanding Cellular Respiration" 
-                    className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
-                    {...register('name')}
-                  />
-                  {errors.name && <ErrorMessage message={errors.name.message} />}
-                </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Main Form Area */}
+            <div className="md:col-span-2 space-y-6">
+              <Card className="p-8 border-none  ring-1 ring-gray-100">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-semibold text-My-Black flex items-center">
+                      <BookOpen className="w-4 h-4 mr-2 text-primary" />
+                      Topic Name
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g., Understanding Cellular Respiration"
+                      className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
+                      {...register('name')}
+                    />
+                    {errors.name && <ErrorMessage message={errors.name.message} />}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <FileText className="w-4 h-4 mr-2 text-primary" />
-                    Description
-                  </Label>
-                  <Textarea 
-                    id="description"
-                    placeholder="Provide a detailed description of the learning outcome..." 
-                    className="min-h-[150px] rounded-xl border-gray-200 focus:ring-primary resize-none"
-                    {...register('description')}
-                  />
-                  {errors.description && <ErrorMessage message={errors.description.message} />}
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-semibold text-My-Black flex items-center">
+                      <FileText className="w-4 h-4 mr-2 text-primary" />
+                      Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Provide a detailed description of the learning outcome..."
+                      className="min-h-[150px] rounded-xl border-gray-200 focus:ring-primary resize-none"
+                      {...register('description')}
+                    />
+                    {errors.description && <ErrorMessage message={errors.description.message} />}
+                  </div>
                 </div>
+              </Card>
+            </div>
+
+            {/* Sidebar / Options */}
+            <div className="space-y-6">
+              <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center">
+                  <Layers className="w-5 h-5 mr-2 text-primary" />
+                  Classification
+                </h3>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-My-Black">Subject</Label>
+                    <Select
+                      onValueChange={(val) => setValue('subject', parseInt(val))}
+                      value={selectedSubject?.toString()}
+                    >
+                      <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
+                        <SelectValue placeholder="Select Subject" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl -xl border-gray-100">
+                        {subjects.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id.toString()}>
+                            {sub.name} ({sub.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.subject && <ErrorMessage message="Subject is required" />}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-My-Black">Class Level</Label>
+                    <Select
+                      onValueChange={(val) => setValue('class_obj', parseInt(val))}
+                      value={selectedClass?.toString()}
+                    >
+                      <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
+                        <SelectValue placeholder="Select Class" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl -xl border-gray-100">
+                        {classes.map((cls) => (
+                          <SelectItem key={cls.id} value={cls.id.toString()}>
+                            {cls.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.class_obj && <ErrorMessage message="Class is required" />}
+                  </div>
+                </div>
+              </Card>
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full h-12 rounded-xl  -primary/20 font-bold bg-primary text-white"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  ) : (
+                    <Save className="w-5 h-5 mr-2" />
+                  )}
+                  Update Topic
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full mt-2 h-11 rounded-xl text-gray-500"
+                  onClick={() => router.back()}
+                >
+                  Cancel
+                </Button>
               </div>
-            </Card>
-          </div>
-
-          {/* Sidebar / Options */}
-          <div className="space-y-6">
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <Layers className="w-5 h-5 mr-2 text-primary" />
-                Classification
-              </h3>
-              
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Subject</Label>
-                  <Select 
-                    onValueChange={(val) => setValue('subject', parseInt(val))}
-                    value={selectedSubject?.toString()}
-                  >
-                    <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
-                      <SelectValue placeholder="Select Subject" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                      {subjects.map((sub) => (
-                        <SelectItem key={sub.id} value={sub.id.toString()}>
-                          {sub.name} ({sub.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.subject && <ErrorMessage message="Subject is required" />}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Class Level</Label>
-                  <Select 
-                    onValueChange={(val) => setValue('class_obj', parseInt(val))}
-                    value={selectedClass?.toString()}
-                  >
-                    <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
-                      <SelectValue placeholder="Select Class" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                      {classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id.toString()}>
-                          {cls.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.class_obj && <ErrorMessage message="Class is required" />}
-                </div>
-              </div>
-            </Card>
-
-            <div className="pt-2">
-              <Button 
-                type="submit" 
-                className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary text-white"
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : (
-                  <Save className="w-5 h-5 mr-2" />
-                )}
-                Update Topic
-              </Button>
-              <Button 
-                type="button"
-                variant="ghost" 
-                className="w-full mt-2 h-11 rounded-xl text-gray-500"
-                onClick={() => router.back()}
-              >
-                Cancel
-              </Button>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
       </div>
     </MainLayout>
   );

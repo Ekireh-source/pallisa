@@ -123,183 +123,183 @@ export default function EditClassPage({ params }: { params: Promise<{ id: string
 
   if (fetchingData) {
     return (
-    <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CLASSES}>
-      <div className="w-full space-y-8 animate-in fade-in duration-500">
-        <Skeleton className="h-10 w-32" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2"><Skeleton className="h-64 w-full rounded-xl" /></div>
-          <div><Skeleton className="h-48 w-full rounded-xl" /></div>
+      <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CLASSES}>
+        <div className="w-full space-y-8 animate-in fade-in duration-500">
+          <Skeleton className="h-10 w-32" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2"><Skeleton className="h-64 w-full rounded-xl" /></div>
+            <div><Skeleton className="h-48 w-full rounded-xl" /></div>
+          </div>
         </div>
-      </div>
-    </ProtectedComponent>
+      </ProtectedComponent>
     );
   }
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.MANAGE_CLASSES}>
-    <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Class</h1>
-            <p className="text-gray-500 mt-1">Update grade level details.</p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100"
-          onClick={handleDelete}
-          disabled={loading}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete
-        </Button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Main Form Area */}
-          <div className="md:col-span-2 space-y-6">
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Layers className="w-4 h-4 mr-2 text-primary" />
-                      Class Name
-                    </Label>
-                    <Input
-                      id="name"
-                      placeholder="e.g., S1, S2, S3"
-                      className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
-                      {...register('name')}
-                    />
-                    {errors.name && <ErrorMessage message={errors.name.message} />}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="level" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Layers className="w-4 h-4 mr-2 text-primary" />
-                      Level
-                    </Label>
-                    <Select
-                      onValueChange={(val) => setValue('level', val)}
-                      value={selectedLevel}
-                    >
-                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.level ? 'border-red-500' : ''}`}>
-                        <SelectValue placeholder="Select Level" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                        <SelectItem value="0level">O-Level</SelectItem>
-                        <SelectItem value="Alevel">A-Level</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.level && <ErrorMessage message={errors.level.message} />}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="campus" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Building2 className="w-4 h-4 mr-2 text-primary" />
-                      Campus
-                    </Label>
-                    <Select
-                      onValueChange={(val) => setValue('campus', parseInt(val))}
-                      value={selectedCampus?.toString()}
-                    >
-                      <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.campus ? 'border-red-500' : ''}`}>
-                        <SelectValue placeholder="Select Campus" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                        {loadingCampuses ? (
-                          <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
-                        ) : campuses.length === 0 ? (
-                          <div className="p-2 text-center text-sm text-gray-500">No campuses found</div>
-                        ) : (
-                          campuses.map((campus) => (
-                            <SelectItem key={campus.id} value={campus.id.toString()}>
-                              {campus.name}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {errors.campus && <ErrorMessage message={errors.campus.message} />}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center">
-                    <FileText className="w-4 h-4 mr-2 text-primary" />
-                    Description (Optional)
-                  </Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Brief description of this grade level..."
-                    className="min-h-[120px] rounded-xl border-gray-200 focus:ring-primary"
-                    {...register('description')}
-                  />
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Sidebar / Options */}
-          <div className="space-y-6">
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center">
-                <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
-                Settings
-              </h3>
-
-              <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-semibold text-gray-900">Active Status</Label>
-                    <p className="text-xs text-gray-500">Class is available for enrollment</p>
-                  </div>
-                  <Switch
-                    checked={isActive}
-                    onCheckedChange={(val) => setValue('is_active', val)}
-                  />
-                </div>
-              </div>
-            </Card>
-
-            <div className="pt-2">
-              <Button
-                type="submit"
-                className="w-full h-12 rounded-xl shadow-lg shadow-blue-200 font-bold bg-primary hover:bg-primary/90"
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : (
-                  <Save className="w-5 h-5 mr-2" />
-                )}
-                Update Class
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full mt-2 h-11 rounded-xl text-gray-500"
-                onClick={() => router.back()}
-              >
-                Cancel
-              </Button>
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
+              onClick={() => router.back()}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-My-Black">Edit Class</h1>
+              <p className="text-gray-500 mt-1">Update grade level details.</p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </Button>
         </div>
-      </form>
-    </div>
-  </ProtectedComponent>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Main Form Area */}
+            <div className="md:col-span-2 space-y-6">
+              <Card className="p-8 border-none  ring-1 ring-gray-100">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-sm font-semibold text-My-Black flex items-center">
+                        <Layers className="w-4 h-4 mr-2 text-primary" />
+                        Class Name
+                      </Label>
+                      <Input
+                        id="name"
+                        placeholder="e.g., S1, S2, S3"
+                        className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
+                        {...register('name')}
+                      />
+                      {errors.name && <ErrorMessage message={errors.name.message} />}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="level" className="text-sm font-semibold text-My-Black flex items-center">
+                        <Layers className="w-4 h-4 mr-2 text-primary" />
+                        Level
+                      </Label>
+                      <Select
+                        onValueChange={(val) => setValue('level', val)}
+                        value={selectedLevel}
+                      >
+                        <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.level ? 'border-red-500' : ''}`}>
+                          <SelectValue placeholder="Select Level" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl -xl border-gray-100">
+                          <SelectItem value="0level">O-Level</SelectItem>
+                          <SelectItem value="Alevel">A-Level</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.level && <ErrorMessage message={errors.level.message} />}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="campus" className="text-sm font-semibold text-My-Black flex items-center">
+                        <Building2 className="w-4 h-4 mr-2 text-primary" />
+                        Campus
+                      </Label>
+                      <Select
+                        onValueChange={(val) => setValue('campus', parseInt(val))}
+                        value={selectedCampus?.toString()}
+                      >
+                        <SelectTrigger className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.campus ? 'border-red-500' : ''}`}>
+                          <SelectValue placeholder="Select Campus" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl -xl border-gray-100">
+                          {loadingCampuses ? (
+                            <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
+                          ) : campuses.length === 0 ? (
+                            <div className="p-2 text-center text-sm text-gray-500">No campuses found</div>
+                          ) : (
+                            campuses.map((campus) => (
+                              <SelectItem key={campus.id} value={campus.id.toString()}>
+                                {campus.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {errors.campus && <ErrorMessage message={errors.campus.message} />}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-semibold text-My-Black flex items-center">
+                      <FileText className="w-4 h-4 mr-2 text-primary" />
+                      Description (Optional)
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Brief description of this grade level..."
+                      className="min-h-[120px] rounded-xl border-gray-200 focus:ring-primary"
+                      {...register('description')}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Sidebar / Options */}
+            <div className="space-y-6">
+              <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center">
+                  <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
+                  Settings
+                </h3>
+
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 ">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-semibold text-My-Black">Active Status</Label>
+                      <p className="text-xs text-gray-500">Class is available for enrollment</p>
+                    </div>
+                    <Switch
+                      checked={isActive}
+                      onCheckedChange={(val) => setValue('is_active', val)}
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full h-12 rounded-xl  -blue-200 font-bold bg-primary hover:bg-primary/90"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  ) : (
+                    <Save className="w-5 h-5 mr-2" />
+                  )}
+                  Update Class
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full mt-2 h-11 rounded-xl text-gray-500"
+                  onClick={() => router.back()}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </ProtectedComponent>
   );
 }

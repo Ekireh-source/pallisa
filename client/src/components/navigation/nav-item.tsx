@@ -52,7 +52,7 @@ export const NavItemComponent = ({
                 <Button
                     disabled={!item.href || (item.href.startsWith("#") && !item.submenu?.length)}
                     variant="ghost"
-                    className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-gray-600 hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
+                    className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-My-Black hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
                         } ${isSideBarOpen ? "justify-between " : "justify-center "}`}
                     onMouseEnter={() => {
                         if (!isSideBarOpen && !isMobile) setIsTooltipVisible(true);
@@ -80,7 +80,7 @@ export const NavItemComponent = ({
                     asChild
                     disabled={!item.href || (item.href.startsWith("#") && !item.submenu?.length)}
                     variant="ghost"
-                    className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-gray-600 hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
+                    className={`w-full !rounded-xl flex items-center px-2 !py-4 text-sm text-My-Black hover:bg-primary/10 hover:text-primary ${isActive ? "bg-primary/10 text-primary" : "hover:bg-opacity-30"
                         } ${isSideBarOpen ? "justify-between " : "justify-center "}`}
                     onMouseEnter={() => {
                         if (!isSideBarOpen && !isMobile) setIsTooltipVisible(true);
@@ -101,7 +101,7 @@ export const NavItemComponent = ({
 
             {/* Render Tooltip when collapsed */}
             {isTooltipVisible && !isSideBarOpen && !isMobileView && (
-                <div className="absolute left-[4.5rem] top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-gray-900 text-white font-medium text-xs rounded-md shadow-xl z-[100] pointer-events-none whitespace-nowrap flex items-center animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute left-[4.5rem] top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-gray-900 text-white font-medium text-xs rounded-md -xl z-[100] pointer-events-none whitespace-nowrap flex items-center animate-in fade-in zoom-in-95 duration-100">
                     {item.title}
                     {/* Tooltip Arrow */}
                     <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-4 border-r-gray-900" />
@@ -118,9 +118,8 @@ export const NavItemComponent = ({
                                 asChild
                                 key={`${sub.title}-${idx}`}
                                 variant="ghost"
-                                className={`w-full rounded-lg flex items-center justify-start px-3 py-2 text-xs text-gray-500 hover:bg-primary/5 hover:text-primary transition-all duration-200 ${
-                                    isSubActive ? "bg-primary/5 text-primary font-bold" : ""
-                                }`}
+                                className={`w-full rounded-lg flex items-center justify-start px-3 py-2 text-xs text-gray-500 hover:bg-primary/5 hover:text-primary transition-all duration-200 ${isSubActive ? "bg-primary/5 text-primary font-bold" : ""
+                                    }`}
                                 onClick={() => {
                                     if (isMobile) setTimeout(() => onToggle(), 10);
                                 }}

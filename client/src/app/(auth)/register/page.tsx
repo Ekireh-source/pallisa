@@ -147,7 +147,7 @@ export default function RegisterPage() {
         <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-2">
           <GraduationCap className="w-6 h-6 text-blue-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
+        <h2 className="text-2xl font-bold text-My-Black">Create your account</h2>
         <p className="text-muted-foreground text-base">
           Join PALLISA to manage your school efficiently.
         </p>

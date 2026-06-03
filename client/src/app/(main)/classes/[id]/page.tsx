@@ -41,7 +41,7 @@ export default function ClassDetailPage() {
   const [classDetails, setClassDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function ClassDetailPage() {
             <Layers className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">{stream.name}</p>
+            <p className="text-My-Black font-semibold">{stream.name}</p>
           </div>
         </div>
       ),
@@ -102,7 +102,7 @@ export default function ClassDetailPage() {
       key: "capacity",
       header: "Capacity",
       cell: (stream) => (
-        <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-none px-3 font-semibold rounded-full">
+        <Badge variant="secondary" className="bg-gray-100 text-My-Black border-none px-3 font-semibold rounded-full">
           {stream.capacity} Students
         </Badge>
       ),
@@ -130,10 +130,10 @@ export default function ClassDetailPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
               <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/streams/${stream.id}/edit`)}
@@ -158,12 +158,12 @@ export default function ClassDetailPage() {
   if (loading) {
     return (
       <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_CLASSES}>
-    <MainLayout title="Class Details" description="Loading...">
-        <div className="flex justify-center items-center h-64">
-          <Icon icon="hugeicons:loading-01" className="w-8 h-8 text-primary animate-spin" />
-        </div>
-      </MainLayout>
-    </ProtectedComponent>
+        <MainLayout title="Class Details" description="Loading...">
+          <div className="flex justify-center items-center h-64">
+            <Icon icon="hugeicons:loading-01" className="w-8 h-8 text-primary animate-spin" />
+          </div>
+        </MainLayout>
+      </ProtectedComponent>
     );
   }
 
@@ -201,16 +201,16 @@ export default function ClassDetailPage() {
       ]}
       headerActions={
         <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="rounded-xl h-11 px-4 border-gray-200"
             onClick={() => router.push('/classes')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Classes
           </Button>
-          <Button 
-            className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent"
+          <Button
+            className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent"
             onClick={() => router.push(`/classes/${id}/edit`)}
           >
             <Edit2 className="w-4 h-4 mr-2" />
@@ -219,16 +219,16 @@ export default function ClassDetailPage() {
         </div>
       }
     >
-      <Card className="border-none shadow-none ring-1 ring-gray-100 overflow-hidden">
+      <Card className="border-none -none ring-1 ring-gray-100 overflow-hidden">
         <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Streams</h3>
+            <h3 className="text-lg font-bold text-My-Black">Streams</h3>
             <p className="text-sm text-gray-500">Manage all streams under this class</p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
               <Input
                 placeholder="Search streams..."
                 className="pl-10 h-10 rounded-xl border-gray-200"
@@ -244,7 +244,7 @@ export default function ClassDetailPage() {
             </Button>
           </div>
         </div>
-        
+
         <div className="p-0 bg-white">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
@@ -258,7 +258,7 @@ export default function ClassDetailPage() {
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <Layers className="w-12 h-12 text-gray-200 mb-4" />
+                <Layers className="w-12 h-12 text-My-Black mb-4" />
                 <p className="text-lg font-medium">No streams found</p>
                 <p className="text-sm text-center max-w-sm mt-1">
                   There are no streams associated with this class yet. Click "Add Stream" to create one.

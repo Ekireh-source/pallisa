@@ -1,3 +1,4 @@
+from members.serializers import TeacherSerializer
 from django.contrib.auth import authenticate
 from django.db import transaction
 from django.utils import timezone
@@ -242,6 +243,13 @@ class AuthenticationService:
                         for campus in campuses
                     ]
             
+            # Check if user is a teacher
+            from members.models import Teacher
+            teacher = Teacher.objects.filter(user_profile=profile).first()
+            if teacher:
+                data['is_teacher'] = True
+                data['teacher'] = TeacherSerializer(teacher).data
+                
             return data
         except AttributeError:
             return {

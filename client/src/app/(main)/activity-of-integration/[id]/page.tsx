@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  ChevronLeft, 
-  Save, 
-  ClipboardCheck, 
-  Calendar, 
+import {
+  ChevronLeft,
+  Save,
+  ClipboardCheck,
+  Calendar,
   Users,
   Search,
   Upload,
@@ -18,11 +18,11 @@ import {
   Edit2,
   Trophy
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Label, 
+import {
+  Button,
+  Card,
+  Input,
+  Label,
   Table,
   TableHeader,
   TableBody,
@@ -41,7 +41,7 @@ import { PERMISSION_CODES } from '@/codes';
 export default function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  
+
   const [activity, setActivity] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +58,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
       if (activityRes.success) setActivity(activityRes.data);
       if (scoresRes.success) setStudents(scoresRes.data);
-      
+
       setLoading(false);
     };
 
@@ -66,13 +66,13 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
   }, [id]);
 
   const handleScoreChange = (studentId: number, value: string) => {
-    setStudents(prev => prev.map(s => 
+    setStudents(prev => prev.map(s =>
       s.student_id === studentId ? { ...s, score: value === '' ? null : parseFloat(value) } : s
     ));
   };
 
   const handleRemarksChange = (studentId: number, value: string) => {
-    setStudents(prev => prev.map(s => 
+    setStudents(prev => prev.map(s =>
       s.student_id === studentId ? { ...s, remarks: value } : s
     ));
   };
@@ -107,7 +107,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
       const text = e.target?.result as string;
       const lines = text.split('\n');
       const newScores: any = {};
-      
+
       lines.forEach((line, index) => {
         if (index === 0) return; // Skip header
         const parts = line.split(',');
@@ -128,7 +128,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
         }
         return s;
       }));
-      
+
       toast.success("CSV data applied to table. Click 'Save All' to persist.");
     };
     reader.readAsText(file);
@@ -145,7 +145,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
     a.click();
   };
 
-  const filteredStudents = students.filter(s => 
+  const filteredStudents = students.filter(s =>
     s.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.admission_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -168,171 +168,171 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
-    <MainLayout
-      title={
-        <div className="flex flex-col">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">{activity?.topic_name}</h1>
-            <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 rounded-full">
-              Integration Activity
-            </Badge>
-          </div>
-          <div className="flex items-center gap-4 mt-1.5 text-white/70 text-sm font-semibold">
-            <span className="flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4" />
-              {activity?.subject_name}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Trophy className="w-4 h-4" />
-              Max Score: {activity?.max_score}
-            </span>
-          </div>
-        </div>
-      }
-      backButton={
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
-          onClick={() => router.push('/activity-of-integration')}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-      }
-      headerActions={
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl h-11 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => router.push(`/activity-of-integration/${id}/edit`)}>
-            <Edit2 className="w-4 h-4 mr-2" />
-            Edit Activity
-          </Button>
-          <Button 
-            className="rounded-xl h-11 bg-white text-primary font-bold hover:bg-gray-100 px-5 shadow-sm border border-transparent"
-            onClick={handleSaveAll}
-            disabled={saving}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-            Save All Scores
-          </Button>
-        </div>
-      }
-    >
-      <div className="space-y-8 animate-in fade-in duration-500 mt-[24px]">
-
-      {/* Filters & Bulk Tools */}
-      <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/30">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search student..." 
-              className="pl-10 h-12 rounded-xl border-gray-200 bg-white shadow-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center gap-2 md:col-span-2">
-            <Button 
-              variant="outline" 
-              className="flex-1 h-12 rounded-xl bg-white border-gray-200" 
-              onClick={downloadTemplate}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download Template
-            </Button>
-            <div className="flex-1 relative">
-              <Input 
-                type="file" 
-                accept=".csv" 
-                className="hidden" 
-                id="activity-bulk-upload" 
-                onChange={handleBulkUpload}
-              />
-              <Button 
-                variant="outline" 
-                className="w-full h-12 rounded-xl bg-white border-gray-200" 
-                asChild
-              >
-                <label htmlFor="activity-bulk-upload" className="cursor-pointer">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Bulk Upload Scores
-                </label>
-              </Button>
+      <MainLayout
+        title={
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">{activity?.topic_name}</h1>
+              <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 rounded-full">
+                Integration Activity
+              </Badge>
+            </div>
+            <div className="flex items-center gap-4 mt-1.5 text-white/70 text-sm font-semibold">
+              <span className="flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4" />
+                {activity?.subject_name}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Trophy className="w-4 h-4" />
+                Max Score: {activity?.max_score}
+              </span>
             </div>
           </div>
-        </div>
-      </Card>
+        }
+        backButton={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
+            onClick={() => router.push('/activity-of-integration')}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+        }
+        headerActions={
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="rounded-xl h-11 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => router.push(`/activity-of-integration/${id}/edit`)}>
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit Activity
+            </Button>
+            <Button
+              className="rounded-xl h-11 bg-white text-primary font-bold hover:bg-gray-100 px-5  border border-transparent"
+              onClick={handleSaveAll}
+              disabled={saving}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              Save All Scores
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-8 animate-in fade-in duration-500 mt-[24px]">
 
-      {/* Student Table */}
-      <Card className="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-gray-50/50">
-              <TableRow>
-                <TableHead className="w-12"></TableHead>
-                <TableHead className="font-semibold text-gray-900">Student Name</TableHead>
-                <TableHead className="w-[150px] font-semibold text-gray-900 text-center">Score (/{activity?.max_score})</TableHead>
-                <TableHead className="font-semibold text-gray-900">Teacher Remarks</TableHead>
-                <TableHead className="w-20 text-right"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredStudents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-64 text-center text-gray-500">
-                    No students found for this activity.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredStudents.map((student) => (
-                  <TableRow key={student.student_id} className="hover:bg-gray-50/30 transition-colors">
-                    <TableCell>
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                        <User className="w-4 h-4" />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{student.student_name}</span>
-                        <span className="text-xs text-gray-500">{student.admission_number}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        max={activity.max_score}
-                        step="0.5"
-                        placeholder="0.0"
-                        className="h-10 text-center font-bold text-blue-700 bg-blue-50/30 border-blue-100 focus:ring-blue-500 rounded-lg"
-                        value={student.score === null ? '' : student.score}
-                        onChange={(e) => handleScoreChange(student.student_id, e.target.value)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input 
-                        placeholder="Observation remarks..."
-                        className="h-10 rounded-lg border-gray-100 focus:ring-blue-500"
-                        value={student.remarks}
-                        onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {student.score_id && (
-                        <div className="flex items-center justify-end text-emerald-500">
-                          <CheckCircle2 className="w-4 h-4" />
-                        </div>
-                      )}
-                    </TableCell>
+          {/* Filters & Bulk Tools */}
+          <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/30">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+                <Input
+                  placeholder="Search student..."
+                  className="pl-10 h-12 rounded-xl border-gray-200 bg-white "
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 md:col-span-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 h-12 rounded-xl bg-white border-gray-200"
+                  onClick={downloadTemplate}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Template
+                </Button>
+                <div className="flex-1 relative">
+                  <Input
+                    type="file"
+                    accept=".csv"
+                    className="hidden"
+                    id="activity-bulk-upload"
+                    onChange={handleBulkUpload}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 rounded-xl bg-white border-gray-200"
+                    asChild
+                  >
+                    <label htmlFor="activity-bulk-upload" className="cursor-pointer">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Bulk Upload Scores
+                    </label>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Student Table */}
+          <Card className="border-none  ring-1 ring-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-gray-50/50">
+                  <TableRow>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="font-semibold text-My-Black">Student Name</TableHead>
+                    <TableHead className="w-[150px] font-semibold text-My-Black text-center">Score (/{activity?.max_score})</TableHead>
+                    <TableHead className="font-semibold text-My-Black">Teacher Remarks</TableHead>
+                    <TableHead className="w-20 text-right"></TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredStudents.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-64 text-center text-gray-500">
+                        No students found for this activity.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredStudents.map((student) => (
+                      <TableRow key={student.student_id} className="hover:bg-gray-50/30 transition-colors">
+                        <TableCell>
+                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-My-Black">
+                            <User className="w-4 h-4" />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-My-Black">{student.student_name}</span>
+                            <span className="text-xs text-gray-500">{student.admission_number}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={activity.max_score}
+                            step="0.5"
+                            placeholder="0.0"
+                            className="h-10 text-center font-bold text-blue-700 bg-blue-50/30 border-blue-100 focus:ring-blue-500 rounded-lg"
+                            value={student.score === null ? '' : student.score}
+                            onChange={(e) => handleScoreChange(student.student_id, e.target.value)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="Observation remarks..."
+                            className="h-10 rounded-lg border-gray-100 focus:ring-blue-500"
+                            value={student.remarks}
+                            onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {student.score_id && (
+                            <div className="flex items-center justify-end text-emerald-500">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         </div>
-      </Card>
-      </div>
-    </MainLayout>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

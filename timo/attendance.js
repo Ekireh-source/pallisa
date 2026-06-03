@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     if (typeof lucide !== 'undefined') lucide.createIcons();
-    
+
     // Set dynamic date
     const dateEl = document.getElementById('currentDate');
     if (dateEl) {
@@ -38,7 +38,7 @@ function showNotification(msg, type = 'success') {
     // Slide in animation
     toast.classList.remove('opacity-0', '-translate-y-10');
     toast.classList.add('opacity-100', 'translate-y-0');
-    
+
     // Auto slide out after 3 seconds
     setTimeout(() => {
         toast.classList.remove('opacity-100', 'translate-y-0');
@@ -49,9 +49,9 @@ function showNotification(msg, type = 'success') {
 function confirmLogout() {
     const modal = document.getElementById('customModal');
     const modalContent = document.getElementById('customModalContent');
-    
+
     modal.classList.remove('hidden');
-    
+
     // Small delay to allow display:block to apply before animating opacity
     requestAnimationFrame(() => {
         modal.classList.remove('opacity-0');
@@ -63,11 +63,11 @@ function confirmLogout() {
 function closeModal() {
     const modal = document.getElementById('customModal');
     const modalContent = document.getElementById('customModalContent');
-    
+
     modal.classList.add('opacity-0');
     modalContent.classList.remove('scale-100');
     modalContent.classList.add('scale-95');
-    
+
     // Wait for animation to finish before hiding
     setTimeout(() => {
         modal.classList.add('hidden');
@@ -88,9 +88,9 @@ async function loadStreams() {
         if (result.success && result.data.length > 0) {
             result.data.forEach(stream => {
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => openRoster(stream.stream_id, stream.subject_id, stream.stream_name, stream.subject_name);
-                
+
                 card.innerHTML = `
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-brand">
@@ -117,10 +117,10 @@ async function loadStreams() {
 async function openRoster(streamId, subjectId, streamName, subjectName) {
     currentStreamId = streamId;
     currentSubjectId = subjectId;
-    
+
     document.getElementById('rosterTitle').innerText = streamName;
     document.getElementById('rosterSubject').innerText = subjectName;
-    
+
     document.getElementById('step1-streams').classList.add('hidden');
     document.getElementById('step2-roster').classList.remove('hidden');
     document.getElementById('submitBar').classList.remove('hidden');
@@ -132,15 +132,15 @@ async function openRoster(streamId, subjectId, streamName, subjectName) {
     try {
         const response = await fetch(`api/attendance.php?action=get_roster&stream_id=${streamId}&subject_id=${subjectId}`);
         const result = await response.json();
-        
+
         list.innerHTML = '';
         rosterData = [];
 
         if (result.success && result.data.learners.length > 0) {
-            
+
             const isEdit = result.data.is_edit;
             currentSessionId = result.data.session_id;
-            
+
             if (isEdit) {
                 document.getElementById('editBadge').classList.remove('hidden');
                 document.getElementById('submitBtnText').innerText = "Update Attendance";
@@ -152,16 +152,16 @@ async function openRoster(streamId, subjectId, streamName, subjectName) {
             result.data.learners.forEach((learner, index) => {
                 const status = learner.status || 'present';
                 rosterData.push({ learner_id: learner.learner_id, status: status });
-                
+
                 const div = document.createElement('div');
-                div.className = "learner-row bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between";
-                
-                const pClass = status === 'present' 
-                    ? "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm" 
+                div.className = "learner-row bg-white p-3 rounded-2xl  border border-slate-100 flex items-center justify-between";
+
+                const pClass = status === 'present'
+                    ? "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-500 text-white "
                     : "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600";
-                
-                const aClass = status === 'absent' 
-                    ? "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-500 text-white shadow-sm" 
+
+                const aClass = status === 'absent'
+                    ? "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-500 text-white "
                     : "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600";
 
                 div.innerHTML = `
@@ -201,17 +201,17 @@ function setStatus(learnerId, status, clickedBtn) {
     const absentBtn = container.querySelector('[data-type="absent"]');
 
     if (status === 'present') {
-        presentBtn.className = "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
+        presentBtn.className = "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-500 text-white ";
         absentBtn.className = "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600";
     } else {
-        absentBtn.className = "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-500 text-white shadow-sm";
+        absentBtn.className = "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-500 text-white ";
         presentBtn.className = "status-btn w-12 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600";
     }
 
     // Auto-scroll
     const currentRow = clickedBtn.closest('.learner-row');
     const nextRow = currentRow.nextElementSibling;
-    
+
     if (nextRow) {
         setTimeout(() => {
             nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -222,7 +222,7 @@ function setStatus(learnerId, status, clickedBtn) {
 async function submitAttendance() {
     const btn = document.getElementById('submitBtn');
     const originalText = document.getElementById('submitBtnText').innerText;
-    
+
     btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Saving...`;
     lucide.createIcons();
     btn.disabled = true;
@@ -230,7 +230,7 @@ async function submitAttendance() {
     const payload = {
         stream_id: currentStreamId,
         subject_id: currentSubjectId,
-        session_id: currentSessionId, 
+        session_id: currentSessionId,
         records: rosterData
     };
 
@@ -240,12 +240,12 @@ async function submitAttendance() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification(currentSessionId ? "Attendance Updated!" : "Attendance Saved!", "success");
-            
+
             // Redirect after brief delay so user sees the success toast
             setTimeout(() => {
                 window.location.href = 'index.php';

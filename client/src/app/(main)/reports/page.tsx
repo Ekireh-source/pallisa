@@ -141,128 +141,128 @@ export default function ReportsPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_REPORTS}>
-    <MainLayout
-      title="Student Reports"
-      description="Calculations: AOIs (20%) + Final Exam (80%). Each activity is shown in detail."
-      headerActions={
-        <Button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent"
-        >
-          {generating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-          Generate Reports
-        </Button>
-      }
-      stats={[
-        { label: 'Total Reports', value: String(reports.length), icon: 'hugeicons:file-text' },
-        { label: 'Avg. Performance', value: stats.avg, icon: 'hugeicons:graduation-cap' },
-        { label: 'Top Performer', value: stats.top, icon: 'hugeicons:award-01' },
-        { label: 'Positions Ranked', value: String(stats.ranked), icon: 'hugeicons:layers' },
-      ]}
-    >
-      {/* Filter Card */}
-      <Card className="p-6 border-none shadow-none ring-0 bg-white">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="space-y-2">
-            <AcademicYearSearchableSelect
-              value={selectedYear}
-              onValueChange={setSelectedYear}
-              placeholder="Select Year"
-              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
-            />
+      <MainLayout
+        title="Student Reports"
+        description="Calculations: AOIs (20%) + Final Exam (80%). Each activity is shown in detail."
+        headerActions={
+          <Button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent"
+          >
+            {generating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            Generate Reports
+          </Button>
+        }
+        stats={[
+          { label: 'Total Reports', value: String(reports.length), icon: 'hugeicons:file-text' },
+          { label: 'Avg. Performance', value: stats.avg, icon: 'hugeicons:graduation-cap' },
+          { label: 'Top Performer', value: stats.top, icon: 'hugeicons:award-01' },
+          { label: 'Positions Ranked', value: String(stats.ranked), icon: 'hugeicons:layers' },
+        ]}
+      >
+        {/* Filter Card */}
+        <Card className="p-6 border-none -none ring-0 bg-white">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="space-y-2">
+              <AcademicYearSearchableSelect
+                value={selectedYear}
+                onValueChange={setSelectedYear}
+                placeholder="Select Year"
+                triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <TermSearchableSelect
+                value={selectedTerm}
+                onValueChange={setSelectedTerm}
+                academicYearId={selectedYear}
+                disabled={!selectedYear}
+                placeholder="Select Term"
+                triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <ClassSearchableSelect
+                value={selectedClass}
+                onValueChange={setSelectedClass}
+                placeholder="All Classes"
+                triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <StreamSearchableSelect
+                value={selectedStream}
+                onValueChange={setSelectedStream}
+                classId={selectedClass}
+                disabled={!selectedClass || selectedClass === 'all'}
+                placeholder="All Streams"
+                triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <TermSearchableSelect
-              value={selectedTerm}
-              onValueChange={setSelectedTerm}
-              academicYearId={selectedYear}
-              disabled={!selectedYear}
-              placeholder="Select Term"
-              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <ClassSearchableSelect
-              value={selectedClass}
-              onValueChange={setSelectedClass}
-              placeholder="All Classes"
-              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <StreamSearchableSelect
-              value={selectedStream}
-              onValueChange={setSelectedStream}
-              classId={selectedClass}
-              disabled={!selectedClass || selectedClass === 'all'}
-              placeholder="All Streams"
-              triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
-            />
-          </div>
-        </div>
-      </Card>
+        </Card>
 
-      {/* Table */}
-      <Card className="border-none shadow-none ring-0 overflow-hidden bg-white">
-        <Table>
-          <TableHeader className="bg-gray-50/50">
-            <TableRow>
-              <TableHead className="font-bold py-4">Student</TableHead>
-              <TableHead className="font-bold">Class</TableHead>
-              <TableHead className="font-bold">Total Score</TableHead>
-              <TableHead className="font-bold">Position</TableHead>
-              <TableHead className="font-bold text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-10">Loading...</TableCell></TableRow>
-            ) : reports.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found.</TableCell></TableRow>
-            ) : (
-              reports.map((report) => (
-                <TableRow key={report.id} className="hover:bg-indigo-50/20">
-                  <TableCell className="font-bold">{report.student_name}</TableCell>
-                  <TableCell>{report.class_name} ({report.stream_name})</TableCell>
-                  <TableCell>
-                    <Badge className="bg-emerald-50 text-emerald-700 border-none">
-                      {report.average_score}%
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{report.position ? `${report.position} / ${report.out_of}` : '--'}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
-                        <DropdownMenuItem 
-                          className="cursor-pointer py-2 font-medium"
-                          onClick={() => router.push(`/reports/${report.id}`)}
-                        >
-                          <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="cursor-pointer py-2"
-                          onClick={() => toast.success("Download started...")}
-                        >
-                          <Icon icon="hugeicons:download-02" className="w-4 h-4 mr-2" />
-                          Download PDF
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Card>
-    </MainLayout>
+        {/* Table */}
+        <Card className="border-none -none ring-0 overflow-hidden bg-white">
+          <Table>
+            <TableHeader className="bg-gray-50/50">
+              <TableRow>
+                <TableHead className="font-bold py-4">Student</TableHead>
+                <TableHead className="font-bold">Class</TableHead>
+                <TableHead className="font-bold">Total Score</TableHead>
+                <TableHead className="font-bold">Position</TableHead>
+                <TableHead className="font-bold text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-10">Loading...</TableCell></TableRow>
+              ) : reports.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-10">No reports found.</TableCell></TableRow>
+              ) : (
+                reports.map((report) => (
+                  <TableRow key={report.id} className="hover:bg-indigo-50/20">
+                    <TableCell className="font-bold">{report.student_name}</TableCell>
+                    <TableCell>{report.class_name} ({report.stream_name})</TableCell>
+                    <TableCell>
+                      <Badge className="bg-emerald-50 text-emerald-700 border-none">
+                        {report.average_score}%
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{report.position ? `${report.position} / ${report.out_of}` : '--'}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
+                          <DropdownMenuItem
+                            className="cursor-pointer py-2 font-medium"
+                            onClick={() => router.push(`/reports/${report.id}`)}
+                          >
+                            <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer py-2"
+                            onClick={() => toast.success("Download started...")}
+                          >
+                            <Icon icon="hugeicons:download-02" className="w-4 h-4 mr-2" />
+                            Download PDF
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

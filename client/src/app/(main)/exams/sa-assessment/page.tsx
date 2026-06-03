@@ -2,15 +2,15 @@
 
 import React, { useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   TrendingUp,
   Percent
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -74,8 +74,8 @@ export default function SaAssessmentsListPage() {
             <TrendingUp className="w-4.5 h-4.5" />
           </div>
           <div>
-            <p className="text-gray-900 font-bold">{sa.subject_name || 'N/A'}</p>
-            <p className="text-xs text-gray-400 font-medium">Stream: {sa.stream_name || 'N/A'}</p>
+            <p className="text-My-Black font-bold">{sa.subject_name || 'N/A'}</p>
+            <p className="text-xs text-My-Black font-medium">Stream: {sa.stream_name || 'N/A'}</p>
           </div>
         </div>
       ),
@@ -85,8 +85,8 @@ export default function SaAssessmentsListPage() {
       header: "Academic Period",
       cell: (sa) => (
         <div className="flex flex-col">
-          <span className="font-semibold text-gray-700 text-sm">{sa.term_name || 'N/A'}</span>
-          <span className="text-xs text-gray-400">Year: {sa.academic_year_name || 'Active Year'}</span>
+          <span className="font-semibold text-My-Black text-sm">{sa.term_name || 'N/A'}</span>
+          <span className="text-xs text-My-Black">Year: {sa.academic_year_name || 'Active Year'}</span>
         </div>
       ),
     },
@@ -94,7 +94,7 @@ export default function SaAssessmentsListPage() {
       key: "total_box",
       header: "Total Box Factor",
       cell: (sa) => (
-        <div className="flex items-center gap-1.5 font-bold text-gray-900">
+        <div className="flex items-center gap-1.5 font-bold text-My-Black">
           <Percent className="w-4 h-4 text-emerald-500" />
           <span>{parseFloat(sa.total_box).toFixed(2)}</span>
         </div>
@@ -116,20 +116,17 @@ export default function SaAssessmentsListPage() {
         return (
           <div className="w-44">
             <div className="flex items-center justify-between mb-1.5">
-              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-gray-400'
-              }`}>
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-My-Black'
+                }`}>
                 {isComplete ? 'Fully Graded' : 'Grading...'}
               </span>
-              <span className={`text-xs font-extrabold ${
-                isComplete ? 'text-emerald-600' : 'text-gray-600'
-              }`}>{progress}%</span>
+              <span className={`text-xs font-extrabold ${isComplete ? 'text-emerald-600' : 'text-My-Black'
+                }`}>{progress}%</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner border border-gray-200/50">
-              <div 
-                className={`h-full rounded-full transition-all duration-500 ${
-                  isComplete ? 'bg-emerald-500' : 'bg-primary'
-                }`}
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden -inner border border-gray-200/50">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-emerald-500' : 'bg-primary'
+                  }`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -148,22 +145,22 @@ export default function SaAssessmentsListPage() {
                 <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 rounded-xl border border-gray-100 shadow-xl p-1.5">
-              <DropdownMenuItem 
-                className="cursor-pointer py-2.5 rounded-lg font-semibold text-gray-700"
+            <DropdownMenuContent align="end" className="w-52 rounded-xl border border-gray-100 -xl p-1.5">
+              <DropdownMenuItem
+                className="cursor-pointer py-2.5 rounded-lg font-semibold text-My-Black"
                 onClick={() => router.push(`/exams/sa-assessment/${sa.public_id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2 text-primary" />
                 View & Grade Marks
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="cursor-pointer py-2.5 rounded-lg font-semibold text-gray-700"
+              <DropdownMenuItem
+                className="cursor-pointer py-2.5 rounded-lg font-semibold text-My-Black"
                 onClick={() => router.push(`/exams/sa-assessment/${sa.public_id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2 text-primary" />
                 Edit Settings
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2.5 rounded-lg font-semibold text-rose-600 focus:text-rose-600 focus:bg-rose-50"
                 onClick={() => handleDelete(sa.public_id)}
               >
@@ -179,55 +176,55 @@ export default function SaAssessmentsListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
-    <MainLayout
-      title="Summative Assessment configurations"
-      description="Define exam milestones scaling configurations and assign student marks matrices."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "New SA Assessment",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/exams/sa-assessment/create",
-          }}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search assessment subjects..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <MainLayout
+        title="Summative Assessment configurations"
+        description="Define exam milestones scaling configurations and assign student marks matrices."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "New SA Assessment",
+              icon: <Plus className="w-4 h-4" />,
+              href: "/exams/sa-assessment/create",
+            }}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search assessment subjects..."
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm }}
+              deps={[searchTerm]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <TrendingUp className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No SA configurations found</p>
+                  <p className="text-sm">Configure new Summative Assessments to start recording student grades.</p>
+                </div>
+              }
             />
           </div>
-        </div>
-
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm }}
-            deps={[searchTerm]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <TrendingUp className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No SA configurations found</p>
-                <p className="text-sm">Configure new Summative Assessments to start recording student grades.</p>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-    </MainLayout>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

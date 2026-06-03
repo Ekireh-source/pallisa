@@ -81,13 +81,20 @@
 /* Core Tailwind utilities are handled by @import "tailwindcss" and the @theme block */
 
 /* Essential layout utilities */
-.min-h-svh { min-height: 100svh; }
-.h-svh { height: 100svh; }
+.min-h-svh {
+  min-height: 100svh;
+}
+
+.h-svh {
+  height: 100svh;
+}
 
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
+
   /* Ensure proper touch targets on mobile */
-  button, [role="button"] {
+  button,
+  [role="button"] {
     min-height: 44px;
     min-width: 44px;
   }
@@ -349,7 +356,7 @@
   /* Mobile expense card improvements */
   .mobile-expense-card {
     border-radius: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   }
 
   .mobile-expense-card .card-content {
@@ -450,7 +457,7 @@
   .mobile-summary-card {
     padding: 1rem;
     border-radius: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   }
 
   .mobile-summary-card .summary-icon {
@@ -486,7 +493,7 @@
   .mobile-filter-panel {
     background-color: white;
     border-radius: 0.75rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     margin-bottom: 1rem;
   }
 
@@ -634,7 +641,10 @@
 }
 
 /* Ensure input fields and form elements use consistent, clear font rendering */
-input, textarea, select, button {
+input,
+textarea,
+select,
+button {
   font-family: inherit;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -643,15 +653,15 @@ input, textarea, select, button {
 }
 
 /* Specific styles for form inputs to ensure crisp text */
-input[type="text"], 
-input[type="email"], 
-input[type="password"], 
-input[type="tel"], 
-input[type="url"], 
-input[type="date"], 
-input[type="number"], 
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="number"],
 input[type="search"],
-textarea, 
+textarea,
 select {
   font-weight: 400;
   letter-spacing: 0.005em;
@@ -731,9 +741,11 @@ select {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-white text-foreground;
   }
+
   html {
     @apply font-sans;
   }

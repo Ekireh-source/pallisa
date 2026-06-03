@@ -17,8 +17,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         showSpinner={false}
         easing="ease"
         speed={200}
-        shadow="0 0 10px #0fa88a,0 0 5px #0fa88a"
-        zIndex={1600}
+      zIndex={1600}
       />
       <ReduxProvider>
         <AuthProvider>

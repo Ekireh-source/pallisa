@@ -9,9 +9,9 @@ interface SuccessMessageProps {
   onDismiss?: () => void;
 }
 
-export const SuccessMessage: React.FC<SuccessMessageProps> = ({ 
-  message, 
-  className = '', 
+export const SuccessMessage: React.FC<SuccessMessageProps> = ({
+  message,
+  className = '',
   variant = 'default',
   onDismiss
 }) => {
@@ -21,7 +21,7 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({
   const variantClasses = {
     default: "bg-green-50 border border-green-200",
     inline: "bg-green-50 border-l-4 border-green-400",
-    toast: "bg-green-500 text-white shadow-lg"
+    toast: "bg-green-500 text-white "
   };
 
   const textClasses = {

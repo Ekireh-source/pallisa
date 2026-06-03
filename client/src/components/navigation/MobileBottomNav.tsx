@@ -105,7 +105,7 @@ export function MobileBottomNav({ onMoreClick }: MobileBottomNavProps) {
         { group: "Management", title: "Roles & Permissions", href: "/roles", icon: "hugeicons:user-shield-01" },
         { group: "Management", title: "Departments", href: "/departments", icon: "hugeicons:folder-01" },
         { group: "Management", title: "Vendors", href: "/vendors", icon: "hugeicons:delivery-truck-01" },
-        
+
         { group: "Finance", title: "Expenses", href: "/expenses", icon: "hugeicons:money-bag-01" },
         { group: "Finance", title: "Categories", href: "/categories", icon: "hugeicons:tag-01" },
       ],
@@ -115,13 +115,13 @@ export function MobileBottomNav({ onMoreClick }: MobileBottomNavProps) {
   const navItems = isTeacher ? teacherNavItems : adminNavItems;
 
   return (
-    <div 
+    <div
       className={cn(
         "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 transition-all duration-300",
-        isTeacher 
-          ? "md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:rounded-2xl md:border md:shadow-xl md:w-[600px] md:bg-white/90 md:backdrop-blur-md md:px-4"
+        isTeacher
+          ? "md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:rounded-2xl md:border md:-xl md:w-[600px] md:bg-white/90 md:backdrop-blur-md md:px-4"
           : "md:hidden"
-      )} 
+      )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-between h-16 px-2">

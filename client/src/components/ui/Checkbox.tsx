@@ -19,7 +19,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         {...props}
       />
       {label && (
-        <label htmlFor={props.id} className="ml-2 block text-sm text-gray-700 form-input-clear">
+        <label htmlFor={props.id} className="ml-2 block text-sm text-My-Black form-input-clear">
           {label}
         </label>
       )}

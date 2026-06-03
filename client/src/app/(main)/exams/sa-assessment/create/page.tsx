@@ -132,8 +132,8 @@ export default function CreateSaAssessmentPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="w-full space-y-6">
-              <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100 bg-white">
-                <h3 className="font-bold text-gray-900 mb-6 flex items-center text-lg">
+              <Card className="p-8 border-none  ring-1 ring-gray-100 bg-white">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center text-lg">
                   <TrendingUp className="w-5 h-5 mr-2.5 text-primary" />
                   Assessment Configuration
                 </h3>
@@ -141,7 +141,7 @@ export default function CreateSaAssessmentPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Select Stream */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Select Stream</Label>
+                    <Label className="text-sm font-semibold text-My-Black">Select Stream</Label>
                     <Select
                       disabled={fetchingData}
                       onValueChange={(val) => setValue('stream', parseInt(val), { shouldValidate: true })}
@@ -150,7 +150,7 @@ export default function CreateSaAssessmentPage() {
                       <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                         <SelectValue placeholder="Select Stream Class" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectContent className="rounded-xl -xl border-gray-100">
                         {streams.map((s) => (
                           <SelectItem key={s.id} value={s.id.toString()}>
                             {s.class_obj_name ? `${s.class_obj_name} - ` : ''}{s.name}
@@ -163,7 +163,7 @@ export default function CreateSaAssessmentPage() {
 
                   {/* Select Subject */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Select Subject</Label>
+                    <Label className="text-sm font-semibold text-My-Black">Select Subject</Label>
                     <Select
                       disabled={fetchingData}
                       onValueChange={(val) => setValue('subject', parseInt(val), { shouldValidate: true })}
@@ -172,7 +172,7 @@ export default function CreateSaAssessmentPage() {
                       <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                         <SelectValue placeholder="Select Subject" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectContent className="rounded-xl -xl border-gray-100">
                         {subjects.map((sub) => (
                           <SelectItem key={sub.id} value={sub.id.toString()}>
                             {sub.name} ({sub.code})
@@ -185,7 +185,7 @@ export default function CreateSaAssessmentPage() {
 
                   {/* Select Term */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Term</Label>
+                    <Label className="text-sm font-semibold text-My-Black">Term</Label>
                     <Select
                       disabled={fetchingData}
                       onValueChange={(val) => setValue('term', parseInt(val), { shouldValidate: true })}
@@ -194,7 +194,7 @@ export default function CreateSaAssessmentPage() {
                       <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                         <SelectValue placeholder="Select Term" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectContent className="rounded-xl -xl border-gray-100">
                         {terms.map((t) => (
                           <SelectItem key={t.id} value={t.id.toString()}>
                             {t.name} {t.is_current ? '(Current Term)' : ''}
@@ -207,7 +207,7 @@ export default function CreateSaAssessmentPage() {
 
                   {/* Select Academic Year */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Academic Year</Label>
+                    <Label className="text-sm font-semibold text-My-Black">Academic Year</Label>
                     <Select
                       disabled={fetchingData}
                       onValueChange={(val) => setValue('academic_year', parseInt(val), { shouldValidate: true })}
@@ -216,7 +216,7 @@ export default function CreateSaAssessmentPage() {
                       <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                         <SelectValue placeholder="Select Academic Year" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectContent className="rounded-xl -xl border-gray-100">
                         {academicYears.map((ay) => (
                           <SelectItem key={ay.id} value={ay.id.toString()}>
                             {ay.name} {ay.is_current ? '(Current Year)' : ''}
@@ -229,7 +229,7 @@ export default function CreateSaAssessmentPage() {
 
                   {/* Divisor Factor */}
                   <div className="space-y-2">
-                    <Label htmlFor="total_box" className="text-sm font-semibold text-gray-700">Total Box Divisor</Label>
+                    <Label htmlFor="total_box" className="text-sm font-semibold text-My-Black">Total Box Divisor</Label>
                     <div className="relative">
                       <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
                       <Input
@@ -247,7 +247,7 @@ export default function CreateSaAssessmentPage() {
 
                   {/* Assigned Teacher */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-gray-700">Assigned Teacher (Optional)</Label>
+                    <Label className="text-sm font-semibold text-My-Black">Assigned Teacher (Optional)</Label>
                     <Select
                       disabled={fetchingData}
                       onValueChange={(val) => setValue('teacher', val === 'none' ? null : parseInt(val))}
@@ -256,7 +256,7 @@ export default function CreateSaAssessmentPage() {
                       <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                         <SelectValue placeholder="Select Teacher" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                      <SelectContent className="rounded-xl -xl border-gray-100">
                         <SelectItem value="none">Auto Assign Current User</SelectItem>
                         {teachers.map((t) => (
                           <SelectItem key={t.id} value={t.id.toString()}>
@@ -281,7 +281,7 @@ export default function CreateSaAssessmentPage() {
                 <Button
                   type="submit"
                   disabled={loading || fetchingData}
-                  className="h-12 px-10 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all active:scale-95 font-bold"
+                  className="h-12 px-10 rounded-xl bg-primary hover:bg-primary/90 text-white  -primary/20 transition-all active:scale-95 font-bold"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
                   Create Config

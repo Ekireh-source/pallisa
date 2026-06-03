@@ -10,7 +10,7 @@ let currentSubjectId = null;
 // Global Analytics Memory States
 let rawReportData = null;
 let activeAoiPage = 1;
-const aoiPageSize = 3; 
+const aoiPageSize = 3;
 
 function goBack() {
     if (currentStep === 2) {
@@ -32,7 +32,7 @@ async function loadStreams() {
         if (result.success && result.data.length > 0) {
             result.data.forEach(stream => {
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => openStreamAnalytics(stream.stream_id, stream.subject_id, stream.stream_name, stream.subject_name);
                 card.innerHTML = `
                     <div class="flex items-center gap-4">
@@ -57,7 +57,7 @@ function openStreamAnalytics(streamId, subjectId, streamName, subjectName) {
     currentSubjectId = subjectId;
     document.getElementById('reportStreamTitle').innerText = streamName;
     document.getElementById('reportSubjectTitle').innerText = subjectName;
-    
+
     document.getElementById('step1-streams').classList.add('hidden');
     document.getElementById('step2-analytics').classList.remove('hidden');
     currentStep = 2;
@@ -72,14 +72,14 @@ async function fetchAnalyticalReport(streamId, subjectId) {
 
         if (result.success) {
             rawReportData = result.data;
-            activeAoiPage = 1; 
+            activeAoiPage = 1;
 
             document.getElementById('termInfoBadge').innerText = "Term " + rawReportData.meta.term + ", " + rawReportData.meta.year;
 
             // Clear previously entered calendar date pickers
             document.getElementById('inpAttDatePicker').value = '';
 
-            renderAttendanceData('term'); 
+            renderAttendanceData('term');
             renderAoiListWithPagination();
             renderSubjectAchievementInsights();
         }
@@ -100,7 +100,7 @@ function toggleAttendanceFilter(timeframe) {
         const btn = document.getElementById("btnAtt" + f.charAt(0).toUpperCase() + f.slice(1));
         if (btn) {
             if (f === timeframe) {
-                btn.className = "flex-1 py-1.5 text-[11px] font-bold rounded-lg bg-white text-brand shadow-sm transition-all";
+                btn.className = "flex-1 py-1.5 text-[11px] font-bold rounded-lg bg-white text-brand  transition-all";
             } else {
                 btn.className = "flex-1 py-1.5 text-[11px] font-semibold rounded-lg text-slate-500 transition-all";
             }
@@ -157,7 +157,7 @@ async function filterAttendanceByCustomDate(dateValue) {
 
 function renderAttendanceData(timeframe) {
     if (!rawReportData || !rawReportData.attendance || !rawReportData.attendance[timeframe]) return;
-    
+
     const block = rawReportData.attendance[timeframe];
     const total = parseInt(block.total_records) || 0;
     const absent = parseInt(block.total_absent) || 0;
@@ -204,10 +204,10 @@ function renderAoiListWithPagination() {
 
     const totalPages = Math.ceil(acts.length / aoiPageSize);
     if (paginationRow) paginationRow.classList.toggle('hidden', totalPages <= 1);
-    
+
     const indicator = document.getElementById('txtAoiPageIndicator');
     if (indicator) indicator.innerText = "Page " + activeAoiPage + " of " + totalPages;
-    
+
     const prevBtn = document.getElementById('btnAoiPrev');
     const nextBtn = document.getElementById('btnAoiNext');
     if (prevBtn) prevBtn.disabled = (activeAoiPage === 1);
@@ -247,7 +247,7 @@ function renderSubjectAchievementInsights() {
 
     const insightBox = document.getElementById('saInsightBox');
     if (!insightBox) return;
-    
+
     if (aggPercentage === 0) {
         insightBox.innerHTML = `⚠️ No evaluation metrics have been posted for this stream's grid yet. Log data in the SA Module to generate reports.`;
         return;

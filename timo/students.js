@@ -28,7 +28,7 @@ async function loadStreams() {
         if (result.success && result.data.length > 0) {
             result.data.forEach(stream => {
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => openStreamDirectory(stream.stream_id, stream.subject_id, stream.stream_name, stream.subject_name);
                 card.innerHTML = `
                     <div class="flex items-center gap-4">
@@ -51,10 +51,10 @@ async function loadStreams() {
 function openStreamDirectory(streamId, subjectId, streamName, subjectName) {
     currentStreamId = streamId;
     currentSubjectId = subjectId;
-    
+
     document.getElementById('dirStreamTitle').innerText = streamName;
     document.getElementById('dirSubjectTitle').innerText = subjectName;
-    
+
     document.getElementById('step1-streams').classList.add('hidden');
     document.getElementById('step2-directory').classList.remove('hidden');
     currentStep = 2;
@@ -65,17 +65,17 @@ function openStreamDirectory(streamId, subjectId, streamName, subjectName) {
 async function fetchStreamRosterRecords(streamId) {
     const grid = document.getElementById('directoryRosterGrid');
     grid.innerHTML = `<div class="text-center py-10 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2 text-brand"></i> Compiling true records...</div>`;
-    
+
     document.getElementById('inpDirectorySearch').value = '';
 
     try {
         const response = await fetch(`api/attendance.php?action=get_roster&stream_id=${streamId}&subject_id=${currentSubjectId}`);
         const result = await response.json();
-        
+
         if (result.success && result.data.learners) {
             studentRosterCache = result.data.learners || [];
             document.getElementById('lblRosterCount').innerText = `${studentRosterCache.length} Learners`;
-            
+
             // Render baseline container shells
             renderDirectoryCards(studentRosterCache);
         }
@@ -96,9 +96,9 @@ function renderDirectoryCards(arrayData) {
     arrayData.forEach((learner, index) => {
         const cardWrapper = document.createElement('div');
         cardWrapper.id = `card_wrapper_${learner.learner_id}`;
-        cardWrapper.className = "flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-200";
-        
-        const guardianHotline = `+2567000000${index + 1}`; 
+        cardWrapper.className = "flex flex-col bg-white rounded-2xl  border border-slate-100 overflow-hidden transition-all duration-200";
+
+        const guardianHotline = `+2567000000${index + 1}`;
 
         cardWrapper.innerHTML = `
             <div onclick="toggleStudentHistoryView(${learner.learner_id})" class="p-3.5 flex items-center justify-between cursor-pointer active:bg-slate-50 transition-colors select-none">
@@ -129,11 +129,11 @@ function renderDirectoryCards(arrayData) {
             </div>
         `;
         grid.appendChild(cardWrapper);
-        
+
         // Asynchronously load real metrics to color the cards right away
         loadTrueStudentMetricsInline(learner.learner_id);
     });
-    
+
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -156,10 +156,10 @@ async function loadTrueStudentMetricsInline(learnerId) {
             // TARGET WARNING DESIGN RULES: Highlight dodging students in red
             if (rate < 75.0 && total > 0) {
                 badge.className = "text-xs font-bold bg-rose-50 text-rose-600 border border-rose-100 px-2 py-1 rounded-lg animate-pulse";
-                wrapper.className = "flex flex-col bg-white rounded-2xl shadow-sm border border-rose-200 overflow-hidden";
+                wrapper.className = "flex flex-col bg-white rounded-2xl  border border-rose-200 overflow-hidden";
             } else {
                 badge.className = "text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 px-2 py-1 rounded-lg";
-                wrapper.className = "flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
+                wrapper.className = "flex flex-col bg-white rounded-2xl  border border-slate-100 overflow-hidden";
             }
             badge.innerText = `${rate}%`;
 
@@ -174,7 +174,7 @@ async function loadTrueStudentMetricsInline(learnerId) {
                     const dayNum = parseInt(parts[2], 10);
                     return `<span class="bg-rose-50 text-rose-600 font-bold border border-rose-100/60 px-2 py-0.5 rounded">${monthsList[monthIdx] || parts[1]} ${dayNum}</span>`;
                 }).join(' ');
-                
+
                 absenceLogsHtml = `
                     <div class="space-y-1 pt-1">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Recorded Absences:</p>
@@ -215,8 +215,8 @@ function filterDirectoryLive(searchVal) {
         return;
     }
     const filteredMatches = studentRosterCache.filter(student => {
-        return student.full_name.toLowerCase().includes(cleanQuery) || 
-               student.admission_number.toLowerCase().includes(cleanQuery);
+        return student.full_name.toLowerCase().includes(cleanQuery) ||
+            student.admission_number.toLowerCase().includes(cleanQuery);
     });
     renderDirectoryCards(filteredMatches);
 }

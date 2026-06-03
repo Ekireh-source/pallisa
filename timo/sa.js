@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 let currentStep = 1;
 let currentStreamId = null;
 let currentSubjectId = null;
-let sa_id = null; 
+let sa_id = null;
 let globalTotalBox = 10.00; // Default matching your database schema baseline
 let matrixData = [];
 
@@ -46,7 +46,7 @@ async function loadStreams() {
         if (result.success && result.data.length > 0) {
             result.data.forEach(stream => {
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => openMatrixGrid(stream.stream_id, stream.subject_id, stream.stream_name, stream.subject_name);
                 card.innerHTML = `
                     <div class="flex items-center gap-4">
@@ -69,10 +69,10 @@ async function loadStreams() {
 async function openMatrixGrid(streamId, subjectId, streamName, subjectName) {
     currentStreamId = streamId;
     currentSubjectId = subjectId;
-    
+
     document.getElementById('matrixStreamTitle').innerText = streamName;
     document.getElementById('matrixSubjectTitle').innerText = subjectName;
-    
+
     document.getElementById('step1-streams').classList.add('hidden');
     document.getElementById('step2-matrix').classList.remove('hidden');
     document.getElementById('submitBar').classList.remove('hidden');
@@ -90,7 +90,7 @@ async function openMatrixGrid(streamId, subjectId, streamName, subjectName) {
 
         if (result.success && result.data.learners.length > 0) {
             sa_id = result.data.sa_id;
-            
+
             // Hydrate the editable total box value from database configuration state safely
             if (result.data.total_box) {
                 globalTotalBox = parseFloat(result.data.total_box);
@@ -105,8 +105,8 @@ async function openMatrixGrid(streamId, subjectId, streamName, subjectName) {
                 matrixData.push(rowObj);
 
                 const rowCard = document.createElement('div');
-                rowCard.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4";
-                
+                rowCard.className = "bg-white p-4 rounded-2xl  border border-slate-100 flex flex-col gap-4";
+
                 const buildInputLine = (keysArray) => {
                     let html = '';
                     keysArray.forEach(k => {
@@ -193,7 +193,7 @@ function updateGlobalTotalBox(val) {
 function recalcRowTotal(learnerId) {
     const row = matrixData.find(r => r.learner_id === learnerId);
     const badge = document.getElementById(`aggregate_badge_${learnerId}`);
-    
+
     let sum = 0;
     let entriesFound = false;
 
@@ -213,13 +213,13 @@ function recalcRowTotal(learnerId) {
     // Your requested formula context implementation: (Sum / Global Total Box) * 100
     const finalPct = ((sum / globalTotalBox) * 100).toFixed(1);
     badge.innerText = `${finalPct}%`;
-    
+
     if (finalPct >= 75) {
-        badge.className = "bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full font-bold text-xs shadow-sm";
+        badge.className = "bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full font-bold text-xs ";
     } else if (finalPct >= 50) {
-        badge.className = "bg-blue-50 text-brand border border-blue-100 px-3 py-1 rounded-full font-bold text-xs shadow-sm";
+        badge.className = "bg-blue-50 text-brand border border-blue-100 px-3 py-1 rounded-full font-bold text-xs ";
     } else {
-        badge.className = "bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1 rounded-full font-bold text-xs shadow-sm";
+        badge.className = "bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1 rounded-full font-bold text-xs ";
     }
 }
 

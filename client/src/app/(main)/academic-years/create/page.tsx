@@ -80,9 +80,9 @@ export default function CreateAcademicYearPage() {
       title="New Academic Year"
       description="Initialize a new academic cycle for the school."
       backButton={
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
           onClick={() => router.back()}
         >
@@ -96,35 +96,35 @@ export default function CreateAcademicYearPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Main Form Area */}
             <div className="md:col-span-2 space-y-6">
-              <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
+              <Card className="p-8 border-none  ring-1 ring-gray-100">
                 <div className="space-y-6">
-                    <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
-                      <CalendarDays className="w-4 h-4 mr-2 text-primary" />
-                      Year Name
-                    </Label>
-                    <Select 
-                      onValueChange={(val) => setValue('name', val)}
-                      value={watch('name')}
-                    >
-                      <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 focus:ring-primary w-full">
-                        <SelectValue placeholder="Select Academic Year" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl shadow-xl border-gray-100">
-                        {Array.from({ length: 12 }, (_, i) => {
-                          const year = 2024 + i;
-                          return (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    {errors.name && <ErrorMessage message={errors.name.message} />}
+                  <Label htmlFor="name" className="text-sm font-semibold text-My-Black flex items-center">
+                    <CalendarDays className="w-4 h-4 mr-2 text-primary" />
+                    Year Name
+                  </Label>
+                  <Select
+                    onValueChange={(val) => setValue('name', val)}
+                    value={watch('name')}
+                  >
+                    <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 focus:ring-primary w-full">
+                      <SelectValue placeholder="Select Academic Year" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl -xl border-gray-100">
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const year = 2024 + i;
+                        return (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {errors.name && <ErrorMessage message={errors.name.message} />}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="start_date" className="text-sm font-semibold text-gray-700 flex items-center">
+                      <Label htmlFor="start_date" className="text-sm font-semibold text-My-Black flex items-center">
                         <Clock className="w-4 h-4 mr-2 text-primary" />
                         Start Date
                       </Label>
@@ -138,7 +138,7 @@ export default function CreateAcademicYearPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="end_date" className="text-sm font-semibold text-gray-700 flex items-center">
+                      <Label htmlFor="end_date" className="text-sm font-semibold text-My-Black flex items-center">
                         <Clock className="w-4 h-4 mr-2 text-primary" />
                         End Date
                       </Label>
@@ -157,16 +157,16 @@ export default function CreateAcademicYearPage() {
 
             {/* Sidebar / Options */}
             <div className="space-y-6">
-              <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-                <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+              <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+                <h3 className="font-bold text-My-Black mb-6 flex items-center">
                   <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                   Cycle Settings
                 </h3>
 
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 ">
                     <div className="space-y-0.5">
-                      <Label className="text-sm font-semibold text-gray-900">Set as Current</Label>
+                      <Label className="text-sm font-semibold text-My-Black">Set as Current</Label>
                       <p className="text-xs text-gray-500">Currently active academic cycle</p>
                     </div>
                     <Switch
@@ -175,9 +175,9 @@ export default function CreateAcademicYearPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 ">
                     <div className="space-y-0.5">
-                      <Label className="text-sm font-semibold text-gray-900">Active Status</Label>
+                      <Label className="text-sm font-semibold text-My-Black">Active Status</Label>
                       <p className="text-xs text-gray-500">Year is visible and selectable</p>
                     </div>
                     <Switch
@@ -191,7 +191,7 @@ export default function CreateAcademicYearPage() {
               <div className="pt-2">
                 <Button
                   type="submit"
-                  className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary text-white"
+                  className="w-full h-12 rounded-xl  -primary/20 font-bold bg-primary text-white"
                   disabled={loading}
                 >
                   {loading ? (

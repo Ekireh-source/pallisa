@@ -4,20 +4,20 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  ChevronLeft, 
-  Save, 
-  ClipboardCheck, 
-  Calendar, 
+import {
+  ChevronLeft,
+  Save,
+  ClipboardCheck,
+  Calendar,
   Clock,
   Loader2,
   Trash2
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Label, 
+import {
+  Button,
+  Card,
+  Input,
+  Label,
   Select,
   SelectTrigger,
   SelectValue,
@@ -73,7 +73,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (termRes && 'results' in termRes) {
         setTerms(termRes.results);
       }
-      
+
       if (examRes.success) {
         reset({
           name: examRes.data.name,
@@ -96,7 +96,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const onSubmit = async (data: IExamInput) => {
     setLoading(true);
     const result = await UpdateExam({ id, data });
-    
+
     if (result.success) {
       toast.success("Exam updated successfully");
       router.push('/exams');
@@ -122,30 +122,30 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
   if (fetchingData) {
     return (
-        <div className="w-full space-y-8 animate-in fade-in duration-500">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
-            <div><Skeleton className="h-64 w-full rounded-xl" /></div>
+      <div className="w-full space-y-8 animate-in fade-in duration-500">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32" />
           </div>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2"><Skeleton className="h-96 w-full rounded-xl" /></div>
+          <div><Skeleton className="h-64 w-full rounded-xl" /></div>
+        </div>
+      </div>
     );
   }
 
-    return (
-      <MainLayout
+  return (
+    <MainLayout
       title="Edit Examination"
       description="Update assessment period details."
       backButton={
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-8 w-8 text-white hover:bg-white/20 rounded-full"
           onClick={() => router.back()}
         >
@@ -153,8 +153,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         </Button>
       }
       headerActions={
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="h-11 rounded-xl bg-white/10 text-white hover:bg-white/20 border-white/20"
           onClick={handleDelete}
           disabled={loading}
@@ -168,16 +168,16 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Form Area */}
           <div className="md:col-span-2 space-y-6">
-            <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
+            <Card className="p-8 border-none  ring-1 ring-gray-100">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
+                  <Label htmlFor="name" className="text-sm font-semibold text-My-Black flex items-center">
                     <ClipboardCheck className="w-4 h-4 mr-2 text-primary" />
                     Examination Name
                   </Label>
-                  <Input 
+                  <Input
                     id="name"
-                    placeholder="e.g., End of Term 1 Exams" 
+                    placeholder="e.g., End of Term 1 Exams"
                     className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.name ? 'border-red-500' : ''}`}
                     {...register('name')}
                   />
@@ -186,11 +186,11 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="start_date" className="text-sm font-semibold text-gray-700 flex items-center">
+                    <Label htmlFor="start_date" className="text-sm font-semibold text-My-Black flex items-center">
                       <Calendar className="w-4 h-4 mr-2 text-primary" />
                       Start Date
                     </Label>
-                    <Input 
+                    <Input
                       id="start_date"
                       type="date"
                       className="h-12 rounded-xl border-gray-200 focus:ring-primary"
@@ -200,11 +200,11 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="end_date" className="text-sm font-semibold text-gray-700 flex items-center">
+                    <Label htmlFor="end_date" className="text-sm font-semibold text-My-Black flex items-center">
                       <Calendar className="w-4 h-4 mr-2 text-primary" />
                       End Date
                     </Label>
-                    <Input 
+                    <Input
                       id="end_date"
                       type="date"
                       className="h-12 rounded-xl border-gray-200 focus:ring-primary"
@@ -219,23 +219,23 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
           {/* Sidebar / Options */}
           <div className="space-y-6">
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+            <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+              <h3 className="font-bold text-My-Black mb-6 flex items-center">
                 <Clock className="w-5 h-5 mr-2 text-primary" />
                 Period & Status
               </h3>
-              
+
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Target Class</Label>
-                  <Select 
+                  <Label className="text-sm font-semibold text-My-Black">Target Class</Label>
+                  <Select
                     onValueChange={(val) => setValue('class_obj', parseInt(val))}
                     value={selectedClass?.toString()}
                   >
                     <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
                       <SelectValue placeholder="Select Class" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl -xl border-gray-100">
                       {classes.map((c) => (
                         <SelectItem key={c.id} value={c.id.toString()}>
                           {c.name}
@@ -247,15 +247,15 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Term</Label>
-                  <Select 
+                  <Label className="text-sm font-semibold text-My-Black">Term</Label>
+                  <Select
                     onValueChange={(val) => setValue('term', parseInt(val))}
                     value={selectedTerm?.toString()}
                   >
                     <SelectTrigger className="h-11 rounded-xl bg-white border-gray-200">
                       <SelectValue placeholder="Select Term" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl -xl border-gray-100">
                       {terms.map((t) => (
                         <SelectItem key={t.id} value={t.id.toString()}>
                           {t.name} ({t.academic_year_name})
@@ -266,12 +266,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                   {errors.term && <ErrorMessage message="Term is required" />}
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 ">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-semibold text-gray-900">Publish Immediately</Label>
+                    <Label className="text-sm font-semibold text-My-Black">Publish Immediately</Label>
                     <p className="text-xs text-gray-500">Make visible to students/parents</p>
                   </div>
-                  <Switch 
+                  <Switch
                     checked={isPublished}
                     onCheckedChange={(val: boolean) => setValue('is_published', val)}
                   />
@@ -280,9 +280,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
             </Card>
 
             <div className="pt-2">
-              <Button 
-                type="submit" 
-                className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary hover:bg-primary/90"
+              <Button
+                type="submit"
+                className="w-full h-12 rounded-xl  -primary/20 font-bold bg-primary hover:bg-primary/90"
                 disabled={loading}
               >
                 {loading ? (
@@ -292,9 +292,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 )}
                 Update Exam
               </Button>
-              <Button 
+              <Button
                 type="button"
-                variant="ghost" 
+                variant="ghost"
                 className="w-full mt-2 h-11 rounded-xl text-gray-500"
                 onClick={() => router.back()}
               >

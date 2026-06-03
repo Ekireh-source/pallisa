@@ -4,11 +4,11 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  ChevronLeft, 
-  Save, 
-  Zap, 
-  BookOpen, 
+import {
+  ChevronLeft,
+  Save,
+  Zap,
+  BookOpen,
   User,
   Calendar,
   Clock,
@@ -17,11 +17,11 @@ import {
   Trophy,
   Trash2
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Label, 
+import {
+  Button,
+  Card,
+  Input,
+  Label,
   Select,
   SelectTrigger,
   SelectValue,
@@ -79,7 +79,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
         const res = await FetchCompetencyAreas(queryParams);
         if (res && 'results' in res) {
           setCompetencyAreas(res.results);
-          
+
           if (selectedTopic) {
             // Automatically select competency area when topic is selected, if there's only one matching
             if (res.results.length === 1) {
@@ -117,7 +117,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
     const loadData = async () => {
       setFetchingData(true);
       const activityRes = await FetchActivityById(id);
-      
+
       if (activityRes.success) {
         const topicId = activityRes.data.topic;
         const [topicsRes, teachersRes, termsRes, areasRes] = await Promise.all([
@@ -160,7 +160,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
   const onSubmit = async (data: IActivityInput) => {
     setLoading(true);
     const result = await UpdateActivity({ id, data });
-    
+
     if (result.success) {
       toast.success("Activity updated successfully");
       router.push('/activity-of-integration');
@@ -198,21 +198,21 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="h-10 w-10 p-0 rounded-full border-gray-200 hover:bg-gray-50"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Activity</h1>
+            <h1 className="text-3xl font-bold text-My-Black">Edit Activity</h1>
             <p className="text-gray-500 mt-1">Update assessment task details.</p>
           </div>
         </div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="h-11 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100"
           onClick={handleDelete}
           disabled={loading}
@@ -223,23 +223,23 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
-          <h3 className="font-bold text-gray-900 mb-6 flex items-center text-lg">
+        <Card className="p-8 border-none  ring-1 ring-gray-100">
+          <h3 className="font-bold text-My-Black mb-6 flex items-center text-lg">
             <BookOpen className="w-5 h-5 mr-2 text-primary" />
             Activity Details
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Related Topic</Label>
-              <Select 
+              <Label className="text-sm font-semibold text-My-Black">Related Topic</Label>
+              <Select
                 onValueChange={(val) => setValue('topic', parseInt(val), { shouldValidate: true })}
                 value={selectedTopic?.toString()}
               >
                 <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                   <SelectValue placeholder="Select Topic" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                <SelectContent className="rounded-xl -xl border-gray-100">
                   {topics.map((t) => (
                     <SelectItem key={t.id} value={t.id.toString()}>
                       {t.name} ({t.subject_name})
@@ -251,15 +251,15 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Term</Label>
-              <Select 
+              <Label className="text-sm font-semibold text-My-Black">Term</Label>
+              <Select
                 onValueChange={(val) => setValue('term', parseInt(val), { shouldValidate: true })}
                 value={selectedTerm?.toString()}
               >
                 <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                   <SelectValue placeholder="Select Term" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                <SelectContent className="rounded-xl -xl border-gray-100">
                   {terms.map((t) => (
                     <SelectItem key={t.id} value={t.id.toString()}>
                       {t.name}
@@ -271,15 +271,15 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Competency Area</Label>
-              <Select 
+              <Label className="text-sm font-semibold text-My-Black">Competency Area</Label>
+              <Select
                 onValueChange={(val) => setValue('competency_area', val === 'none' ? undefined : parseInt(val))}
                 value={selectedCompetencyArea?.toString() || 'none'}
               >
                 <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                   <SelectValue placeholder="Select Competency Area" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                <SelectContent className="rounded-xl -xl border-gray-100">
                   <SelectItem value="none">None</SelectItem>
                   {displayedCompetencyAreas.map((a) => (
                     <SelectItem key={a.id} value={a.id.toString()}>
@@ -291,31 +291,31 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Assigned Teacher</Label>
-              <Select 
+              <Label className="text-sm font-semibold text-My-Black">Assigned Teacher</Label>
+              <Select
                 onValueChange={(val) => setValue('teacher', val === 'none' ? undefined : parseInt(val))}
                 value={selectedTeacher?.toString() || 'none'}
               >
                 <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200">
                   <SelectValue placeholder="Select Teacher" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                <SelectContent className="rounded-xl -xl border-gray-100">
                   <SelectItem value="none">None</SelectItem>
-                    {teachers.map((t) => (
-                      <SelectItem key={t.id} value={t.id.toString()}>
-                        {t.full_name}
-                      </SelectItem>
-                    ))}
+                  {teachers.map((t) => (
+                    <SelectItem key={t.id} value={t.id.toString()}>
+                      {t.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="max_score" className="text-sm font-semibold text-gray-700">Max Score</Label>
-              <Input 
+              <Label htmlFor="max_score" className="text-sm font-semibold text-My-Black">Max Score</Label>
+              <Input
                 id="max_score"
                 type="number"
-                placeholder="10" 
+                placeholder="10"
                 className={`h-12 rounded-xl border-gray-200 focus:ring-primary ${errors.max_score ? 'border-red-500' : ''}`}
                 {...register('max_score', { valueAsNumber: true })}
               />
@@ -325,18 +325,18 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
         </Card>
 
         <div className="flex justify-end gap-4 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             className="h-12 px-8 rounded-xl border-gray-200"
             onClick={() => router.back()}
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={loading}
-            className="h-12 px-10 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="h-12 px-10 rounded-xl bg-primary hover:bg-primary/90 text-white  -primary/20 transition-all active:scale-95"
           >
             {loading ? "Updating..." : "Update Activity"}
           </Button>

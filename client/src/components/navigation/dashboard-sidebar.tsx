@@ -25,7 +25,7 @@ export default function DashboardSideBar({ isSideBarOpen, setIsSideBarOpen }: Da
     const isMobile = useIsMobile();
     const router = useRouter();
     const school = useSelector((state: any) => state.auth.school);
-    
+
     const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
     const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
     const [expandedSubItems, setExpandedSubItems] = useState<{ [key: string]: boolean }>({});
@@ -237,7 +237,7 @@ export default function DashboardSideBar({ isSideBarOpen, setIsSideBarOpen }: Da
                 >
                     <div className="p-4 border-b border-gray-100 h-16 max-h-16 flex items-center">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 aspect-square text-white rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center overflow-hidden relative shadow-md shadow-indigo-100/50">
+                            <div className="w-10 h-10 aspect-square text-white rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center overflow-hidden relative  -indigo-100/50">
                                 {InstitutionLogo ? (
                                     <Image
                                         alt={InstitutionName}

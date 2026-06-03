@@ -2,21 +2,21 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Edit2, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit2,
+  Trash2,
   ClipboardCheck,
   Calendar,
   Clock,
   CheckCircle2,
   Eye
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -46,7 +46,7 @@ export default function ExamsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const { school } = useSelector((state: RootState) => state.auth);
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   const fetchFirstPage = async (query?: any) => {
@@ -79,29 +79,30 @@ export default function ExamsListPage() {
             <ClipboardCheck className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">{exam.name}</p>
-            <p className="text-xs text-gray-400">Term: {exam.term_name || 'N/A'}</p>
+            <p className="text-My-Black font-semibold">{exam.name}</p>
+            <p className="text-xs text-My-Black">Term: {exam.term_name || 'N/A'}</p>
           </div>
         </div>
       ),
     },
     {
-      key: "academic_year_name",
-      header: "Academic Year",
+      key: "class_name",
+      header: "Target Class",
       cell: (exam) => (
-        <span className="font-medium text-gray-600">{exam.class_obj || 'N/A'}</span>
+        <span className="font-medium text-My-Black">{exam.class_name || exam.class_obj || 'All Classes'}</span>
+
       ),
     },
     {
       key: "dates",
       header: "Assessment Period",
       cell: (exam) => (
-        <div className="text-xs text-gray-600 space-y-1">
+        <div className="text-xs text-My-Black space-y-1">
           <div className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 text-gray-400" />
+            <Calendar className="w-3.5 h-3.5 text-My-Black" />
             <span>{format(new Date(exam.start_date), 'MMM dd, yyyy')}</span>
           </div>
-          <div className="flex items-center gap-1 text-gray-400">
+          <div className="flex items-center gap-1 text-My-Black">
             <Clock className="w-3.5 h-3.5" />
             <span>End: {format(new Date(exam.end_date), 'MMM dd, yyyy')}</span>
           </div>
@@ -132,25 +133,25 @@ export default function ExamsListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
-              <DropdownMenuItem 
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
+              <DropdownMenuItem
                 className="cursor-pointer py-2 font-medium"
                 onClick={() => router.push(`/exams/${exam.public_id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/exams/${exam.public_id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(exam.public_id)}
               >
@@ -166,55 +167,55 @@ export default function ExamsListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
-    <MainLayout
-      title="Examinations"
-      description="Schedule and manage school-wide assessments."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "New Exam",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/exams/create",
-          }}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search exams..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <MainLayout
+        title="Examinations"
+        description="Schedule and manage school-wide assessments."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "New Exam",
+              icon: <Plus className="w-4 h-4" />,
+              href: "/exams/create",
+            }}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search exams..."
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm, school: school?.id }}
+              deps={[searchTerm, school]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <ClipboardCheck className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No exams scheduled</p>
+                  <p className="text-sm">Create a new exam to begin assessments.</p>
+                </div>
+              }
             />
           </div>
-        </div>
-
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm, school: school?.id }}
-            deps={[searchTerm, school]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <ClipboardCheck className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No exams scheduled</p>
-                <p className="text-sm">Create a new exam to begin assessments.</p>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-    </MainLayout>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

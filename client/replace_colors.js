@@ -2,10 +2,10 @@ const fs = require('fs');
 
 function processFile(file) {
   let content = fs.readFileSync(file, 'utf8');
-  content = content.replace(/text-gray-900/g, 'text-[var(--My-Black)]')
-                   .replace(/text-gray-800/g, 'text-[var(--My-Black)]')
-                   .replace(/text-gray-500/g, 'text-[var(--My-Gray)]')
-                   .replace(/text-gray-400/g, 'text-[var(--My-Gray)]');
+  content = content.replace(/text-My-Black/g, 'text-[var(--My-Black)]')
+    .replace(/text-gray-800/g, 'text-[var(--My-Black)]')
+    .replace(/text-gray-500/g, 'text-[var(--My-Gray)]')
+    .replace(/text-My-Black/g, 'text-[var(--My-Gray)]');
   fs.writeFileSync(file, content);
 }
 

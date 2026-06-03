@@ -2,19 +2,19 @@
 
 import React, { use } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  ChevronLeft, 
-  Edit2, 
-  BookOpen, 
-  Layers, 
+import {
+  ChevronLeft,
+  Edit2,
+  BookOpen,
+  Layers,
   FileText,
   Calendar,
   User,
   BookMarked
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Badge,
   Skeleton
 } from '@/components/ui';
@@ -67,9 +67,9 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       }
       backButton={
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="rounded-2xl h-12 w-12 hover:bg-white/20 text-white transition-all mr-2"
           onClick={() => router.push('/topics')}
         >
@@ -77,8 +77,8 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
         </Button>
       }
       headerActions={
-        <Button 
-          className="h-11 rounded-xl bg-white text-primary hover:bg-gray-100 font-bold px-6 shadow-sm flex items-center gap-2 border border-transparent"
+        <Button
+          className="h-11 rounded-xl bg-white text-primary hover:bg-gray-100 font-bold px-6  flex items-center gap-2 border border-transparent"
           onClick={() => router.push(`/topics/${id}/edit`)}
         >
           <Edit2 className="w-4 h-4 mr-2" />
@@ -88,55 +88,55 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
     >
       <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-[24px]">
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-6">
-          <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                  <FileText className="w-6 h-6" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 space-y-6">
+            <Card className="p-8 border-none  ring-1 ring-gray-100">
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-My-Black text-lg">Description</h3>
+                    <p className="text-My-Black leading-relaxed whitespace-pre-wrap">
+                      {topic.description || "No description provided for this topic."}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="font-bold text-gray-900 text-lg">Description</h3>
-                  <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
-                    {topic.description || "No description provided for this topic."}
-                  </p>
-                </div>
-              </div>
 
-              <div className="pt-6 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Created on {format(new Date(topic.created_at), 'MMMM d, yyyy')}
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookMarked className="w-4 h-4" />
-                  Topic ID: {id}
+                <div className="pt-6 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Created on {format(new Date(topic.created_at), 'MMMM d, yyyy')}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BookMarked className="w-4 h-4" />
+                    Topic ID: {id}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        <div className="space-y-6">
-          <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-            <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-              <Layers className="w-5 h-5 mr-2 text-primary" />
-              Quick Stats
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-500 text-sm">Activities</span>
-                <span className="font-bold text-gray-900">{topic.activities_count || 0}</span>
+          <div className="space-y-6">
+            <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+              <h3 className="font-bold text-My-Black mb-4 flex items-center">
+                <Layers className="w-5 h-5 mr-2 text-primary" />
+                Quick Stats
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500 text-sm">Activities</span>
+                  <span className="font-bold text-My-Black">{topic.activities_count || 0}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500 text-sm">Avg. Score</span>
+                  <span className="font-bold text-primary">--</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-500 text-sm">Avg. Score</span>
-                <span className="font-bold text-primary">--</span>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
-      </div>
       </div>
     </MainLayout>
   );

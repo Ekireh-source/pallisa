@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const delInput = document.getElementById('inpDeleteConfirm');
     if (delInput) {
-        delInput.addEventListener('input', function(e) {
+        delInput.addEventListener('input', function (e) {
             document.getElementById('btnConfirmDelete').disabled = e.target.value.toLowerCase().trim() !== 'delete';
         });
     }
@@ -46,18 +46,18 @@ async function loadLearnersData() {
 
         if (result.success) {
             const data = result.data;
-            
+
             // Build Stream Dictionary for dropdowns and fast CSV lookups
             const strSelect = document.getElementById('selLearnerStream');
             const editStrSelect = document.getElementById('selEditStream');
             strSelect.innerHTML = '<option value="">-- Select Stream --</option>';
             editStrSelect.innerHTML = '';
-            
+
             streamsMap = {};
             data.streams.forEach(str => {
                 const combinedName = `${str.class_name} ${str.stream_name}`;
                 streamsMap[combinedName.toLowerCase()] = str.stream_id; // For exact matching
-                
+
                 const opt = `<option value="${str.stream_id}">${combinedName}</option>`;
                 strSelect.innerHTML += opt;
                 editStrSelect.innerHTML += opt;
@@ -67,7 +67,7 @@ async function loadLearnersData() {
             learnersCache = data.learners;
             existingLINs.clear();
             learnersCache.forEach(l => existingLINs.add(l.admission_number.toUpperCase()));
-            
+
             document.getElementById('learnerCountBadge').innerText = learnersCache.length;
             renderLearners(learnersCache);
         }
@@ -87,8 +87,8 @@ function renderLearners(dataArray) {
 
     dataArray.forEach(l => {
         const card = document.createElement('div');
-        card.className = "bg-white p-3 border border-slate-200 rounded-xl shadow-sm flex flex-col gap-2 elevate-card";
-        
+        card.className = "bg-white p-3 border border-slate-200 rounded-xl  flex flex-col gap-2 elevate-card";
+
         card.innerHTML = `
             <div class="flex items-center justify-between border-b border-slate-50 pb-2">
                 <div class="flex items-center gap-2.5 overflow-hidden pr-2">
@@ -101,10 +101,10 @@ function renderLearners(dataArray) {
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 flex-shrink-0">
-                    <button onclick="promptEdit(${l.learner_id}, '${l.full_name.replace(/'/g, "\\'")}', '${l.admission_number}', ${l.stream_id})" class="w-7 h-7 rounded bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-brand hover:text-white transition-colors border border-slate-200 hover:border-brand shadow-sm">
+                    <button onclick="promptEdit(${l.learner_id}, '${l.full_name.replace(/'/g, "\\'")}', '${l.admission_number}', ${l.stream_id})" class="w-7 h-7 rounded bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-brand hover:text-white transition-colors border border-slate-200 hover:border-brand ">
                         <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="promptDelete(${l.learner_id}, '${l.full_name.replace(/'/g, "\\'")}')" class="w-7 h-7 rounded bg-slate-50 text-rose-400 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors border border-slate-200 hover:border-rose-500 shadow-sm">
+                    <button onclick="promptDelete(${l.learner_id}, '${l.full_name.replace(/'/g, "\\'")}')" class="w-7 h-7 rounded bg-slate-50 text-rose-400 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors border border-slate-200 hover:border-rose-500 ">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
@@ -125,8 +125,8 @@ function filterLearners() {
         renderLearners(learnersCache);
         return;
     }
-    const filtered = learnersCache.filter(l => 
-        l.full_name.toLowerCase().includes(query) || 
+    const filtered = learnersCache.filter(l =>
+        l.full_name.toLowerCase().includes(query) ||
         l.admission_number.toLowerCase().includes(query) ||
         l.stream_name.toLowerCase().includes(query) ||
         l.class_name.toLowerCase().includes(query)
@@ -143,22 +143,22 @@ async function handleSingleLearnerSubmission(e) {
     const name = document.getElementById('inpLearnerName').value;
     const lin = document.getElementById('inpLearnerLIN').value.toUpperCase();
     const strId = document.getElementById('selLearnerStream').value;
-    
+
     btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Saving...`;
 
     try {
-        const response = await fetch('api/admin_learners.php', { 
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ action: 'add_learner', full_name: name, admission_number: lin, stream_id: strId }) 
+        const response = await fetch('api/admin_learners.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_learner', full_name: name, admission_number: lin, stream_id: strId })
         });
         const result = await response.json();
-        
-        if (result.success) { 
-            showNotification(result.message); 
+
+        if (result.success) {
+            showNotification(result.message);
             document.getElementById('formAddLearner').reset();
-            loadLearnersData(); 
+            loadLearnersData();
         } else { showNotification(result.message, 'error'); }
-    } catch (err) { showNotification('Failed to register learner.', 'error'); } 
+    } catch (err) { showNotification('Failed to register learner.', 'error'); }
     finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Register Learner`; if (typeof lucide !== 'undefined') lucide.createIcons(); }
 }
 
@@ -183,7 +183,7 @@ async function executeEdit() {
     const name = document.getElementById('inpEditName').value.trim();
     const lin = document.getElementById('inpEditLIN').value.trim().toUpperCase();
     const strId = document.getElementById('selEditStream').value;
-    
+
     const btn = document.getElementById('btnConfirmEdit');
     const origHtml = btn.innerHTML;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Saving...`; btn.disabled = true;
@@ -194,9 +194,9 @@ async function executeEdit() {
             body: JSON.stringify({ action: 'edit_learner', learner_id: targetLearnerId, full_name: name, admission_number: lin, stream_id: strId })
         });
         const result = await response.json();
-        if (result.success) { showNotification(result.message); closeEditModal(); loadLearnersData(); } 
+        if (result.success) { showNotification(result.message); closeEditModal(); loadLearnersData(); }
         else { showNotification(result.message, 'error'); }
-    } catch (err) { showNotification('Failed to update learner.', 'error'); } 
+    } catch (err) { showNotification('Failed to update learner.', 'error'); }
     finally { btn.innerHTML = origHtml; btn.disabled = false; if (typeof lucide !== 'undefined') lucide.createIcons(); }
 }
 
@@ -229,7 +229,7 @@ async function executeDelete() {
             body: JSON.stringify({ action: 'delete_learner', learner_id: targetLearnerId })
         });
         const result = await response.json();
-        if (result.success) { showNotification(result.message); closeDeleteModal(); loadLearnersData(); } 
+        if (result.success) { showNotification(result.message); closeDeleteModal(); loadLearnersData(); }
         else { showNotification(result.message, 'error'); btn.innerHTML = origHtml; btn.disabled = false; }
     } catch (err) { showNotification('Failed to execute delete.', 'error'); btn.innerHTML = origHtml; btn.disabled = false; }
 }
@@ -241,10 +241,10 @@ function downloadCSVTemplate() {
     let csvContent = "Full Name,LIN,Stream Name\n";
     // Provide a hint in the first row
     csvContent += "John Doe,U1001,Example: Senior 3 S3 North\n";
-    
+
     // Add all valid stream names to help the user
     Object.keys(streamsMap).forEach((streamName, idx) => {
-        if(idx < 5) csvContent += `Student ${idx+1},U200${idx+1},${streamName}\n`;
+        if (idx < 5) csvContent += `Student ${idx + 1},U200${idx + 1},${streamName}\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -262,7 +262,7 @@ function handleCSVUpload(event) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         const text = e.target.result;
         processCSV(text);
         // Clear input so same file can be uploaded again if needed
@@ -276,7 +276,7 @@ function processCSV(csvText) {
     const tableBody = document.getElementById('previewTableBody');
     tableBody.innerHTML = '';
     validatedBulkData = [];
-    
+
     let validCount = 0;
     let invalidCount = 0;
     let localLINCache = new Set(); // Prevent duplicates within the CSV itself
@@ -312,7 +312,7 @@ function processCSV(csvText) {
 
         const tr = document.createElement('tr');
         tr.className = "border-b border-slate-100 last:border-none";
-        
+
         if (isValid) {
             validCount++;
             validatedBulkData.push({ full_name: fullName, admission_number: lin, stream_id: matchedStreamId });
@@ -336,7 +336,7 @@ function processCSV(csvText) {
 
     document.getElementById('lblValidCount').innerText = validCount;
     document.getElementById('lblInvalidCount').innerText = invalidCount;
-    
+
     const btnConfirm = document.getElementById('btnConfirmBulk');
     btnConfirm.disabled = validCount === 0;
 
@@ -356,7 +356,7 @@ function closeBulkModal() {
 
 async function executeBulkImport() {
     if (validatedBulkData.length === 0) return;
-    
+
     const btn = document.getElementById('btnConfirmBulk');
     const origHtml = btn.innerHTML;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processing Array...`;
@@ -368,17 +368,17 @@ async function executeBulkImport() {
             body: JSON.stringify({ action: 'bulk_import', learners: validatedBulkData })
         });
         const result = await response.json();
-        
-        if (result.success) { 
-            showNotification(result.message); 
-            closeBulkModal(); 
-            loadLearnersData(); 
+
+        if (result.success) {
+            showNotification(result.message);
+            closeBulkModal();
+            loadLearnersData();
         } else { showNotification(result.message, 'error'); }
-    } catch (err) { 
-        showNotification('Server rejected bulk package.', 'error'); 
-    } finally { 
-        btn.innerHTML = origHtml; btn.disabled = false; 
+    } catch (err) {
+        showNotification('Server rejected bulk package.', 'error');
+    } finally {
+        btn.innerHTML = origHtml; btn.disabled = false;
     }
 }
 
-function confirmLogout() { if(confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }
+function confirmLogout() { if (confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }

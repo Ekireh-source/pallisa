@@ -44,7 +44,7 @@ export default function StreamDetailPage() {
   const [streamDetails, setStreamDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   useEffect(() => {
@@ -98,12 +98,12 @@ export default function StreamDetailPage() {
         const initials = student.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'S';
         return (
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border border-gray-100 shadow-sm">
+            <Avatar className="h-10 w-10 border border-gray-100 ">
               <AvatarImage src={student.user_profile_data?.profile_picture || undefined} alt={initials} />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold text-gray-900">{student.full_name}</p>
+              <p className="font-semibold text-My-Black">{student.full_name}</p>
               <p className="text-xs text-gray-500">{student.student_id || 'No ID'}</p>
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function StreamDetailPage() {
       key: "gender",
       header: "Gender",
       cell: (student) => (
-        <span className="text-gray-600 font-medium">
+        <span className="text-My-Black font-medium">
           {student.user_profile_data?.gender === 'M' ? 'Male' : student.user_profile_data?.gender === 'F' ? 'Female' : 'Other'}
         </span>
       ),
@@ -128,11 +128,11 @@ export default function StreamDetailPage() {
           graduated: "bg-blue-50 text-blue-700",
           suspended: "bg-rose-50 text-rose-700",
           transferred: "bg-amber-50 text-amber-700",
-          withdrawn: "bg-gray-100 text-gray-700",
+          withdrawn: "bg-gray-100 text-My-Black",
         };
         const status = student.enrollment_status || 'enrolled';
         const colorClass = statusColors[status] || statusColors.enrolled;
-        
+
         return (
           <Badge className={`border-none px-3 font-semibold rounded-full ${colorClass}`}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -148,10 +148,10 @@ export default function StreamDetailPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
               <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/students/${student.id}`)}
@@ -183,12 +183,12 @@ export default function StreamDetailPage() {
   if (loading) {
     return (
       <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_STREAMS}>
-    <MainLayout title="Stream Details" description="Loading...">
-        <div className="flex justify-center items-center h-64">
-          <Icon icon="hugeicons:loading-01" className="w-8 h-8 text-primary animate-spin" />
-        </div>
-      </MainLayout>
-    </ProtectedComponent>
+        <MainLayout title="Stream Details" description="Loading...">
+          <div className="flex justify-center items-center h-64">
+            <Icon icon="hugeicons:loading-01" className="w-8 h-8 text-primary animate-spin" />
+          </div>
+        </MainLayout>
+      </ProtectedComponent>
     );
   }
 
@@ -227,16 +227,16 @@ export default function StreamDetailPage() {
       ]}
       headerActions={
         <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="rounded-xl h-11 px-4 border-gray-200"
             onClick={() => router.push('/streams')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Streams
           </Button>
-          <Button 
-            className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent"
+          <Button
+            className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent"
             onClick={() => router.push(`/streams/${id}/edit`)}
           >
             <Edit2 className="w-4 h-4 mr-2" />
@@ -245,16 +245,16 @@ export default function StreamDetailPage() {
         </div>
       }
     >
-      <Card className="border-none shadow-none ring-1 ring-gray-100 overflow-hidden">
+      <Card className="border-none -none ring-1 ring-gray-100 overflow-hidden">
         <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Students</h3>
+            <h3 className="text-lg font-bold text-My-Black">Students</h3>
             <p className="text-sm text-gray-500">Manage all students enrolled in this stream</p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
               <Input
                 placeholder="Search students..."
                 className="pl-10 h-10 rounded-xl border-gray-200"
@@ -264,7 +264,7 @@ export default function StreamDetailPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="p-0 bg-white">
           <PaginatedTable
             fetchFirstPage={fetchFirstPage}
@@ -278,7 +278,7 @@ export default function StreamDetailPage() {
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <Users className="w-12 h-12 text-gray-200 mb-4" />
+                <Users className="w-12 h-12 text-My-Black mb-4" />
                 <p className="text-lg font-medium">No students found</p>
                 <p className="text-sm text-center max-w-sm mt-1">
                   There are no students currently enrolled in this stream.

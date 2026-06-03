@@ -43,27 +43,27 @@ export function ConfirmationModal({
     <Dialog.Root open={isOpen} onOpenChange={handleClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-md mx-4">
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg -xl z-50 w-full max-w-md mx-4">
           <div className="p-6">
             <div className="flex items-start space-x-3">
               <div className="flex-1 min-w-0">
-                <Dialog.Title className="text-lg font-semibold text-gray-900">
+                <Dialog.Title className="text-lg font-semibold text-My-Black">
                   {title}
                 </Dialog.Title>
-                <Dialog.Description className="mt-2 text-sm text-gray-600">
+                <Dialog.Description className="mt-2 text-sm text-My-Black">
                   {message}
                 </Dialog.Description>
               </div>
               <button
                 onClick={handleClose}
                 disabled={isLoading}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                className="flex-shrink-0 text-My-Black hover:text-My-Black transition-colors disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
           </div>
-          
+
           <div className="px-6 pb-6 bg-white">
             <div className="flex justify-end space-x-3">
               <Button

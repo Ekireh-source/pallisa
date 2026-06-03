@@ -66,7 +66,8 @@ function* login({
 
 		// yield put(setInactivityTimeout(lifetime));
 
-		yield put(setCurrentUser(authResponse.user_profile));
+		const userObj = { ...authResponse.user_profile, ...authResponse.user_info };
+		yield put(setCurrentUser(userObj));
 
 		if (authResponse.school) {
 			yield put(setSchool(authResponse.school));

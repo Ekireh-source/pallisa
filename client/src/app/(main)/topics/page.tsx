@@ -2,18 +2,18 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Edit2, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit2,
+  Trash2,
   BookOpen,
   BookMarked
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -38,7 +38,7 @@ export default function TopicsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const { school } = useSelector((state: RootState) => state.auth);
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   const fetchFirstPage = async (query?: any) => {
@@ -71,8 +71,8 @@ export default function TopicsListPage() {
             <BookMarked className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">{topic.name}</p>
-            <p className="text-xs text-gray-400">Class: {topic.class_name || 'N/A'}</p>
+            <p className="text-My-Black font-semibold">{topic.name}</p>
+            <p className="text-xs text-My-Black">Class: {topic.class_name || 'N/A'}</p>
           </div>
         </div>
       ),
@@ -81,7 +81,7 @@ export default function TopicsListPage() {
       key: "subject_name",
       header: "Subject",
       cell: (topic) => (
-        <span className="font-medium text-gray-600">{topic.subject_name || 'N/A'}</span>
+        <span className="font-medium text-My-Black">{topic.subject_name || 'N/A'}</span>
       ),
     },
     {
@@ -99,25 +99,25 @@ export default function TopicsListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
-              <DropdownMenuItem 
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
+              <DropdownMenuItem
                 className="cursor-pointer py-2 font-medium"
                 onClick={() => router.push(`/topics/${topic.id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/topics/${topic.id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(topic.id)}
               >
@@ -145,12 +145,12 @@ export default function TopicsListPage() {
         />
       }
     >
-      <Card className="border-none shadow-none ring-0">
+      <Card className="border-none -none ring-0">
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search topics..." 
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+            <Input
+              placeholder="Search topics..."
               className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -172,7 +172,7 @@ export default function TopicsListPage() {
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <BookMarked className="w-12 h-12 text-gray-200 mb-4" />
+                <BookMarked className="w-12 h-12 text-My-Black mb-4" />
                 <p className="text-lg font-medium">No topics found</p>
                 <p className="text-sm">Try adjusting your search or add a new topic.</p>
               </div>

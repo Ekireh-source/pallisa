@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const delInput = document.getElementById('inpDeleteConfirm');
     if (delInput) {
-        delInput.addEventListener('input', function(e) {
+        delInput.addEventListener('input', function (e) {
             document.getElementById('btnConfirmDelete').disabled = e.target.value.toLowerCase().trim() !== 'delete';
         });
     }
@@ -43,11 +43,11 @@ async function loadAllocationsData() {
 
         if (result.success) {
             const data = result.data;
-            
+
             // Populate Create Dropdowns
             populateDropdown('selTeacher', data.teachers, 'user_id', 'full_name', '-- Select Teacher --');
             populateDropdown('selSubject', data.subjects, 'subject_id', 'subject_name', '-- Select Subject --');
-            
+
             const streamSelect = document.getElementById('selStream');
             streamSelect.innerHTML = '<option value="">-- Select Stream --</option>';
             data.streams.forEach(str => {
@@ -94,8 +94,8 @@ function renderAssignments(dataArray) {
 
     dataArray.forEach(asn => {
         const card = document.createElement('div');
-        card.className = "bg-white p-4 border border-slate-200 rounded-xl shadow-sm flex flex-col gap-3 elevate-card";
-        
+        card.className = "bg-white p-4 border border-slate-200 rounded-xl  flex flex-col gap-3 elevate-card";
+
         card.innerHTML = `
             <div class="flex items-start justify-between border-b border-slate-50 pb-2.5">
                 <div class="flex items-center gap-2.5 truncate pr-2">
@@ -140,8 +140,8 @@ function filterAssignments() {
         renderAssignments(assignmentsCache);
         return;
     }
-    const filtered = assignmentsCache.filter(a => 
-        a.teacher_name.toLowerCase().includes(query) || 
+    const filtered = assignmentsCache.filter(a =>
+        a.teacher_name.toLowerCase().includes(query) ||
         a.subject_name.toLowerCase().includes(query) ||
         a.stream_name.toLowerCase().includes(query) ||
         a.class_name.toLowerCase().includes(query)
@@ -158,33 +158,33 @@ async function handleAssignmentSubmission(e) {
     const tId = document.getElementById('selTeacher').value;
     const subId = document.getElementById('selSubject').value;
     const strId = document.getElementById('selStream').value;
-    
-    btn.disabled = true; 
+
+    btn.disabled = true;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Linking...`;
 
     try {
-        const response = await fetch('api/admin_assignments.php', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ action: 'add_assignment', teacher_id: tId, subject_id: subId, stream_id: strId }) 
+        const response = await fetch('api/admin_assignments.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_assignment', teacher_id: tId, subject_id: subId, stream_id: strId })
         });
         const result = await response.json();
-        
-        if (result.success) { 
-            showNotification(result.message); 
-            document.getElementById('selTeacher').value = ''; 
-            document.getElementById('selSubject').value = ''; 
-            document.getElementById('selStream').value = ''; 
-            loadAllocationsData(); 
-        } else { 
-            showNotification(result.message, 'error'); 
+
+        if (result.success) {
+            showNotification(result.message);
+            document.getElementById('selTeacher').value = '';
+            document.getElementById('selSubject').value = '';
+            document.getElementById('selStream').value = '';
+            loadAllocationsData();
+        } else {
+            showNotification(result.message, 'error');
         }
-    } catch (err) { 
-        showNotification('Failed to create assignment.', 'error'); 
-    } finally { 
-        btn.disabled = false; 
-        btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Link Assignment`; 
-        if (typeof lucide !== 'undefined') lucide.createIcons(); 
+    } catch (err) {
+        showNotification('Failed to create assignment.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Link Assignment`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 }
 
@@ -193,7 +193,7 @@ async function handleAssignmentSubmission(e) {
 // ----------------------------------------------------
 function promptEdit(assignmentId, teacherId, subjectId, streamId) {
     targetAssignmentId = assignmentId;
-    
+
     document.getElementById('selEditTeacher').value = teacherId;
     document.getElementById('selEditSubject').value = subjectId;
     document.getElementById('selEditStream').value = streamId;
@@ -215,7 +215,7 @@ async function executeEdit() {
     const tId = document.getElementById('selEditTeacher').value;
     const subId = document.getElementById('selEditSubject').value;
     const strId = document.getElementById('selEditStream').value;
-    
+
     if (!tId || !subId || !strId) return showNotification("All fields are required.", "error");
 
     const btn = document.getElementById('btnConfirmEdit');
@@ -230,18 +230,18 @@ async function executeEdit() {
         });
         const result = await response.json();
 
-        if (result.success) { 
-            showNotification(result.message); 
-            closeEditModal(); 
-            loadAllocationsData(); 
-        } else { 
-            showNotification(result.message, 'error'); 
+        if (result.success) {
+            showNotification(result.message);
+            closeEditModal();
+            loadAllocationsData();
+        } else {
+            showNotification(result.message, 'error');
         }
-    } catch (err) { 
-        showNotification('Failed to update assignment.', 'error'); 
-    } finally { 
-        btn.innerHTML = origHtml; btn.disabled = false; 
-        if (typeof lucide !== 'undefined') lucide.createIcons(); 
+    } catch (err) {
+        showNotification('Failed to update assignment.', 'error');
+    } finally {
+        btn.innerHTML = origHtml; btn.disabled = false;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 }
 
@@ -281,9 +281,9 @@ async function executeDelete() {
         });
         const result = await response.json();
 
-        if (result.success) { showNotification(result.message); closeDeleteModal(); loadAllocationsData(); } 
+        if (result.success) { showNotification(result.message); closeDeleteModal(); loadAllocationsData(); }
         else { showNotification(result.message, 'error'); btn.innerHTML = origHtml; btn.disabled = false; }
     } catch (err) { showNotification('Failed to revoke assignment.', 'error'); btn.innerHTML = origHtml; btn.disabled = false; }
 }
 
-function confirmLogout() { if(confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }
+function confirmLogout() { if (confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }

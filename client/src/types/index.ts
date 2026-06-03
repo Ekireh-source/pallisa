@@ -14,6 +14,7 @@ export interface User {
   role?: Role;
   user_permissions?: UserPermission[];
   is_teacher?: boolean;
+  teacher?: TeacherDetail;
   // Nested user field from UserProfileSerializer
   user?: {
     id: number;
@@ -22,6 +23,7 @@ export interface User {
     is_active: boolean;
     date_joined: string;
     is_teacher?: boolean;
+    teacher?: TeacherDetail;
   };
 }
 
@@ -66,6 +68,7 @@ export interface LoginResponse {
   access: string;
   refresh: string;
   user_profile: User;
+  user_info?: any;
   school?: School;
   message?: string;
 }
@@ -644,6 +647,7 @@ export interface MemberStudent {
   student_name?: string;
   user_email?: string;
   current_stream_name?: string;
+  current_class_name?: string;
   class_name?: string;
   // Additional fields from StudentSerializer
   full_name?: string;
@@ -706,8 +710,8 @@ export interface TeacherDetail {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  subject_assignments: TeacherAssignment[];
-  primary_streams: MemberStream[];
+  subject_assignments?: TeacherAssignment[];
+  primary_streams?: MemberStream[];
   // Additional fields from TeacherSerializer
   full_name?: string;
   email?: string;

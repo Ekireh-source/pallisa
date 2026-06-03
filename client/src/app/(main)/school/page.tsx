@@ -1,21 +1,21 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Edit2, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit2,
+  Trash2,
   Building2,
   Eye,
   MapPin,
   Phone,
   Mail
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   Badge,
   DropdownMenu,
@@ -52,7 +52,7 @@ export default function SchoolsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const router = useRouter();
-  
+
   const tableRefreshRef = useRef<(() => void) | null>(null);
 
   const fetchFirstPage = async (query?: any) => {
@@ -63,7 +63,7 @@ export default function SchoolsListPage() {
       params.level = query.level;
     }
     const result = await FetchSchools(params);
-    
+
     return result;
   };
 
@@ -96,10 +96,10 @@ export default function SchoolsListPage() {
               : <Building2 className="w-4 h-4" />}
           </div>
           <div className="flex flex-col">
-            <Link href={`/school/${school.id}`} className="hover:text-primary hover:underline font-semibold text-gray-900 transition-colors">
+            <Link href={`/school/${school.id}`} className="hover:text-primary hover:underline font-semibold text-My-Black transition-colors">
               {school.name}
             </Link>
-            <span className="text-xs text-gray-400 font-normal">
+            <span className="text-xs text-My-Black font-normal">
               ID: {school.public_id?.slice(0, 8)}...
             </span>
           </div>
@@ -111,20 +111,19 @@ export default function SchoolsListPage() {
       header: "Level",
       cell: (school) => (
         school.level ? (
-          <Badge 
+          <Badge
             variant="secondary"
-            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize border-none ${
-              school.level === 'primary' 
-                ? 'bg-blue-50 text-blue-700 hover:bg-blue-50/85' 
-                : school.level === 'secondary'
-                  ? 'bg-primary/10 text-primary hover:bg-primary/15'
-                  : 'bg-purple-50 text-purple-700 hover:bg-purple-50/85'
-            }`}
+            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize border-none ${school.level === 'primary'
+              ? 'bg-blue-50 text-blue-700 hover:bg-blue-50/85'
+              : school.level === 'secondary'
+                ? 'bg-primary/10 text-primary hover:bg-primary/15'
+                : 'bg-purple-50 text-purple-700 hover:bg-purple-50/85'
+              }`}
           >
             {school.level}
           </Badge>
         ) : (
-          <span className="text-gray-400 text-sm">-</span>
+          <span className="text-My-Black text-sm">-</span>
         )
       ),
     },
@@ -150,8 +149,8 @@ export default function SchoolsListPage() {
       key: "address",
       header: "Address",
       cell: (school) => (
-        <div className="flex items-center text-sm text-gray-600">
-          <MapPin className="w-3 h-3 mr-1 text-gray-400" />
+        <div className="flex items-center text-sm text-My-Black">
+          <MapPin className="w-3 h-3 mr-1 text-My-Black" />
           {school.address || "Not specified"}
         </div>
       ),
@@ -160,11 +159,10 @@ export default function SchoolsListPage() {
       key: "status",
       header: "Status",
       cell: (school) => (
-        <Badge 
+        <Badge
           variant={school.active ? 'default' : 'destructive'}
-          className={`rounded-full px-2.5 py-0.5 border-none ${
-            school.active ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : ''
-          }`}
+          className={`rounded-full px-2.5 py-0.5 border-none ${school.active ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : ''
+            }`}
         >
           {school.active ? 'Active' : 'Inactive'}
         </Badge>
@@ -181,7 +179,7 @@ export default function SchoolsListPage() {
                 <MoreHorizontal className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-xl border-gray-100">
+            <DropdownMenuContent align="end" className="w-44 rounded-xl -xl border-gray-100">
               <DropdownMenuItem className="cursor-pointer py-2" onClick={() => router.push(`/school/${school.id}`)}
               >
                 <Eye className="w-4 h-4 mr-2 text-primary" />
@@ -207,7 +205,7 @@ export default function SchoolsListPage() {
       title="Schools"
       description="Manage registered schools and institutions."
       headerActions={
-        <Button className="shadow-lg shadow-primary/20 rounded-xl h-11" asChild>
+        <Button className=" -primary/20 rounded-xl h-11" asChild>
           <Link href="/school/create">
             <Plus className="w-4 h-4 mr-2" />
             Add School
@@ -215,12 +213,12 @@ export default function SchoolsListPage() {
         </Button>
       }
     >
-      <Card className="border-none shadow-none ring-0 bg-transparent">
+      <Card className="border-none -none ring-0 bg-transparent">
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search schools..." 
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+            <Input
+              placeholder="Search schools..."
               className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -231,7 +229,7 @@ export default function SchoolsListPage() {
               <SelectTrigger className="w-[180px] h-10 rounded-lg border-gray-200">
                 <SelectValue placeholder="All Levels" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-xl border-gray-100">
+              <SelectContent className="rounded-xl -xl border-gray-100">
                 <SelectItem value="all">All Levels</SelectItem>
                 <SelectItem value="primary">Primary</SelectItem>
                 <SelectItem value="secondary">Secondary</SelectItem>
@@ -255,7 +253,7 @@ export default function SchoolsListPage() {
             refreshRef={tableRefreshRef}
             emptyState={
               <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <Building2 className="w-12 h-12 text-gray-200 mb-4" />
+                <Building2 className="w-12 h-12 text-My-Black mb-4" />
                 <p className="text-lg font-medium">No schools found</p>
                 <p className="text-sm">Add your first school to get started.</p>
               </div>

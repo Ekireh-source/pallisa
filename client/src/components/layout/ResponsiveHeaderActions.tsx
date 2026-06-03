@@ -60,17 +60,17 @@ export function ResponsiveHeaderActions({ primary, secondary = [] }: ResponsiveH
             </Button>
           )
         ))}
-        
+
         {primary && (
           primary.href ? (
-            <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" asChild>
+            <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent" asChild>
               <Link href={primary.href}>
                 {primary.icon && <span className="mr-2 flex items-center text-primary">{primary.icon}</span>}
                 {primary.label}
               </Link>
             </Button>
           ) : (
-            <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6 shadow-sm border border-transparent" onClick={primary.onClick}>
+            <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 hover:text-primary font-bold px-6  border border-transparent" onClick={primary.onClick}>
               {primary.icon && <span className="mr-2 flex items-center text-primary">{primary.icon}</span>}
               {primary.label}
             </Button>
@@ -81,31 +81,31 @@ export function ResponsiveHeaderActions({ primary, secondary = [] }: ResponsiveH
       {/* Mobile View */}
       <div className="lg:hidden flex justify-end">
         {allActions.length === 1 ? (
-           // Single Action
-           allActions[0].href ? (
-             <Button className="rounded-xl h-9 w-9 bg-white/10 hover:bg-white/20 text-white border border-white/20 shadow-sm flex items-center justify-center p-0 shrink-0" asChild>
-                <Link href={allActions[0].href}>
-                  {allActions[0].icon || <MoreVertical className="w-4 h-4" />}
-                </Link>
-             </Button>
-           ) : (
-             <Button className="rounded-xl h-9 w-9 bg-white/10 hover:bg-white/20 text-white border border-white/20 shadow-sm flex items-center justify-center p-0 shrink-0" onClick={allActions[0].onClick}>
+          // Single Action
+          allActions[0].href ? (
+            <Button className="rounded-xl h-9 w-9 bg-white/10 hover:bg-white/20 text-white border border-white/20  flex items-center justify-center p-0 shrink-0" asChild>
+              <Link href={allActions[0].href}>
                 {allActions[0].icon || <MoreVertical className="w-4 h-4" />}
-             </Button>
-           )
+              </Link>
+            </Button>
+          ) : (
+            <Button className="rounded-xl h-9 w-9 bg-white/10 hover:bg-white/20 text-white border border-white/20  flex items-center justify-center p-0 shrink-0" onClick={allActions[0].onClick}>
+              {allActions[0].icon || <MoreVertical className="w-4 h-4" />}
+            </Button>
+          )
         ) : (
           // Multiple Actions
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="rounded-xl h-9 w-9 bg-white/10 hover:bg-white/20 text-white border border-white/20 shadow-sm flex items-center justify-center cursor-pointer p-0 shrink-0">
+              <Button className="rounded-xl h-9 w-9 bg-white/10 hover:bg-white/20 text-white border border-white/20  flex items-center justify-center cursor-pointer p-0 shrink-0">
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 rounded-2xl shadow-2xl border-gray-100 bg-white p-2">
+            <DropdownMenuContent align="end" className="w-52 rounded-2xl -2xl border-gray-100 bg-white p-2">
               {allActions.map((action, idx) => {
                 const isPrimary = (action as any)._isPrimary;
-                const textColor = action.variant === "danger" ? "text-rose-600 focus:text-rose-600 hover:text-rose-600" : "text-gray-700";
-                
+                const textColor = action.variant === "danger" ? "text-rose-600 focus:text-rose-600 hover:text-rose-600" : "text-My-Black";
+
                 if (action.href) {
                   return (
                     <DropdownMenuItem key={idx} className={`cursor-pointer rounded-xl py-2.5 font-medium flex items-center gap-2 hover:bg-gray-50 focus:bg-gray-50 ${textColor}`} asChild>

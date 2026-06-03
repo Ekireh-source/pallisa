@@ -50,9 +50,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'amount' ? parseFloat(value) || 0 : 
-               (name === 'category' || name === 'department' || name === 'vendor' || name === 'term') && value ? 
-               parseInt(value) : value === '' ? undefined : value
+      [name]: name === 'amount' ? parseFloat(value) || 0 :
+        (name === 'category' || name === 'department' || name === 'vendor' || name === 'term') && value ?
+          parseInt(value) : value === '' ? undefined : value
     }));
   };
 
@@ -88,7 +88,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-lg  border border-gray-200 p-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Error Message */}
         {error && (
@@ -99,7 +99,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="title" className="block text-sm font-medium text-My-Black mb-2">
             Title *
           </label>
           <input
@@ -108,9 +108,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.title ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.title ? 'border-red-300' : 'border-gray-300'
+              }`}
             placeholder="Enter expense title"
             required
           />
@@ -121,7 +120,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="description" className="block text-sm font-medium text-My-Black mb-2">
             Description
           </label>
           <textarea
@@ -130,9 +129,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             value={formData.description}
             onChange={handleInputChange}
             rows={3}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.description ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.description ? 'border-red-300' : 'border-gray-300'
+              }`}
             placeholder="Enter expense description"
           />
           {fieldErrors.description && (
@@ -142,7 +140,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Amount */}
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="amount" className="block text-sm font-medium text-My-Black mb-2">
             Amount *
           </label>
           <div className="relative">
@@ -157,9 +155,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
               onChange={handleInputChange}
               step="0.01"
               min="0"
-              className={`w-full pl-7 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                fieldErrors.amount ? 'border-red-300' : 'border-gray-300'
-              }`}
+              className={`w-full pl-7 pr-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.amount ? 'border-red-300' : 'border-gray-300'
+                }`}
               placeholder="0.00"
               required
             />
@@ -171,7 +168,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Category */}
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="category" className="block text-sm font-medium text-My-Black mb-2">
             Category *
           </label>
           <select
@@ -179,9 +176,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="category"
             value={formData.category}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.category ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.category ? 'border-red-300' : 'border-gray-300'
+              }`}
             required
           >
             <option value="">Select a category</option>
@@ -198,7 +194,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Department */}
         <div>
-          <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="department" className="block text-sm font-medium text-My-Black mb-2">
             Department
           </label>
           <select
@@ -206,9 +202,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="department"
             value={formData.department || ''}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.department ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.department ? 'border-red-300' : 'border-gray-300'
+              }`}
           >
             <option value="">Select a department</option>
             {departments.map(department => (
@@ -224,7 +219,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Vendor */}
         <div>
-          <label htmlFor="vendor" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="vendor" className="block text-sm font-medium text-My-Black mb-2">
             Vendor
           </label>
           <select
@@ -232,9 +227,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="vendor"
             value={formData.vendor || ''}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.vendor ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.vendor ? 'border-red-300' : 'border-gray-300'
+              }`}
           >
             <option value="">Select a vendor</option>
             {vendors.map(vendor => (
@@ -250,7 +244,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Term */}
         <div>
-          <label htmlFor="term" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="term" className="block text-sm font-medium text-My-Black mb-2">
             Academic Term
           </label>
           <select
@@ -258,9 +252,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="term"
             value={formData.term || ''}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.term ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.term ? 'border-red-300' : 'border-gray-300'
+              }`}
           >
             <option value="">Select a term</option>
             {terms.map(term => (
@@ -276,7 +269,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Date */}
         <div>
-          <label htmlFor="incurred_on" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="incurred_on" className="block text-sm font-medium text-My-Black mb-2">
             Date Incurred *
           </label>
           <input
@@ -285,9 +278,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="incurred_on"
             value={formData.incurred_on}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.incurred_on ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.incurred_on ? 'border-red-300' : 'border-gray-300'
+              }`}
             required
           />
           {fieldErrors.incurred_on && (
@@ -297,7 +289,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Payment Method */}
         <div>
-          <label htmlFor="payment_method" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="payment_method" className="block text-sm font-medium text-My-Black mb-2">
             Payment Method
           </label>
           <select
@@ -305,9 +297,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="payment_method"
             value={formData.payment_method}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.payment_method ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.payment_method ? 'border-red-300' : 'border-gray-300'
+              }`}
           >
             {paymentMethods.map(method => (
               <option key={method.value} value={method.value}>
@@ -322,7 +313,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Invoice Number */}
         <div>
-          <label htmlFor="invoice_number" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="invoice_number" className="block text-sm font-medium text-My-Black mb-2">
             Invoice Number
           </label>
           <input
@@ -331,9 +322,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="invoice_number"
             value={formData.invoice_number}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.invoice_number ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.invoice_number ? 'border-red-300' : 'border-gray-300'
+              }`}
             placeholder="Enter invoice number"
           />
           {fieldErrors.invoice_number && (
@@ -343,7 +333,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         {/* Receipt Upload */}
         <div>
-          <label htmlFor="receipt_image" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="receipt_image" className="block text-sm font-medium text-My-Black mb-2">
             Receipt/Invoice Image
           </label>
           <input
@@ -352,18 +342,17 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             name="receipt_image"
             onChange={handleFileChange}
             accept="image/*"
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              fieldErrors.receipt_image ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md  focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${fieldErrors.receipt_image ? 'border-red-300' : 'border-gray-300'
+              }`}
           />
           {fieldErrors.receipt_image && (
             <p className="mt-1 text-sm text-red-600">{fieldErrors.receipt_image}</p>
           )}
-          
+
           {/* Receipt Preview */}
           {receiptPreview && (
             <div className="mt-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+              <p className="text-sm font-medium text-My-Black mb-2">Preview:</p>
               <Image
                 src={receiptPreview}
                 alt="Receipt preview"
@@ -380,7 +369,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-md  text-sm font-medium text-My-Black bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             disabled={loading}
           >
             Cancel
@@ -388,7 +377,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-4 py-2 border border-transparent rounded-md  text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             {loading && <LoadingSpinner size="sm" />}
             <span>{initialData ? 'Update Expense' : 'Create Expense'}</span>

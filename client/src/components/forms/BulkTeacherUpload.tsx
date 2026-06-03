@@ -61,10 +61,10 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
 
   const validateData = useCallback((data: TeacherData[]): ValidationError[] => {
     const errors: ValidationError[] = [];
-    
+
     data.forEach((teacher, index) => {
       const row = index + 2; // +2 because Excel is 1-indexed and we have a header row
-      
+
       // Required fields
       if (!teacher.user_first_name?.trim()) {
         errors.push({ row, field: 'First Name', message: 'First name is required' });
@@ -78,17 +78,17 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
       if (!teacher.employment_type) {
         errors.push({ row, field: 'Employment Type', message: 'Employment type is required' });
       }
-      
+
       // Email validation
       if (teacher.user_email && !isValidEmail(teacher.user_email)) {
         errors.push({ row, field: 'Email', message: 'Invalid email format' });
       }
-      
+
       // Phone validation
       if (teacher.user_phone && !isValidPhone(teacher.user_phone)) {
         errors.push({ row, field: 'Phone Number', message: 'Invalid phone number format' });
       }
-      
+
       // Date validation
       if (teacher.user_dob && !isValidDate(teacher.user_dob)) {
         errors.push({ row, field: 'Date of Birth', message: 'Invalid date format (YYYY-MM-DD)' });
@@ -96,23 +96,23 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
       if (teacher.hire_date && !isValidDate(teacher.hire_date)) {
         errors.push({ row, field: 'Hire Date', message: 'Invalid date format (YYYY-MM-DD)' });
       }
-      
+
       // Gender validation
       if (teacher.user_gender && !['M', 'F', 'O'].includes(teacher.user_gender)) {
         errors.push({ row, field: 'Gender', message: 'Gender must be M, F, or O' });
       }
-      
+
       // Employment type validation
       if (teacher.employment_type && !['full_time', 'part_time', 'contract', 'substitute', 'volunteer'].includes(teacher.employment_type)) {
         errors.push({ row, field: 'Employment Type', message: 'Invalid employment type' });
       }
-      
+
       // Years of experience validation
       if (teacher.years_of_experience !== undefined && (teacher.years_of_experience < 0 || teacher.years_of_experience > 50)) {
         errors.push({ row, field: 'Years of Experience', message: 'Years of experience must be between 0 and 50' });
       }
     });
-    
+
     return errors;
   }, []);
 
@@ -122,26 +122,26 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      
+
       // Convert to JSON with header row
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      
+
       if (jsonData.length < 2) {
         toast.error('Excel file must contain at least a header row and one data row');
         return;
       }
-      
+
       // Extract headers and data
       const headers = jsonData[0] as string[];
       const dataRows = jsonData.slice(1) as unknown[][];
-      
+
       // Map Excel data to TeacherData format
       const teachers: TeacherData[] = [];
-      
+
       for (let i = 0; i < dataRows.length; i++) {
         const row = dataRows[i];
         const teacher: Partial<TeacherData> = {};
-        
+
         headers.forEach((header, colIndex) => {
           const value = row[colIndex];
           if (value !== undefined && value !== null && value !== '') {
@@ -200,22 +200,22 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
             }
           }
         });
-        
+
         // Validate required fields
         if (teacher.user_first_name && teacher.user_last_name && teacher.employment_type) {
           teachers.push(teacher as TeacherData);
         }
       }
-      
+
       if (teachers.length === 0) {
         toast.error('No valid teacher data found in the Excel file');
         return;
       }
-      
+
       setPreviewData(teachers);
       const errors = validateData(teachers);
       setValidationErrors(errors);
-      
+
       if (errors.length > 0) {
         toast.error(`Found ${errors.length} validation errors. Please check the data.`);
       } else {
@@ -255,7 +255,7 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
     parseExcelFile(selectedFile);
   }, [parseExcelFile]);
 
-  
+
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -319,11 +319,11 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Teachers Template');
-    
+
     // Generate filename with current date
     const date = new Date().toISOString().split('T')[0];
     const filename = `teachers_bulk_upload_template_${date}.xlsx`;
-    
+
     XLSX.writeFile(wb, filename);
     toast.success('Template downloaded successfully');
   };
@@ -376,28 +376,28 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
       });
 
       console.log('Attempting to create teachers with data:', teachersData);
-      
+
       // Use the bulk upload endpoint
       const result = await teacherApi.bulkCreate(teachersData as TeacherCreateUpdate[]);
-      
+
       console.log('Bulk upload result:', result);
-      
+
       toast.success(`Successfully uploaded ${result.created_count} teachers`);
-      
+
       // Reset form
       setFile(null);
       setPreviewData([]);
       setValidationErrors([]);
       setUploadProgress(null);
-      
+
       // Call success callback
       if (onSuccess) {
         onSuccess();
       }
-      
+
     } catch (error) {
       console.error('Upload error:', error);
-      
+
       // Check if it's an authentication error
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response?: { status?: number } };
@@ -406,7 +406,7 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
           return;
         }
       }
-      
+
       toast.error('Upload failed. Please check your data and try again.');
     } finally {
       setIsUploading(false);
@@ -452,7 +452,7 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
             <div>
               <h3 className="font-medium text-blue-900">Download Template</h3>
               <p className="text-sm text-blue-700">
-                Download the Excel template to see the required format and example data. 
+                Download the Excel template to see the required format and example data.
                 <strong>Email is required for all teachers.</strong>
               </p>
             </div>
@@ -475,8 +475,8 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
                   id="file-upload"
                 />
                 <label htmlFor="file-upload" className="cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm text-gray-600">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-My-Black" />
+                  <p className="text-sm text-My-Black">
                     Click to select file or drag and drop
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
@@ -499,7 +499,7 @@ export function BulkTeacherUpload({ isOpen = false, onClose, onSuccess }: BulkTe
                   variant="ghost"
                   size="sm"
                   onClick={() => setFile(null)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-My-Black"
                 >
                   Remove
                 </Button>

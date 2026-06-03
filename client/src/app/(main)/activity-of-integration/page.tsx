@@ -2,14 +2,14 @@
 
 import React, { useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Zap
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
+import {
+  Button,
+  Card,
   Input,
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,7 @@ export default function ActivitiesListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const { school } = useSelector((state: RootState) => state.auth);
-  
+
   const tableRefreshRef = useRef<any>(null);
 
   const fetchFirstPage = async (query?: any) => {
@@ -67,8 +67,8 @@ export default function ActivitiesListPage() {
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">{act?.competency_area_name}</p>
-            
+            <p className="text-My-Black font-semibold">{act?.competency_area_name}</p>
+
           </div>
         </div>
       ),
@@ -77,7 +77,7 @@ export default function ActivitiesListPage() {
       key: "subject_name",
       header: "Subject",
       cell: (act) => (
-        <span className="font-medium text-gray-600">{act.subject_name || 'N/A'}</span>
+        <span className="font-medium text-My-Black">{act.subject_name || 'N/A'}</span>
       ),
     },
     {
@@ -96,20 +96,17 @@ export default function ActivitiesListPage() {
         return (
           <div className="w-44">
             <div className="flex items-center justify-between mb-1.5">
-              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-gray-400'
-              }`}>
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${isComplete ? 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded' : 'text-My-Black'
+                }`}>
                 {isComplete ? 'Fully Graded' : 'Grading...'}
               </span>
-              <span className={`text-xs font-extrabold ${
-                isComplete ? 'text-emerald-600' : 'text-gray-600'
-              }`}>{progress}%</span>
+              <span className={`text-xs font-extrabold ${isComplete ? 'text-emerald-600' : 'text-My-Black'
+                }`}>{progress}%</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner border border-gray-200/50">
-              <div 
-                className={`h-full rounded-full transition-all duration-500 ${
-                  isComplete ? 'bg-emerald-500' : 'bg-primary'
-                }`}
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden -inner border border-gray-200/50">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-emerald-500' : 'bg-primary'
+                  }`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -125,25 +122,25 @@ export default function ActivitiesListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl  border-gray-100">
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2 font-medium"
                 onClick={() => router.push(`/activity-of-integration/${act.public_id}`)}
               >
                 <Icon icon="hugeicons:view" className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2"
                 onClick={() => router.push(`/activity-of-integration/${act.public_id}/edit`)}
               >
                 <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer py-2 text-rose-600 focus:text-rose-600"
                 onClick={() => handleDelete(act.public_id)}
               >
@@ -159,55 +156,55 @@ export default function ActivitiesListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
-    <MainLayout
-      title="Activities of Integration"
-      description="Manage assessment tasks for the competency-based curriculum."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "New Activity",
-            icon: <Plus className="w-4 h-4" />,
-            href: "/activity-of-integration/create",
-          }}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search activities..." 
-              className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <MainLayout
+        title="Activities of Integration"
+        description="Manage assessment tasks for the competency-based curriculum."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "New Activity",
+              icon: <Plus className="w-4 h-4" />,
+              href: "/activity-of-integration/create",
+            }}
+          />
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search activities..."
+                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm, school: school?.id }}
+              deps={[searchTerm, school]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <Zap className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No activities found</p>
+                  <p className="text-sm">Create activities to start assessing students.</p>
+                </div>
+              }
             />
           </div>
-        </div>
-
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm, school: school?.id }}
-            deps={[searchTerm, school]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <Zap className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No activities found</p>
-                <p className="text-sm">Create activities to start assessing students.</p>
-              </div>
-            }
-          />
-        </div>
-      </Card>
-    </MainLayout>
+        </Card>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

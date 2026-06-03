@@ -9,13 +9,13 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-white  border-b border-gray-200">
       <div className="flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Left side - Mobile menu button */}
         <div className="flex items-center">
           <button
             type="button"
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            className="lg:hidden p-2 rounded-md text-My-Black hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
             onClick={onMenuClick}
           >
             <span className="sr-only">Open sidebar</span>
@@ -23,10 +23,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          
+
           {/* Breadcrumb or page title can go here */}
           <div className="ml-4 lg:ml-0">
-            <h1 className="text-lg font-medium text-gray-900 lg:hidden">Pallisa Expense Manager</h1>
+            <h1 className="text-lg font-medium text-My-Black lg:hidden">Pallisa Expense Manager</h1>
           </div>
         </div>
 
@@ -47,7 +47,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </div>
 
           {/* Notifications */}
-          <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+          <button className="p-2 text-My-Black hover:text-gray-500 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
             <span className="sr-only">View notifications</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zm-8.586 0L1.5 22.414A2 2 0 001.5 19.586L15 6.086V1a2 2 0 012-2h4a2 2 0 012 2v4L19.414 1.414A2 2 0 0122 1.414L22 4.414A2 2 0 0119.414 7L15 11.414v5.586z" />
@@ -56,7 +56,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </button>
 
           {/* Settings */}
-          <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+          <button className="p-2 text-My-Black hover:text-gray-500 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
             <span className="sr-only">Settings</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

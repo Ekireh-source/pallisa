@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  ChevronLeft, 
-  Save, 
-  ClipboardCheck, 
-  Calendar, 
+import {
+  ChevronLeft,
+  Save,
+  ClipboardCheck,
+  Calendar,
   Users,
   Search,
   Upload,
@@ -18,11 +18,11 @@ import {
   MoreVertical,
   Edit2
 } from 'lucide-react';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Label, 
+import {
+  Button,
+  Card,
+  Input,
+  Label,
   Select,
   SelectTrigger,
   SelectValue,
@@ -66,13 +66,13 @@ const formatDateSafe = (dateString?: string, formatStr: string = 'MMM d, yyyy') 
 export default function ExamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  
+
   const [exam, setExam] = useState<any>(null);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [selectedSubjectData, setSelectedSubjectData] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [fetchingScores, setFetchingScores] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -121,7 +121,7 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
 
   const handleScoreChange = (studentId: number, value: string, paperId?: string) => {
     const numValue = value === '' ? null : parseFloat(value);
-    
+
     setStudents(prev => prev.map(s => {
       if (s.student_id === studentId) {
         if (paperId) {
@@ -140,14 +140,14 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   const handleRemarksChange = (studentId: number, value: string) => {
-    setStudents(prev => prev.map(s => 
+    setStudents(prev => prev.map(s =>
       s.student_id === studentId ? { ...s, remarks: value } : s
     ));
   };
 
   const handleSaveAll = async () => {
     if (!selectedSubject) return;
-    
+
     setSaving(true);
     const payload = {
       subject_id: parseInt(selectedSubject),
@@ -178,41 +178,41 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       const text = e.target?.result as string;
       const lines = text.split('\n');
       const newScores: any = {};
-      
+
       let headers: string[] = [];
-      
+
       lines.forEach((line, index) => {
         const parts = line.split(',').map(p => p.trim());
         if (index === 0) {
-           headers = parts;
-           return;
+          headers = parts;
+          return;
         }
-        
+
         if (parts.length >= 2) {
           const admNo = parts[0];
           const uploadData: any = { papers: {}, score: null, remarks: '' };
-          
+
           if (hasPapers) {
-             let remarksIndex = headers.findIndex(h => h.toLowerCase() === 'remarks');
-             if (remarksIndex === -1) remarksIndex = parts.length - 1;
-             
-             selectedSubjectData.papers.forEach((paper: any) => {
-                const paperIndex = headers.indexOf(paper.name);
-                if (paperIndex !== -1 && parts[paperIndex]) {
-                   const s = parseFloat(parts[paperIndex]);
-                   if (!isNaN(s)) uploadData.papers[paper.id] = s;
-                }
-             });
-             uploadData.remarks = parts[remarksIndex] || '';
-             newScores[admNo] = uploadData;
+            let remarksIndex = headers.findIndex(h => h.toLowerCase() === 'remarks');
+            if (remarksIndex === -1) remarksIndex = parts.length - 1;
+
+            selectedSubjectData.papers.forEach((paper: any) => {
+              const paperIndex = headers.indexOf(paper.name);
+              if (paperIndex !== -1 && parts[paperIndex]) {
+                const s = parseFloat(parts[paperIndex]);
+                if (!isNaN(s)) uploadData.papers[paper.id] = s;
+              }
+            });
+            uploadData.remarks = parts[remarksIndex] || '';
+            newScores[admNo] = uploadData;
           } else {
-             const score = parseFloat(parts[1]);
-             const remarks = parts[2] || '';
-             if (admNo && !isNaN(score)) {
-                uploadData.score = score;
-                uploadData.remarks = remarks;
-                newScores[admNo] = uploadData;
-             }
+            const score = parseFloat(parts[1]);
+            const remarks = parts[2] || '';
+            if (admNo && !isNaN(score)) {
+              uploadData.score = score;
+              uploadData.remarks = remarks;
+              newScores[admNo] = uploadData;
+            }
           }
         }
       });
@@ -221,13 +221,13 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
         const upload = newScores[s.admission_number];
         if (upload) {
           if (hasPapers) {
-             return { ...s, papers: { ...(s.papers || {}), ...upload.papers }, remarks: upload.remarks };
+            return { ...s, papers: { ...(s.papers || {}), ...upload.papers }, remarks: upload.remarks };
           }
           return { ...s, score: upload.score, remarks: upload.remarks };
         }
         return s;
       }));
-      
+
       toast.success("CSV data applied to table. Don't forget to save!");
     };
     reader.readAsText(file);
@@ -239,15 +239,15 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       const paperNames = selectedSubjectData.papers.map((p: any) => p.name).join(',');
       header = `AdmissionNumber,${paperNames},Remarks\n`;
     }
-    
+
     const rows = students.map(s => {
       if (hasPapers) {
-         const paperScores = selectedSubjectData.papers.map((p: any) => s.papers?.[p.id] ?? '').join(',');
-         return `${s.admission_number},${paperScores},${s.remarks || ''}`;
+        const paperScores = selectedSubjectData.papers.map((p: any) => s.papers?.[p.id] ?? '').join(',');
+        return `${s.admission_number},${paperScores},${s.remarks || ''}`;
       }
       return `${s.admission_number},${s.score ?? ''},${s.remarks || ''}`;
     }).join('\n');
-    
+
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -256,7 +256,7 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
     a.click();
   };
 
-  const filteredStudents = students.filter(s => 
+  const filteredStudents = students.filter(s =>
     s.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.admission_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -264,26 +264,26 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
   if (loading) {
     return (
       <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_GRADING}>
-    <MainLayout
-        title={<Skeleton className="h-8 w-48 bg-white/20" />}
-        description="Loading exam details..."
-        backButton={
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50" disabled>
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-        }
-      >
-        <div className="space-y-8 animate-pulse pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Skeleton className="h-24 rounded-xl" />
-            <Skeleton className="h-24 rounded-xl" />
-            <Skeleton className="h-24 rounded-xl" />
-            <Skeleton className="h-24 rounded-xl" />
+        <MainLayout
+          title={<Skeleton className="h-8 w-48 bg-white/20" />}
+          description="Loading exam details..."
+          backButton={
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50" disabled>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          }
+        >
+          <div className="space-y-8 animate-pulse pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+            </div>
+            <Skeleton className="h-96 w-full rounded-xl" />
           </div>
-          <Skeleton className="h-96 w-full rounded-xl" />
-        </div>
-      </MainLayout>
-    </ProtectedComponent>
+        </MainLayout>
+      </ProtectedComponent>
     );
   }
 
@@ -301,9 +301,9 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
       }
       description={exam ? `${exam.class_name} • ${exam.start_date && exam.end_date ? `${formatDateSafe(exam.start_date, 'MMM d')} - ${formatDateSafe(exam.end_date, 'MMM d, yyyy')}` : 'Date not set'}` : "Manage the scores and records for this examination."}
       backButton={
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-8 w-8 text-white hover:bg-white/20 rounded-full"
           onClick={() => router.push('/exams')}
         >
@@ -330,175 +330,175 @@ export default function ExamDetailPage({ params }: { params: Promise<{ id: strin
     >
       <div className="space-y-8 animate-in fade-in duration-500 pt-4">
         {/* Subject & Filters */}
-      <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/30">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700 flex items-center">
-              <BookOpen className="w-4 h-4 mr-2 text-primary" />
-              Select Subject
-            </Label>
-            <SubjectSearchableSelect
-              value={selectedSubject}
-              onValueChange={setSelectedSubject}
-              placeholder="Choose a subject to enter marks"
-              triggerClassName="h-12 rounded-xl bg-white border-gray-200 shadow-sm"
-            />
-          </div>
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Search student..." 
-              className="pl-10 h-12 rounded-xl border-gray-200 bg-white shadow-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              className="flex-1 h-12 rounded-xl bg-white" 
-              onClick={downloadTemplate}
-              disabled={!selectedSubject}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Template
-            </Button>
-            <div className="flex-1 relative">
-              <Input 
-                type="file" 
-                accept=".csv" 
-                className="hidden" 
-                id="bulk-upload" 
-                onChange={handleBulkUpload}
-                disabled={!selectedSubject}
+        <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/30">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-My-Black flex items-center">
+                <BookOpen className="w-4 h-4 mr-2 text-primary" />
+                Select Subject
+              </Label>
+              <SubjectSearchableSelect
+                value={selectedSubject}
+                onValueChange={setSelectedSubject}
+                placeholder="Choose a subject to enter marks"
+                triggerClassName="h-12 rounded-xl bg-white border-gray-200 "
               />
-              <Button 
-                variant="outline" 
-                className="w-full h-12 rounded-xl bg-white" 
-                asChild
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+              <Input
+                placeholder="Search student..."
+                className="pl-10 h-12 rounded-xl border-gray-200 bg-white "
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl bg-white"
+                onClick={downloadTemplate}
                 disabled={!selectedSubject}
               >
-                <label htmlFor="bulk-upload" className="cursor-pointer">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Bulk Upload
-                </label>
+                <Download className="w-4 h-4 mr-2" />
+                Template
               </Button>
+              <div className="flex-1 relative">
+                <Input
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  id="bulk-upload"
+                  onChange={handleBulkUpload}
+                  disabled={!selectedSubject}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full h-12 rounded-xl bg-white"
+                  asChild
+                  disabled={!selectedSubject}
+                >
+                  <label htmlFor="bulk-upload" className="cursor-pointer">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Bulk Upload
+                  </label>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      {/* Student Table */}
-      <Card className="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
-        {!selectedSubject ? (
-          <div className="h-96 flex flex-col items-center justify-center text-gray-500 bg-gray-50/50">
-            <BookOpen className="w-16 h-16 text-gray-200 mb-4" />
-            <p className="text-lg font-medium text-gray-900">No Subject Selected</p>
-            <p className="max-w-xs text-center mt-1">Please select a subject above to view the student list and enter examination marks.</p>
-          </div>
-        ) : fetchingScores ? (
-          <div className="p-8 space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex gap-4">
-                <Skeleton className="h-12 w-full" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-gray-50/50">
-                <TableRow>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead className="font-semibold text-gray-900">Student Info</TableHead>
-                  {hasPapers ? (
-                    selectedSubjectData.papers.map((paper: any) => (
-                      <TableHead key={paper.id} className="w-[150px] font-semibold text-gray-900 text-center">
-                        {paper.name} ({paper.max_score})
-                      </TableHead>
-                    ))
-                  ) : (
-                    <TableHead className="w-[150px] font-semibold text-gray-900 text-center">Score (100%)</TableHead>
-                  )}
-                  <TableHead className="font-semibold text-gray-900">Teacher Remarks</TableHead>
-                  <TableHead className="w-20 text-right"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStudents.length === 0 ? (
+        {/* Student Table */}
+        <Card className="border-none  ring-1 ring-gray-100 overflow-hidden">
+          {!selectedSubject ? (
+            <div className="h-96 flex flex-col items-center justify-center text-gray-500 bg-gray-50/50">
+              <BookOpen className="w-16 h-16 text-My-Black mb-4" />
+              <p className="text-lg font-medium text-My-Black">No Subject Selected</p>
+              <p className="max-w-xs text-center mt-1">Please select a subject above to view the student list and enter examination marks.</p>
+            </div>
+          ) : fetchingScores ? (
+            <div className="p-8 space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-gray-50/50">
                   <TableRow>
-                    <TableCell colSpan={5} className="h-64 text-center text-gray-500">
-                      No students found in this class.
-                    </TableCell>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="font-semibold text-My-Black">Student Info</TableHead>
+                    {hasPapers ? (
+                      selectedSubjectData.papers.map((paper: any) => (
+                        <TableHead key={paper.id} className="w-[150px] font-semibold text-My-Black text-center">
+                          {paper.name} ({paper.max_score})
+                        </TableHead>
+                      ))
+                    ) : (
+                      <TableHead className="w-[150px] font-semibold text-My-Black text-center">Score (100%)</TableHead>
+                    )}
+                    <TableHead className="font-semibold text-My-Black">Teacher Remarks</TableHead>
+                    <TableHead className="w-20 text-right"></TableHead>
                   </TableRow>
-                ) : (
-                  filteredStudents.map((student) => (
-                    <TableRow key={student.student_id} className="hover:bg-gray-50/30 transition-colors">
-                      <TableCell>
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                          <User className="w-4 h-4" />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">{student.student_name}</span>
-                          <span className="text-xs text-gray-500">{student.admission_number}</span>
-                        </div>
-                      </TableCell>
-                      
-                      {hasPapers ? (
-                        selectedSubjectData.papers.map((paper: any) => (
-                          <TableCell key={paper.id}>
-                            <Input 
-                              type="number" 
-                              min="0" 
-                              max={paper.max_score}
-                              placeholder="0.0"
-                              className="h-10 text-center font-bold text-primary bg-primary/5 border-primary/10 focus:ring-primary rounded-lg"
-                              value={student.papers?.[paper.id] ?? ''}
-                              onChange={(e) => handleScoreChange(student.student_id, e.target.value, paper.id.toString())}
-                            />
-                          </TableCell>
-                        ))
-                      ) : (
-                        <TableCell>
-                          <Input 
-                            type="number" 
-                            min="0" 
-                            max="100"
-                            placeholder="0.0"
-                            className="h-10 text-center font-bold text-primary bg-primary/5 border-primary/10 focus:ring-primary rounded-lg"
-                            value={student.score === null ? '' : student.score}
-                            onChange={(e) => handleScoreChange(student.student_id, e.target.value)}
-                          />
-                        </TableCell>
-                      )}
-                      
-                      <TableCell>
-                        <Input 
-                          placeholder="Optional remarks..."
-                          className="h-10 rounded-lg border-gray-100 focus:ring-primary"
-                          value={student.remarks}
-                          onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {student.score_id && (
-                          <div className="flex items-center justify-end text-emerald-500">
-                            <CheckCircle2 className="w-4 h-4" />
-                          </div>
-                        )}
+                </TableHeader>
+                <TableBody>
+                  {filteredStudents.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-64 text-center text-gray-500">
+                        No students found in this class.
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </Card>
+                  ) : (
+                    filteredStudents.map((student) => (
+                      <TableRow key={student.student_id} className="hover:bg-gray-50/30 transition-colors">
+                        <TableCell>
+                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-My-Black">
+                            <User className="w-4 h-4" />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-My-Black">{student.student_name}</span>
+                            <span className="text-xs text-gray-500">{student.admission_number}</span>
+                          </div>
+                        </TableCell>
+
+                        {hasPapers ? (
+                          selectedSubjectData.papers.map((paper: any) => (
+                            <TableCell key={paper.id}>
+                              <Input
+                                type="number"
+                                min="0"
+                                max={paper.max_score}
+                                placeholder="0.0"
+                                className="h-10 text-center font-bold text-primary bg-primary/5 border-primary/10 focus:ring-primary rounded-lg"
+                                value={student.papers?.[paper.id] ?? ''}
+                                onChange={(e) => handleScoreChange(student.student_id, e.target.value, paper.id.toString())}
+                              />
+                            </TableCell>
+                          ))
+                        ) : (
+                          <TableCell>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              placeholder="0.0"
+                              className="h-10 text-center font-bold text-primary bg-primary/5 border-primary/10 focus:ring-primary rounded-lg"
+                              value={student.score === null ? '' : student.score}
+                              onChange={(e) => handleScoreChange(student.student_id, e.target.value)}
+                            />
+                          </TableCell>
+                        )}
+
+                        <TableCell>
+                          <Input
+                            placeholder="Optional remarks..."
+                            className="h-10 rounded-lg border-gray-100 focus:ring-primary"
+                            value={student.remarks}
+                            onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {student.score_id && (
+                            <div className="flex items-center justify-end text-emerald-500">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </Card>
       </div>
     </MainLayout>
   );

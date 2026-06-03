@@ -15,7 +15,7 @@ async function loadAttendanceData() {
         if (result.success) {
             const data = result.data;
             masterData = data.learners;
-            
+
             // Set Term Badge
             document.getElementById('headerTermBadge').innerText = `Term ${data.term}, ${data.year}`;
 
@@ -23,17 +23,17 @@ async function loadAttendanceData() {
             document.getElementById('kpiRate').innerText = `${data.kpis.global_rate}%`;
             document.getElementById('kpiRate').className = `text-3xl font-extrabold tracking-tight ${data.kpis.global_rate >= 75 ? 'text-emerald-600' : 'text-rose-500'}`;
             document.getElementById('kpiLessons').innerText = data.kpis.total_sessions;
-            
+
             document.getElementById('kpiBest').innerText = data.kpis.best_stream || 'N/A';
             document.getElementById('kpiBestSub').innerText = data.kpis.best_stream ? `${data.kpis.best_rate}% Attendance` : '--';
-            
+
             document.getElementById('kpiWorst').innerText = data.kpis.worst_stream || 'N/A';
             document.getElementById('kpiWorstSub').innerText = data.kpis.worst_stream ? `${data.kpis.worst_rate}% Attendance` : '--';
 
             // Populate Filters
             const streamSel = document.getElementById('selStreamFilter');
             const subSel = document.getElementById('selSubjectFilter');
-            
+
             data.filters.streams.forEach(s => { streamSel.innerHTML += `<option value="${s}">${s}</option>`; });
             data.filters.subjects.forEach(s => { subSel.innerHTML += `<option value="${s}">${s}</option>`; });
 
@@ -71,7 +71,7 @@ function renderTable(dataArray) {
     dataArray.forEach(row => {
         const rate = parseFloat(row.attendance_rate);
         const rateColor = rate >= 75 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-rose-600 bg-rose-50 border-rose-200 font-extrabold';
-        
+
         const tr = document.createElement('tr');
         tr.className = "border-b border-slate-100 hover:bg-slate-50/50 transition-colors";
         tr.innerHTML = `
@@ -93,7 +93,7 @@ function renderTable(dataArray) {
             <td class="py-3 px-5 text-center font-bold text-emerald-600">${row.present}</td>
             <td class="py-3 px-5 text-center font-bold text-rose-500">${row.absent}</td>
             <td class="py-3 px-5 text-right">
-                <span class="px-2.5 py-1 rounded-md text-xs border shadow-sm ${rateColor}">${rate}%</span>
+                <span class="px-2.5 py-1 rounded-md text-xs border  ${rateColor}">${rate}%</span>
             </td>
         `;
         tbody.appendChild(tr);
@@ -102,7 +102,7 @@ function renderTable(dataArray) {
 
 function exportToCSV() {
     if (masterData.length === 0) return;
-    
+
     let csv = "Full Name,LIN,Stream,Total Lessons,Present,Absent,Attendance Rate (%)\n";
     masterData.forEach(r => {
         csv += `"${r.full_name}","${r.admission_number}","${r.stream_full}",${r.total_lessons},${r.present},${r.absent},${r.attendance_rate}\n`;
@@ -118,4 +118,4 @@ function exportToCSV() {
     document.body.removeChild(link);
 }
 
-function confirmLogout() { if(confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }
+function confirmLogout() { if (confirm("Are you sure you want to log out of the Admin Workspace?")) { window.location.href = 'api/logout.php'; } }

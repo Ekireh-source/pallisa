@@ -94,13 +94,13 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
       <div className="flex gap-1 mb-4 bg-gray-50 p-1 rounded-xl w-fit">
         <button
           onClick={() => setTab('assign')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${tab === 'assign' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${tab === 'assign' ? 'bg-white text-primary ' : 'text-gray-500 hover:text-My-Black'}`}
         >
           <Edit3 className="w-3.5 h-3.5" /> Assign Permissions
         </button>
         <button
           onClick={() => setTab('assigned')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${tab === 'assigned' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${tab === 'assigned' ? 'bg-white text-primary ' : 'text-gray-500 hover:text-My-Black'}`}
         >
           <ListChecks className="w-3.5 h-3.5" />
           Assigned
@@ -113,8 +113,8 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
       {tab === 'assigned' ? (
         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
           {role.permissions.length === 0 ? (
-            <div className="py-16 text-center text-gray-400">
-              <Shield className="w-8 h-8 mx-auto text-gray-200 mb-2" />
+            <div className="py-16 text-center text-My-Black">
+              <Shield className="w-8 h-8 mx-auto text-My-Black mb-2" />
               <p className="text-sm font-medium">No permissions assigned yet</p>
               <p className="text-xs mt-1">Switch to "Assign Permissions" to add some.</p>
             </div>
@@ -131,8 +131,8 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
                     <CheckCircle2 className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs font-semibold text-gray-800">{p.name}</p>
-                      {p.description && <p className="text-[10px] text-gray-400 mt-0.5">{p.description}</p>}
-                      <p className="text-[10px] font-mono text-gray-400 mt-0.5">{p.code}</p>
+                      {p.description && <p className="text-[10px] text-My-Black mt-0.5">{p.description}</p>}
+                      <p className="text-[10px] font-mono text-My-Black mt-0.5">{p.code}</p>
                     </div>
                   </div>
                 ))}
@@ -143,7 +143,7 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
       ) : (
         <>
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
+            <p className="text-xs font-black text-My-Black uppercase tracking-widest">
               {selected.size} / {allPermissions.length} selected
             </p>
             <div className="flex gap-2">
@@ -159,7 +159,7 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
           </div>
 
           <div className="relative mb-3">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-My-Black" />
             <Input placeholder="Search permissions…" value={search}
               onChange={e => setSearch(e.target.value)}
               className="pl-8 h-8 text-xs rounded-lg border-gray-200" />
@@ -175,7 +175,7 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
                 <div key={cat.code} className="border border-gray-100 rounded-xl overflow-hidden">
                   <button className="w-full flex items-center gap-2 px-3 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
                     onClick={() => toggleCat(cat.code)}>
-                    <span className="text-gray-400">
+                    <span className="text-My-Black">
                       {isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     </span>
                     <input type="checkbox" checked={catAll}
@@ -183,8 +183,8 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
                       onChange={e => { e.stopPropagation(); selectAllInCat(perms, e.target.checked); }}
                       onClick={e => e.stopPropagation()}
                       className="rounded border-gray-300 text-primary w-3.5 h-3.5 cursor-pointer" />
-                    <span className="text-xs font-bold text-gray-700 flex-1 text-left">{cat.name}</span>
-                    <span className="text-[10px] text-gray-400 font-medium">{numSel}/{perms.length}</span>
+                    <span className="text-xs font-bold text-My-Black flex-1 text-left">{cat.name}</span>
+                    <span className="text-[10px] text-My-Black font-medium">{numSel}/{perms.length}</span>
                   </button>
                   {isOpen && (
                     <div className="divide-y divide-gray-50">
@@ -196,8 +196,8 @@ function PermissionPanel({ role, allPermissions, onSaved }: {
                             className="mt-0.5 rounded border-gray-300 text-primary w-3.5 h-3.5 cursor-pointer" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-gray-800 leading-tight">{perm.name}</p>
-                            {perm.description && <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{perm.description}</p>}
-                            <p className="text-[10px] font-mono text-gray-400 mt-0.5">{perm.code}</p>
+                            {perm.description && <p className="text-[10px] text-My-Black mt-0.5 leading-tight">{perm.description}</p>}
+                            <p className="text-[10px] font-mono text-My-Black mt-0.5">{perm.code}</p>
                           </div>
                         </label>
                       ))}
@@ -251,19 +251,19 @@ function RoleFormDialog({ open, onClose, initial, onSaved }: {
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-black">{initial ? 'Edit Role' : 'New Role'}</DialogTitle>
-          <DialogDescription className="text-gray-400 text-sm">
+          <DialogDescription className="text-My-Black text-sm">
             {initial ? 'Update name or description.' : 'Create a role, then assign permissions.'}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-gray-600 uppercase tracking-widest">Role Name *</Label>
+            <Label className="text-xs font-bold text-My-Black uppercase tracking-widest">Role Name *</Label>
             <Input value={name} onChange={e => { setName(e.target.value); setError(''); }}
               placeholder="e.g. Class Teacher" className="h-11 rounded-xl border-gray-200" autoFocus />
             {error && <ErrorMessage message={error} />}
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-gray-600 uppercase tracking-widest">Description</Label>
+            <Label className="text-xs font-bold text-My-Black uppercase tracking-widest">Description</Label>
             <Input value={description} onChange={e => setDescription(e.target.value)}
               placeholder="Optional…" className="h-11 rounded-xl border-gray-200" />
           </div>
@@ -345,131 +345,131 @@ export default function RolesPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_ROLES}>
-    <MainLayout
-      title="Roles & Permissions"
-      description="Manage roles and their access permissions."
-      headerActions={
-        <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 font-bold px-6 border border-transparent"
-          onClick={() => { setEditingRole(null); setFormOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" /> New Role
-        </Button>
-      }
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ minHeight: '70vh' }}>
-        {/* ── Left: Role list ── */}
-        <Card className="h-[450px] lg:h-auto border-none shadow-none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input placeholder="Search roles…" value={search} onChange={e => setSearch(e.target.value)}
-                className="pl-9 h-9 rounded-xl border-gray-200 text-sm" />
+      <MainLayout
+        title="Roles & Permissions"
+        description="Manage roles and their access permissions."
+        headerActions={
+          <Button className="rounded-xl h-11 bg-white text-primary hover:bg-gray-100 font-bold px-6 border border-transparent"
+            onClick={() => { setEditingRole(null); setFormOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" /> New Role
+          </Button>
+        }
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ minHeight: '70vh' }}>
+          {/* ── Left: Role list ── */}
+          <Card className="h-[450px] lg:h-auto border-none -none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+                <Input placeholder="Search roles…" value={search} onChange={e => setSearch(e.target.value)}
+                  className="pl-9 h-9 rounded-xl border-gray-200 text-sm" />
+              </div>
             </div>
-          </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
-            {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-4 animate-pulse space-y-1.5">
-                  <div className="h-4 bg-gray-100 rounded w-1/2" />
-                  <div className="h-3 bg-gray-50 rounded w-3/4" />
-                </div>
-              ))
-            ) : filtered.length === 0 ? (
-              <div className="py-16 text-center text-gray-400 space-y-2">
-                <Shield className="w-8 h-8 mx-auto text-gray-200" />
-                <p className="text-sm font-medium">No roles found</p>
-              </div>
-            ) : filtered.map(role => (
-              <button key={role.id} onClick={() => setSelectedRole(role)}
-                className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors hover:bg-primary/5 ${selectedRole?.id === role.id ? 'bg-primary/10 border-l-2 border-primary' : ''}`}>
-                <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${role.is_superadmin ? 'bg-gray-100 text-gray-600' : 'bg-primary/10 text-primary'}`}>
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="text-sm font-bold text-gray-900 truncate">{role.name}</p>
-                    {role.is_superadmin && (
-                      <Badge className="text-[9px] px-1.5 py-0 bg-gray-100 text-gray-700 border-none rounded-full font-black">SUPER</Badge>
-                    )}
+            <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="p-4 animate-pulse space-y-1.5">
+                    <div className="h-4 bg-gray-100 rounded w-1/2" />
+                    <div className="h-3 bg-gray-50 rounded w-3/4" />
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5 truncate">{role.description || 'No description'}</p>
-                  <p className="text-[10px] font-bold text-primary/70 mt-0.5">{role.permissions.length} permissions</p>
+                ))
+              ) : filtered.length === 0 ? (
+                <div className="py-16 text-center text-My-Black space-y-2">
+                  <Shield className="w-8 h-8 mx-auto text-My-Black" />
+                  <p className="text-sm font-medium">No roles found</p>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                    <button className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex-shrink-0">
-                      <Icon icon="hugeicons:more-vertical-circle-01" className="w-4 h-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40 rounded-xl border-gray-100">
-                    <DropdownMenuItem className="cursor-pointer py-2 text-sm"
-                      onClick={e => { e.stopPropagation(); setEditingRole(role); setFormOpen(true); }}>
-                      <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" /> Edit
-                    </DropdownMenuItem>
-                    {!role.is_superadmin && (
-                      <DropdownMenuItem className="cursor-pointer py-2 text-sm text-rose-600 focus:text-rose-600"
-                        onClick={e => { e.stopPropagation(); handleDelete(role); }}
-                        disabled={deleting === role.id}>
-                        {deleting === role.id
-                          ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          : <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />}
-                        Delete
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </button>
-            ))}
-          </div>
-        </Card>
-
-        {/* ── Right: Permission panel ── */}
-        <Card className="lg:col-span-2 h-[550px] lg:h-auto border-none shadow-none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
-          {selectedRole ? (
-            <>
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${selectedRole.is_superadmin ? 'bg-gray-100' : 'bg-primary/10'}`}>
-                  <ShieldCheck className={`w-5 h-5 ${selectedRole.is_superadmin ? 'text-gray-600' : 'text-primary'}`} />
-                </div>
-                <div>
-                  <h2 className="font-black text-gray-900 text-lg leading-none">{selectedRole.name}</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">{selectedRole.description || 'No description'}</p>
-                </div>
-                {selectedRole.is_superadmin && (
-                  <Badge className="ml-auto bg-gray-100 text-gray-700 border-none font-black text-xs rounded-full px-3">
-                    SuperAdmin · All permissions
-                  </Badge>
-                )}
-              </div>
-              <div className="flex-1 overflow-hidden p-5">
-                {selectedRole.is_superadmin ? (
-                  <div className="h-full flex flex-col items-center justify-center gap-4 text-center text-gray-400">
-                    <ShieldCheck className="w-16 h-16 text-gray-200" />
-                    <div>
-                      <p className="font-black text-gray-700 text-lg">Super Admin Role</p>
-                      <p className="text-sm mt-1">This role automatically has <strong>all permissions</strong>.</p>
+              ) : filtered.map(role => (
+                <button key={role.id} onClick={() => setSelectedRole(role)}
+                  className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors hover:bg-primary/5 ${selectedRole?.id === role.id ? 'bg-primary/10 border-l-2 border-primary' : ''}`}>
+                  <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${role.is_superadmin ? 'bg-gray-100 text-My-Black' : 'bg-primary/10 text-primary'}`}>
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-sm font-bold text-My-Black truncate">{role.name}</p>
+                      {role.is_superadmin && (
+                        <Badge className="text-[9px] px-1.5 py-0 bg-gray-100 text-My-Black border-none rounded-full font-black">SUPER</Badge>
+                      )}
                     </div>
+                    <p className="text-[11px] text-My-Black mt-0.5 truncate">{role.description || 'No description'}</p>
+                    <p className="text-[10px] font-bold text-primary/70 mt-0.5">{role.permissions.length} permissions</p>
                   </div>
-                ) : (
-                  <PermissionPanel key={selectedRole.id} role={selectedRole}
-                    allPermissions={allPermissions} onSaved={handlePermSaved} />
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center gap-4 text-center text-gray-400 p-8">
-              <Shield className="w-16 h-16 text-gray-100" />
-              <div>
-                <p className="font-black text-gray-600 text-lg">Select a Role</p>
-                <p className="text-sm mt-1">Choose a role to manage its permissions.</p>
-              </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+                      <button className="p-1 rounded-lg hover:bg-gray-100 text-My-Black hover:text-My-Black flex-shrink-0">
+                        <Icon icon="hugeicons:more-vertical-circle-01" className="w-4 h-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40 rounded-xl border-gray-100">
+                      <DropdownMenuItem className="cursor-pointer py-2 text-sm"
+                        onClick={e => { e.stopPropagation(); setEditingRole(role); setFormOpen(true); }}>
+                        <Icon icon="hugeicons:pencil-edit-01" className="w-4 h-4 mr-2" /> Edit
+                      </DropdownMenuItem>
+                      {!role.is_superadmin && (
+                        <DropdownMenuItem className="cursor-pointer py-2 text-sm text-rose-600 focus:text-rose-600"
+                          onClick={e => { e.stopPropagation(); handleDelete(role); }}
+                          disabled={deleting === role.id}>
+                          {deleting === role.id
+                            ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            : <Icon icon="hugeicons:delete-02" className="w-4 h-4 mr-2" />}
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </button>
+              ))}
             </div>
-          )}
-        </Card>
-      </div>
+          </Card>
 
-      <RoleFormDialog open={formOpen} onClose={() => setFormOpen(false)}
-        initial={editingRole} onSaved={handleRoleSaved} />
-    </MainLayout>
+          {/* ── Right: Permission panel ── */}
+          <Card className="lg:col-span-2 h-[550px] lg:h-auto border-none -none ring-1 ring-gray-100 bg-white flex flex-col overflow-hidden">
+            {selectedRole ? (
+              <>
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${selectedRole.is_superadmin ? 'bg-gray-100' : 'bg-primary/10'}`}>
+                    <ShieldCheck className={`w-5 h-5 ${selectedRole.is_superadmin ? 'text-My-Black' : 'text-primary'}`} />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-My-Black text-lg leading-none">{selectedRole.name}</h2>
+                    <p className="text-xs text-My-Black mt-0.5">{selectedRole.description || 'No description'}</p>
+                  </div>
+                  {selectedRole.is_superadmin && (
+                    <Badge className="ml-auto bg-gray-100 text-My-Black border-none font-black text-xs rounded-full px-3">
+                      SuperAdmin · All permissions
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex-1 overflow-hidden p-5">
+                  {selectedRole.is_superadmin ? (
+                    <div className="h-full flex flex-col items-center justify-center gap-4 text-center text-My-Black">
+                      <ShieldCheck className="w-16 h-16 text-My-Black" />
+                      <div>
+                        <p className="font-black text-My-Black text-lg">Super Admin Role</p>
+                        <p className="text-sm mt-1">This role automatically has <strong>all permissions</strong>.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <PermissionPanel key={selectedRole.id} role={selectedRole}
+                      allPermissions={allPermissions} onSaved={handlePermSaved} />
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center gap-4 text-center text-My-Black p-8">
+                <Shield className="w-16 h-16 text-gray-100" />
+                <div>
+                  <p className="font-black text-My-Black text-lg">Select a Role</p>
+                  <p className="text-sm mt-1">Choose a role to manage its permissions.</p>
+                </div>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        <RoleFormDialog open={formOpen} onClose={() => setFormOpen(false)}
+          initial={editingRole} onSaved={handleRoleSaved} />
+      </MainLayout>
     </ProtectedComponent>
   );
 }

@@ -77,7 +77,7 @@ export default function CreateStreamPage() {
   const onSubmit = async (data: IStreamInput) => {
     setLoading(true);
     console.log("Submitting stream data:", data);
-    
+
     // Sanitize data: if class_teacher is 0 or NaN, set to null
     const payload = {
       ...data,
@@ -121,10 +121,10 @@ export default function CreateStreamPage() {
           <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-2 space-y-6">
-                <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100">
+                <Card className="p-8 border-none  ring-1 ring-gray-100">
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center">
+                      <Label htmlFor="name" className="text-sm font-semibold text-My-Black flex items-center">
                         <Layers className="w-4 h-4 mr-2 text-primary" />
                         Stream Name
                       </Label>
@@ -139,7 +139,7 @@ export default function CreateStreamPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label htmlFor="class_obj" className="text-sm font-semibold text-gray-700 flex items-center">
+                        <Label htmlFor="class_obj" className="text-sm font-semibold text-My-Black flex items-center">
                           <School className="w-4 h-4 mr-2 text-primary" />
                           Class
                         </Label>
@@ -150,7 +150,7 @@ export default function CreateStreamPage() {
                           <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 focus:ring-primary w-full text-left">
                             <SelectValue placeholder="Select a class" />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                          <SelectContent className="rounded-xl -xl border-gray-100">
                             {classes.map((cls) => (
                               <SelectItem key={cls.id} value={cls.id.toString()}>
                                 {cls.name}{cls.level ? ` (${cls.level === '0level' ? 'O-Level' : 'A-Level'})` : ''}
@@ -162,7 +162,7 @@ export default function CreateStreamPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="capacity" className="text-sm font-semibold text-gray-700 flex items-center">
+                        <Label htmlFor="capacity" className="text-sm font-semibold text-My-Black flex items-center">
                           <Users className="w-4 h-4 mr-2 text-primary" />
                           Capacity
                         </Label>
@@ -177,7 +177,7 @@ export default function CreateStreamPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="class_teacher" className="text-sm font-semibold text-gray-700 flex items-center">
+                      <Label htmlFor="class_teacher" className="text-sm font-semibold text-My-Black flex items-center">
                         <Users className="w-4 h-4 mr-2 text-primary" />
                         Class Teacher (Optional)
                       </Label>
@@ -196,7 +196,7 @@ export default function CreateStreamPage() {
                             <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 focus:ring-primary w-full text-left">
                               <SelectValue placeholder="Select a teacher" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                            <SelectContent className="rounded-xl -xl border-gray-100">
                               <SelectItem value="none">Select a teacher</SelectItem>
                               {teachers.map((teacher) => (
                                 <SelectItem key={teacher.id} value={teacher.id.toString()}>
@@ -219,16 +219,16 @@ export default function CreateStreamPage() {
               </div>
 
               <div className="space-y-6">
-                <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-gray-50/50">
-                  <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+                <Card className="p-6 border-none  ring-1 ring-gray-100 bg-gray-50/50">
+                  <h3 className="font-bold text-My-Black mb-6 flex items-center">
                     <ToggleLeft className="w-5 h-5 mr-2 text-primary" />
                     Stream Status
                   </h3>
 
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 ">
                       <div className="space-y-0.5">
-                        <Label className="text-sm font-semibold text-gray-900">Active Status</Label>
+                        <Label className="text-sm font-semibold text-My-Black">Active Status</Label>
                         <p className="text-xs text-gray-500">Enable or disable this stream</p>
                       </div>
                       <Switch
@@ -242,7 +242,7 @@ export default function CreateStreamPage() {
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 font-bold bg-primary hover:bg-primary/90"
+                    className="w-full h-12 rounded-xl  -primary/20 font-bold bg-primary hover:bg-primary/90"
                     disabled={loading}
                   >
                     {loading ? (

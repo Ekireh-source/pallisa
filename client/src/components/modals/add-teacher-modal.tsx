@@ -94,11 +94,11 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
   const onSubmit = async (values: any) => {
     const data = values as ITeacherInput;
     setLoading(true);
-    
+
     try {
       // Create FormData to handle the API expectations
       const formData = new FormData();
-      
+
       // Append all fields to FormData
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== '') {
@@ -107,7 +107,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
       });
 
       const result = await CreateTeacher(formData);
-      
+
       if (result.success) {
         toast.success("Teacher registered successfully");
         onTeacherAdded(result.data);
@@ -136,7 +136,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
           type="button"
           size="sm"
           variant="outline"
-          className="h-12 px-4 rounded-xl border-dashed border-gray-300 hover:border-primary hover:text-primary transition-all flex items-center gap-1.5 font-semibold text-gray-600 bg-white"
+          className="h-12 px-4 rounded-xl border-dashed border-gray-300 hover:border-primary hover:text-primary transition-all flex items-center gap-1.5 font-semibold text-My-Black bg-white"
           onClick={() => setOpen(true)}
         >
           <Plus className="w-4 h-4" />
@@ -144,9 +144,9 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
         </Button>
       )}
 
-      <DialogContent className="max-w-3xl rounded-2xl p-6 md:p-8 bg-white border border-gray-100 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl rounded-2xl p-6 md:p-8 bg-white border border-gray-100 -2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <DialogTitle className="text-2xl font-bold text-My-Black flex items-center gap-2">
             <User className="w-6 h-6 text-primary" />
             Add New Teacher
           </DialogTitle>
@@ -158,7 +158,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6 mt-4">
           <div className="space-y-6">
             <div>
-              <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-50 pb-2">
+              <h4 className="text-sm font-bold text-My-Black mb-4 flex items-center gap-2 border-b border-gray-50 pb-2">
                 <User className="w-4 h-4 text-primary" />
                 Personal Details
               </h4>
@@ -188,7 +188,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                 <div className="space-y-1.5">
                   <Label htmlFor="modal_user_email">Email Address (Optional)</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
                     <Input
                       id="modal_user_email"
                       type="email"
@@ -209,7 +209,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                     <SelectTrigger id="modal_user_gender" className="h-11 rounded-xl border-gray-200">
                       <SelectValue placeholder="Select Gender" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl -xl border-gray-100">
                       <SelectItem value="M">Male</SelectItem>
                       <SelectItem value="F">Female</SelectItem>
                       <SelectItem value="O">Other</SelectItem>
@@ -226,7 +226,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                     <SelectTrigger id="modal_user_role_id" className={`h-11 rounded-xl border-gray-200 focus:ring-primary ${errors.user_role_id ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select Role" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl -xl border-gray-100">
                       {loadingRoles ? (
                         <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
                       ) : roles.length === 0 ? (
@@ -252,7 +252,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                     <SelectTrigger id="modal_campus" className={`h-11 rounded-xl border-gray-200 focus:ring-primary ${errors.campus ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select Campus" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl -xl border-gray-100">
                       {loadingCampuses ? (
                         <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
                       ) : campuses.length === 0 ? (
@@ -272,7 +272,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-50 pb-2">
+              <h4 className="text-sm font-bold text-My-Black mb-4 flex items-center gap-2 border-b border-gray-50 pb-2">
                 <Briefcase className="w-4 h-4 text-primary" />
                 Professional Details
               </h4>
@@ -297,7 +297,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                     <SelectTrigger id="modal_employment_type" className="h-11 rounded-xl border-gray-200">
                       <SelectValue placeholder="Select Type" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-xl border-gray-100">
+                    <SelectContent className="rounded-xl -xl border-gray-100">
                       <SelectItem value="full_time">Full Time</SelectItem>
                       <SelectItem value="part_time">Part Time</SelectItem>
                       <SelectItem value="contract">Contract</SelectItem>
@@ -310,7 +310,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                 <div className="space-y-1.5">
                   <Label htmlFor="modal_specialization">Specialization / Subjects</Label>
                   <div className="relative">
-                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
                     <Input
                       id="modal_specialization"
                       placeholder="e.g., Mathematics, Physics"
@@ -323,7 +323,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                 <div className="space-y-1.5">
                   <Label htmlFor="modal_qualification">Qualification</Label>
                   <div className="relative">
-                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
                     <Input
                       id="modal_qualification"
                       placeholder="e.g., B.Ed, M.Sc"
@@ -336,7 +336,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                 <div className="space-y-1.5">
                   <Label htmlFor="modal_hire_date">Hire Date</Label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
                     <Input
                       id="modal_hire_date"
                       type="date"
@@ -346,9 +346,9 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3.5 bg-gray-50/50 rounded-xl border border-gray-100 shadow-sm self-end h-11">
+                <div className="flex items-center justify-between p-3.5 bg-gray-50/50 rounded-xl border border-gray-100  self-end h-11">
                   <div className="space-y-0.5">
-                    <Label className="text-xs font-semibold text-gray-900">Active Status</Label>
+                    <Label className="text-xs font-semibold text-My-Black">Active Status</Label>
                   </div>
                   <Switch
                     checked={isActive}
@@ -370,7 +370,7 @@ export function AddTeacherModal({ onTeacherAdded, trigger }: AddTeacherModalProp
             </Button>
             <Button
               type="submit"
-              className="h-11 rounded-xl px-8 font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+              className="h-11 rounded-xl px-8 font-bold bg-primary hover:bg-primary/90 text-white  -primary/20"
               disabled={loading}
             >
               {loading ? (

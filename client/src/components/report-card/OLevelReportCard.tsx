@@ -83,13 +83,13 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
   const { subject_reports } = reportCard;
 
   const aoisOnly = subject_reports.map((sr) => sr.competency_scores.filter((c) => c.assessment_type === 'aoi'));
-  const maxAois  = Math.max(...aoisOnly.map((a) => a.length), 0);
+  const maxAois = Math.max(...aoisOnly.map((a) => a.length), 0);
 
-  const totalAoi  = subject_reports.reduce((acc, sr) => acc + Number(sr.aoi_score  || 0), 0);
+  const totalAoi = subject_reports.reduce((acc, sr) => acc + Number(sr.aoi_score || 0), 0);
   const totalExam = subject_reports.reduce((acc, sr) => acc + Number(sr.exam_score || 0), 0);
-  const totalCum  = totalAoi + totalExam;
-  const maxTotal  = subject_reports.length * 100;
-  const avg       = subject_reports.length > 0 ? (totalCum / subject_reports.length).toFixed(1) : '0';
+  const totalCum = totalAoi + totalExam;
+  const maxTotal = subject_reports.length * 100;
+  const avg = subject_reports.length > 0 ? (totalCum / subject_reports.length).toFixed(1) : '0';
   const daysAbsent = reportCard.attendance_total_days - reportCard.attendance_days_present;
 
   const sigCount = [s.show_class_teacher_signature, s.show_head_teacher_signature, s.show_parent_signature].filter(Boolean).length;
@@ -143,14 +143,14 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
 
       {/* ── Student Profile & Performance Graph ── */}
       <div className="flex flex-col lg:flex-row gap-6 mb-6 items-stretch">
-        
+
         {/* Left Box: Student Avatar & Passport Details */}
         <div className="flex-1 p-5 bg-gradient-to-br from-gray-50/50 to-white flex flex-col md:flex-row gap-6 items-center">
           <div className="w-28 h-32 rounded-[12px] border border-gray-200 overflow-hidden shrink-0 bg-gray-150 flex items-center justify-center ">
             {reportCard.student_picture ? (
               <img src={formatImgUrl(reportCard.student_picture) || ''} alt={reportCard.student_name} className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center justify-center text-gray-300">
+              <div className="flex flex-col items-center justify-center text-My-Black">
                 <User size={48} className="stroke-[1.5]" />
               </div>
             )}
@@ -206,8 +206,8 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
         <div className="mb-6 grid grid-cols-3 gap-4">
           {[
             { label: 'Total School Days', value: reportCard.attendance_total_days },
-            { label: 'Days Present',      value: reportCard.attendance_days_present },
-            { label: 'Days Absent',       value: daysAbsent },
+            { label: 'Days Present', value: reportCard.attendance_days_present },
+            { label: 'Days Absent', value: daysAbsent },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-xl border border-gray-200 p-3 text-center bg-gray-50/40">
               <p className="text-[9px] font-black uppercase tracking-widest text-[var(--My-Gray)] mb-1">{label}</p>
@@ -238,16 +238,16 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
             {subject_reports.length === 0 ? (
               <tr><td colSpan={10} className="px-4 py-8 text-center text-[var(--My-Gray)] italic">No subject results recorded.</td></tr>
             ) : subject_reports.map((sr, i) => {
-              const aois     = sr.competency_scores.filter(c => c.assessment_type === 'aoi');
+              const aois = sr.competency_scores.filter(c => c.assessment_type === 'aoi');
               const subTotal = Number(sr.aoi_score || 0) + Number(sr.exam_score || 0);
               return (
                 <tr key={sr.id} className={i % 2 === 1 ? 'bg-gray-50/80' : 'bg-white'}>
                   <td className="px-4 py-2.5 font-bold text-[var(--My-Black)] border-r border-b border-gray-200 text-xs">{sr.subject_name}</td>
                   {Array.from({ length: Math.max(1, maxAois) }).map((_, idx) => (
-                    <td key={idx} className="px-2 py-2.5 text-center text-gray-700 border-r border-b border-gray-200 text-xs">{aois[idx]?.score ?? '—'}</td>
+                    <td key={idx} className="px-2 py-2.5 text-center text-My-Black border-r border-b border-gray-200 text-xs">{aois[idx]?.score ?? '—'}</td>
                   ))}
-                  <td className="px-3 py-2.5 text-center font-medium text-gray-700 border-r border-b border-gray-200 text-xs">{sr.aoi_score}</td>
-                  <td className="px-3 py-2.5 text-center font-medium text-gray-700 border-r border-b border-gray-200 text-xs">{sr.exam_score}</td>
+                  <td className="px-3 py-2.5 text-center font-medium text-My-Black border-r border-b border-gray-200 text-xs">{sr.aoi_score}</td>
+                  <td className="px-3 py-2.5 text-center font-medium text-My-Black border-r border-b border-gray-200 text-xs">{sr.exam_score}</td>
                   <td className="px-3 py-2.5 text-center font-black text-[var(--My-Black)] border-r border-b border-gray-200 text-xs">{subTotal}</td>
                   <td className="px-2 py-2.5 text-center border-r border-b border-gray-200">
                     <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold ${gradeColor(sr.grade)}`}>{sr.grade || '—'}</span>
@@ -261,7 +261,7 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
             })}
             {subject_reports.length > 0 && (
               <tr className="bg-gray-100">
-                <td colSpan={1 + Math.max(1, maxAois)} className="px-4 py-2.5 text-right font-black text-gray-700 border-r border-gray-200 uppercase tracking-widest text-[10px]">Totals</td>
+                <td colSpan={1 + Math.max(1, maxAois)} className="px-4 py-2.5 text-right font-black text-My-Black border-r border-gray-200 uppercase tracking-widest text-[10px]">Totals</td>
                 <td className="px-3 py-2.5 text-center font-bold text-[var(--My-Black)] border-r border-gray-200 text-xs">{totalAoi.toFixed(1)}</td>
                 <td className="px-3 py-2.5 text-center font-bold text-[var(--My-Black)] border-r border-gray-200 text-xs">{totalExam.toFixed(1)}</td>
                 <td className="px-3 py-2.5 text-center font-black border-r border-gray-200 text-sm" style={{ color: accentColor }}>{totalCum.toFixed(1)}</td>
@@ -278,7 +278,7 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
           <p className="text-[10px] font-black uppercase tracking-widest text-[var(--My-Gray)] mb-2">Identifier Key</p>
           <div className="flex gap-6 flex-wrap">
             {Array.from({ length: maxAois }).map((_, i) => (
-              <span key={i} className="text-xs text-gray-600 font-medium">
+              <span key={i} className="text-xs text-My-Black font-medium">
                 <span className="font-bold text-[var(--My-Black)]">AOI {i + 1}</span> – Activity of Integration {i + 1} <span className="text-[var(--My-Gray)]">(max: 3.0)</span>
               </span>
             ))}
@@ -359,11 +359,11 @@ export function OLevelReportCard({ reportCard, s, primaryColor, accentColor, gra
                       <span className={`inline-block px-2 py-0.5 rounded font-black ${gradeColor(b.grade)}`}>{b.grade}</span>
                     </td>
                     {s.show_grade_descriptor_score_range && (
-                      <td className="px-3 py-2 text-center border-r border-gray-200 font-bold text-gray-600">
+                      <td className="px-3 py-2 text-center border-r border-gray-200 font-bold text-My-Black">
                         {Math.round(b.min_score)} – {Math.round(b.max_score)}
                       </td>
                     )}
-                    <td className="px-3 py-2 text-gray-600 leading-relaxed italic">{b.description || b.remarks || '—'}</td>
+                    <td className="px-3 py-2 text-My-Black leading-relaxed italic">{b.description || b.remarks || '—'}</td>
                   </tr>
                 ))}
               </tbody>

@@ -71,14 +71,14 @@ export default function StudentsListPage() {
   const [campuses, setCampuses] = useState<any[]>([]);
   const [streams, setStreams] = useState<any[]>([]);
   const router = useRouter();
-  
+
   const tableRefreshRef = useRef<(() => void) | null>(null);
 
   // Get school from selector
   const school = useSelector(selectSchool);
 
   const fetchFirstPage = async (query?: any) => {
-    const params: any = { 
+    const params: any = {
       search: query?.search || undefined,
       campus_id: school?.campus || undefined,
       school: query?.school || undefined
@@ -126,7 +126,7 @@ export default function StudentsListPage() {
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Students Template");
-    
+
     // Add info about IDs
     const info = [
       ["Note: campus and current_stream must be valid IDs from the lists below."],
@@ -208,7 +208,7 @@ export default function StudentsListPage() {
       case 'suspended': return 'bg-amber-100 text-amber-700';
       case 'transferred': return 'bg-purple-100 text-purple-700';
       case 'withdrawn': return 'bg-rose-100 text-rose-700';
-      default: return 'bg-gray-100 text-gray-700';
+      default: return 'bg-gray-100 text-My-Black';
     }
   };
 
@@ -225,9 +225,9 @@ export default function StudentsListPage() {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <Link 
+            <Link
               href={`/students/${student.id}`}
-              className="font-semibold text-gray-900 hover:text-primary transition-colors"
+              className="font-semibold text-My-Black hover:text-primary transition-colors"
             >
               {student.full_name || 'Unnamed Student'}
             </Link>
@@ -243,7 +243,7 @@ export default function StudentsListPage() {
       header: "ID / Admission / LIN",
       cell: (student) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">{student.student_id}</span>
+          <span className="text-sm font-medium text-My-Black">{student.student_id}</span>
           <span className="text-xs text-gray-500">Adm: {student.admission_number || 'N/A'}</span>
           {student.lin && <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded mt-0.5 w-fit">LIN: {student.lin}</span>}
         </div>
@@ -254,7 +254,7 @@ export default function StudentsListPage() {
       header: "Class & Stream",
       cell: (student) => (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-900 font-medium">
+          <span className="text-sm text-My-Black font-medium">
             {student.current_class_name || 'No Class'}
           </span>
           <span className="text-xs text-gray-500">
@@ -280,10 +280,10 @@ export default function StudentsListPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-gray-600" />
+                <Icon icon="hugeicons:more-vertical-circle-01" className="w-5 h-5 text-My-Black" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100">
+            <DropdownMenuContent align="end" className="w-48 rounded-xl -xl border-gray-100">
               <DropdownMenuItem
                 className="cursor-pointer py-2 font-medium"
                 onClick={() => router.push(`/students/${student.id}`)}
@@ -321,100 +321,100 @@ export default function StudentsListPage() {
 
   return (
     <ProtectedComponent permissionCode={PERMISSION_CODES.VIEW_STUDENTS}>
-    <MainLayout
-      title="Students"
-      description="Manage student enrollment and profiles."
-      headerActions={
-        <ResponsiveHeaderActions
-          primary={{
-            label: "Add Student",
-            icon: <UserPlus className="w-4 h-4" />,
-            href: "/students/create",
-          }}
-          secondary={[
-            {
-              label: "Bulk Upload",
-              icon: <FileSpreadsheet className="w-4 h-4" />,
-              onClick: () => setIsUploadModalOpen(true),
-            },
-          ]}
-        />
-      }
-    >
-      <Card className="border-none shadow-none ring-0">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search by name, ID or email..."
-                className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="w-full md:w-48">
-              <StreamSearchableSelect
-                value={streamFilter}
-                onValueChange={setStreamFilter}
-                placeholder="All Streams"
-                triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
-                hideLabel
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {school?.campus_name && (
-              <Badge variant="outline" className="h-10 px-4 rounded-lg bg-primary/10 text-primary border-primary/20 flex items-center gap-2">
-                <Building2 className="w-3.5 h-3.5" />
-                {school.campus_name}
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4">
-          <PaginatedTable
-            fetchFirstPage={fetchFirstPage}
-            fetchFromUrl={getPaginatedFromUrl}
-            columns={columns}
-            showRowNumbers={false}
-            skeletonRows={5}
-            className="min-h-0!"
-            tableClassName="[&_td]:py-4"
-            query={{ search: searchTerm, stream: streamFilter, school: school?.id }}
-            deps={[searchTerm, streamFilter, school]}
-            refreshRef={tableRefreshRef}
-            emptyState={
-              <div className="flex flex-col items-center justify-center text-gray-500 py-12">
-                <GraduationCap className="w-12 h-12 text-gray-200 mb-4" />
-                <p className="text-lg font-medium">No students found</p>
-                <p className="text-sm">Add students to start managing their academic records.</p>
-              </div>
-            }
+      <MainLayout
+        title="Students"
+        description="Manage student enrollment and profiles."
+        headerActions={
+          <ResponsiveHeaderActions
+            primary={{
+              label: "Add Student",
+              icon: <UserPlus className="w-4 h-4" />,
+              href: "/students/create",
+            }}
+            secondary={[
+              {
+                label: "Bulk Upload",
+                icon: <FileSpreadsheet className="w-4 h-4" />,
+                onClick: () => setIsUploadModalOpen(true),
+              },
+            ]}
           />
-        </div>
-      </Card>
+        }
+      >
+        <Card className="border-none -none ring-0">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-My-Black" />
+                <Input
+                  placeholder="Search by name, ID or email..."
+                  className="pl-10 h-10 rounded-xl border-gray-200 focus:ring-primary w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="w-full md:w-48">
+                <StreamSearchableSelect
+                  value={streamFilter}
+                  onValueChange={setStreamFilter}
+                  placeholder="All Streams"
+                  triggerClassName="h-10 rounded-xl border-gray-200 bg-white"
+                  hideLabel
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {school?.campus_name && (
+                <Badge variant="outline" className="h-10 px-4 rounded-lg bg-primary/10 text-primary border-primary/20 flex items-center gap-2">
+                  <Building2 className="w-3.5 h-3.5" />
+                  {school.campus_name}
+                </Badge>
+              )}
+            </div>
+          </div>
 
-      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="sm:max-w-[800px] rounded-3xl p-6 overflow-y-auto max-h-[90vh] border-none shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Bulk Student Upload</DialogTitle>
-            <DialogDescription>
-              Upload multiple students at once using an Excel template. Complete validation before committing the upload.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
-            <BulkStudentUpload 
-              onSuccess={() => {
-                setIsUploadModalOpen(false);
-                tableRefreshRef.current?.();
-              }} 
+          <div className="p-4">
+            <PaginatedTable
+              fetchFirstPage={fetchFirstPage}
+              fetchFromUrl={getPaginatedFromUrl}
+              columns={columns}
+              showRowNumbers={false}
+              skeletonRows={5}
+              className="min-h-0!"
+              tableClassName="[&_td]:py-4"
+              query={{ search: searchTerm, stream: streamFilter, school: school?.id }}
+              deps={[searchTerm, streamFilter, school]}
+              refreshRef={tableRefreshRef}
+              emptyState={
+                <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+                  <GraduationCap className="w-12 h-12 text-My-Black mb-4" />
+                  <p className="text-lg font-medium">No students found</p>
+                  <p className="text-sm">Add students to start managing their academic records.</p>
+                </div>
+              }
             />
           </div>
-        </DialogContent>
-      </Dialog>
-    </MainLayout>
+        </Card>
+
+        <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+          <DialogContent className="sm:max-w-[800px] rounded-3xl p-6 overflow-y-auto max-h-[90vh] border-none -2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Bulk Student Upload</DialogTitle>
+              <DialogDescription>
+                Upload multiple students at once using an Excel template. Complete validation before committing the upload.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4">
+              <BulkStudentUpload
+                onSuccess={() => {
+                  setIsUploadModalOpen(false);
+                  tableRefreshRef.current?.();
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </MainLayout>
     </ProtectedComponent>
   );
 }

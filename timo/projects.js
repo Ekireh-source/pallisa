@@ -6,10 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
 let currentStep = 1;
 let currentStreamId = null;
 let currentSubjectId = null;
-let activeCompetency = null; 
+let activeCompetency = null;
 let allowedCompetencies = []; // Will be dynamically loaded from admin database configurations
 
-let scoreCache = {}; 
+let scoreCache = {};
 let backendLearnersList = [];
 
 function goBack() {
@@ -48,7 +48,7 @@ async function loadStreams() {
         if (result.success && result.data.length > 0) {
             result.data.forEach(stream => {
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => openProjectBoard(stream.stream_id, stream.subject_id, stream.stream_name, stream.subject_name);
                 card.innerHTML = `
                     <div class="flex items-center gap-4">
@@ -71,10 +71,10 @@ async function loadStreams() {
 async function openProjectBoard(streamId, subjectId, streamName, subjectName) {
     currentStreamId = streamId;
     currentSubjectId = subjectId;
-    
+
     document.getElementById('projectStreamTitle').innerText = streamName;
     document.getElementById('projectSubjectTitle').innerText = subjectName;
-    
+
     document.getElementById('step1-streams').classList.add('hidden');
     document.getElementById('step2-board').classList.remove('hidden');
     document.getElementById('submitBar').classList.remove('hidden');
@@ -88,7 +88,7 @@ async function fetchProjectRosterAndTabs() {
     const list = document.getElementById('projectLearnersList');
     const tabsContainer = document.getElementById('competencyTabsContainer');
     list.innerHTML = `<div class="text-center py-10 text-slate-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2 text-brand"></i> Pulling scores records...</div>`;
-    
+
     // Fallback indicator default if network drops mid-call
     let targetComp = activeCompetency;
 
@@ -102,10 +102,10 @@ async function fetchProjectRosterAndTabs() {
 
         if (result.success) {
             backendLearnersList = result.data.learners || [];
-            
+
             // DYNAMIC UPDATE: Hydrate allowed tabs array configured by Admin from response variables
-            allowedCompetencies = result.data.active_competencies || [1,2,3,4];
-            
+            allowedCompetencies = result.data.active_competencies || [1, 2, 3, 4];
+
             // Enforce safe boundaries context: if current selection isn't allowed, use the first active one
             if (!activeCompetency || !allowedCompetencies.includes(activeCompetency)) {
                 activeCompetency = allowedCompetencies[0];
@@ -118,7 +118,7 @@ async function fetchProjectRosterAndTabs() {
                 btn.onclick = () => switchCompetencyTab(num);
                 btn.innerText = `C${num}`;
                 if (num === activeCompetency) {
-                    btn.className = "flex-1 py-2.5 text-center rounded-xl text-xs font-bold transition-all bg-white text-brand shadow-sm";
+                    btn.className = "flex-1 py-2.5 text-center rounded-xl text-xs font-bold transition-all bg-white text-brand ";
                 } else {
                     btn.className = "flex-1 py-2.5 text-center rounded-xl text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
                 }
@@ -135,15 +135,15 @@ async function fetchProjectRosterAndTabs() {
 
             backendLearnersList.forEach((learner) => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-3.5";
+                card.className = "bg-white p-4 rounded-2xl  border border-slate-100 flex flex-col gap-3.5";
                 let itemsHtml = '<div class="grid grid-cols-5 gap-2 w-full">';
-                
+
                 targetCriteria.forEach(fullCriteriaKey => {
                     let currentVal = '';
                     if (learner.scores && learner.scores[fullCriteriaKey] !== undefined && learner.scores[fullCriteriaKey] !== null) {
                         currentVal = learner.scores[fullCriteriaKey];
                     }
-                    
+
                     if (!scoreCache[learner.learner_id]) scoreCache[learner.learner_id] = {};
                     if (scoreCache[learner.learner_id][fullCriteriaKey] === undefined) {
                         scoreCache[learner.learner_id][fullCriteriaKey] = currentVal !== '' ? parseFloat(currentVal) : null;
@@ -162,7 +162,7 @@ async function fetchProjectRosterAndTabs() {
                         </div>
                     `;
                 });
-                
+
                 itemsHtml += '</div>';
 
                 card.innerHTML = `

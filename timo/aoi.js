@@ -85,7 +85,7 @@ function closeModal(modalId, contentId) {
 // ==========================================
 async function loadStreams() {
     try {
-        const response = await fetch('api/attendance.php?action=get_streams'); 
+        const response = await fetch('api/attendance.php?action=get_streams');
         const result = await response.json();
         const list = document.getElementById('streamsList');
         list.innerHTML = '';
@@ -93,7 +93,7 @@ async function loadStreams() {
         if (result.success && result.data.length > 0) {
             result.data.forEach(stream => {
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => {
                     currentSubjectCode = stream.subject_code ? stream.subject_code.toUpperCase() : 'SUB';
                     loadAoisForStream(stream.stream_id, stream.subject_id, stream.stream_name, stream.subject_name);
@@ -124,7 +124,7 @@ async function loadAoisForStream(streamId, subjectId, streamName, subjectName) {
     currentSubjectId = subjectId;
     document.getElementById('aoiStreamTitle').innerText = streamName;
     document.getElementById('aoiSubjectTitle').innerText = subjectName;
-    
+
     document.getElementById('step1-streams').classList.add('hidden');
     document.getElementById('step2-aoi-list').classList.remove('hidden');
     currentStep = 2;
@@ -146,7 +146,7 @@ async function fetchAoiList() {
             result.data.forEach(aoi => {
                 let statusBadge = '';
                 let statusIconColor = 'text-brand';
-                
+
                 if (aoi.status === 'empty') {
                     statusBadge = `<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">Not Entered</span>`;
                     statusIconColor = 'text-slate-400';
@@ -159,9 +159,9 @@ async function fetchAoiList() {
                 }
 
                 const card = document.createElement('button');
-                card.className = "w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
+                card.className = "w-full bg-white p-4 rounded-2xl  border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-transform text-left";
                 card.onclick = () => openScoring(aoi.aoi_id, aoi.aoi_name, aoi.unique_code, aoi.max_mark);
-                
+
                 card.innerHTML = `
                     <div>
                         <h4 class="text-md font-bold text-slate-800">${aoi.aoi_name}</h4>
@@ -190,8 +190,8 @@ async function submitNewAoi() {
     const name = document.getElementById('inpAoiName').value;
     const code = document.getElementById('inpAoiCode').value;
     const max = parseFloat(document.getElementById('inpMaxMark').value);
-    
-    if(!name || !code || !max || max <= 0) {
+
+    if (!name || !code || !max || max <= 0) {
         showNotification("Please fill all fields correctly.", "error");
         return;
     }
@@ -206,7 +206,7 @@ async function submitNewAoi() {
             body: JSON.stringify({ action: 'create_aoi', stream_id: currentStreamId, subject_id: currentSubjectId, term: 2, academic_year: 2026, aoi_name: name, unique_code: code, max_mark: max })
         });
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification("Activity Created!");
             closeModal('createAoiModal', 'createAoiContent');
@@ -227,7 +227,7 @@ async function submitNewAoi() {
 async function openScoring(aoiId, name, code, maxMark) {
     currentAoiId = aoiId;
     currentMaxMark = parseFloat(maxMark);
-    
+
     document.getElementById('scoringAoiName').innerText = name;
     document.getElementById('scoringAoiCode').innerText = code;
     document.getElementById('scoringMaxMark').innerText = maxMark;
@@ -255,7 +255,7 @@ async function renderRosterGrid() {
             result.data.forEach((learner, index) => {
                 const score = learner.score_entered !== null ? learner.score_entered : '';
                 rosterData.push({ learner_id: learner.learner_id, score: score });
-                
+
                 let pctHtml = '<span class="text-[10px] text-slate-400 font-bold">--%</span>';
                 if (score !== '') {
                     const pct = ((score / currentMaxMark) * 100).toFixed(1);
@@ -263,7 +263,7 @@ async function renderRosterGrid() {
                 }
 
                 const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between";
+                div.className = "bg-white p-3 rounded-2xl  border border-slate-100 flex items-center justify-between";
                 div.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">${index + 1}</div>
@@ -297,15 +297,15 @@ function updateScore(learnerId, val, inputEl) {
     if (isNaN(score) || val === '') {
         record.score = null;
         pctContainer.innerHTML = '<span class="text-[10px] text-slate-400 font-bold">--%</span>';
-        if(inputEl) inputEl.style.borderColor = '#e2e8f0';
+        if (inputEl) inputEl.style.borderColor = '#e2e8f0';
         return;
     }
 
     if (score > currentMaxMark) {
         score = currentMaxMark;
-        if(inputEl) { inputEl.value = currentMaxMark; inputEl.style.borderColor = '#ef4444'; }
+        if (inputEl) { inputEl.value = currentMaxMark; inputEl.style.borderColor = '#ef4444'; }
     } else {
-        if(inputEl) inputEl.style.borderColor = '#0a58ca';
+        if (inputEl) inputEl.style.borderColor = '#0a58ca';
     }
 
     record.score = score;
@@ -345,11 +345,11 @@ async function submitEditedMaxMark() {
                     // Adjust limits dynamically if old score was higher than the new max mark
                     if (record.score > currentMaxMark) {
                         record.score = currentMaxMark;
-                        if(inputEl) inputEl.value = currentMaxMark;
+                        if (inputEl) inputEl.value = currentMaxMark;
                     }
                     updateScore(record.record_id || record.learner_id, record.score, inputEl);
                 }
-                if(inputEl) inputEl.setAttribute('max', currentMaxMark); // Reset ceiling attribute
+                if (inputEl) inputEl.setAttribute('max', currentMaxMark); // Reset ceiling attribute
             });
 
         } else {
@@ -377,7 +377,7 @@ async function submitScores() {
             body: JSON.stringify({ action: 'save_scores', aoi_id: currentAoiId, records: validRecords })
         });
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification("Scores Saved Successfully!");
             setTimeout(() => { goBack(); btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Save Scores`; btn.disabled = false; lucide.createIcons(); }, 1500);

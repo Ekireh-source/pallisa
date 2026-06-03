@@ -111,9 +111,9 @@ export default function DashboardPage() {
 
   if (viewMode === 'teacher') {
     return (
-      <TeachersDashboard 
-        user={user?.value} 
-        school={school} 
+      <TeachersDashboard
+        user={user?.value}
+        school={school}
         onSwitchView={isAdmin ? () => setViewMode('admin') : undefined}
         showAdminToggle={isAdmin}
       />
@@ -131,7 +131,7 @@ export default function DashboardPage() {
             <Calendar className="w-4 h-4 mr-2" />
             Term 1, 2026
           </Button>
-          <Button className="h-11 rounded-xl bg-white text-primary hover:bg-gray-100 hover:text-primary shadow-lg shadow-white/10 transition-transform hover:-translate-y-0.5" asChild>
+          <Button className="h-11 rounded-xl bg-white text-primary hover:bg-gray-100 hover:text-primary  -white/10 transition-transform hover:-translate-y-0.5" asChild>
             <Link href="/students/create">
               <Plus className="w-4 h-4 mr-2" />
               New Enrollment
@@ -146,9 +146,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Recent Transactions */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden bg-white">
+            <Card className="border-none  ring-1 ring-gray-100 overflow-hidden bg-white">
               <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Recent Fee Payments</h2>
+                <h2 className="text-xl font-bold text-My-Black">Recent Fee Payments</h2>
                 <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90 hover:bg-primary/10 font-semibold" asChild>
                   <Link href="/fees/payments">View All <ChevronRight className="w-4 h-4 ml-1" /></Link>
                 </Button>
@@ -157,18 +157,18 @@ export default function DashboardPage() {
                 <Table>
                   <TableHeader className="bg-gray-50/50">
                     <TableRow>
-                      <TableHead className="font-semibold text-gray-900">Student</TableHead>
-                      <TableHead className="font-semibold text-gray-900">Category</TableHead>
-                      <TableHead className="font-semibold text-gray-900">Date</TableHead>
-                      <TableHead className="font-semibold text-gray-900">Amount</TableHead>
-                      <TableHead className="font-semibold text-gray-900">Status</TableHead>
+                      <TableHead className="font-semibold text-My-Black">Student</TableHead>
+                      <TableHead className="font-semibold text-My-Black">Category</TableHead>
+                      <TableHead className="font-semibold text-My-Black">Date</TableHead>
+                      <TableHead className="font-semibold text-My-Black">Amount</TableHead>
+                      <TableHead className="font-semibold text-My-Black">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentTransactions && recentTransactions.length > 0 ? (
                       recentTransactions.map((tx: any) => (
                         <TableRow key={tx.id} className="hover:bg-gray-50/50 transition-colors">
-                          <TableCell className="font-medium text-gray-900">
+                          <TableCell className="font-medium text-My-Black">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8 ring-2 ring-white">
                                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
@@ -178,14 +178,14 @@ export default function DashboardPage() {
                               {tx.student}
                             </div>
                           </TableCell>
-                          <TableCell className="text-gray-600">{tx.category}</TableCell>
+                          <TableCell className="text-My-Black">{tx.category}</TableCell>
                           <TableCell className="text-gray-500 text-sm">{tx.date}</TableCell>
-                          <TableCell className="font-bold text-gray-900">{tx.amount}</TableCell>
+                          <TableCell className="font-bold text-My-Black">{tx.amount}</TableCell>
                           <TableCell>
                             <Badge
                               variant={tx.status === 'completed' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'}
                               className={`rounded-full capitalize ${tx.status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
-                                  tx.status === 'pending' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''
+                                tx.status === 'pending' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''
                                 }`}
                             >
                               {tx.status}
@@ -206,8 +206,8 @@ export default function DashboardPage() {
             </Card>
 
             {/* Performance Summary (Placeholder) */}
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-white">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Enrollment Trends</h2>
+            <Card className="p-6 border-none  ring-1 ring-gray-100 bg-white">
+              <h2 className="text-xl font-bold text-My-Black mb-6">Enrollment Trends</h2>
               <div className="h-[200px] w-full flex items-end justify-between gap-2 px-2">
                 {[65, 45, 75, 55, 90, 70, 85].map((h, i) => (
                   <div key={i} className="flex-1 group relative">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                       {h}%
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2 text-center font-medium">Day {i + 1}</p>
+                    <p className="text-[10px] text-My-Black mt-2 text-center font-medium">Day {i + 1}</p>
                   </div>
                 ))}
               </div>
@@ -228,8 +228,8 @@ export default function DashboardPage() {
           {/* Right Column - Sidebar Widgets */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-white">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+            <Card className="p-6 border-none  ring-1 ring-gray-100 bg-white">
+              <h2 className="text-lg font-bold text-My-Black mb-4">Quick Actions</h2>
               <div className="grid grid-cols-1 gap-3">
                 {quickActions.map((action, i) => (
                   <Button
@@ -242,8 +242,8 @@ export default function DashboardPage() {
                       <div className={`p-2 rounded-xl ${action.color} text-white mr-3 transition-transform group-hover:scale-110`}>
                         <action.icon className="w-5 h-5" />
                       </div>
-                      <span className="font-semibold text-gray-700">{action.title}</span>
-                      <ChevronRight className="w-4 h-4 ml-auto text-gray-400 group-hover:text-gray-900" />
+                      <span className="font-semibold text-My-Black">{action.title}</span>
+                      <ChevronRight className="w-4 h-4 ml-auto text-My-Black group-hover:text-My-Black" />
                     </Link>
                   </Button>
                 ))}
@@ -251,7 +251,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Setup Progress */}
-            <Card className="p-6 border-none bg-primary text-white shadow-xl shadow-primary/20">
+            <Card className="p-6 border-none bg-primary text-white -xl -primary/20">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-white/20 rounded-xl">
                   <GraduationCap className="w-5 h-5 text-white" />
@@ -268,14 +268,14 @@ export default function DashboardPage() {
                 </div>
                 <Progress value={65} className="h-2 bg-white/20" />
               </div>
-              <Button className="w-full mt-6 bg-white text-primary hover:bg-white/90 border-none font-bold h-11 rounded-xl shadow-md hover:-translate-y-0.5 transition-all">
+              <Button className="w-full mt-6 bg-white text-primary hover:bg-white/90 border-none font-bold h-11 rounded-xl  hover:-translate-y-0.5 transition-all">
                 Finish Setup
               </Button>
             </Card>
 
             {/* Activity Feed */}
-            <Card className="p-6 border-none shadow-sm ring-1 ring-gray-100 bg-white">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">System Activity</h2>
+            <Card className="p-6 border-none  ring-1 ring-gray-100 bg-white">
+              <h2 className="text-lg font-bold text-My-Black mb-4">System Activity</h2>
               <div className="space-y-4">
                 {[
                   { text: "New staff member registered", time: "2 hours ago", icon: UserCheck, color: "text-emerald-500" },
@@ -286,7 +286,7 @@ export default function DashboardPage() {
                     <div className={`mt-1 h-2 w-2 rounded-full ${activity.color.replace('text-', 'bg-')}`} />
                     <div>
                       <p className="text-sm font-medium text-gray-800">{activity.text}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{activity.time}</p>
+                      <p className="text-xs text-My-Black mt-0.5">{activity.time}</p>
                     </div>
                   </div>
                 ))}
